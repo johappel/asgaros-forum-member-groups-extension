@@ -19,11 +19,11 @@ Eine berechtigte Person kann:
 
 ### M1.1 Plugin-Grundgerüst
 
-- [ ] Plugin-Header, Autoloading und Namespaces anlegen.
-- [ ] Aktivierungs-, Deaktivierungs- und Deinstallationsstrategie definieren.
-- [ ] Abhängigkeit zu Asgaros Forum prüfen.
-- [ ] Verständliche Admin-Mitteilung bei fehlendem oder inkompatiblem Asgaros anzeigen.
-- [ ] Versionskonstanten für Plugin und Datenbankschema einführen.
+- [x] Plugin-Header, Autoloading und Namespaces anlegen.
+- [x] Aktivierungs-, Deaktivierungs- und Deinstallationsstrategie definieren.
+- [x] Abhängigkeit zu Asgaros Forum prüfen.
+- [x] Verständliche Admin-Mitteilung bei fehlendem oder inkompatiblem Asgaros anzeigen.
+- [x] Versionskonstanten für Plugin und Datenbankschema einführen.
 
 ### M1.2 Asgaros-Adapter
 
