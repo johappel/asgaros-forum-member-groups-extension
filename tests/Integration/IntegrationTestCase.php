@@ -44,7 +44,7 @@ abstract class IntegrationTestCase extends TestCase {
 	 *
 	 * @var int
 	 */
-	protected int $forum_id = 4249;
+	protected int $forum_id = 5;
 
 	/**
 	 * @var SpaceRepository

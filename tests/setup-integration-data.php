@@ -73,37 +73,33 @@ $group_id = (int) ( is_array( $group ) ? $group['term_id'] : $group->term_id );
 update_term_meta( $category_id, 'usergroups', array( $group_id ) );
 echo "Gruppe {$group_id} der Kategorie {$category_id} zugeordnet.\n";
 
-// Forum erstellen (Post vom Typ asgarosforum_forum, parent_id = Kategorie).
-$existing_forum = get_posts( array(
-	'post_type'   => 'asgarosforum_forum',
-	'title'       => $forum_name,
-	'numberposts' => 1,
-) );
+// Forum erstellen (in der Asgaros-eigenen Tabelle wp_forum_forums,
+// parent_id = Kategorie-ID). Asgaros speichert Foren NICHT als WP-Posts.
+global $asgarosforum;
+$existing_forum = $asgarosforum->db->get_row(
+	$asgarosforum->db->prepare(
+		"SELECT id FROM {$asgarosforum->tables->forums} WHERE name = %s AND parent_id = %d LIMIT 1;",
+		$forum_name,
+		$category_id
+	),
+	ARRAY_A
+);
 
 if ( ! empty( $existing_forum ) ) {
-	$forum = $existing_forum[0];
-	echo "Forum existiert bereits: {$forum->ID}\n";
+	$forum_id = (int) $existing_forum['id'];
+	echo "Forum existiert bereits: {$forum_id}\n";
 } else {
-	$forum_id = wp_insert_post( array(
-		'post_type'    => 'asgarosforum_forum',
-		'post_title'   => $forum_name,
-		'post_status'  => 'publish',
-		'post_parent'  => 0,
-		'menu_order'   => 1,
-	) );
-	// Asgaros speichert die Kategorie-Zuordnung in post_parent_id (eigene Spalte).
-	global $wpdb;
-	$wpdb->update(
-		$wpdb->posts,
-		array( 'post_parent' => $category_id ),
-		array( 'ID' => $forum_id ),
-		array( '%d' ),
-		array( '%d' )
+	$forum_id = $asgarosforum->content->insert_forum(
+		$category_id,
+		$forum_name,
+		'Testforum für AFSpaces',
+		0,
+		'fas fa-comments',
+		1,
+		'normal'
 	);
 	echo "Forum erstellt: {$forum_id}\n";
-	$forum = get_post( $forum_id );
 }
-$forum_id = (int) $forum->ID;
 
 echo "\nTestdaten bereit:\n";
 echo "  Kategorie: {$category_id}\n";

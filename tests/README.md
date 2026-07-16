@@ -6,6 +6,7 @@ Integrationstests gegen die echte WP Local + Asgaros-Instanz unter
 ## Voraussetzungen
 
 - WP Local Site `forums` (MariaDB auf Port `10016`, DB `local`/`root`/`root`).
+- Frontend-URL: **http://forums.test/** (für E2E-Tests mit Playwright).
 - Asgaros Forum aktiv (getestet mit 3.4.0).
 - Local PHP 8.2.23 unter
   `C:\Users\Joachim\AppData\Roaming\Local\lightning-services\php-8.2.23+0\bin\win64\php.exe`

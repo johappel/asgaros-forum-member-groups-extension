@@ -101,6 +101,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			<section class="afspaces-members" aria-labelledby="afspaces-members-heading">
 				<h2 id="afspaces-members-heading"><?php echo esc_html__( 'Mitglieder', 'afspaces' ); ?></h2>
 
+				<?php
+				$dashboard_page = get_page_by_path( 'afspaces-dashboard' );
+				if ( $dashboard_page ) {
+					?>
+					<p>
+						<a href="<?php echo esc_url( get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
+							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+						</a>
+					</p>
+					<?php
+				}
+				?>
+
 				<form method="get" class="afspaces-search" role="search" aria-label="<?php echo esc_attr__( 'Mitglieder suchen', 'afspaces' ); ?>">
 					<label for="afp_search"><?php echo esc_html__( 'Person suchen', 'afspaces' ); ?></label>
 					<input type="search" id="afp_search" name="afp_search" value="<?php echo esc_attr( $search ); ?>" />

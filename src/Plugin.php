@@ -18,6 +18,7 @@ use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
 use AFSpaces\Interface\FrontendController;
 use AFSpaces\Interface\MembersView;
+use AFSpaces\Interface\RestController;
 
 if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
@@ -92,6 +93,10 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 					return $view->render( (int) $_GET['space_id'] );
 				}
 			);
+
+			// REST-API registrieren.
+			$rest = new RestController( $spaces, $asgaros, $members );
+			add_action( 'rest_api_init', array( $rest, 'register_routes' ) );
 		}
 
 		/**

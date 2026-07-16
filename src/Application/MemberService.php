@@ -77,6 +77,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\MemberService' ) ) {
 				throw new DomainException( __( 'Der Raum existiert nicht.', 'afspaces' ) );
 			}
 
+			if ( $target_user_id < 1 || ! get_user_by( 'id', $target_user_id ) ) {
+				throw new DomainException( __( 'Der Zielbenutzer existiert nicht.', 'afspaces' ) );
+			}
+
 			if ( ! $this->policy->can_add_member( $space_id, $actor_user_id ) ) {
 				throw new DomainException(
 					__( 'Du bist nicht berechtigt, Mitglieder zu diesem Raum hinzuzufügen.', 'afspaces' )

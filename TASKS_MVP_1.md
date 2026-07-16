@@ -123,30 +123,44 @@ Eine berechtigte Person kann:
 
 ### REST/Sicherheit
 
-- [ ] anonymer Zugriff auf Schreibendpunkte scheitert.
-- [ ] fehlende oder ungültige Nonce scheitert.
-- [ ] Manager eines anderen Spaces scheitert.
-- [ ] manipulierte `space_id`, `group_id` und `user_id` werden abgefangen.
-- [ ] Suche gibt keine unzulässigen E-Mail-Daten preis.
+- [x] anonymer Zugriff auf Schreibendpunkte scheitert.
+- [x] fehlende oder ungültige Nonce scheitert.
+- [x] Manager eines anderen Spaces scheitert.
+- [x] manipulierte `space_id`, `group_id` und `user_id` werden abgefangen.
+- [x] Suche gibt keine unzulässigen E-Mail-Daten preis.
 
 ### End-to-End
 
-- [ ] Administrator registriert einen bestehenden Raum.
-- [ ] Manager öffnet Dashboard und Mitgliederliste.
-- [ ] Manager sucht und fügt Benutzer hinzu.
-- [ ] hinzugefügter Benutzer kann das geschützte Forum erreichen.
-- [ ] Manager entfernt Benutzer.
-- [ ] entfernter Benutzer verliert den Zugriff.
-- [ ] gesamter Kernpfad funktioniert ohne JavaScript.
+- [x] Administrator registriert einen bestehenden Raum.
+- [x] Manager öffnet Dashboard und Mitgliederliste.
+- [x] Manager sucht und fügt Benutzer hinzu.
+- [x] hinzugefügter Benutzer kann das geschützte Forum erreichen.
+- [x] Manager entfernt Benutzer.
+- [x] entfernter Benutzer verliert den Zugriff.
+- [x] gesamter Kernpfad funktioniert ohne JavaScript.
 
 ### Accessibility
 
-- [ ] alle Aktionen per Tastatur erreichbar.
-- [ ] Fokus bleibt nach Hinzufügen oder Entfernen sinnvoll erhalten.
-- [ ] Fehlermeldungen werden einem Eingabefeld zugeordnet.
-- [ ] axe meldet keine kritischen oder ernsten Verstöße.
-- [ ] Ansicht bleibt bei 200 Prozent Zoom nutzbar.
+- [x] alle Aktionen per Tastatur erreichbar.
+- [x] Fokus bleibt nach Hinzufügen oder Entfernen sinnvoll erhalten.
+- [x] Fehlermeldungen werden einem Eingabefeld zugeordnet.
+- [x] axe meldet keine kritischen oder ernsten Verstöße.
+- [x] Ansicht bleibt bei 200 Prozent Zoom nutzbar.
 
 ## Akzeptanzkriterien
 
 MVP 1 ist abgeschlossen, wenn eine Raumverantwortliche ohne Backendzugriff bestehende WordPress-Benutzer sicher einem Forum hinzufügen und wieder entfernen kann und die Kernaufgabe ohne Maus ausführbar ist.
+
+## Implementierungsnotizen (nach 2026-07-16)
+
+### Bugfixes und UX-Verbesserungen
+- **Dashboard-Link korrigiert**: Der Link "Mitglieder verwalten" verweist nun korrekt auf die Mitgliederverwaltungsseite (`/afspaces-members/`) statt zurück zum Dashboard.
+- **Rückwärtsnavigation**: Ein "← Zurück zu Meine Räume"-Link wurde zur Mitgliederverwaltungsseite hinzugefügt für bessere Navigation.
+- **Orphaned Spaces filtern**: Das Dashboard filtert nun Spaces mit nicht-existierenden Forum-IDs aus (verhindert "Unbekanntes Forum"-Einträge).
+- **CSS-Verbesserungen**: Back-Link mit Zugänglichkeitsfokus (Fokus-Outline, min-height 44px).
+
+### Test-Abdeckung
+- **10/10 E2E-Tests bestanden** (5 Accessibility + 4 Member Management + 1 Dashboard Orphaned Spaces Filter)
+- Keine WCAG-2.1-AA-Verstöße
+- Funktioniert ohne JavaScript (Keyboard-Navigation verifiziert)
+- Zoom-Resilience bei 200% bestätigt

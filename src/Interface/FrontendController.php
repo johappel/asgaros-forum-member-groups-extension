@@ -120,7 +120,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			}
 
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
-			wp_safe_redirect( add_query_arg( 'space_id', $space_id, wp_get_referer() ?: home_url() ) );
+			$members_page = get_page_by_path( 'afspaces-members' );
+			$redirect_url = $members_page ? get_permalink( $members_page ) : ( wp_get_referer() ?: home_url() );
+			wp_safe_redirect( add_query_arg( 'space_id', $space_id, $redirect_url ) );
 			exit;
 		}
 
@@ -157,7 +159,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$manageable = array();
 			foreach ( $spaces as $space ) {
 				if ( $this->can_manage_space( $space->id, $actor ) ) {
-					$manageable[] = $space;
+					// Skip orphaned spaces (forum_id points to non-existent forum).
+					$forum = $this->asgaros->get_forum( $space->forum_id );
+					if ( ! empty( $forum ) ) {
+						$manageable[] = $space;
+					}
 				}
 			}
 
@@ -174,19 +180,23 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 						<?php foreach ( $manageable as $space ) : ?>
 							<?php
 							$forum = $this->asgaros->get_forum( $space->forum_id );
+							// $forum is guaranteed to be non-empty due to filtering in render_dashboard().
 							$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
 							$member_count = 0;
 							if ( ! empty( $group_ids ) ) {
 								$members = $this->asgaros->list_group_members( (int) $group_ids[0], array( 'per_page' => 1 ) );
 								$member_count = (int) ( $members['total'] ?? 0 );
 							}
+							// Link zur Mitgliederseite (nicht zum Dashboard).
+							$members_page = get_page_by_path( 'afspaces-members' );
+							$members_url = $members_page ? get_permalink( $members_page ) : home_url();
 							$manage_url = add_query_arg(
 								array( 'space_id' => $space->id ),
-								get_permalink()
+								$members_url
 							);
 							?>
 							<li class="afspaces-space-item">
-								<h3><?php echo esc_html( $forum['name'] ?? __( 'Unbekanntes Forum', 'afspaces' ) ); ?></h3>
+								<h3><?php echo esc_html( $forum['name'] ); ?></h3>
 								<p><?php echo esc_html( sprintf( __( '%d Mitglieder', 'afspaces' ), $member_count ) ); ?></p>
 								<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
 									<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>

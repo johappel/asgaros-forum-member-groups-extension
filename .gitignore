@@ -1,4 +1,35 @@
+# PHP / Composer
 /vendor/
-/.phpunit.cache/
 /composer.lock
+/.phpunit.cache/
+/.phpunit.integration.cache/
+*.cache
+
+# Lokale PHPUnit-Overrides (die .dist-Dateien sind die Vorlagen)
+/phpunit.xml
+/phpunit-integration.xml
+
+# Temporäre Debug-Skripte in tests/
+tests/tmp_*.php
+
+# Playwright E2E
 /node_modules/
+/e2e/node_modules/
+/e2e/test-results/
+/e2e/playwright-report/
+/e2e/blob-report/
+/e2e/.cache/
+
+# Umgebung & Secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Betriebssystem / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
