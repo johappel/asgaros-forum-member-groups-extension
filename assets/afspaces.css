@@ -1,0 +1,162 @@
+/* Asgaros Forum Spaces — Frontend-Stile (barrierearm). */
+
+.afspaces-dashboard,
+.afspaces-members {
+	max-width: 60rem;
+	margin: 1.5rem 0;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.afspaces-dashboard h2,
+.afspaces-members h2,
+.afspaces-members h3 {
+	margin-top: 1.5rem;
+}
+
+.afspaces-space-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 1rem;
+}
+
+.afspaces-space-item {
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	padding: 1rem;
+}
+
+.afspaces-button {
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	background: #2271b1;
+	color: #fff;
+	border: 1px solid #2271b1;
+	border-radius: 4px;
+	text-decoration: none;
+	cursor: pointer;
+	min-height: 44px;
+	font-size: 1rem;
+}
+
+.afspaces-button:hover,
+.afspaces-button:focus {
+	background: #135e96;
+}
+
+.afspaces-button-danger {
+	background: #d63638;
+	border-color: #d63638;
+}
+
+.afspaces-button-danger:hover,
+.afspaces-button-danger:focus {
+	background: #b32d2e;
+}
+
+.afspaces-button:focus-visible,
+.afspaces-search input:focus-visible,
+.afspaces-inline-form button:focus-visible {
+	outline: 3px solid #ffb900;
+	outline-offset: 2px;
+}
+
+.afspaces-message {
+	padding: 0.75rem 1rem;
+	border-radius: 4px;
+	margin: 1rem 0;
+	border: 1px solid transparent;
+}
+
+.afspaces-message-success {
+	background: #edfaef;
+	border-color: #46b450;
+	color: #1a5d23;
+}
+
+.afspaces-message-error {
+	background: #fcf0f1;
+	border-color: #d63638;
+	color: #8a1f1d;
+}
+
+.afspaces-member-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1rem 0;
+}
+
+.afspaces-member-table th,
+.afspaces-member-table td {
+	border: 1px solid #c3c4c7;
+	padding: 0.5rem 0.75rem;
+	text-align: left;
+}
+
+.afspaces-member-table th {
+	background: #f0f0f1;
+}
+
+.afspaces-search {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: end;
+	margin: 1rem 0;
+}
+
+.afspaces-search label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+}
+
+.afspaces-search input[type="search"] {
+	min-height: 44px;
+	padding: 0.5rem;
+	min-width: 16rem;
+}
+
+.afspaces-inline-form {
+	display: inline;
+}
+
+.afspaces-tag {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	background: #f0f0f1;
+	border-radius: 3px;
+	font-size: 0.875rem;
+}
+
+.afspaces-pagination {
+	margin: 1rem 0;
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.afspaces-pagination a {
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	text-decoration: none;
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
+}
+
+.afspaces-pagination a[aria-current="page"] {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		transition: none !important;
+		animation: none !important;
+	}
+}

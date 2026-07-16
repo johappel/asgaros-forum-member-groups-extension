@@ -27,74 +27,74 @@ Eine berechtigte Person kann:
 
 ### M1.2 Asgaros-Adapter
 
-- [ ] Adapterinterface erstellen.
-- [ ] installierte Asgaros-Version erkennen.
-- [ ] bestehende Foren lesen.
-- [ ] zugeordnete Benutzergruppen lesen.
-- [ ] Gruppenmitglieder paginiert lesen.
-- [ ] Benutzer einer Gruppe hinzufügen.
-- [ ] Benutzer aus einer Gruppe entfernen.
-- [ ] Fehler in Domain-Ausnahmen übersetzen.
-- [ ] eingesetzte interne Asgaros-APIs dokumentieren.
+- [x] Adapterinterface erstellen.
+- [x] installierte Asgaros-Version erkennen.
+- [x] bestehende Foren lesen.
+- [x] zugeordnete Benutzergruppen lesen.
+- [x] Gruppenmitglieder paginiert lesen.
+- [x] Benutzer einer Gruppe hinzufügen.
+- [x] Benutzer aus einer Gruppe entfernen.
+- [x] Fehler in Domain-Ausnahmen übersetzen.
+- [x] eingesetzte interne Asgaros-APIs dokumentieren.
 
 ### M1.3 Space-Zuordnung
 
-- [ ] Datenmodell für Space und Space Manager erstellen.
-- [ ] bestehende Asgaros-Foren administrativ als Space registrierbar machen.
-- [ ] primäre Zugriffsgruppe pro Space festlegen.
-- [ ] Owner und Manager einem Space zuordnen.
-- [ ] letzten Owner vor Selbstentfernung schützen.
+- [x] Datenmodell für Space und Space Manager erstellen.
+- [x] bestehende Asgaros-Foren administrativ als Space registrierbar machen.
+- [x] primäre Zugriffsgruppe pro Space festlegen.
+- [x] Owner und Manager einem Space zuordnen.
+- [x] letzten Owner vor Selbstentfernung schützen.
 
 ### M1.4 Capabilities und Policies
 
-- [ ] Capabilities bei Aktivierung registrieren.
-- [ ] globale Administratorrechte abbilden.
-- [ ] Space-spezifische Managerrechte implementieren.
-- [ ] zentrale Policy für Anzeigen, Hinzufügen und Entfernen erstellen.
-- [ ] Schutz gegen Bearbeitung fremder Spaces implementieren.
+- [x] Capabilities bei Aktivierung registrieren.
+- [x] globale Administratorrechte abbilden.
+- [x] Space-spezifische Managerrechte implementieren.
+- [x] zentrale Policy für Anzeigen, Hinzufügen und Entfernen erstellen.
+- [x] Schutz gegen Bearbeitung fremder Spaces implementieren.
 
 ### M1.5 Frontend-Dashboard
 
-- [ ] Shortcode `[afspaces_dashboard]` bereitstellen.
-- [ ] Liste der verwaltbaren Räume anzeigen.
-- [ ] Anzahl Mitglieder anzeigen.
-- [ ] Link „Mitglieder verwalten“ anzeigen.
-- [ ] leere Zustände verständlich darstellen.
-- [ ] Zugriff ohne Berechtigung verständlich ablehnen.
+- [x] Shortcode `[afspaces_dashboard]` bereitstellen.
+- [x] Liste der verwaltbaren Räume anzeigen.
+- [x] Anzahl Mitglieder anzeigen.
+- [x] Link „Mitglieder verwalten“ anzeigen.
+- [x] leere Zustände verständlich darstellen.
+- [x] Zugriff ohne Berechtigung verständlich ablehnen.
 
 ### M1.6 Mitgliederansicht
 
-- [ ] Mitglieder paginiert anzeigen.
-- [ ] Anzeigename, Rolle im Space und Status darstellen.
-- [ ] Suche und Filter bereitstellen.
-- [ ] WordPress-Benutzer serverseitig suchen.
-- [ ] bereits zugeordnete Personen kennzeichnen.
-- [ ] Benutzer über Button oder Auswahl hinzufügen.
-- [ ] Mitglied nach Bestätigung entfernen.
-- [ ] Bulk-Hinzufügen optional, Bulk-Entfernen zunächst nicht erforderlich.
+- [x] Mitglieder paginiert anzeigen.
+- [x] Anzeigename, Rolle im Space und Status darstellen.
+- [x] Suche und Filter bereitstellen.
+- [x] WordPress-Benutzer serverseitig suchen.
+- [x] bereits zugeordnete Personen kennzeichnen.
+- [x] Benutzer über Button oder Auswahl hinzufügen.
+- [x] Mitglied nach Bestätigung entfernen.
+- [x] Bulk-Hinzufügen optional, Bulk-Entfernen zunächst nicht erforderlich.
 
 ### M1.7 Optionale Drag-and-drop-Ansicht
 
-- [ ] erst nach funktionierender Standardbedienung implementieren.
-- [ ] gleiche Aktionen über Buttons ermöglichen.
-- [ ] Tastaturbedienung für Verschieben anbieten oder Drag-and-drop als rein optional kennzeichnen.
-- [ ] Statusänderungen für Screenreader ansagen.
-- [ ] nach einem Drop serverseitige Bestätigung abwarten und Fehler rückgängig darstellen.
+- [x] erst nach funktionierender Standardbedienung implementieren.
+- [x] gleiche Aktionen über Buttons ermöglichen.
+- [x] Tastaturbedienung für Verschieben anbieten oder Drag-and-drop als rein optional kennzeichnen.
+- [x] Statusänderungen für Screenreader ansagen.
+- [x] nach einem Drop serverseitige Bestätigung abwarten und Fehler rückgängig darstellen.
 
 ### M1.8 Audit-Log
 
-- [ ] Hinzufügen und Entfernen protokollieren.
-- [ ] Akteur, Space, Zielbenutzer, Aktion und Zeitpunkt speichern.
-- [ ] keine unnötigen Profildaten duplizieren.
-- [ ] Aufbewahrungsdauer konfigurierbar machen.
+- [x] Hinzufügen und Entfernen protokollieren.
+- [x] Akteur, Space, Zielbenutzer, Aktion und Zeitpunkt speichern.
+- [x] keine unnötigen Profildaten duplizieren.
+- [x] Aufbewahrungsdauer konfigurierbar machen.
 
 ### M1.9 Fehler und Rückmeldungen
 
-- [ ] Erfolgsmeldung mit betroffener Person und Raum anzeigen.
-- [ ] Fehler mit konkreter nächster Handlung anzeigen.
-- [ ] doppelte Zuordnung idempotent behandeln.
-- [ ] Entfernen eines nicht vorhandenen Mitglieds idempotent behandeln.
-- [ ] Race Conditions bei parallelen Änderungen berücksichtigen.
+- [x] Erfolgsmeldung mit betroffener Person und Raum anzeigen.
+- [x] Fehler mit konkreter nächster Handlung anzeigen.
+- [x] doppelte Zuordnung idempotent behandeln.
+- [x] Entfernen eines nicht vorhandenen Mitglieds idempotent behandeln.
+- [x] Race Conditions bei parallelen Änderungen berücksichtigen.
 
 ## Nicht enthalten
 
@@ -108,10 +108,10 @@ Eine berechtigte Person kann:
 
 ### Unit
 
-- [ ] Policy erlaubt Verwaltung des eigenen Spaces.
-- [ ] Policy verweigert Verwaltung eines fremden Spaces.
-- [ ] letzter Owner kann nicht entfernt werden.
-- [ ] Adapterausnahmen werden korrekt normalisiert.
+- [x] Policy erlaubt Verwaltung des eigenen Spaces.
+- [x] Policy verweigert Verwaltung eines fremden Spaces.
+- [x] letzter Owner kann nicht entfernt werden.
+- [x] Adapterausnahmen werden korrekt normalisiert.
 
 ### Integration
 

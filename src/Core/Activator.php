@@ -9,6 +9,10 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Core;
 
+use AFSpaces\Adapters\Database\AuditRepository;
+use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Core\Capabilities;
+
 if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 
 	/**
@@ -29,8 +33,15 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 				);
 			}
 
-			// Capabilities werden in M1.4 registriert.
-			// Datenbankschema-Migration folgt in einem späteren MVP-Schritt.
+			// Eigene Tabellen anlegen.
+			$spaces = new SpaceRepository();
+			$spaces->install();
+			$audit = new AuditRepository();
+			$audit->install();
+
+			// Capabilities registrieren.
+			Capabilities::register();
+
 			flush_rewrite_rules();
 		}
 	}

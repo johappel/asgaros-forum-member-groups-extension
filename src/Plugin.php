@@ -9,7 +9,15 @@ declare( strict_types=1 );
 
 namespace AFSpaces;
 
+use AFSpaces\Adapters\Asgaros\AsgarosAdapter;
+use AFSpaces\Adapters\Database\AuditRepository;
+use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\MemberService;
+use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
+use AFSpaces\Domain\SpacePolicy;
+use AFSpaces\Interface\FrontendController;
+use AFSpaces\Interface\MembersView;
 
 if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
@@ -64,8 +72,26 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 				return;
 			}
 
-			// Weitere Initialisierung folgt in späteren MVP-Schritten.
-			// Hier wird bewusst noch keine Asgaros-spezifische Logik aktiviert.
+			$spaces  = new SpaceRepository();
+			$asgaros = new AsgarosAdapter( $plugin->requirements );
+			$policy  = new SpacePolicy( $spaces );
+			$audit   = new AuditRepository();
+			$members = new MemberService( $spaces, $asgaros, $policy, $audit );
+
+			$frontend = new FrontendController( $spaces, $asgaros, $members );
+			$frontend->init();
+
+			// Mitgliederansicht in denselben Shortcode integrieren.
+			add_shortcode(
+				'afspaces_members',
+				static function () use ( $spaces, $asgaros, $members ): string {
+					if ( ! isset( $_GET['space_id'] ) ) {
+						return '';
+					}
+					$view = new MembersView( $spaces, $asgaros, $members );
+					return $view->render( (int) $_GET['space_id'] );
+				}
+			);
 		}
 
 		/**

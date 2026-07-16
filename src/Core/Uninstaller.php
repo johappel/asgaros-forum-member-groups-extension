@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Core;
 
+use AFSpaces\Core\Capabilities;
+
 if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 
 	/**
@@ -22,9 +24,14 @@ if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 		 * @return void
 		 */
 		public static function uninstall(): void {
-			// Eigene Tabellen und Optionen werden in einem späteren
-			// MVP-Schritt definiert und hier aufgeräumt.
-			// Asgaros-Daten bleiben unangetastet (siehe ARCHITECTURE.md).
+			// Capabilities entfernen.
+			Capabilities::remove();
+
+			// Eigene Tabellen aufräumen (Asgaros-Daten bleiben unangetastet, siehe ARCHITECTURE.md).
+			global $wpdb;
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_spaces" );
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_space_managers" );
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_audit" );
 		}
 	}
 }
