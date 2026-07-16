@@ -115,11 +115,11 @@ Eine berechtigte Person kann:
 
 ### Integration
 
-- [ ] Hinzufügen erzeugt Asgaros-Gruppenzuordnung.
-- [ ] Entfernen löscht Asgaros-Gruppenzuordnung.
-- [ ] Audit-Eintrag wird erzeugt.
-- [ ] Benutzerlisten sind paginiert.
-- [ ] inkompatible Asgaros-Version deaktiviert Schreiboperationen.
+- [x] Hinzufügen erzeugt Asgaros-Gruppenzuordnung.
+- [x] Entfernen löscht Asgaros-Gruppenzuordnung.
+- [x] Audit-Eintrag wird erzeugt.
+- [x] Benutzerlisten sind paginiert.
+- [x] inkompatible Asgaros-Version deaktiviert Schreiboperationen.
 
 ### REST/Sicherheit
 

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 bootstrap="tests/bootstrap.php"
+		 bootstrap="tests/integration-bootstrap.php"
 		 colors="true"
-		 cacheDirectory=".phpunit.cache"
+		 cacheDirectory=".phpunit.integration.cache"
 		 failOnWarning="true">
 	<testsuites>
-		<testsuite name="AFSpaces Unit Tests">
-			<directory>tests</directory>
-			<exclude>tests/Integration</exclude>
+		<testsuite name="AFSpaces Integration Tests">
+			<directory>tests/Integration</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>
