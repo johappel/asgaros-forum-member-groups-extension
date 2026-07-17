@@ -84,3 +84,13 @@ if ( ! function_exists( 'current_time' ) ) {
 		return time();
 	}
 }
+
+if ( ! function_exists( 'wp_salt' ) ) {
+	/**
+	 * @param string $scheme
+	 * @return string
+	 */
+	function wp_salt( string $scheme = 'auth' ): string {
+		return 'afspaces-test-salt-' . $scheme;
+	}
+}

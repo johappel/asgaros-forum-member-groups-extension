@@ -11,6 +11,7 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\DomainException;
@@ -43,6 +44,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private InvitationService $invitations;
 
 		/**
+		 * @var InviteLinkService
+		 */
+		private InviteLinkService $invite_links;
+
+		/**
 		 * @var string
 		 */
 		private string $nonce_action = 'afspaces_member_action';
@@ -59,12 +65,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			SpaceRepository $spaces,
 			AsgarosAdapterInterface $asgaros,
 			MemberService $members,
-			InvitationService $invitations
+			InvitationService $invitations,
+			InviteLinkService $invite_links
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
 			$this->members = $members;
 			$this->invitations = $invitations;
+			$this->invite_links = $invite_links;
 		}
 
 		/**
@@ -115,6 +123,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$space_id = isset( $_POST['space_id'] ) ? (int) $_POST['space_id'] : 0;
 			$actor    = get_current_user_id();
 			$action   = sanitize_text_field( wp_unslash( $_POST['afspaces_action'] ) );
+			$invite_link_token = '';
 
 			try {
 				if ( 'add_member' === $action ) {
@@ -156,6 +165,60 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$token = isset( $_POST['invitation_token'] ) ? sanitize_text_field( wp_unslash( $_POST['invitation_token'] ) ) : '';
 					$this->invitations->decline_invitation_by_token( $token, $actor );
 					$this->set_message( 'success', __( 'Einladung wurde abgelehnt.', 'afspaces' ) );
+				} elseif ( 'create_invite_link' === $action ) {
+					$result = $this->invite_links->create_link(
+						$space_id,
+						$actor,
+						array(
+							'approval_mode'      => isset( $_POST['approval_mode'] ) ? sanitize_text_field( wp_unslash( $_POST['approval_mode'] ) ) : '',
+							'max_uses'           => isset( $_POST['max_uses'] ) ? (int) $_POST['max_uses'] : 1,
+							'expires_in_days'    => isset( $_POST['expires_in_days'] ) ? (int) $_POST['expires_in_days'] : 7,
+							'allow_registration' => ! empty( $_POST['allow_registration'] ),
+						)
+					);
+					$this->set_created_invite_link( $result['url'] );
+					$this->set_message( 'success', __( 'Einladungslink wurde erstellt.', 'afspaces' ) );
+				} elseif ( 'revoke_invite_link' === $action ) {
+					$link_id = isset( $_POST['invite_link_id'] ) ? (int) $_POST['invite_link_id'] : 0;
+					$this->invite_links->revoke_link( $link_id, $actor );
+					$this->set_message( 'success', __( 'Einladungslink wurde widerrufen.', 'afspaces' ) );
+				} elseif ( 'shorten_invite_link' === $action ) {
+					$link_id = isset( $_POST['invite_link_id'] ) ? (int) $_POST['invite_link_id'] : 0;
+					$expires_at = isset( $_POST['shorten_expires_at'] ) ? sanitize_text_field( wp_unslash( $_POST['shorten_expires_at'] ) ) : '';
+					$this->invite_links->shorten_expiry( $link_id, $actor, $expires_at );
+					$this->set_message( 'success', __( 'Das Ablaufdatum des Einladungslinks wurde verkürzt.', 'afspaces' ) );
+				} elseif ( 'use_invite_link' === $action ) {
+					$invite_link_token = isset( $_POST['invite_link_token'] ) ? sanitize_text_field( wp_unslash( $_POST['invite_link_token'] ) ) : '';
+					$result = $this->invite_links->use_link( $invite_link_token, $actor );
+
+					if ( 'joined' === $result['result'] ) {
+						$this->set_message( 'success', __( 'Du bist dem Raum beigetreten.', 'afspaces' ) );
+						wp_safe_redirect( $result['forum_url'] );
+						exit;
+					}
+
+					if ( 'already_member' === $result['result'] ) {
+						$this->set_message( 'success', __( 'Du bist bereits Mitglied dieses Raums.', 'afspaces' ) );
+						wp_safe_redirect( $result['forum_url'] );
+						exit;
+					}
+
+					$this->set_message( 'success', __( 'Deine Beitrittsanfrage wurde gespeichert.', 'afspaces' ) );
+				} elseif ( 'request_invite_link_registration' === $action ) {
+					$invite_link_token = isset( $_POST['invite_link_token'] ) ? sanitize_text_field( wp_unslash( $_POST['invite_link_token'] ) ) : '';
+					$consent = ! empty( $_POST['privacy_consent'] );
+
+					if ( ! $consent ) {
+						throw new DomainException( __( 'Bitte bestätige die Datenschutzinformationen, bevor du fortfährst.', 'afspaces' ) );
+					}
+
+					$preview = $this->invite_links->preview_link( $invite_link_token, 0 );
+					if ( ! $preview['can_register'] || '' === (string) $preview['registration_url'] ) {
+						throw new DomainException( __( 'Die Registrierung über diesen Einladungslink ist derzeit nicht verfügbar.', 'afspaces' ) );
+					}
+
+					wp_safe_redirect( (string) $preview['registration_url'] );
+					exit;
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
@@ -163,16 +226,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
 			$ref = wp_get_referer() ?: home_url();
-			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation' ), true ) ) {
+			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation', 'create_invite_link', 'revoke_invite_link', 'shorten_invite_link' ), true ) ) {
 				$invite_page = get_page_by_path( 'afspaces-invitations' );
 				$redirect_url = $invite_page ? get_permalink( $invite_page ) : $ref;
 				wp_safe_redirect( add_query_arg( 'space_id', $space_id, $redirect_url ) );
 				exit;
 			}
 
-			if ( in_array( $action, array( 'accept_invitation', 'decline_invitation' ), true ) ) {
+			if ( in_array( $action, array( 'accept_invitation', 'decline_invitation', 'use_invite_link', 'request_invite_link_registration' ), true ) ) {
 				$mine_page = get_page_by_path( 'afspaces-my-invitations' );
 				$redirect_url = $mine_page ? get_permalink( $mine_page ) : $ref;
+				if ( 'use_invite_link' === $action && '' !== $invite_link_token ) {
+					$redirect_url = add_query_arg( 'invite_link', rawurlencode( $invite_link_token ), $redirect_url );
+				} elseif ( 'request_invite_link_registration' === $action && '' !== $invite_link_token ) {
+					$redirect_url = add_query_arg( 'invite_link', rawurlencode( $invite_link_token ), $redirect_url );
+				}
 				wp_safe_redirect( $redirect_url );
 				exit;
 			}
@@ -198,6 +266,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				'type'    => $type,
 				'message' => $message,
 			);
+		}
+
+		/**
+		 * @param string $url Vollständiger Invite-Link.
+		 * @return void
+		 */
+		private function set_created_invite_link( string $url ): void {
+			if ( ! session_id() && ! headers_sent() ) {
+				session_start();
+			}
+
+			$_SESSION['afspaces_created_invite_link'] = $url;
 		}
 
 		/**

@@ -37,3 +37,7 @@ Vor MVP 1 sind zu dokumentieren:
 - Administrator erhält konkrete Diagnose.
 - Adaptertests laufen gegen jede offiziell unterstützte Version.
 - Änderungen an internen APIs führen zu einer neuen Adapterversion, nicht zu Änderungen in Domain oder UI.
+
+## MVP 3 Hinweis
+
+- MVP 3 nutzt keine zusätzlichen Asgaros-Interna. Invite-Links greifen weiter ausschließlich über den vorhandenen Adapter auf Foren-Metadaten, Gruppenmitgliedschaften und Gruppenzuordnungen zu.

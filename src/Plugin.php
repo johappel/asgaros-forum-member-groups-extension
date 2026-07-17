@@ -82,10 +82,12 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$policy  = new SpacePolicy( $spaces );
 			$audit   = new AuditRepository();
 			$inv_repo = new InvitationRepository();
+			$link_repo = new \AFSpaces\Adapters\Database\InviteLinkRepository();
 			$members = new MemberService( $spaces, $asgaros, $policy, $audit );
 			$invites = new InvitationService( $spaces, $inv_repo, $asgaros, $policy, $audit );
+			$invite_links = new \AFSpaces\Application\InviteLinkService( $spaces, $link_repo, $asgaros, $policy, $audit );
 
-			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites );
+			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $invite_links );
 			$frontend->init();
 
 			// Mitgliederansicht in denselben Shortcode integrieren.
@@ -102,25 +104,25 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			add_shortcode(
 				'afspaces_invitations',
-				static function () use ( $spaces, $invites, $members ): string {
+				static function () use ( $spaces, $invites, $members, $invite_links ): string {
 					if ( ! isset( $_GET['space_id'] ) ) {
 						return '';
 					}
-					$view = new InvitationsView( $spaces, $invites, $members );
+					$view = new InvitationsView( $spaces, $invites, $members, $invite_links );
 					return $view->render( (int) $_GET['space_id'] );
 				}
 			);
 
 			add_shortcode(
 				'afspaces_my_invitations',
-				static function () use ( $invites, $spaces, $asgaros ): string {
-					$view = new MyInvitationsView( $invites, $spaces, $asgaros );
+				static function () use ( $invites, $spaces, $asgaros, $invite_links ): string {
+					$view = new MyInvitationsView( $invites, $invite_links, $spaces, $asgaros );
 					return $view->render();
 				}
 			);
 
 			// REST-API registrieren.
-			$rest = new RestController( $spaces, $asgaros, $members, $invites );
+			$rest = new RestController( $spaces, $asgaros, $members, $invites, $invite_links );
 			add_action( 'rest_api_init', array( $rest, 'register_routes' ) );
 
 			add_filter( 'wp_privacy_personal_data_exporters', static function ( array $exporters ) use ( $inv_repo ): array {

@@ -8,115 +8,115 @@ Raumverantwortliche erstellen widerrufbare Einladungslinks mit klaren Bedingunge
 
 ### M3.1 Linkmodell
 
-- [ ] eigenes Invite-Link-Modell erstellen.
-- [ ] kryptografisch sicheren Zufallstoken erzeugen.
-- [ ] nur Token-Hash speichern.
-- [ ] Ablaufdatum unterstützen.
-- [ ] maximale Nutzungszahl unterstützen.
-- [ ] Status `active`, `revoked`, `expired`, `exhausted` implementieren.
-- [ ] Ersteller und Erstellzeitpunkt speichern.
+- [x] eigenes Invite-Link-Modell erstellen.
+- [x] kryptografisch sicheren Zufallstoken erzeugen.
+- [x] nur Token-Hash speichern.
+- [x] Ablaufdatum unterstützen.
+- [x] maximale Nutzungszahl unterstützen.
+- [x] Status `active`, `revoked`, `expired`, `exhausted` implementieren.
+- [x] Ersteller und Erstellzeitpunkt speichern.
 
 ### M3.2 Link erstellen
 
-- [ ] Frontend-Formular für Linkbedingungen erstellen.
-- [ ] Standardwerte sicher wählen.
-- [ ] unbegrenzte Links nur bei expliziter administrativer Freigabe erlauben.
-- [ ] Link nach Erstellung genau einmal vollständig anzeigen und kopierbar machen.
-- [ ] keine Tokens in Audit-Logs oder allgemeinen Listen speichern.
+- [x] Frontend-Formular für Linkbedingungen erstellen.
+- [x] Standardwerte sicher wählen.
+- [x] unbegrenzte Links nur bei expliziter administrativer Freigabe erlauben.
+- [x] Link nach Erstellung genau einmal vollständig anzeigen und kopierbar machen.
+- [x] keine Tokens in Audit-Logs oder allgemeinen Listen speichern.
 
 ### M3.3 Link verwenden
 
-- [ ] Token serverseitig prüfen.
-- [ ] abgelaufene, widerrufene und ausgeschöpfte Links verständlich ablehnen.
-- [ ] angemeldeten Benutzer zur Annahme auffordern.
-- [ ] nicht angemeldete Benutzer zur Anmeldung führen und Rücksprung erhalten.
-- [ ] optional Registrierung nur bei aktivierter Policy anbieten.
-- [ ] vorhandene Mitgliedschaft idempotent behandeln.
+- [x] Token serverseitig prüfen.
+- [x] abgelaufene, widerrufene und ausgeschöpfte Links verständlich ablehnen.
+- [x] angemeldeten Benutzer zur Annahme auffordern.
+- [x] nicht angemeldete Benutzer zur Anmeldung führen und Rücksprung erhalten.
+- [x] optional Registrierung nur bei aktivierter Policy anbieten.
+- [x] vorhandene Mitgliedschaft idempotent behandeln.
 
 ### M3.4 Freigabemodi
 
 Mindestens:
 
-- [ ] automatische Aufnahme nach Annahme,
-- [ ] Beitrittsanfrage mit manueller Freigabe,
-- [ ] nur bestehende WordPress-Benutzer.
+- [x] automatische Aufnahme nach Annahme,
+- [x] Beitrittsanfrage mit manueller Freigabe,
+- [x] nur bestehende WordPress-Benutzer.
 
 Optional:
 
-- [ ] Registrierung neuer Benutzer erlaubt,
+- [x] Registrierung neuer Benutzer erlaubt,
 - [ ] E-Mail-Domain-Einschränkung,
 - [ ] Einladungscode zusätzlich zum Link.
 
 ### M3.5 Linkverwaltung
 
-- [ ] aktive Links mit Bedingungen anzeigen.
-- [ ] Nutzungszahl anzeigen.
-- [ ] Link widerrufen.
-- [ ] Ablaufdatum verkürzen.
-- [ ] Token niemals erneut aus dem Hash rekonstruieren.
-- [ ] bei verlorenem Link neuen Link erstellen statt Token anzeigen.
+- [x] aktive Links mit Bedingungen anzeigen.
+- [x] Nutzungszahl anzeigen.
+- [x] Link widerrufen.
+- [x] Ablaufdatum verkürzen.
+- [x] Token niemals erneut aus dem Hash rekonstruieren.
+- [x] bei verlorenem Link neuen Link erstellen statt Token anzeigen.
 
 ### M3.6 Missbrauchsschutz
 
-- [ ] Rate-Limit für Tokenprüfungen.
-- [ ] Rate-Limit für Annahmeversuche.
-- [ ] verdächtige Versuche protokollieren, ohne Token zu speichern.
-- [ ] optional CAPTCHA-Hook bei öffentlicher Registrierung vorsehen.
-- [ ] keine Information preisgeben, ob ein bestimmter Benutzer Mitglied ist.
-- [ ] sichere Weiterleitungen ohne Open Redirect.
+- [x] Rate-Limit für Tokenprüfungen.
+- [x] Rate-Limit für Annahmeversuche.
+- [x] verdächtige Versuche protokollieren, ohne Token zu speichern.
+- [x] optional CAPTCHA-Hook bei öffentlicher Registrierung vorsehen.
+- [x] keine Information preisgeben, ob ein bestimmter Benutzer Mitglied ist.
+- [x] sichere Weiterleitungen ohne Open Redirect.
 
 ### M3.7 Registrierung
 
 Nur umsetzen, wenn zentral aktiviert:
 
-- [ ] WordPress-Registrierung respektieren.
-- [ ] minimale notwendige Felder verwenden.
-- [ ] Zustimmung zu geltenden Datenschutzinformationen einholen.
-- [ ] E-Mail-Verifikation beziehungsweise bestehende WordPress-Flows berücksichtigen.
-- [ ] nach Registrierung Linkbedingung erneut serverseitig prüfen.
+- [x] WordPress-Registrierung respektieren.
+- [x] minimale notwendige Felder verwenden.
+- [x] Zustimmung zu geltenden Datenschutzinformationen einholen.
+- [x] E-Mail-Verifikation beziehungsweise bestehende WordPress-Flows berücksichtigen.
+- [x] nach Registrierung Linkbedingung erneut serverseitig prüfen.
 
 ## Tests
 
 ### Unit
 
-- [ ] Token-Hashing und Vergleich.
-- [ ] Ablauf und maximale Nutzungszahl.
-- [ ] Statusableitung.
-- [ ] Policy für Freigabemodi.
+- [x] Token-Hashing und Vergleich.
+- [x] Ablauf und maximale Nutzungszahl.
+- [x] Statusableitung.
+- [x] Policy für Freigabemodi.
 
 ### Integration
 
-- [ ] gültiger Link erzeugt Mitgliedschaft.
-- [ ] Nutzungszähler wird transaktionssicher erhöht.
-- [ ] letzter erlaubter Gebrauch funktioniert genau einmal.
-- [ ] widerrufener Link wird abgelehnt.
-- [ ] Token erscheint nicht in gespeicherten Logs.
-- [ ] Beitrittsanfrage erzeugt noch keine Mitgliedschaft.
+- [x] gültiger Link erzeugt Mitgliedschaft.
+- [x] Nutzungszähler wird transaktionssicher erhöht.
+- [x] letzter erlaubter Gebrauch funktioniert genau einmal.
+- [x] widerrufener Link wird abgelehnt.
+- [x] Token erscheint nicht in gespeicherten Logs.
+- [x] Beitrittsanfrage erzeugt noch keine Mitgliedschaft.
 
 ### REST/Sicherheit
 
-- [ ] erratene Tokens sind praktisch ausgeschlossen.
-- [ ] Timing-sicherer Vergleich wird verwendet.
-- [ ] Brute-Force-Drosselung greift.
-- [ ] Open Redirect ist ausgeschlossen.
-- [ ] anonyme Antworten geben keine internen Details preis.
-- [ ] Race Condition bei maximaler Nutzungszahl ist getestet.
+- [x] erratene Tokens sind praktisch ausgeschlossen.
+- [x] Timing-sicherer Vergleich wird verwendet.
+- [x] Brute-Force-Drosselung greift.
+- [x] Open Redirect ist ausgeschlossen.
+- [x] anonyme Antworten geben keine internen Details preis.
+- [x] Race Condition bei maximaler Nutzungszahl ist getestet.
 
 ### End-to-End
 
-- [ ] Manager erstellt Link mit Ablauf und Nutzungslimit.
-- [ ] bestehender Benutzer tritt bei.
-- [ ] nicht angemeldeter Benutzer meldet sich an und kehrt zurück.
-- [ ] ausgeschöpfter Link zeigt verständliche Meldung.
-- [ ] Manager widerruft Link.
-- [ ] optionaler Freigabeflow funktioniert.
+- [x] Manager erstellt Link mit Ablauf und Nutzungslimit.
+- [x] bestehender Benutzer tritt bei.
+- [x] nicht angemeldeter Benutzer meldet sich an und kehrt zurück.
+- [x] ausgeschöpfter Link zeigt verständliche Meldung.
+- [x] Manager widerruft Link.
+- [x] optionaler Freigabeflow funktioniert.
 
 ### Accessibility
 
-- [ ] Linkbedingungen sind verständlich beschriftet.
-- [ ] Kopierfunktion besitzt sichtbare und angekündigte Rückmeldung.
-- [ ] Fehlermeldungen vermeiden rein technische Tokenbegriffe.
-- [ ] Registrierungs- und Annahmefluss ist vollständig per Tastatur nutzbar.
+- [x] Linkbedingungen sind verständlich beschriftet.
+- [x] Kopierfunktion besitzt sichtbare und angekündigte Rückmeldung.
+- [x] Fehlermeldungen vermeiden rein technische Tokenbegriffe.
+- [x] Registrierungs- und Annahmefluss ist vollständig per Tastatur nutzbar.
 
 ## Akzeptanzkriterien
 

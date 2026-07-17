@@ -91,6 +91,33 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpacePolicy' ) ) {
 		}
 
 		/**
+		 * Darf der Akteur Invite-Links für einen Space erstellen oder verwalten?
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @return bool
+		 */
+		public function can_manage_invite_links( int $space_id, int $actor_user_id ): bool {
+			return $this->can_manage( $space_id, $actor_user_id );
+		}
+
+		/**
+		 * Darf der Akteur unbegrenzte Invite-Links erstellen?
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @return bool
+		 */
+		public function can_create_unlimited_invite_links( int $space_id, int $actor_user_id ): bool {
+			if ( ! $this->can_manage_invite_links( $space_id, $actor_user_id ) ) {
+				return false;
+			}
+
+			return user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
+				|| user_can( $actor_user_id, Capabilities::CREATE_INVITE_LINKS );
+		}
+
+		/**
 		 * Darf der Akteur einen Benutzer aus dem Space entfernen?
 		 *
 		 * Schützt den letzten Owner vor dem Entfernen.

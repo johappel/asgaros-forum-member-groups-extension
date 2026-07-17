@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\DomainException;
@@ -24,14 +25,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 		private SpaceRepository $spaces;
 		private InvitationService $invitations;
 		private MemberService $members;
+		private InviteLinkService $invite_links;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, InvitationService $invitations, MemberService $members ) {
+		public function __construct( SpaceRepository $spaces, InvitationService $invitations, MemberService $members, InviteLinkService $invite_links ) {
 			$this->spaces      = $spaces;
 			$this->invitations = $invitations;
 			$this->members     = $members;
+			$this->invite_links = $invite_links;
 		}
 
 		/**
@@ -56,6 +59,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 
 			try {
 				$list = $this->invitations->list_space_invitations( $space_id, $actor, '' !== $status_filter ? $status_filter : null );
+				$link_list = $this->invite_links->list_links( $space_id, $actor );
 			} catch ( DomainException $e ) {
 				return $this->notice( $e->getMessage() );
 			}
@@ -69,6 +73,91 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			?>
 			<section class="afspaces-invitations" aria-labelledby="afspaces-invitations-heading">
 				<h2 id="afspaces-invitations-heading"><?php echo esc_html__( 'Einladungen', 'afspaces' ); ?></h2>
+				<?php echo $this->render_message(); ?>
+				<?php echo $this->render_created_invite_link(); ?>
+
+				<section class="afspaces-invite-links" aria-labelledby="afspaces-invite-links-heading">
+					<h3 id="afspaces-invite-links-heading"><?php echo esc_html__( 'Einladungslinks', 'afspaces' ); ?></h3>
+					<p><?php echo esc_html__( 'Ein Link wird nur einmal vollständig angezeigt. Später ist nur noch die Verwaltung des Links möglich.', 'afspaces' ); ?></p>
+
+					<form method="post" class="afspaces-invite-link-form">
+						<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+						<input type="hidden" name="afspaces_action" value="create_invite_link" />
+						<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+
+						<label for="approval_mode"><?php echo esc_html__( 'Freigabemodus', 'afspaces' ); ?></label>
+						<select id="approval_mode" name="approval_mode">
+							<option value="auto_join"><?php echo esc_html__( 'Automatische Aufnahme', 'afspaces' ); ?></option>
+							<option value="approval_required"><?php echo esc_html__( 'Beitrittsanfrage mit Freigabe', 'afspaces' ); ?></option>
+						</select>
+
+						<label for="invite_link_max_uses"><?php echo esc_html__( 'Maximale Nutzungen', 'afspaces' ); ?></label>
+						<input type="number" id="invite_link_max_uses" name="max_uses" min="0" max="1000" value="1" />
+						<p class="description"><?php echo esc_html__( '0 steht für unbegrenzt und wird nur bei entsprechender Freigabe akzeptiert.', 'afspaces' ); ?></p>
+
+						<label for="invite_link_expires_days"><?php echo esc_html__( 'Ablauf in Tagen', 'afspaces' ); ?></label>
+						<input type="number" id="invite_link_expires_days" name="expires_in_days" min="1" max="30" value="7" />
+
+						<label for="invite_link_registration" class="afspaces-checkbox">
+							<input type="checkbox" id="invite_link_registration" name="allow_registration" value="1" <?php disabled( ! $this->invite_links->is_registration_available_for_space( $space ) ); ?> />
+							<span><?php echo esc_html__( 'Registrierung für neue Benutzer anbieten, wenn zentral erlaubt', 'afspaces' ); ?></span>
+						</label>
+
+						<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Einladungslink erstellen', 'afspaces' ); ?></button>
+					</form>
+
+					<?php if ( empty( $link_list ) ) : ?>
+						<p><?php echo esc_html__( 'Es sind noch keine Einladungslinks vorhanden.', 'afspaces' ); ?></p>
+					<?php else : ?>
+						<table class="afspaces-member-table afspaces-invitations-table afspaces-invite-links-table">
+							<thead>
+								<tr>
+									<th><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Freigabe', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Nutzungen', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Ablauf', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Registrierung', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php foreach ( $link_list as $link ) : ?>
+									<tr>
+										<td><?php echo esc_html( $link->effective_status() ); ?></td>
+										<td><?php echo esc_html( 'approval_required' === $link->approval_mode ? __( 'Manuelle Freigabe', 'afspaces' ) : __( 'Automatisch', 'afspaces' ) ); ?></td>
+										<td><?php echo esc_html( 0 === $link->max_uses ? __( 'unbegrenzt', 'afspaces' ) : sprintf( '%1$d / %2$d', $link->use_count, $link->max_uses ) ); ?></td>
+										<td><?php echo esc_html( $link->expires_at ); ?></td>
+										<td><?php echo esc_html( $link->allows_registration() ? __( 'Ja', 'afspaces' ) : __( 'Nein', 'afspaces' ) ); ?></td>
+										<td>
+											<?php if ( 'active' === $link->effective_status() ) : ?>
+												<form method="post" class="afspaces-inline-form">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="revoke_invite_link" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="invite_link_id" value="<?php echo esc_attr( (string) $link->id ); ?>" />
+													<button type="submit" class="afspaces-button afspaces-button-danger"><?php echo esc_html__( 'Widerrufen', 'afspaces' ); ?></button>
+												</form>
+												<form method="post" class="afspaces-inline-form">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="shorten_invite_link" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="invite_link_id" value="<?php echo esc_attr( (string) $link->id ); ?>" />
+													<label>
+														<span class="screen-reader-text"><?php echo esc_html__( 'Neues Ablaufdatum', 'afspaces' ); ?></span>
+														<input type="datetime-local" name="shorten_expires_at" value="<?php echo esc_attr( gmdate( 'Y-m-d\TH:i', strtotime( $link->expires_at ) ) ); ?>" />
+													</label>
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Ablauf verkürzen', 'afspaces' ); ?></button>
+												</form>
+											<?php else : ?>
+												<span><?php echo esc_html__( 'Keine Aktion', 'afspaces' ); ?></span>
+											<?php endif; ?>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+					<?php endif; ?>
+				</section>
 
 				<form method="get" class="afspaces-search" role="search" aria-label="<?php echo esc_attr__( 'Benutzer für Einladung suchen', 'afspaces' ); ?>">
 					<label for="inv_search"><?php echo esc_html__( 'Person suchen', 'afspaces' ); ?></label>
@@ -176,6 +265,59 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 		 */
 		private function notice( string $text ): string {
 			return sprintf( '<p class="afspaces-notice" role="status">%s</p>', esc_html( $text ) );
+		}
+
+		/**
+		 * @return string
+		 */
+		private function render_message(): string {
+			if ( ! session_id() && ! headers_sent() ) {
+				session_start();
+			}
+
+			if ( empty( $_SESSION['afspaces_message'] ) ) {
+				return '';
+			}
+
+			$msg = $_SESSION['afspaces_message'];
+			unset( $_SESSION['afspaces_message'] );
+
+			$role = ( 'error' === $msg['type'] ) ? 'alert' : 'status';
+			return sprintf(
+				'<div class="afspaces-message afspaces-message-%1$s" role="%2$s" aria-live="polite">%3$s</div>',
+				esc_attr( $msg['type'] ),
+				esc_attr( $role ),
+				esc_html( $msg['message'] )
+			);
+		}
+
+		/**
+		 * @return string
+		 */
+		private function render_created_invite_link(): string {
+			if ( ! session_id() && ! headers_sent() ) {
+				session_start();
+			}
+
+			if ( empty( $_SESSION['afspaces_created_invite_link'] ) ) {
+				return '';
+			}
+
+			$url = (string) $_SESSION['afspaces_created_invite_link'];
+			unset( $_SESSION['afspaces_created_invite_link'] );
+
+			$field_id = 'afspaces-created-link';
+			$status_id = 'afspaces-created-link-status';
+
+			return sprintf(
+				'<div class="afspaces-created-invite-link" role="status" aria-live="polite"><p>%1$s</p><div class="afspaces-inline-form"><input type="text" readonly value="%2$s" id="%3$s" /><button type="button" class="afspaces-button" onclick="var field=document.getElementById(\'%3$s\'); if(field){ field.focus(); field.select(); try { navigator.clipboard.writeText(field.value); } catch(e) {} var status=document.getElementById(\'%4$s\'); if(status){ status.textContent=\'%5$s\'; } }">%6$s</button></div><p id="%4$s" class="afspaces-copy-feedback" role="status" aria-live="polite"></p></div>',
+				esc_html__( 'Neuer Einladungslink:', 'afspaces' ),
+				esc_attr( $url ),
+				esc_attr( $field_id ),
+				esc_attr( $status_id ),
+				esc_js( __( 'Link kopiert.', 'afspaces' ) ),
+				esc_html__( 'Link kopieren', 'afspaces' )
+			);
 		}
 	}
 }

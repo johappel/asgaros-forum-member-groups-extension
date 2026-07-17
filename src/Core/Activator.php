@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace AFSpaces\Core;
 
 use AFSpaces\Adapters\Database\AuditRepository;
+use AFSpaces\Adapters\Database\InviteLinkRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Core\Capabilities;
@@ -41,6 +42,8 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 			$audit->install();
 			$invitations = new InvitationRepository();
 			$invitations->install();
+			$invite_links = new InviteLinkRepository();
+			$invite_links->install();
 
 			// Capabilities registrieren.
 			Capabilities::register();

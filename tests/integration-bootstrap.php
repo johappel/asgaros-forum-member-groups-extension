@@ -26,8 +26,26 @@ if ( ! defined( 'DB_HOST' ) ) {
 	define( 'DB_HOST', '127.0.0.1:10016' );
 }
 
+// Manche Fremd-Plugins erwarten einen HTTP-Kontext auch in CLI-Tests.
+if ( ! isset( $_SERVER['REQUEST_METHOD'] ) ) {
+	$_SERVER['REQUEST_METHOD'] = 'GET';
+}
+
+// Unterdrückt gezielt die bekannte DB_HOST-Redefinitions-Warnung aus wp-config.php.
+set_error_handler(
+	static function ( int $errno, string $errstr ): bool {
+		if ( E_WARNING === $errno && false !== strpos( $errstr, 'Constant DB_HOST already defined' ) ) {
+			return true;
+		}
+
+		return false;
+	}
+);
+
 // WordPress laden (definiert WP-Funktionen, $wpdb, etc.).
 require_once $wp_load;
+
+restore_error_handler();
 
 // Asgaros-Instanz global verfügbar machen (falls nicht automatisch geschehen).
 global $asgarosforum;

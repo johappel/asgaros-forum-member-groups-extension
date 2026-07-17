@@ -11,6 +11,7 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\Capabilities;
@@ -48,6 +49,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		private InvitationService $invitations;
 
 		/**
+		 * @var InviteLinkService
+		 */
+		private InviteLinkService $invite_links;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param SpaceRepository         $spaces  Space-Repository.
@@ -59,12 +65,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			SpaceRepository $spaces,
 			AsgarosAdapterInterface $asgaros,
 			MemberService $members,
-			InvitationService $invitations
+			InvitationService $invitations,
+			InviteLinkService $invite_links
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
 			$this->members = $members;
 			$this->invitations = $invitations;
+			$this->invite_links = $invite_links;
 		}
 
 		/**
@@ -196,6 +204,70 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 
 			register_rest_route(
 				$namespace,
+				'/spaces/(?P<space_id>\d+)/invite-links',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'get_invite_links' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+					),
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'create_invite_link' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+						'args'                => array(
+							'approval_mode' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+							'max_uses' => array(
+								'type'              => 'integer',
+								'required'          => false,
+								'default'           => 1,
+								'sanitize_callback' => 'absint',
+							),
+							'expires_in_days' => array(
+								'type'              => 'integer',
+								'required'          => false,
+								'default'           => 7,
+								'sanitize_callback' => 'absint',
+							),
+							'allow_registration' => array(
+								'type'              => 'boolean',
+								'required'          => false,
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/invite-links/(?P<link_id>\d+)',
+				array(
+					array(
+						'methods'             => WP_REST_Server::DELETABLE,
+						'callback'            => array( $this, 'revoke_invite_link' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+					),
+					array(
+						'methods'             => WP_REST_Server::EDITABLE,
+						'callback'            => array( $this, 'shorten_invite_link' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+						'args'                => array(
+							'expires_at' => array(
+								'type'              => 'string',
+								'required'          => true,
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
 				'/spaces/(?P<space_id>\d+)/invitations/(?P<invitation_id>\d+)',
 				array(
 					array(
@@ -237,6 +309,30 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 					array(
 						'methods'             => WP_REST_Server::CREATABLE,
 						'callback'            => array( $this, 'decline_invitation' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/invite-links/preview/(?P<token>[A-Za-z0-9\-_]+)',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'preview_invite_link' ),
+						'permission_callback' => '__return_true',
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/invite-links/use/(?P<token>[A-Za-z0-9\-_]+)',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'use_invite_link' ),
 						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
 					),
 				)
@@ -528,6 +624,123 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		}
 
 		/**
+		 * GET /spaces/{id}/invite-links
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function get_invite_links( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor    = get_current_user_id();
+
+			try {
+				$list = $this->invite_links->list_links( $space_id, $actor );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invite_link_list_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			$items = array_map(
+				static function ( $link ): array {
+					return array(
+						'id'                 => $link->id,
+						'space_id'           => $link->space_id,
+						'creator_user_id'    => $link->creator_user_id,
+						'status'             => $link->effective_status(),
+						'approval_mode'      => $link->approval_mode,
+						'max_uses'           => $link->max_uses,
+						'use_count'          => $link->use_count,
+						'allow_registration' => $link->allows_registration(),
+						'expires_at'         => $link->expires_at,
+					);
+				},
+				$list
+			);
+
+			return new WP_REST_Response( array( 'invite_links' => $items ), 200 );
+		}
+
+		/**
+		 * POST /spaces/{id}/invite-links
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function create_invite_link( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor    = get_current_user_id();
+
+			try {
+				$result = $this->invite_links->create_link(
+					$space_id,
+					$actor,
+					array(
+						'approval_mode'      => (string) ( $request['approval_mode'] ?? '' ),
+						'max_uses'           => (int) ( $request['max_uses'] ?? 1 ),
+						'expires_in_days'    => (int) ( $request['expires_in_days'] ?? 7 ),
+						'allow_registration' => (bool) ( $request['allow_registration'] ?? false ),
+					)
+				);
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invite_link_create_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			/** @var \AFSpaces\Domain\InviteLink $link */
+			$link = $result['link'];
+
+			return new WP_REST_Response(
+				array(
+					'id'                 => $link->id,
+					'status'             => $link->effective_status(),
+					'approval_mode'      => $link->approval_mode,
+					'max_uses'           => $link->max_uses,
+					'use_count'          => $link->use_count,
+					'allow_registration' => $link->allows_registration(),
+					'expires_at'         => $link->expires_at,
+					'url'                => $result['url'],
+				),
+				201
+			);
+		}
+
+		/**
+		 * DELETE /spaces/{id}/invite-links/{link_id}
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function revoke_invite_link( WP_REST_Request $request ) {
+			$link_id = (int) $request['link_id'];
+			$actor   = get_current_user_id();
+
+			try {
+				$this->invite_links->revoke_link( $link_id, $actor );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invite_link_revoke_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'status' => 'revoked' ), 200 );
+		}
+
+		/**
+		 * PATCH /spaces/{id}/invite-links/{link_id}
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function shorten_invite_link( WP_REST_Request $request ) {
+			$link_id = (int) $request['link_id'];
+			$actor   = get_current_user_id();
+
+			try {
+				$link = $this->invite_links->shorten_expiry( $link_id, $actor, (string) $request['expires_at'] );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invite_link_update_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'status' => $link->effective_status(), 'expires_at' => $link->expires_at ), 200 );
+		}
+
+		/**
 		 * POST /spaces/{id}/invitations
 		 *
 		 * @param WP_REST_Request $request Request.
@@ -630,6 +843,59 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			}
 
 			return new WP_REST_Response( array( 'status' => $inv->status, 'space_id' => $inv->space_id ), 200 );
+		}
+
+		/**
+		 * GET /invite-links/preview/{token}
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function preview_invite_link( WP_REST_Request $request ) {
+			try {
+				$preview = $this->invite_links->preview_link( (string) $request['token'], get_current_user_id() );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invite_link_preview_failed', $e->getMessage(), array( 'status' => $this->status_for_domain_error( $e ) ) );
+			}
+
+			return new WP_REST_Response(
+				array(
+					'forum_name'       => $preview['forum_name'],
+					'state'            => $preview['state'],
+					'can_register'     => $preview['can_register'],
+					'action_label'     => $preview['action_label'],
+					'status_message'   => $preview['status_message'],
+				),
+				200
+			);
+		}
+
+		/**
+		 * POST /invite-links/use/{token}
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function use_invite_link( WP_REST_Request $request ) {
+			try {
+				$result = $this->invite_links->use_link( (string) $request['token'], get_current_user_id() );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invite_link_use_failed', $e->getMessage(), array( 'status' => $this->status_for_domain_error( $e ) ) );
+			}
+
+			return new WP_REST_Response( $result, 200 );
+		}
+
+		/**
+		 * @param DomainException $exception Fehler.
+		 * @return int
+		 */
+		private function status_for_domain_error( DomainException $exception ): int {
+			if ( false !== stripos( $exception->getMessage(), 'Zu viele Versuche' ) ) {
+				return 429;
+			}
+
+			return 400;
 		}
 	}
 }

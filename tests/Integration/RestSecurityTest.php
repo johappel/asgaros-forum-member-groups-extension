@@ -173,4 +173,56 @@ final class RestSecurityTest extends IntegrationTestCase {
 
 		$this->assertSame( 403, $response->get_status(), 'Manager eines anderen Spaces darf nicht widerrufen.' );
 	}
+
+	/**
+	 * Test: Preview für erratenes Token bleibt anonym und generisch.
+	 */
+	public function test_invite_link_preview_for_unknown_token_is_generic(): void {
+		$request = new \WP_REST_Request( 'GET', '/afspaces/v1/invite-links/preview/not-a-real-token' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'Dieser Einladungslink ist ungültig oder nicht mehr verfugbar.', $data['message'] );
+	}
+
+	/**
+	 * Test: Brute-Force-Drosselung greift für wiederholte Token-Prüfungen.
+	 */
+	public function test_invite_link_preview_is_rate_limited(): void {
+		for ( $i = 0; $i < 15; $i++ ) {
+			$request = new \WP_REST_Request( 'GET', '/afspaces/v1/invite-links/preview/not-a-real-token-2' );
+			rest_get_server()->dispatch( $request );
+		}
+
+		$request = new \WP_REST_Request( 'GET', '/afspaces/v1/invite-links/preview/not-a-real-token-2' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 429, $response->get_status() );
+	}
+
+	/**
+	 * Test: Berechtigter Manager erhält den Link nur einmal im Erstellungs-Response.
+	 */
+	public function test_create_invite_link_response_includes_url_but_list_does_not(): void {
+		$actor    = $this->make_user_with_cap( 'link_mgr', Capabilities::MANAGE_ALL_SPACES );
+		$space_id = $this->create_test_space( $actor );
+
+		wp_set_current_user( $actor );
+		$create = new \WP_REST_Request( 'POST', '/afspaces/v1/spaces/' . $space_id . '/invite-links' );
+		$create->set_param( 'max_uses', 1 );
+		$response = rest_get_server()->dispatch( $create );
+
+		$this->assertSame( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'url', $data );
+
+		$list = new \WP_REST_Request( 'GET', '/afspaces/v1/spaces/' . $space_id . '/invite-links' );
+		$list_response = rest_get_server()->dispatch( $list );
+		$list_data = $list_response->get_data();
+
+		$this->assertSame( 200, $list_response->get_status() );
+		$this->assertArrayHasKey( 'invite_links', $list_data );
+		$this->assertArrayNotHasKey( 'url', $list_data['invite_links'][0] );
+	}
 }
