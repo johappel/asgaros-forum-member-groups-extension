@@ -22,6 +22,7 @@ class StubSpaceRepository extends SpaceRepository {
 
 	private bool $manager_flag = false;
 	private int $owner_count = 1;
+	private int $responsible_count = 1;
 	private ?Space $space = null;
 
 	public function set_is_manager( bool $flag ): void {
@@ -30,6 +31,10 @@ class StubSpaceRepository extends SpaceRepository {
 
 	public function set_owner_count( int $count ): void {
 		$this->owner_count = $count;
+	}
+
+	public function set_responsible_count( int $count ): void {
+		$this->responsible_count = $count;
 	}
 
 	public function set_space( ?Space $space ): void {
@@ -42,6 +47,10 @@ class StubSpaceRepository extends SpaceRepository {
 
 	public function count_owners( int $space_id ): int {
 		return $this->owner_count;
+	}
+
+	public function count_responsibles( int $space_id ): int {
+		return $this->responsible_count;
 	}
 
 	public function get_space( int $space_id ): ?Space {
@@ -87,6 +96,7 @@ final class SpacePolicyTest extends TestCase {
 		$this->repo->set_space( $space );
 		$this->repo->set_is_manager( true );
 		$this->repo->set_owner_count( 1 );
+		$this->repo->set_responsible_count( 1 );
 
 		$this->assertFalse( $this->policy->can_remove_member( 1, 42, 7 ) );
 	}
@@ -99,6 +109,20 @@ final class SpacePolicyTest extends TestCase {
 		$this->repo->set_space( $space );
 		$this->repo->set_is_manager( true );
 		$this->repo->set_owner_count( 2 );
+		$this->repo->set_responsible_count( 2 );
+
+		$this->assertTrue( $this->policy->can_remove_member( 1, 42, 7 ) );
+	}
+
+	/**
+	 * @testdox Owner kann entfernt werden, wenn ein weiterer Raumverantwortlicher existiert.
+	 */
+	public function test_owner_can_be_removed_when_other_responsible_exists(): void {
+		$space = new Space( array( 'id' => 1, 'owner_user_id' => 7 ) );
+		$this->repo->set_space( $space );
+		$this->repo->set_is_manager( true );
+		$this->repo->set_owner_count( 1 );
+		$this->repo->set_responsible_count( 2 );
 
 		$this->assertTrue( $this->policy->can_remove_member( 1, 42, 7 ) );
 	}
@@ -111,6 +135,7 @@ final class SpacePolicyTest extends TestCase {
 		$this->repo->set_space( $space );
 		$this->repo->set_is_manager( true );
 		$this->repo->set_owner_count( 1 );
+		$this->repo->set_responsible_count( 1 );
 
 		$this->assertTrue( $this->policy->can_remove_member( 1, 42, 99 ) );
 	}

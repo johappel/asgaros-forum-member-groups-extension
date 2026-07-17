@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\AuditRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Core\DomainException;
+use AFSpaces\Domain\SpaceManager;
 use AFSpaces\Domain\SpacePolicy;
 
 if ( ! class_exists( 'AFSpaces\\Application\\MemberService' ) ) {
@@ -112,8 +113,103 @@ if ( ! class_exists( 'AFSpaces\\Application\\MemberService' ) ) {
 				);
 			}
 
+			$replacement_owner_id = 0;
+			if ( (int) $space->owner_user_id === $target_user_id ) {
+				foreach ( $this->spaces->get_managers( $space_id ) as $manager ) {
+					if ( (int) $manager->user_id !== $target_user_id ) {
+						$replacement_owner_id = (int) $manager->user_id;
+						break;
+					}
+				}
+			}
+
 			$this->asgaros->remove_user_from_group( $target_user_id, $space->primary_group_id );
+
+			if ( $this->spaces->is_manager( $space_id, $target_user_id ) ) {
+				$this->spaces->remove_manager( $space_id, $target_user_id );
+			}
+
+			if ( $replacement_owner_id > 0 ) {
+				$this->spaces->set_owner_user( $space_id, $replacement_owner_id );
+				$this->spaces->add_manager(
+					new SpaceManager(
+						array(
+							'space_id' => $space_id,
+							'user_id'  => $replacement_owner_id,
+							'role'     => SpaceManager::ROLE_OWNER,
+						)
+					)
+				);
+			}
+
 			$this->audit->log( $space_id, $actor_user_id, $target_user_id, 'member_removed' );
+		}
+
+		/**
+		 * Macht ein bestehendes Mitglied zum Raumverantwortlichen.
+		 *
+		 * @param int $space_id       Space-ID.
+		 * @param int $actor_user_id  Akteur.
+		 * @param int $target_user_id Zielbenutzer.
+		 * @return void
+		 * @throws DomainException Wenn keine Berechtigung oder Ziel ungültig.
+		 */
+		public function assign_manager( int $space_id, int $actor_user_id, int $target_user_id ): void {
+			$space = $this->spaces->get_space( $space_id );
+			if ( ! $space ) {
+				throw new DomainException( __( 'Der Raum existiert nicht.', 'afspaces' ) );
+			}
+
+			if ( $target_user_id < 1 || ! get_user_by( 'id', $target_user_id ) ) {
+				throw new DomainException( __( 'Der Zielbenutzer existiert nicht.', 'afspaces' ) );
+			}
+
+			if ( ! $this->policy->can_manage( $space_id, $actor_user_id ) ) {
+				throw new DomainException( __( 'Du bist nicht berechtigt, Raumverantwortliche zu verwalten.', 'afspaces' ) );
+			}
+
+			if ( ! $this->asgaros->is_user_in_group( $target_user_id, $space->primary_group_id ) ) {
+				throw new DomainException( __( 'Die Person muss erst Mitglied dieses Raums sein.', 'afspaces' ) );
+			}
+
+			$this->spaces->add_manager(
+				new SpaceManager(
+					array(
+						'space_id' => $space_id,
+						'user_id'  => $target_user_id,
+						'role'     => SpaceManager::ROLE_MANAGER,
+					)
+				)
+			);
+
+			$this->audit->log( $space_id, $actor_user_id, $target_user_id, 'manager_assigned' );
+		}
+
+		/**
+		 * Entzieht einer Person die Raumverantwortung.
+		 *
+		 * @param int $space_id       Space-ID.
+		 * @param int $actor_user_id  Akteur.
+		 * @param int $target_user_id Zielbenutzer.
+		 * @return void
+		 * @throws DomainException Wenn keine Berechtigung oder Schutzregel greift.
+		 */
+		public function revoke_manager( int $space_id, int $actor_user_id, int $target_user_id ): void {
+			$space = $this->spaces->get_space( $space_id );
+			if ( ! $space ) {
+				throw new DomainException( __( 'Der Raum existiert nicht.', 'afspaces' ) );
+			}
+
+			if ( ! $this->policy->can_manage( $space_id, $actor_user_id ) ) {
+				throw new DomainException( __( 'Du bist nicht berechtigt, Raumverantwortliche zu verwalten.', 'afspaces' ) );
+			}
+
+			if ( (int) $space->owner_user_id === $target_user_id && $this->spaces->count_owners( $space_id ) <= 1 ) {
+				throw new DomainException( __( 'Der letzte Owner kann nicht als Raumverantwortlicher entfernt werden.', 'afspaces' ) );
+			}
+
+			$this->spaces->remove_manager( $space_id, $target_user_id );
+			$this->audit->log( $space_id, $actor_user_id, $target_user_id, 'manager_revoked' );
 		}
 
 		/**

@@ -186,6 +186,24 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 		}
 
 		/**
+		 * Entfernt einen Manager aus einem Space.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $user_id  Benutzer-ID.
+		 * @return void
+		 */
+		public function remove_manager( int $space_id, int $user_id ): void {
+			$this->db->delete(
+				$this->managers_table,
+				array(
+					'space_id' => $space_id,
+					'user_id'  => $user_id,
+				),
+				array( '%d', '%d' )
+			);
+		}
+
+		/**
 		 * Gibt die Manager eines Spaces zurück.
 		 *
 		 * @param int $space_id Space-ID.
@@ -233,6 +251,43 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 					$space_id,
 					SpaceManager::ROLE_OWNER
 				)
+			);
+		}
+
+		/**
+		 * Zählt alle Raumverantwortlichen (Owner + Manager) eines Spaces.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @return int
+		 */
+		public function count_responsibles( int $space_id ): int {
+			return (int) $this->db->get_var(
+				$this->db->prepare(
+					"SELECT COUNT(*) FROM {$this->managers_table} WHERE space_id = %d AND role IN (%s, %s);",
+					$space_id,
+					SpaceManager::ROLE_OWNER,
+					SpaceManager::ROLE_MANAGER
+				)
+			);
+		}
+
+		/**
+		 * Setzt den Owner eines Spaces.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $user_id  Neue Owner-Benutzer-ID.
+		 * @return void
+		 */
+		public function set_owner_user( int $space_id, int $user_id ): void {
+			$this->db->update(
+				$this->spaces_table,
+				array(
+					'owner_user_id' => $user_id,
+					'updated_at'    => current_time( 'mysql' ),
+				),
+				array( 'id' => $space_id ),
+				array( '%d', '%s' ),
+				array( '%d' )
 			);
 		}
 

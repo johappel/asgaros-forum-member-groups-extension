@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace AFSpaces\Tests\Integration;
 
 use AFSpaces\Core\DomainException;
+use AFSpaces\Domain\SpaceManager;
 
 /**
  * Testet Hinzufügen/Entfernen, Audit und Pagination.
@@ -67,6 +68,33 @@ final class MemberManagementTest extends IntegrationTestCase {
 			\AsgarosForumUserGroups::isUserInUserGroup( $target, $this->group_id ),
 			'Benutzer darf nicht mehr in der Asgaros-Gruppe sein.'
 		);
+	}
+
+	/**
+	 * Test: Entfernen entfernt auch Raumverantwortung (Manager-Mapping).
+	 */
+	public function test_remove_clears_space_manager_mapping(): void {
+		$actor = $this->make_user( 'actor_mgrrem' );
+		$target = $this->make_user( 'target_mgrrem' );
+		$space_id = $this->create_test_space( $actor );
+
+		$this->members->add_member( $space_id, $actor, $target );
+		$this->spaces->add_manager(
+			new SpaceManager(
+				array(
+					'space_id' => $space_id,
+					'user_id'  => $target,
+					'role'     => SpaceManager::ROLE_MANAGER,
+				)
+			)
+		);
+
+		$this->assertTrue( $this->spaces->is_manager( $space_id, $target ) );
+
+		$this->members->remove_member( $space_id, $actor, $target );
+
+		$this->assertFalse( $this->spaces->is_manager( $space_id, $target ), 'Manager-Mapping muss entfernt sein.' );
+		$this->assertFalse( \AsgarosForumUserGroups::isUserInUserGroup( $target, $this->group_id ) );
 	}
 
 	/**

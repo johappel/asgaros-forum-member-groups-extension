@@ -69,6 +69,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 				return $this->notice( __( 'Dieser Raum existiert nicht.', 'afspaces' ) );
 			}
 
+			$forum = $this->asgaros->get_forum( $space->forum_id );
+			$forum_name = (string) ( $forum['name'] ?? '' );
+			if ( '' === $forum_name ) {
+				$forum_name = sprintf( __( 'Raum #%d', 'afspaces' ), $space->id );
+			}
+
 			$actor = get_current_user_id();
 			if ( ! $this->can_manage( $space_id, $actor ) ) {
 				return $this->notice( __( 'Du bist nicht berechtigt, diesen Raum zu verwalten.', 'afspaces' ) );
@@ -90,6 +96,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 				'search'   => $search,
 			) );
 
+			$total_members = (int) ( $members['total'] ?? 0 );
+			if ( '' !== $search ) {
+				$unfiltered = $this->asgaros->list_group_members( $group_id, array(
+					'page'     => 1,
+					'per_page' => 1,
+					'search'   => '',
+				) );
+				$total_members = (int) ( $unfiltered['total'] ?? $total_members );
+			}
+
+			$manager_roles = array();
+			foreach ( $this->spaces->get_managers( $space_id ) as $manager ) {
+				$manager_roles[ (int) $manager->user_id ] = (string) $manager->role;
+			}
+
 			$existing_ids = array_column( $members['members'] ?? array(), 'user_id' );
 			$search_results = array();
 			if ( '' !== $search ) {
@@ -99,7 +120,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-members" aria-labelledby="afspaces-members-heading">
-				<h2 id="afspaces-members-heading"><?php echo esc_html__( 'Mitglieder', 'afspaces' ); ?></h2>
+				<h2 id="afspaces-members-heading"><?php echo esc_html( sprintf( __( 'Mitglieder - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<?php echo $this->render_message(); ?>
 
 				<?php
 				$dashboard_page = get_page_by_path( 'afspaces-dashboard' );
@@ -145,28 +167,70 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 
 				<h3><?php echo esc_html__( 'Aktuelle Mitglieder', 'afspaces' ); ?></h3>
 				<?php if ( empty( $members['members'] ) ) : ?>
-					<p><?php echo esc_html__( 'Dieser Raum hat noch keine Mitglieder.', 'afspaces' ); ?></p>
+					<?php if ( '' !== $search ) : ?>
+						<p><?php echo esc_html__( 'Für die aktuelle Suche wurden keine bestehenden Mitglieder gefunden.', 'afspaces' ); ?></p>
+					<?php elseif ( 0 === $total_members ) : ?>
+						<p><?php echo esc_html__( 'Dieser Raum hat noch keine Mitglieder.', 'afspaces' ); ?></p>
+					<?php else : ?>
+						<p><?php echo esc_html__( 'Auf dieser Seite wurden keine Mitglieder gefunden.', 'afspaces' ); ?></p>
+					<?php endif; ?>
 				<?php else : ?>
 					<table class="afspaces-member-table">
 						<caption class="screen-reader-text"><?php echo esc_html__( 'Liste der Raummitglieder', 'afspaces' ); ?></caption>
 						<thead>
 							<tr>
 								<th scope="col"><?php echo esc_html__( 'Name', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Rolle im Raum', 'afspaces' ); ?></th>
 								<th scope="col"><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ( $members['members'] as $member ) : ?>
+								<?php
+								$user_id = (int) $member['user_id'];
+								$role = (string) ( $manager_roles[ $user_id ] ?? '' );
+								$is_owner = ( 'owner' === $role );
+								$is_manager = ( 'manager' === $role );
+								?>
 								<tr>
 									<td><?php echo esc_html( $member['display_name'] ); ?></td>
 									<td>
-										<form method="post" class="afspaces-inline-form" onsubmit="return confirm('<?php echo esc_js( __( 'Diese Person wirklich entfernen?', 'afspaces' ) ); ?>');">
-											<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
-											<input type="hidden" name="afspaces_action" value="remove_member" />
-											<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
-											<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $member['user_id'] ); ?>" />
-											<button type="submit" class="afspaces-button afspaces-button-danger"><?php echo esc_html__( 'Entfernen', 'afspaces' ); ?></button>
-										</form>
+										<?php if ( $is_owner ) : ?>
+											<span class="afspaces-tag"><?php echo esc_html__( 'Owner', 'afspaces' ); ?></span>
+										<?php elseif ( $is_manager ) : ?>
+											<span class="afspaces-tag"><?php echo esc_html__( 'Raumverantwortlich', 'afspaces' ); ?></span>
+										<?php else : ?>
+											<span class="afspaces-tag"><?php echo esc_html__( 'Mitglied', 'afspaces' ); ?></span>
+										<?php endif; ?>
+									</td>
+									<td>
+										<div class="afspaces-inline-form" role="group" aria-label="<?php echo esc_attr__( 'Mitgliedsaktionen', 'afspaces' ); ?>">
+											<?php if ( ! $is_owner && ! $is_manager ) : ?>
+												<form method="post" class="afspaces-inline-form">
+													<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="assign_manager" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $member['user_id'] ); ?>" />
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Als Raumverantwortliche festlegen', 'afspaces' ); ?></button>
+												</form>
+											<?php elseif ( $is_manager ) : ?>
+												<form method="post" class="afspaces-inline-form" onsubmit="return confirm('<?php echo esc_js( __( 'Raumverantwortung wirklich entziehen?', 'afspaces' ) ); ?>');">
+													<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="revoke_manager" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $member['user_id'] ); ?>" />
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Raumverantwortung entziehen', 'afspaces' ); ?></button>
+												</form>
+											<?php endif; ?>
+
+											<form method="post" class="afspaces-inline-form" onsubmit="return confirm('<?php echo esc_js( __( 'Diese Person wirklich entfernen?', 'afspaces' ) ); ?>');">
+												<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
+												<input type="hidden" name="afspaces_action" value="remove_member" />
+												<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+												<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $member['user_id'] ); ?>" />
+												<button type="submit" class="afspaces-button afspaces-button-danger"><?php echo esc_html__( 'Entfernen', 'afspaces' ); ?></button>
+											</form>
+										</div>
 									</td>
 								</tr>
 							<?php endforeach; ?>
@@ -242,6 +306,32 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			return sprintf(
 				'<p class="afspaces-notice" role="status">%s</p>',
 				esc_html( $text )
+			);
+		}
+
+		/**
+		 * Rendert Session-Nachrichten (PRG-Rückmeldung).
+		 *
+		 * @return string
+		 */
+		private function render_message(): string {
+			if ( ! session_id() && ! headers_sent() ) {
+				session_start();
+			}
+
+			if ( empty( $_SESSION['afspaces_message'] ) ) {
+				return '';
+			}
+
+			$msg = $_SESSION['afspaces_message'];
+			unset( $_SESSION['afspaces_message'] );
+
+			$role = ( 'error' === $msg['type'] ) ? 'alert' : 'status';
+			return sprintf(
+				'<div class="afspaces-message afspaces-message-%1$s" role="%2$s" aria-live="polite">%3$s</div>',
+				esc_attr( $msg['type'] ),
+				esc_attr( $role ),
+				esc_html( $msg['message'] )
 			);
 		}
 	}

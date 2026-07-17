@@ -143,6 +143,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$target = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
 					$this->members->remove_member( $space_id, $actor, $target );
 					$this->set_message( 'success', __( 'Die Person wurde entfernt.', 'afspaces' ) );
+				} elseif ( 'assign_manager' === $action ) {
+					$target = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
+					$this->members->assign_manager( $space_id, $actor, $target );
+					$this->set_message( 'success', __( 'Die Person ist jetzt Raumverantwortliche.', 'afspaces' ) );
+				} elseif ( 'revoke_manager' === $action ) {
+					$target = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
+					$this->members->revoke_manager( $space_id, $actor, $target );
+					$this->set_message( 'success', __( 'Die Raumverantwortung wurde entzogen.', 'afspaces' ) );
 				} elseif ( 'create_invitation' === $action ) {
 					$target = isset( $_POST['invitee_user_id'] ) ? (int) $_POST['invitee_user_id'] : 0;
 					$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
@@ -360,13 +368,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 								array( 'space_id' => $space->id ),
 								$members_url
 							);
+							$invitations_page = get_page_by_path( 'afspaces-invitations' );
+							$invitations_url = $invitations_page ? get_permalink( $invitations_page ) : home_url();
+							$invite_url = add_query_arg(
+								array( 'space_id' => $space->id ),
+								$invitations_url
+							);
 							?>
 							<li class="afspaces-space-item">
 								<h3><?php echo esc_html( $forum['name'] ); ?></h3>
 								<p><?php echo esc_html( sprintf( __( '%d Mitglieder', 'afspaces' ), $member_count ) ); ?></p>
-								<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
-									<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>
-								</a>
+								<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
+									<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
+										<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>
+									</a>
+									<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $invite_url ); ?>">
+										<?php echo esc_html__( 'Einladungen und Invite-Links', 'afspaces' ); ?>
+									</a>
+								</div>
 							</li>
 						<?php endforeach; ?>
 					</ul>

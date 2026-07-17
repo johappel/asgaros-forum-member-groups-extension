@@ -124,20 +124,35 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 
 			$categories = $forum->content->get_categories( false );
 			if ( empty( $categories ) ) {
+				// Fallback: In manchen Frontend-Kontexten liefert Asgaros hier leer.
+				$rows = $forum->db->get_results( "SELECT * FROM {$forum->tables->forums} ORDER BY id ASC;", ARRAY_A );
+				if ( empty( $rows ) ) {
+					return $result;
+				}
+
+				foreach ( $rows as $row ) {
+					$result[] = $this->normalize_forum( $row, (int) ( $row['parent_id'] ?? 0 ) );
+				}
+
 				return $result;
 			}
 
 			foreach ( $categories as $category ) {
-				$forums = $forum->get_forums( (int) $category->id );
+				$category_id = (int) ( $category->id ?? $category->term_id ?? 0 );
+				if ( $category_id < 1 ) {
+					continue;
+				}
+
+				$forums = $forum->get_forums( $category_id );
 				if ( empty( $forums ) ) {
 					continue;
 				}
 				foreach ( $forums as $f ) {
-					$result[] = $this->normalize_forum( (array) $f, (int) $category->id );
+					$result[] = $this->normalize_forum( (array) $f, $category_id );
 					$subforums = $forum->get_subforums( (int) $f->id );
 					if ( ! empty( $subforums ) ) {
 						foreach ( $subforums as $sf ) {
-							$result[] = $this->normalize_forum( (array) $sf, (int) $category->id );
+							$result[] = $this->normalize_forum( (array) $sf, $category_id );
 						}
 					}
 				}

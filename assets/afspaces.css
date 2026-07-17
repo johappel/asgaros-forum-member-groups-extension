@@ -33,6 +33,12 @@
 	padding: 1rem;
 }
 
+.afspaces-space-actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
 .afspaces-button {
 	display: inline-block;
 	padding: 0.5rem 1rem;

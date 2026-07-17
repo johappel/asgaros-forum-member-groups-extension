@@ -132,10 +132,10 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpacePolicy' ) ) {
 				return false;
 			}
 
-			// Letzten Owner vor Selbstentfernung schützen.
+			// Letzte verantwortliche Person (Owner/Manager) vor Selbstentfernung schützen.
 			$space = $this->repository->get_space( $space_id );
 			if ( $space && $target_user_id === $space->owner_user_id ) {
-				if ( $this->repository->count_owners( $space_id ) <= 1 ) {
+				if ( $this->repository->count_responsibles( $space_id ) <= 1 ) {
 					return false;
 				}
 			}
