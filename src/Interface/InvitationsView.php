@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Interface;
 
+use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
@@ -23,6 +24,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 	class InvitationsView {
 
 		private SpaceRepository $spaces;
+		private AsgarosAdapterInterface $asgaros;
 		private InvitationService $invitations;
 		private MemberService $members;
 		private InviteLinkService $invite_links;
@@ -30,8 +32,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, InvitationService $invitations, MemberService $members, InviteLinkService $invite_links ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, MemberService $members, InviteLinkService $invite_links ) {
 			$this->spaces      = $spaces;
+			$this->asgaros     = $asgaros;
 			$this->invitations = $invitations;
 			$this->members     = $members;
 			$this->invite_links = $invite_links;
@@ -69,16 +72,37 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				$search_results = $this->members->search_users( $search, 1, 20 )['members'] ?? array();
 			}
 
+			$forum_data = $this->asgaros->get_forum( $space->forum_id );
+			$forum_name = trim( (string) ( $forum_data['name'] ?? '' ) );
+			if ( '' === $forum_name ) {
+				$forum_name = sprintf( 'Space #%d', $space_id );
+			}
+
 			ob_start();
 			?>
 			<section class="afspaces-invitations" aria-labelledby="afspaces-invitations-heading">
-				<h2 id="afspaces-invitations-heading"><?php echo esc_html__( 'Einladungen', 'afspaces' ); ?></h2>
+				<h2 id="afspaces-invitations-heading"><?php echo esc_html( sprintf( __( 'Einladungen - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
+				<?php
+				$dashboard_page = get_page_by_path( 'afspaces-dashboard' );
+				if ( $dashboard_page ) :
+					?>
+					<p>
+						<a href="<?php echo esc_url( get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
+							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+						</a>
+					</p>
+					<?php
+				endif;
+				?>
+				<p><strong><?php echo esc_html__( 'Raum:', 'afspaces' ); ?></strong> <?php echo esc_html( $forum_name ); ?></p>
+				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
 				<?php echo $this->render_created_invite_link(); ?>
 
 				<section class="afspaces-invite-links" aria-labelledby="afspaces-invite-links-heading">
 					<h3 id="afspaces-invite-links-heading"><?php echo esc_html__( 'Einladungslinks', 'afspaces' ); ?></h3>
 					<p><?php echo esc_html__( 'Ein Link wird nur einmal vollständig angezeigt. Später ist nur noch die Verwaltung des Links möglich.', 'afspaces' ); ?></p>
+					<p class="description"><?php echo esc_html__( 'Die optionale Registrierung neuer Benutzer wird nur angeboten, wenn sie auf dieser Website zentral erlaubt ist.', 'afspaces' ); ?></p>
 
 					<form method="post" class="afspaces-invite-link-form">
 						<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
@@ -98,10 +122,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 						<label for="invite_link_expires_days"><?php echo esc_html__( 'Ablauf in Tagen', 'afspaces' ); ?></label>
 						<input type="number" id="invite_link_expires_days" name="expires_in_days" min="1" max="30" value="7" />
 
-						<label for="invite_link_registration" class="afspaces-checkbox">
-							<input type="checkbox" id="invite_link_registration" name="allow_registration" value="1" <?php disabled( ! $this->invite_links->is_registration_available_for_space( $space ) ); ?> />
-							<span><?php echo esc_html__( 'Registrierung für neue Benutzer anbieten, wenn zentral erlaubt', 'afspaces' ); ?></span>
-						</label>
+						<?php if ( $this->invite_links->is_registration_available_for_space( $space ) ) : ?>
+							<label for="invite_link_registration" class="afspaces-checkbox">
+								<input type="checkbox" id="invite_link_registration" name="allow_registration" value="1" />
+								<span><?php echo esc_html__( 'Registrierung für neue Benutzer anbieten', 'afspaces' ); ?></span>
+							</label>
+						<?php endif; ?>
 
 						<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Einladungslink erstellen', 'afspaces' ); ?></button>
 					</form>
@@ -167,6 +193,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				</form>
 
 				<?php if ( ! empty( $search_results ) ) : ?>
+					<p class="description"><?php echo esc_html__( 'Wähle eine Person aus der Liste und sende eine persönliche Einladung mit optionaler Nachricht und Laufzeit.', 'afspaces' ); ?></p>
 					<h3><?php echo esc_html__( 'Benutzer einladen', 'afspaces' ); ?></h3>
 					<ul class="afspaces-search-results">
 						<?php foreach ( $search_results as $user ) : ?>
@@ -304,7 +331,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			}
 
 			$url = (string) $_SESSION['afspaces_created_invite_link'];
-			unset( $_SESSION['afspaces_created_invite_link'] );
 
 			$field_id = 'afspaces-created-link';
 			$status_id = 'afspaces-created-link-status';

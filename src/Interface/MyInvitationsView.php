@@ -43,23 +43,31 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 		 * @return string
 		 */
 		public function render(): string {
-			$invite_link_token = isset( $_GET['invite_link'] ) ? sanitize_text_field( wp_unslash( $_GET['invite_link'] ) ) : '';
+			$invite_link_token = isset( $_GET['invite_link'] ) ? sanitize_text_field( (string) $_GET['invite_link'] ) : '';
 			if ( '' !== $invite_link_token ) {
 				return $this->render_invite_link( $invite_link_token );
 			}
 
-			if ( ! is_user_logged_in() ) {
+			if ( ! \is_user_logged_in() ) {
 				return sprintf( '<p class="afspaces-notice" role="status">%s</p>', esc_html__( 'Bitte melde dich an.', 'afspaces' ) );
 			}
 
-			$actor = get_current_user_id();
+			$actor = $this->current_user_id();
 			$list  = $this->invitations->list_my_invitations( $actor );
+			$dashboard_page = \get_page_by_path( 'afspaces-dashboard' );
 
 			ob_start();
 			?>
 			<section class="afspaces-my-invitations" aria-labelledby="afspaces-my-invitations-heading">
 				<h2 id="afspaces-my-invitations-heading"><?php echo esc_html__( 'Meine Forum-Einladungen', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
+				<?php if ( $dashboard_page ) : ?>
+					<p>
+						<a href="<?php echo esc_url( \get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
+							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
 				<p><?php echo esc_html__( 'Mit der Annahme wirst du Mitglied der jeweiligen Raumgruppe.', 'afspaces' ); ?></p>
 				<?php if ( empty( $list ) ) : ?>
 					<p><?php echo esc_html__( 'Du hast aktuell keine Einladungen.', 'afspaces' ); ?></p>
@@ -69,7 +77,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 							<?php
 							$space  = $this->spaces->get_space( $inv->space_id );
 							$forum  = $space ? $this->asgaros->get_forum( $space->forum_id ) : null;
-							$sender = get_userdata( $inv->inviter_user_id );
+							$sender = \get_userdata( $inv->inviter_user_id );
 							$token  = $this->invitations->build_token( $inv );
 							?>
 							<li class="afspaces-space-item">
@@ -113,7 +121,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 		 * @return string
 		 */
 		private function render_invite_link( string $token ): string {
-			$actor = get_current_user_id();
+			$actor = $this->current_user_id();
 
 			try {
 				$preview = $this->invite_links->preview_link( $token, $actor );
@@ -124,25 +132,36 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-my-invitations afspaces-invite-link-landing" aria-labelledby="afspaces-invite-link-heading">
-				<h2 id="afspaces-invite-link-heading"><?php echo esc_html__( 'Raumeinladung', 'afspaces' ); ?></h2>
+					<h2 id="afspaces-invite-link-heading"><?php echo esc_html__( 'Raumeinladung', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
+					<p><strong><?php echo esc_html__( 'Raum:', 'afspaces' ); ?></strong> <?php echo esc_html( $preview['forum_name'] ); ?></p>
+					<?php $dashboard_page = \get_page_by_path( 'afspaces-dashboard' ); ?>
+					<?php if ( $dashboard_page ) : ?>
+						<p>
+							<a href="<?php echo esc_url( \get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
+								<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+							</a>
+						</p>
+					<?php endif; ?>
 				<h3><?php echo esc_html( $preview['forum_name'] ); ?></h3>
 				<p><?php echo esc_html( $preview['status_message'] ); ?></p>
 
 				<?php if ( 'login_required' === $preview['state'] ) : ?>
 					<p><a class="afspaces-button" href="<?php echo esc_url( $preview['login_url'] ); ?>"><?php echo esc_html__( 'Anmelden und fortfahren', 'afspaces' ); ?></a></p>
+						<p class="description"><?php echo esc_html__( 'Der Einladungslink selbst ist davon unabhängig, ob du dich nur anmelden oder auf dieser Website zusätzlich registrieren musst.', 'afspaces' ); ?></p>
 					<?php if ( $preview['can_register'] && '' !== $preview['registration_url'] ) : ?>
-						<?php $privacy_url = (string) wp_privacy_policy_url(); ?>
+								<?php $privacy_url = function_exists( '\wp_privacy_policy_url' ) ? (string) \wp_privacy_policy_url() : ''; ?>
 						<form method="post" class="afspaces-invite-registration-consent" aria-label="<?php echo esc_attr__( 'Registrierung mit Datenschutz-Zustimmung', 'afspaces' ); ?>">
-							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+							<?php echo \wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 							<input type="hidden" name="afspaces_action" value="request_invite_link_registration" />
 							<input type="hidden" name="invite_link_token" value="<?php echo esc_attr( $token ); ?>" />
+								<p class="description"><?php echo esc_html__( 'Wenn du neu registriert wirst, wird das nur nach zentraler Freigabe angeboten.', 'afspaces' ); ?></p>
 							<label for="afspaces-privacy-consent" class="afspaces-checkbox">
 								<input type="checkbox" id="afspaces-privacy-consent" name="privacy_consent" value="1" required />
 								<span>
 									<?php if ( '' !== $privacy_url ) : ?>
 										<?php
-										echo wp_kses_post(
+										echo \wp_kses_post(
 											sprintf(
 												/* translators: %s: Link zur Datenschutzerklärung */
 												__( 'Ich habe die <a href="%s" target="_blank" rel="noopener noreferrer">Datenschutzinformationen</a> gelesen und akzeptiere sie.', 'afspaces' ),
@@ -157,11 +176,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 							</label>
 							<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Neu registrieren', 'afspaces' ); ?></button>
 						</form>
-						<?php do_action( 'afspaces_invite_link_registration_captcha', $preview['link'], $preview['space'] ); ?>
+						<?php \do_action( 'afspaces_invite_link_registration_captcha', $preview['link'], $preview['space'] ); ?>
 					<?php endif; ?>
 				<?php elseif ( in_array( $preview['state'], array( 'ready', 'approval_required' ), true ) ) : ?>
 					<form method="post" class="afspaces-inline-form">
-						<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+							<?php echo \wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 						<input type="hidden" name="afspaces_action" value="use_invite_link" />
 						<input type="hidden" name="invite_link_token" value="<?php echo esc_attr( $token ); ?>" />
 						<button type="submit" class="afspaces-button"><?php echo esc_html( $preview['action_label'] ); ?></button>
@@ -197,6 +216,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 				esc_attr( $role ),
 				esc_html( $msg['message'] )
 			);
+		}
+
+		/**
+		 * Gibt die aktuelle Benutzer-ID zurück, ohne in Testumgebungen zu fatalen Fehlern zu führen.
+		 *
+		 * @return int
+		 */
+		private function current_user_id(): int {
+			return function_exists( '\get_current_user_id' ) ? (int) \get_current_user_id() : 0;
 		}
 	}
 }
