@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Adapters\Asgaros;
 
+use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
 use AFSpaces\Core\Requirements;
 
@@ -95,6 +96,11 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$forum = $this->forum();
 			if ( null === $forum ) {
 				return array();
+			}
+
+			if ( user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
+				|| user_can( $actor_user_id, Capabilities::CREATE_SPACE ) ) {
+				return $this->collect_forums( $forum );
 			}
 
 			// Asgaros-Administratoren dürfen alle Foren verwalten.

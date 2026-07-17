@@ -15,6 +15,7 @@ use AFSpaces\Adapters\Database\InvitationRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
@@ -86,8 +87,9 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$members = new MemberService( $spaces, $asgaros, $policy, $audit );
 			$invites = new InvitationService( $spaces, $inv_repo, $asgaros, $policy, $audit );
 			$invite_links = new \AFSpaces\Application\InviteLinkService( $spaces, $link_repo, $asgaros, $policy, $audit );
+			$space_registration = new SpaceRegistrationService( $spaces, $asgaros );
 
-			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $invite_links );
+			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $invite_links, $space_registration );
 			$frontend->init();
 
 			// Mitgliederansicht in denselben Shortcode integrieren.

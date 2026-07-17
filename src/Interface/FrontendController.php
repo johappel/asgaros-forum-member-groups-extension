@@ -14,6 +14,8 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\SpaceRegistrationService;
+use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
@@ -49,6 +51,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private InviteLinkService $invite_links;
 
 		/**
+		 * @var SpaceRegistrationService
+		 */
+		private SpaceRegistrationService $space_registration;
+
+		/**
 		 * @var string
 		 */
 		private string $nonce_action = 'afspaces_member_action';
@@ -66,13 +73,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			AsgarosAdapterInterface $asgaros,
 			MemberService $members,
 			InvitationService $invitations,
-			InviteLinkService $invite_links
+			InviteLinkService $invite_links,
+			SpaceRegistrationService $space_registration
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
 			$this->members = $members;
 			$this->invitations = $invitations;
 			$this->invite_links = $invite_links;
+			$this->space_registration = $space_registration;
 		}
 
 		/**
@@ -219,6 +228,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 					wp_safe_redirect( (string) $preview['registration_url'] );
 					exit;
+				} elseif ( 'register_space' === $action ) {
+					$forum_id = isset( $_POST['forum_id'] ) ? (int) $_POST['forum_id'] : 0;
+					$space = $this->space_registration->register_existing_forum( $forum_id, $actor );
+					$forum = $this->asgaros->get_forum( $space->forum_id );
+					$this->set_message(
+						'success',
+						sprintf(
+							/* translators: %s: Forumsname */
+							__( 'Das Forum "%s" wurde als Raum registriert.', 'afspaces' ),
+							(string) ( $forum['name'] ?? (string) $space->forum_id )
+						)
+					);
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
@@ -230,6 +251,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				$invite_page = get_page_by_path( 'afspaces-invitations' );
 				$redirect_url = $invite_page ? get_permalink( $invite_page ) : $ref;
 				wp_safe_redirect( add_query_arg( 'space_id', $space_id, $redirect_url ) );
+				exit;
+			}
+
+			if ( 'register_space' === $action ) {
+				$dashboard_page = get_page_by_path( 'afspaces-dashboard' );
+				$redirect_url = $dashboard_page ? get_permalink( $dashboard_page ) : $ref;
+				wp_safe_redirect( $redirect_url );
 				exit;
 			}
 
@@ -292,6 +320,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			$actor = get_current_user_id();
 			$spaces = $this->spaces->list_spaces();
+			$registrable_forums = $this->space_registration->list_registrable_forums( $actor );
 
 			$manageable = array();
 			foreach ( $spaces as $space ) {
@@ -311,7 +340,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				<?php echo $this->render_message(); ?>
 
 				<?php if ( empty( $manageable ) ) : ?>
-					<p><?php echo esc_html__( 'Dir sind noch keine Räume zugeordnet. Ein Administrator kann bestehende Foren als Raum registrieren.', 'afspaces' ); ?></p>
+					<p><?php echo esc_html__( 'Dir sind noch keine Räume zugeordnet.', 'afspaces' ); ?></p>
 				<?php else : ?>
 					<ul class="afspaces-space-list">
 						<?php foreach ( $manageable as $space ) : ?>
@@ -342,6 +371,70 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 						<?php endforeach; ?>
 					</ul>
 				<?php endif; ?>
+
+				<?php if ( $this->can_register_spaces( $actor ) ) : ?>
+					<section class="afspaces-space-registration" aria-labelledby="afspaces-space-registration-heading">
+						<h3 id="afspaces-space-registration-heading"><?php echo esc_html__( 'Bestehendes Forum als Raum registrieren', 'afspaces' ); ?></h3>
+						<p><?php echo esc_html__( 'Ein Raum wird aus einem bestehenden Asgaros-Forum plus seiner zugeordneten Asgaros-Benutzergruppe gebildet.', 'afspaces' ); ?></p>
+
+						<?php if ( empty( $registrable_forums ) ) : ?>
+							<p><?php echo esc_html__( 'Es wurden keine verwaltbaren Foren gefunden.', 'afspaces' ); ?></p>
+						<?php else : ?>
+							<table class="afspaces-member-table afspaces-space-registration-table">
+								<thead>
+									<tr>
+										<th><?php echo esc_html__( 'Forum', 'afspaces' ); ?></th>
+										<th><?php echo esc_html__( 'Zugriffsgruppe', 'afspaces' ); ?></th>
+										<th><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
+										<th><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php foreach ( $registrable_forums as $forum ) : ?>
+										<tr>
+											<td><?php echo esc_html( $forum['name'] ); ?></td>
+											<td>
+												<?php if ( empty( $forum['group_ids'] ) ) : ?>
+													<?php echo esc_html__( 'Keine Gruppe an der Kategorie hinterlegt', 'afspaces' ); ?>
+												<?php else : ?>
+													<?php echo esc_html( implode( ', ', array_map( 'strval', $forum['group_ids'] ) ) ); ?>
+												<?php endif; ?>
+											</td>
+											<td>
+												<?php if ( $forum['is_registered'] ) : ?>
+													<?php echo esc_html__( 'Bereits registriert', 'afspaces' ); ?>
+												<?php elseif ( ! $forum['can_register'] ) : ?>
+													<?php echo esc_html__( 'Nicht registrierbar', 'afspaces' ); ?>
+												<?php else : ?>
+													<?php echo esc_html__( 'Bereit', 'afspaces' ); ?>
+												<?php endif; ?>
+											</td>
+											<td>
+												<?php if ( $forum['is_registered'] ) : ?>
+													<?php
+													$members_page = get_page_by_path( 'afspaces-members' );
+													$members_url = $members_page ? get_permalink( $members_page ) : home_url();
+													$manage_url = add_query_arg( 'space_id', (int) $forum['space_id'], $members_url );
+													?>
+													<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>"><?php echo esc_html__( 'Öffnen', 'afspaces' ); ?></a>
+												<?php elseif ( ! $forum['can_register'] ) : ?>
+													<span><?php echo esc_html__( 'Ordne zuerst in Asgaros eine Benutzergruppe zur Kategorie zu.', 'afspaces' ); ?></span>
+												<?php else : ?>
+													<form method="post" class="afspaces-inline-form">
+														<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+														<input type="hidden" name="afspaces_action" value="register_space" />
+														<input type="hidden" name="forum_id" value="<?php echo esc_attr( (string) $forum['forum_id'] ); ?>" />
+														<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Als Raum registrieren', 'afspaces' ); ?></button>
+													</form>
+												<?php endif; ?>
+											</td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+						<?php endif; ?>
+					</section>
+				<?php endif; ?>
 			</section>
 			<?php
 			return (string) ob_get_clean();
@@ -359,6 +452,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				return true;
 			}
 			return $this->spaces->is_manager( $space_id, $actor );
+		}
+
+		/**
+		 * @param int $actor Benutzer-ID.
+		 * @return bool
+		 */
+		private function can_register_spaces( int $actor ): bool {
+			return user_can( $actor, Capabilities::CREATE_SPACE )
+				|| user_can( $actor, Capabilities::MANAGE_ALL_SPACES );
 		}
 
 		/**
