@@ -315,5 +315,16 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				\AsgarosForumUserGroups::insertUserGroupsOfUsers( $user_id, $updated );
 			}
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function is_user_in_group( int $user_id, int $group_id ): bool {
+			if ( ! class_exists( '\\AsgarosForumUserGroups' ) ) {
+				return false;
+			}
+
+			return (bool) \AsgarosForumUserGroups::isUserInUserGroup( $user_id, $group_id );
+		}
 	}
 }

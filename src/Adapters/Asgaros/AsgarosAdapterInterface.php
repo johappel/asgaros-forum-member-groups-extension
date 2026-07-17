@@ -82,5 +82,14 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @throws \AFSpaces\Core\DomainException Wenn das Entfernen fehlschlägt.
 		 */
 		public function remove_user_from_group( int $user_id, int $group_id ): void;
+
+		/**
+		 * Prüft, ob ein Benutzer Mitglied einer bestimmten Gruppe ist.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @param int $group_id Gruppen-ID.
+		 * @return bool
+		 */
+		public function is_user_in_group( int $user_id, int $group_id ): bool;
 	}
 }

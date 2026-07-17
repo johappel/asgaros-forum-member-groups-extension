@@ -12,60 +12,60 @@ Eine berechtigte Person kann eine Einladung senden, deren Status verfolgen und s
 
 ### M2.1 Einladungsmodell
 
-- [ ] Invitation-Tabelle und Migration erstellen.
-- [ ] Zustände `pending`, `accepted`, `declined`, `revoked`, `expired` implementieren.
-- [ ] Ablaufdatum unterstützen.
-- [ ] doppelte offene Einladung verhindern oder zusammenführen.
-- [ ] Zustandswechsel als explizite Domain-Operationen implementieren.
+- [x] Invitation-Tabelle und Migration erstellen.
+- [x] Zustände `pending`, `accepted`, `declined`, `revoked`, `expired` implementieren.
+- [x] Ablaufdatum unterstützen.
+- [x] doppelte offene Einladung verhindern oder zusammenführen.
+- [x] Zustandswechsel als explizite Domain-Operationen implementieren.
 
 ### M2.2 Einladung erstellen
 
-- [ ] vorhandenen WordPress-Benutzer auswählen.
-- [ ] persönliche Einladung mit optionaler Nachricht erstellen.
-- [ ] Berechtigung für genau diesen Space prüfen.
-- [ ] Einladung nicht automatisch als Mitgliedschaft behandeln.
-- [ ] bereits bestehende Mitglieder nicht erneut einladen.
+- [x] vorhandenen WordPress-Benutzer auswählen.
+- [x] persönliche Einladung mit optionaler Nachricht erstellen.
+- [x] Berechtigung für genau diesen Space prüfen.
+- [x] Einladung nicht automatisch als Mitgliedschaft behandeln.
+- [x] bereits bestehende Mitglieder nicht erneut einladen.
 
 ### M2.3 Benachrichtigungen
 
-- [ ] WordPress-E-Mail über `wp_mail()` senden.
-- [ ] E-Mail-Inhalt filterbar und übersetzbar machen.
-- [ ] Link zur sicheren Annahmeseite integrieren.
-- [ ] optional interne WordPress-Benachrichtigung vorbereiten.
-- [ ] E-Mail-Fehler sichtbar und wiederholbar behandeln.
-- [ ] Versand drosseln.
+- [x] WordPress-E-Mail über `wp_mail()` senden.
+- [x] E-Mail-Inhalt filterbar und übersetzbar machen.
+- [x] Link zur sicheren Annahmeseite integrieren.
+- [x] optional interne WordPress-Benachrichtigung vorbereiten.
+- [x] E-Mail-Fehler sichtbar und wiederholbar behandeln.
+- [x] Versand drosseln.
 
 ### M2.4 Frontend für eingeladene Personen
 
-- [ ] Seite „Meine Forum-Einladungen“ bereitstellen.
-- [ ] Absender, Space, Ablaufdatum und Nachricht anzeigen.
-- [ ] „Annehmen“ und „Ablehnen“ anbieten.
-- [ ] vor Annahme verständlich erklären, welche Mitgliedschaft entsteht.
-- [ ] Annahme idempotent verarbeiten.
-- [ ] nach Annahme zur Forumsseite führen.
+- [x] Seite „Meine Forum-Einladungen“ bereitstellen.
+- [x] Absender, Space, Ablaufdatum und Nachricht anzeigen.
+- [x] „Annehmen“ und „Ablehnen“ anbieten.
+- [x] vor Annahme verständlich erklären, welche Mitgliedschaft entsteht.
+- [x] Annahme idempotent verarbeiten.
+- [x] nach Annahme zur Forumsseite führen.
 
 ### M2.5 Einladungsverwaltung
 
-- [ ] offene Einladungen pro Space anzeigen.
-- [ ] Status und Ablaufdatum anzeigen.
-- [ ] Einladung widerrufen.
-- [ ] E-Mail erneut senden, ohne neue Einladung zu erzeugen.
-- [ ] abgelaufene Einladungen kennzeichnen.
-- [ ] Filter nach Status anbieten.
+- [x] offene Einladungen pro Space anzeigen.
+- [x] Status und Ablaufdatum anzeigen.
+- [x] Einladung widerrufen.
+- [x] E-Mail erneut senden, ohne neue Einladung zu erzeugen.
+- [x] abgelaufene Einladungen kennzeichnen.
+- [x] Filter nach Status anbieten.
 
 ### M2.6 Mitgliedschaft bei Annahme
 
-- [ ] über den Adapter zur primären Asgaros-Gruppe hinzufügen.
-- [ ] Einladung und Gruppenzuordnung möglichst atomar behandeln.
-- [ ] bei Adapterfehler keine angenommene Einladung ohne Mitgliedschaft hinterlassen.
-- [ ] Audit-Einträge für Einladung, Annahme, Ablehnung und Widerruf erzeugen.
+- [x] über den Adapter zur primären Asgaros-Gruppe hinzufügen.
+- [x] Einladung und Gruppenzuordnung möglichst atomar behandeln.
+- [x] bei Adapterfehler keine angenommene Einladung ohne Mitgliedschaft hinterlassen.
+- [x] Audit-Einträge für Einladung, Annahme, Ablehnung und Widerruf erzeugen.
 
 ### M2.7 Datenschutz
 
-- [ ] Einladungen nur beteiligten Personen und berechtigten Managern anzeigen.
-- [ ] optionale Nachricht bereinigen und escapen.
-- [ ] keine Einladung an gesperrte oder ausgeschlossene Benutzer senden.
-- [ ] Lösch- und Exportintegration für Einladungsdaten ergänzen.
+- [x] Einladungen nur beteiligten Personen und berechtigten Managern anzeigen.
+- [x] optionale Nachricht bereinigen und escapen.
+- [x] keine Einladung an gesperrte oder ausgeschlossene Benutzer senden.
+- [x] Lösch- und Exportintegration für Einladungsdaten ergänzen.
 
 ## Nicht enthalten
 
@@ -78,43 +78,43 @@ Eine berechtigte Person kann eine Einladung senden, deren Status verfolgen und s
 
 ### Unit
 
-- [ ] erlaubte und verbotene Zustandsübergänge.
-- [ ] Ablaufberechnung.
-- [ ] Duplikaterkennung.
-- [ ] Policy für Einladen und Widerrufen.
+- [x] erlaubte und verbotene Zustandsübergänge.
+- [x] Ablaufberechnung.
+- [x] Duplikaterkennung.
+- [x] Policy für Einladen und Widerrufen.
 
 ### Integration
 
-- [ ] Einladung wird gespeichert und E-Mail angestoßen.
-- [ ] Annahme erzeugt Gruppenzuordnung.
-- [ ] Ablehnung erzeugt keine Gruppenzuordnung.
-- [ ] Widerruf verhindert spätere Annahme.
-- [ ] Ablauf verhindert spätere Annahme.
-- [ ] erneuter Versand verändert den Token nicht ungeprüft.
+- [x] Einladung wird gespeichert und E-Mail angestoßen.
+- [x] Annahme erzeugt Gruppenzuordnung.
+- [x] Ablehnung erzeugt keine Gruppenzuordnung.
+- [x] Widerruf verhindert spätere Annahme.
+- [x] Ablauf verhindert spätere Annahme.
+- [x] erneuter Versand verändert den Token nicht ungeprüft.
 
 ### REST/Sicherheit
 
-- [ ] fremde Benutzer können Einladung nicht annehmen.
-- [ ] Manager eines anderen Spaces kann Einladung nicht sehen oder widerrufen.
-- [ ] manipulierte Statuswerte werden abgelehnt.
-- [ ] Einladungsendpunkte sind gegen CSRF geschützt.
-- [ ] Versanddrosselung greift.
+- [x] fremde Benutzer können Einladung nicht annehmen.
+- [x] Manager eines anderen Spaces kann Einladung nicht sehen oder widerrufen.
+- [x] manipulierte Statuswerte werden abgelehnt.
+- [x] Einladungsendpunkte sind gegen CSRF geschützt.
+- [x] Versanddrosselung greift.
 
 ### End-to-End
 
-- [ ] Manager lädt vorhandenen Benutzer ein.
-- [ ] eingeladener Benutzer sieht Einladung.
-- [ ] Benutzer nimmt an und erhält Zugriff.
-- [ ] Benutzer lehnt eine zweite Einladung ab.
-- [ ] Manager widerruft eine Einladung.
+- [x] Manager lädt vorhandenen Benutzer ein.
+- [x] eingeladener Benutzer sieht Einladung.
+- [x] Benutzer nimmt an und erhält Zugriff.
+- [x] Benutzer lehnt eine zweite Einladung ab.
+- [x] Manager widerruft eine Einladung.
 - [ ] abgelaufene Einladung ist nicht mehr annehmbar.
 
 ### Accessibility
 
-- [ ] Einladungsstatus ist nicht nur farblich erkennbar.
+- [x] Einladungsstatus ist nicht nur farblich erkennbar.
 - [ ] Annahme- und Ablehnungsdialoge besitzen korrektes Fokusmanagement.
-- [ ] E-Mail ist in verständlichem Klartext nutzbar.
-- [ ] Statusänderungen werden assistiven Technologien mitgeteilt.
+- [x] E-Mail ist in verständlichem Klartext nutzbar.
+- [x] Statusänderungen werden assistiven Technologien mitgeteilt.
 
 ## Akzeptanzkriterien
 

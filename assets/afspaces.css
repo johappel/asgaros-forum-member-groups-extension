@@ -1,7 +1,9 @@
 /* Asgaros Forum Spaces — Frontend-Stile (barrierearm). */
 
 .afspaces-dashboard,
-.afspaces-members {
+.afspaces-members,
+.afspaces-invitations,
+.afspaces-my-invitations {
 	max-width: 60rem;
 	margin: 1.5rem 0;
 	font-size: 1rem;
@@ -10,7 +12,10 @@
 
 .afspaces-dashboard h2,
 .afspaces-members h2,
-.afspaces-members h3 {
+.afspaces-members h3,
+.afspaces-invitations h2,
+.afspaces-invitations h3,
+.afspaces-my-invitations h2 {
 	margin-top: 1.5rem;
 }
 
@@ -123,6 +128,29 @@
 	display: inline;
 }
 
+.afspaces-invitations-table .afspaces-inline-form {
+	display: inline-flex;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+	margin-right: 0.5rem;
+}
+
+.afspaces-my-invitations .afspaces-inline-form {
+	display: inline-flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.afspaces-button-secondary {
+	background: #50575e !important;
+	border-color: #50575e !important;
+}
+
+.afspaces-button-secondary:hover,
+.afspaces-button-secondary:focus {
+	background: #3c434a !important;
+}
+
 .afspaces-tag {
 	display: inline-block;
 	padding: 0.25rem 0.5rem;
@@ -173,5 +201,31 @@
 	* {
 		transition: none !important;
 		animation: none !important;
+	}
+}
+
+@media (max-width: 780px) {
+	.afspaces-member-table,
+	.afspaces-member-table thead,
+	.afspaces-member-table tbody,
+	.afspaces-member-table th,
+	.afspaces-member-table td,
+	.afspaces-member-table tr {
+		display: block;
+	}
+
+	.afspaces-member-table thead {
+		position: absolute;
+		left: -9999px;
+	}
+
+	.afspaces-member-table tr {
+		border: 1px solid #c3c4c7;
+		margin-bottom: 0.75rem;
+	}
+
+	.afspaces-member-table td {
+		border: 0;
+		border-bottom: 1px solid #e2e4e7;
 	}
 }

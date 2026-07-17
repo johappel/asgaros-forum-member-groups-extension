@@ -11,6 +11,7 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\DomainException;
 
@@ -37,6 +38,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private MemberService $members;
 
 		/**
+		 * @var InvitationService
+		 */
+		private InvitationService $invitations;
+
+		/**
 		 * @var string
 		 */
 		private string $nonce_action = 'afspaces_member_action';
@@ -47,15 +53,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		 * @param SpaceRepository         $spaces  Space-Repository.
 		 * @param AsgarosAdapterInterface $asgaros Asgaros-Adapter.
 		 * @param MemberService           $members Mitglieder-Service.
+		 * @param InvitationService       $invitations Einladungs-Service.
 		 */
 		public function __construct(
 			SpaceRepository $spaces,
 			AsgarosAdapterInterface $asgaros,
-			MemberService $members
+			MemberService $members,
+			InvitationService $invitations
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
 			$this->members = $members;
+			$this->invitations = $invitations;
 		}
 
 		/**
@@ -76,7 +85,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		 */
 		public function enqueue_assets(): void {
 			if ( ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_dashboard' )
-				&& ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_members' ) ) {
+				&& ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_members' )
+				&& ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_invitations' )
+				&& ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_my_invitations' ) ) {
 				return;
 			}
 			wp_enqueue_style(
@@ -114,14 +125,60 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$target = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
 					$this->members->remove_member( $space_id, $actor, $target );
 					$this->set_message( 'success', __( 'Die Person wurde entfernt.', 'afspaces' ) );
+				} elseif ( 'create_invitation' === $action ) {
+					$target = isset( $_POST['invitee_user_id'] ) ? (int) $_POST['invitee_user_id'] : 0;
+					$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+					$days = isset( $_POST['expires_in_days'] ) ? (int) $_POST['expires_in_days'] : 7;
+					$this->invitations->create_invitation( $space_id, $actor, $target, $message, $days );
+					$this->set_message( 'success', __( 'Einladung wurde erstellt und versendet.', 'afspaces' ) );
+				} elseif ( 'revoke_invitation' === $action ) {
+					$invitation_id = isset( $_POST['invitation_id'] ) ? (int) $_POST['invitation_id'] : 0;
+					$this->invitations->revoke_invitation( $invitation_id, $actor );
+					$this->set_message( 'success', __( 'Einladung wurde widerrufen.', 'afspaces' ) );
+				} elseif ( 'resend_invitation' === $action ) {
+					$invitation_id = isset( $_POST['invitation_id'] ) ? (int) $_POST['invitation_id'] : 0;
+					$this->invitations->resend_invitation( $invitation_id, $actor );
+					$this->set_message( 'success', __( 'Einladung wurde erneut versendet.', 'afspaces' ) );
+				} elseif ( 'accept_invitation' === $action ) {
+					$token = isset( $_POST['invitation_token'] ) ? sanitize_text_field( wp_unslash( $_POST['invitation_token'] ) ) : '';
+					$accepted = $this->invitations->accept_invitation_by_token( $token, $actor );
+					$this->set_message( 'success', __( 'Einladung angenommen. Mitgliedschaft wurde aktiviert.', 'afspaces' ) );
+
+					$forum_url = home_url( '/forum/' );
+					$space = $this->spaces->get_space( $accepted->space_id );
+					if ( $space ) {
+						$forum_url = (string) apply_filters( 'afspaces_forum_url_after_accept', $forum_url, $space, $accepted );
+					}
+
+					wp_safe_redirect( $forum_url );
+					exit;
+				} elseif ( 'decline_invitation' === $action ) {
+					$token = isset( $_POST['invitation_token'] ) ? sanitize_text_field( wp_unslash( $_POST['invitation_token'] ) ) : '';
+					$this->invitations->decline_invitation_by_token( $token, $actor );
+					$this->set_message( 'success', __( 'Einladung wurde abgelehnt.', 'afspaces' ) );
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
 			}
 
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
+			$ref = wp_get_referer() ?: home_url();
+			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation' ), true ) ) {
+				$invite_page = get_page_by_path( 'afspaces-invitations' );
+				$redirect_url = $invite_page ? get_permalink( $invite_page ) : $ref;
+				wp_safe_redirect( add_query_arg( 'space_id', $space_id, $redirect_url ) );
+				exit;
+			}
+
+			if ( in_array( $action, array( 'accept_invitation', 'decline_invitation' ), true ) ) {
+				$mine_page = get_page_by_path( 'afspaces-my-invitations' );
+				$redirect_url = $mine_page ? get_permalink( $mine_page ) : $ref;
+				wp_safe_redirect( $redirect_url );
+				exit;
+			}
+
 			$members_page = get_page_by_path( 'afspaces-members' );
-			$redirect_url = $members_page ? get_permalink( $members_page ) : ( wp_get_referer() ?: home_url() );
+			$redirect_url = $members_page ? get_permalink( $members_page ) : $ref;
 			wp_safe_redirect( add_query_arg( 'space_id', $space_id, $redirect_url ) );
 			exit;
 		}

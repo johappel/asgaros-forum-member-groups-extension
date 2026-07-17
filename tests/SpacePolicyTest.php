@@ -114,4 +114,20 @@ final class SpacePolicyTest extends TestCase {
 
 		$this->assertTrue( $this->policy->can_remove_member( 1, 42, 99 ) );
 	}
+
+	/**
+	 * @testdox Manager darf persönliche Einladungen erstellen.
+	 */
+	public function test_manager_can_invite_member(): void {
+		$this->repo->set_is_manager( true );
+		$this->assertTrue( $this->policy->can_invite_member( 1, 42, 88 ) );
+	}
+
+	/**
+	 * @testdox Nicht-Manager darf keine Einladung widerrufen.
+	 */
+	public function test_non_manager_cannot_revoke_invitation(): void {
+		$this->repo->set_is_manager( false );
+		$this->assertFalse( $this->policy->can_revoke_invitation( 1, 42, 88 ) );
+	}
 }

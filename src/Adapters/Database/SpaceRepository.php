@@ -78,6 +78,10 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 			dbDelta( $sql_spaces );
 			dbDelta( $sql_managers );
+
+			// Bestehende Duplikate bereinigen, bevor ein Unique-Index auf forum_id gesetzt wird.
+			$this->normalize_duplicate_forums();
+			$this->ensure_forum_unique_index();
 		}
 
 		/**
@@ -87,6 +91,24 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 		 * @return int Neue Space-ID.
 		 */
 		public function create_space( Space $space ): int {
+			$existing = $this->get_space_by_forum( $space->forum_id );
+			if ( $existing ) {
+				$this->db->update(
+					$this->spaces_table,
+					array(
+						'primary_group_id' => $space->primary_group_id,
+						'owner_user_id'    => $space->owner_user_id,
+						'visibility'       => $space->visibility,
+						'status'           => $space->status,
+						'updated_at'       => current_time( 'mysql' ),
+					),
+					array( 'id' => $existing->id ),
+					array( '%d', '%d', '%s', '%s', '%s' ),
+					array( '%d' )
+				);
+				return (int) $existing->id;
+			}
+
 			$now = current_time( 'mysql' );
 			$this->db->insert(
 				$this->spaces_table,
@@ -212,6 +234,110 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 					SpaceManager::ROLE_OWNER
 				)
 			);
+		}
+
+		/**
+		 * Führt vorhandene doppelte Spaces (pro forum_id) auf den ältesten Datensatz zusammen.
+		 *
+		 * @return void
+		 */
+		private function normalize_duplicate_forums(): void {
+			$rows = $this->db->get_results(
+				"SELECT forum_id, MIN(id) AS keep_id, GROUP_CONCAT(id ORDER BY id ASC) AS ids, COUNT(*) AS cnt
+				 FROM {$this->spaces_table}
+				 GROUP BY forum_id
+				 HAVING COUNT(*) > 1;",
+				ARRAY_A
+			);
+
+			if ( empty( $rows ) ) {
+				return;
+			}
+
+			$invite_table = $this->db->prefix . 'afspaces_invitations';
+			$audit_table  = $this->db->prefix . 'afspaces_audit';
+
+			foreach ( $rows as $row ) {
+				$keep_id = (int) $row['keep_id'];
+				$ids     = array_map( 'intval', explode( ',', (string) $row['ids'] ) );
+				$dups    = array_values( array_filter( $ids, static fn( int $id ): bool => $id !== $keep_id ) );
+
+				if ( empty( $dups ) ) {
+					continue;
+				}
+
+				$in_placeholders = implode( ', ', array_fill( 0, count( $dups ), '%d' ) );
+
+				// Manager-Mappings konfliktfrei auf den behaltenen Space umhängen.
+				$insert_sql = $this->db->prepare(
+					"INSERT IGNORE INTO {$this->managers_table} (space_id, user_id, role)
+					 SELECT %d, user_id, role FROM {$this->managers_table} WHERE space_id IN ({$in_placeholders});",
+					array_merge( array( $keep_id ), $dups )
+				);
+				$this->db->query( $insert_sql );
+
+				$delete_manager_sql = $this->db->prepare(
+					"DELETE FROM {$this->managers_table} WHERE space_id IN ({$in_placeholders});",
+					$dups
+				);
+				$this->db->query( $delete_manager_sql );
+
+				if ( $this->table_exists( $invite_table ) ) {
+					$invite_sql = $this->db->prepare(
+						"UPDATE {$invite_table} SET space_id = %d WHERE space_id IN ({$in_placeholders});",
+						array_merge( array( $keep_id ), $dups )
+					);
+					$this->db->query( $invite_sql );
+				}
+
+				if ( $this->table_exists( $audit_table ) ) {
+					$audit_sql = $this->db->prepare(
+						"UPDATE {$audit_table} SET space_id = %d WHERE space_id IN ({$in_placeholders});",
+						array_merge( array( $keep_id ), $dups )
+					);
+					$this->db->query( $audit_sql );
+				}
+
+				$delete_space_sql = $this->db->prepare(
+					"DELETE FROM {$this->spaces_table} WHERE id IN ({$in_placeholders});",
+					$dups
+				);
+				$this->db->query( $delete_space_sql );
+			}
+		}
+
+		/**
+		 * Stellt einen Unique-Index auf forum_id sicher.
+		 *
+		 * @return void
+		 */
+		private function ensure_forum_unique_index(): void {
+			$table_name = $this->spaces_table;
+			$has_index = (int) $this->db->get_var(
+				$this->db->prepare(
+					"SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND INDEX_NAME = %s;",
+					$table_name,
+					'unique_forum_id'
+				)
+			);
+
+			if ( $has_index > 0 ) {
+				return;
+			}
+
+			$this->db->query( "ALTER TABLE {$this->spaces_table} ADD UNIQUE KEY unique_forum_id (forum_id);" );
+		}
+
+		/**
+		 * Prüft, ob eine Tabelle existiert.
+		 *
+		 * @param string $table Tabellenname.
+		 * @return bool
+		 */
+		private function table_exists( string $table ): bool {
+			$like = $this->db->esc_like( $table );
+			$found = $this->db->get_var( $this->db->prepare( 'SHOW TABLES LIKE %s', $like ) );
+			return (string) $found === $table;
 		}
 	}
 }

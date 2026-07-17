@@ -69,3 +69,18 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 		return trim( strip_tags( $value ) );
 	}
 }
+
+// current_time-Stub.
+if ( ! function_exists( 'current_time' ) ) {
+	/**
+	 * @param string $type
+	 * @return string|int
+	 */
+	function current_time( string $type ) {
+		if ( 'mysql' === $type ) {
+			return gmdate( 'Y-m-d H:i:s' );
+		}
+
+		return time();
+	}
+}

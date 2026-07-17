@@ -129,4 +129,48 @@ final class RestSecurityTest extends IntegrationTestCase {
 
 		$this->cleanup_user_from_group( $target );
 	}
+
+	/**
+	 * Test: Fremder Benutzer kann Einladung nicht annehmen.
+	 */
+	public function test_foreign_user_cannot_accept_invitation(): void {
+		$actor      = $this->make_user_with_cap( 'inv_owner', Capabilities::MANAGE_ALL_SPACES );
+		$invitee    = $this->make_user_with_cap( 'inv_target' );
+		$other_user = $this->make_user_with_cap( 'inv_other' );
+		$space_id   = $this->create_test_space( $actor );
+
+		add_filter( 'pre_wp_mail', '__return_true' );
+		$inv = $this->invitation_service->create_invitation( $space_id, $actor, $invitee, 'Hallo', 7 );
+		$token = $this->invitation_service->build_token( $inv );
+		remove_filter( 'pre_wp_mail', '__return_true' );
+
+		wp_set_current_user( $other_user );
+		$request = new \WP_REST_Request( 'POST', '/afspaces/v1/invitations/' . $token . '/accept' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Fremder Benutzer darf Einladung nicht annehmen.' );
+	}
+
+	/**
+	 * Test: Manager eines anderen Spaces darf Einladung nicht widerrufen.
+	 */
+	public function test_other_space_manager_cannot_revoke_invitation(): void {
+		$uniq = uniqid( '', false );
+		$owner_a    = $this->make_user_with_cap( 'inv_owner_a_' . $uniq );
+		$owner_b    = $this->make_user_with_cap( 'inv_owner_b_' . $uniq );
+		$invitee    = $this->make_user_with_cap( 'inv_target_b_' . $uniq );
+
+		$space_a = $this->create_test_space( $owner_a );
+		$space_b = $this->create_test_space( $owner_b );
+
+		add_filter( 'pre_wp_mail', '__return_true' );
+		$inv = $this->invitation_service->create_invitation( $space_b, $owner_b, $invitee, '', 7 );
+		remove_filter( 'pre_wp_mail', '__return_true' );
+
+		wp_set_current_user( $owner_a );
+		$request = new \WP_REST_Request( 'DELETE', '/afspaces/v1/spaces/' . $space_b . '/invitations/' . $inv->id );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status(), 'Manager eines anderen Spaces darf nicht widerrufen.' );
+	}
 }

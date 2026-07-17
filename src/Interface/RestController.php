@@ -11,6 +11,7 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
@@ -42,20 +43,28 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		private MemberService $members;
 
 		/**
+		 * @var InvitationService
+		 */
+		private InvitationService $invitations;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param SpaceRepository         $spaces  Space-Repository.
 		 * @param AsgarosAdapterInterface $asgaros Asgaros-Adapter.
 		 * @param MemberService           $members Mitglieder-Service.
+		 * @param InvitationService       $invitations Einladungs-Service.
 		 */
 		public function __construct(
 			SpaceRepository $spaces,
 			AsgarosAdapterInterface $asgaros,
-			MemberService $members
+			MemberService $members,
+			InvitationService $invitations
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
 			$this->members = $members;
+			$this->invitations = $invitations;
 		}
 
 		/**
@@ -138,6 +147,97 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 								'sanitize_callback' => 'absint',
 							),
 						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/invitations',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'get_invitations' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+						'args'                => array(
+							'status' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+						),
+					),
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'create_invitation' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+						'args'                => array(
+							'invitee_user_id' => array(
+								'type'              => 'integer',
+								'required'          => true,
+								'minimum'           => 1,
+								'sanitize_callback' => 'absint',
+							),
+							'message' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_textarea_field',
+							),
+							'expires_in_days' => array(
+								'type'              => 'integer',
+								'required'          => false,
+								'default'           => 7,
+								'sanitize_callback' => 'absint',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/invitations/(?P<invitation_id>\d+)',
+				array(
+					array(
+						'methods'             => WP_REST_Server::DELETABLE,
+						'callback'            => array( $this, 'revoke_invitation' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/invitations/(?P<invitation_id>\d+)/resend',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'resend_invitation' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/invitations/(?P<token>[A-Za-z0-9\-_]+)/accept',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'accept_invitation' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/invitations/(?P<token>[A-Za-z0-9\-_]+)/decline',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'decline_invitation' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
 					),
 				)
 			);
@@ -236,6 +336,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 				__( 'Keine Berechtigung zur Suche.', 'afspaces' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
+		}
+
+		/**
+		 * Permission-Callback für Accept/Decline-Endpunkte.
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return bool|WP_Error
+		 */
+		public function can_respond_to_invitation( WP_REST_Request $request ) {
+			if ( ! is_user_logged_in() ) {
+				return new WP_Error(
+					'afspaces_rest_unauthorized',
+					__( 'Anmeldung erforderlich.', 'afspaces' ),
+					array( 'status' => rest_authorization_required_code() )
+				);
+			}
+
+			return true;
 		}
 
 		/**
@@ -371,6 +489,147 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 				),
 				200
 			);
+		}
+
+		/**
+		 * GET /spaces/{id}/invitations
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function get_invitations( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor    = get_current_user_id();
+			$status   = isset( $request['status'] ) ? (string) $request['status'] : null;
+
+			try {
+				$list = $this->invitations->list_space_invitations( $space_id, $actor, $status );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invitation_list_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			$items = array_map(
+				static function ( $inv ): array {
+					return array(
+						'id'              => $inv->id,
+						'space_id'        => $inv->space_id,
+						'inviter_user_id' => $inv->inviter_user_id,
+						'invitee_user_id' => $inv->invitee_user_id,
+						'status'          => $inv->effective_status(),
+						'expires_at'      => $inv->expires_at,
+						'message'         => $inv->message,
+						'send_count'      => $inv->send_count,
+					);
+				},
+				$list
+			);
+
+			return new WP_REST_Response( array( 'invitations' => $items ), 200 );
+		}
+
+		/**
+		 * POST /spaces/{id}/invitations
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function create_invitation( WP_REST_Request $request ) {
+			$space_id        = (int) $request['space_id'];
+			$invitee_user_id = (int) $request['invitee_user_id'];
+			$message         = (string) ( $request['message'] ?? '' );
+			$expires_days    = (int) ( $request['expires_in_days'] ?? 7 );
+			$actor           = get_current_user_id();
+
+			try {
+				$inv = $this->invitations->create_invitation( $space_id, $actor, $invitee_user_id, $message, $expires_days );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invitation_create_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response(
+				array(
+					'id'         => $inv->id,
+					'status'     => $inv->effective_status(),
+					'expires_at' => $inv->expires_at,
+				),
+				201
+			);
+		}
+
+		/**
+		 * DELETE /spaces/{id}/invitations/{invitation_id}
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function revoke_invitation( WP_REST_Request $request ) {
+			$invitation_id = (int) $request['invitation_id'];
+			$actor         = get_current_user_id();
+
+			try {
+				$this->invitations->revoke_invitation( $invitation_id, $actor );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invitation_revoke_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'status' => 'revoked' ), 200 );
+		}
+
+		/**
+		 * POST /spaces/{id}/invitations/{invitation_id}/resend
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function resend_invitation( WP_REST_Request $request ) {
+			$invitation_id = (int) $request['invitation_id'];
+			$actor         = get_current_user_id();
+
+			try {
+				$this->invitations->resend_invitation( $invitation_id, $actor );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invitation_resend_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'status' => 'resent' ), 200 );
+		}
+
+		/**
+		 * POST /invitations/{token}/accept
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function accept_invitation( WP_REST_Request $request ) {
+			$token = (string) $request['token'];
+			$actor = get_current_user_id();
+
+			try {
+				$inv = $this->invitations->accept_invitation_by_token( $token, $actor );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invitation_accept_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'status' => $inv->status, 'space_id' => $inv->space_id ), 200 );
+		}
+
+		/**
+		 * POST /invitations/{token}/decline
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function decline_invitation( WP_REST_Request $request ) {
+			$token = (string) $request['token'];
+			$actor = get_current_user_id();
+
+			try {
+				$inv = $this->invitations->decline_invitation_by_token( $token, $actor );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_invitation_decline_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'status' => $inv->status, 'space_id' => $inv->space_id ), 200 );
 		}
 	}
 }

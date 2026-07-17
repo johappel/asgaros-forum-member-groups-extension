@@ -59,6 +59,38 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpacePolicy' ) ) {
 		}
 
 		/**
+		 * Darf der Akteur eine persönliche Einladung erstellen?
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @param int $target_user_id Zielbenutzer.
+		 * @return bool
+		 */
+		public function can_invite_member( int $space_id, int $actor_user_id, int $target_user_id ): bool {
+			if ( $target_user_id < 1 ) {
+				return false;
+			}
+
+			return $this->can_manage( $space_id, $actor_user_id );
+		}
+
+		/**
+		 * Darf der Akteur eine Einladung widerrufen oder erneut senden?
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @param int $target_user_id Zielbenutzer.
+		 * @return bool
+		 */
+		public function can_revoke_invitation( int $space_id, int $actor_user_id, int $target_user_id ): bool {
+			if ( $target_user_id < 1 ) {
+				return false;
+			}
+
+			return $this->can_manage( $space_id, $actor_user_id );
+		}
+
+		/**
 		 * Darf der Akteur einen Benutzer aus dem Space entfernen?
 		 *
 		 * Schützt den letzten Owner vor dem Entfernen.
