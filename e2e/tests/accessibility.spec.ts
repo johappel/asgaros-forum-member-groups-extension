@@ -9,7 +9,7 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const BASE = 'http://forums.test';
-const SPACE_ID = 92;
+const SPACE_ID = Number(process.env.AFSPACES_SPACE_ID) || 262;
 const MEMBERS_PAGE = `${BASE}/afspaces/?afspaces_view=members&space_id=${SPACE_ID}`;
 
 const MANAGER = {

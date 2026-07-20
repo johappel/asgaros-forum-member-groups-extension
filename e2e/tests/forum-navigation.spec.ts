@@ -8,7 +8,7 @@ import { test, expect, Page } from '@playwright/test';
 const BASE = process.env.AFSPACES_BASE_URL || 'http://forums.test';
 const MANAGER = { username: 'afp_e2e_manager', password: 'E2ePassw0rd!' };
 
-const SPACE_ID = 92;
+const SPACE_ID = Number(process.env.AFSPACES_SPACE_ID) || 262;
 const HUB_DASHBOARD = `${BASE}/afspaces/`;
 const HUB_MEMBERS = `${BASE}/afspaces/?afspaces_view=members&space_id=${SPACE_ID}`;
 
@@ -49,8 +49,8 @@ test.describe('Forum-integrierte Navigation', () => {
     await expect(page.locator('nav.afspaces-breadcrumb')).toBeVisible();
 
     const nav = page.locator('nav.afspaces-hub-nav');
-    await expect(nav.locator('a', { hasText: 'Mitglieder' })).toBeVisible();
-    await expect(nav.locator('a', { hasText: 'Einladungen' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Mitglieder', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Einladungen', exact: true })).toBeVisible();
   });
 
   test('Unternavigation ist per Tastatur bedienbar', async ({ page }) => {

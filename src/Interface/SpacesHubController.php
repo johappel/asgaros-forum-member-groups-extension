@@ -114,25 +114,25 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			ob_start();
 			?>
-			<div class="afspaces-hub">
-				<?php echo $this->render_breadcrumb( $view, $space_id ); ?>
-				<?php echo $this->render_navigation( $view, $space_id, $actor ); ?>
-				<div class="afspaces-hub-content">
-					<?php echo $content; // Bereits escaped in den jeweiligen Views. ?>
-				</div>
+		<div id="af-wrapper" class="afspaces-wrapper">
+			<?php echo $this->render_breadcrumb( $view, $space_id ); ?>
+			<?php echo $this->render_navigation( $view, $space_id, $actor ); ?>
+			<div class="afspaces-hub-content">
+				<?php echo $content; // Bereits escaped in den jeweiligen Views. ?>
 			</div>
-			<?php
-			return (string) ob_get_clean();
-		}
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
 
-		/**
-		 * Wählt die passende Unteransicht aus.
-		 *
-		 * @param string $view     Unteransicht.
-		 * @param int    $space_id Space-ID.
-		 * @return string
-		 */
-		private function render_view( string $view, int $space_id ): string {
+	/**
+	 * Wählt die passende Unteransicht aus.
+	 *
+	 * @param string $view     Unteransicht.
+	 * @param int    $space_id Space-ID.
+	 * @return string
+	 */
+	private function render_view( string $view, int $space_id ): string {
 			switch ( $view ) {
 				case SpacesUrls::VIEW_MEMBERS:
 					$members_view = new MembersView( $this->spaces, $this->asgaros, $this->members );

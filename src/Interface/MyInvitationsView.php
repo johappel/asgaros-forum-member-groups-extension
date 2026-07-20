@@ -66,10 +66,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 						<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
 					</a>
 				</p>
-				<p><?php echo esc_html__( 'Mit der Annahme wirst du Mitglied der jeweiligen Raumgruppe.', 'afspaces' ); ?></p>
 				<?php if ( empty( $list ) ) : ?>
 					<p><?php echo esc_html__( 'Du hast aktuell keine Einladungen.', 'afspaces' ); ?></p>
 				<?php else : ?>
+					<p><?php echo esc_html__( 'Mit der Annahme wirst du Mitglied der jeweiligen Raumgruppe.', 'afspaces' ); ?></p>
 					<ul class="afspaces-space-list">
 						<?php foreach ( $list as $inv ) : ?>
 							<?php

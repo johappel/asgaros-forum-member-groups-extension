@@ -43,7 +43,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		 */
 		public function init(): void {
 			add_filter( 'asgarosforum_filter_header_menu', array( $this, 'add_menu_entry' ) );
-			add_action( 'asgarosforum_overview_custom_content_top', array( $this, 'render_overview_panel' ) );
+			// Rendert innerhalb von #af-wrapper direkt unterhalb der Forum-Navigation.
+			add_action( 'asgarosforum_content_header', array( $this, 'render_overview_panel' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		}
 
@@ -66,10 +67,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			$menu_entries['afspaces'] = array(
 				'menu_class'        => 'afspaces-link',
 				'menu_link_text'    => esc_html__( 'Räume', 'afspaces' ),
-				'menu_url'          => SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ),
-				'menu_login_status' => 1,
-				'menu_new_tab'      => false,
-			);
+			'menu_url'          => '#',
+			'menu_login_status' => 1,
+			'menu_new_tab'      => false,
+		);
 
 			return $menu_entries;
 		}
@@ -80,13 +81,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		 * @return void
 		 */
 		public function render_overview_panel(): void {
+			// Nur auf der Forum-Übersicht anzeigen, nicht in Themen/Beiträgen.
+			if ( ! $this->is_forum_overview() ) {
+				return;
+			}
+
 			$user_id = get_current_user_id();
 			if ( 0 === $user_id ) {
 				return;
 			}
 
 			$managed_count = $this->managed_space_count( $user_id );
-			$pending_count = $this->invitations->count_pending_for_invitee( $user_id );
+			$pending_count = $this->pending_count( $user_id );
 			$can_create    = $this->can_create_spaces( $user_id );
 
 			// Panel nur anzeigen, wenn es für den Benutzer relevant ist.
@@ -94,7 +100,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				return;
 			}
 
-			echo '<section class="afspaces-forum-panel" aria-labelledby="afspaces-forum-panel-heading">';
+			echo '<section class="afspaces-forum-panel" id="afspaces-forum-panel" style="display: none;" aria-labelledby="afspaces-forum-panel-heading">';
 			printf(
 				'<h2 id="afspaces-forum-panel-heading" class="afspaces-forum-panel-heading">%s</h2>',
 				esc_html__( 'Deine Räume', 'afspaces' )
@@ -145,10 +151,28 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 
 			echo '</ul>';
 			echo '</section>';
-		}
 
-		/**
-		 * Bindet die Frontend-Stile auf Forumseiten ein.
+		// Toggle-JavaScript: Zeigt/verbirgt das Panel auf Klick des Menüpunkts.
+		?>
+		<script type="module">
+			document.addEventListener( 'DOMContentLoaded', function() {
+				const menuLink = document.querySelector( 'a.afspaces-link[href="#"]' );
+				const panel = document.getElementById( 'afspaces-forum-panel' );
+				if ( ! menuLink || ! panel ) return;
+
+				menuLink.addEventListener( 'click', function( e ) {
+					e.preventDefault();
+					const isVisible = panel.style.display !== 'none';
+					panel.style.display = isVisible ? 'none' : 'block';
+					menuLink.classList.toggle( 'is-active', ! isVisible );
+				} );
+			} );
+		</script>
+		<?php
+	}
+
+	/**
+	 * Bindet die Frontend-Stile auf Forumseiten ein.
 		 *
 		 * @return void
 		 */
@@ -185,7 +209,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				return true;
 			}
 
-			if ( $this->invitations->count_pending_for_invitee( $user_id ) > 0 ) {
+			if ( $this->pending_count( $user_id ) > 0 ) {
 				return true;
 			}
 
@@ -193,16 +217,71 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		}
 
 		/**
-		 * Ermittelt die Zahl der vom Benutzer verwaltbaren Räume.
+		 * Prüft, ob gerade die Forum-Übersicht (nicht ein Thema/Beitrag) angezeigt wird.
+		 *
+		 * @return bool
+		 */
+		private function is_forum_overview(): bool {
+			global $asgarosforum;
+			if ( ! is_object( $asgarosforum ) || ! isset( $asgarosforum->current_view ) ) {
+				return false;
+			}
+			return 'overview' === $asgarosforum->current_view;
+		}
+
+		/**
+		 * Ermittelt die Zahl der vom Benutzer verwaltbaren Räume (kurz gecacht).
 		 *
 		 * @param int $user_id Benutzer-ID.
 		 * @return int
 		 */
 		private function managed_space_count( int $user_id ): int {
-			if ( user_can( $user_id, Capabilities::MANAGE_ALL_SPACES ) ) {
-				return count( $this->spaces->list_spaces() );
+			return $this->cached_count(
+				'afspaces_managed_count_' . $user_id,
+				function () use ( $user_id ): int {
+					if ( user_can( $user_id, Capabilities::MANAGE_ALL_SPACES ) ) {
+						return count( $this->spaces->list_spaces() );
+					}
+					return $this->spaces->count_manager_spaces( $user_id );
+				}
+			);
+		}
+
+		/**
+		 * Ermittelt die Zahl offener Einladungen (kurz gecacht).
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int
+		 */
+		private function pending_count( int $user_id ): int {
+			return $this->cached_count(
+				'afspaces_pending_count_' . $user_id,
+				fn (): int => $this->invitations->count_pending_for_invitee( $user_id )
+			);
+		}
+
+		/**
+		 * Kleiner Transient-Cache, damit die Zahlen nicht bei jedem Forum-Aufruf
+		 * frisch aus der Datenbank gelesen werden müssen.
+		 *
+		 * @param string   $key      Transient-Schlüssel.
+		 * @param callable $callback Ermittelt den Wert bei Cache-Miss.
+		 * @return int
+		 */
+		private function cached_count( string $key, callable $callback ): int {
+			$ttl = (int) apply_filters( 'afspaces_panel_cache_ttl', 30 );
+			if ( $ttl <= 0 ) {
+				return (int) $callback();
 			}
-			return $this->spaces->count_manager_spaces( $user_id );
+
+			$cached = get_transient( $key );
+			if ( false !== $cached ) {
+				return (int) $cached;
+			}
+
+			$value = (int) $callback();
+			set_transient( $key, $value, $ttl );
+			return $value;
 		}
 
 		/**

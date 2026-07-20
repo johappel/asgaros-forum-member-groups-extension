@@ -10,7 +10,7 @@ const ADMIN = { username: 'afp_e2e_admin', password: 'E2ePassw0rd!' };
 const MANAGER = { username: 'afp_e2e_manager', password: 'E2ePassw0rd!' };
 const TARGET = { username: 'afp_e2e_target', password: 'E2ePassw0rd!' };
 
-const SPACE_ID = 92;
+const SPACE_ID = Number(process.env.AFSPACES_SPACE_ID) || 262;
 const MEMBERS_PAGE = `${BASE}/afspaces/?afspaces_view=members&space_id=${SPACE_ID}`;
 
 async function waitForLoggedIn(page: Page) {

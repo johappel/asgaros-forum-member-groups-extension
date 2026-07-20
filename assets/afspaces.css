@@ -1,5 +1,89 @@
 /* Asgaros Forum Spaces — Frontend-Stile (barrierearm). */
 
+/* Forum-ähnliche Wrapper-Struktur für Spaces-Hub. */
+#af-wrapper.afspaces-wrapper {
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 1rem;
+	background: #fff;
+	position: relative;
+}
+
+/* Breadcrumb Navigation — Forum-Stil. */
+.afspaces-breadcrumb {
+	display: flex;
+	gap: 0.5rem;
+	margin: 1rem 0 1.5rem 0;
+	padding: 0;
+	font-size: 0.95rem;
+	color: #555d66;
+	list-style: none;
+}
+
+.afspaces-breadcrumb a {
+	color: #2271b1;
+	text-decoration: none;
+}
+
+.afspaces-breadcrumb a:hover,
+.afspaces-breadcrumb a:focus {
+	text-decoration: underline;
+}
+
+.afspaces-breadcrumb-sep {
+	margin: 0 0.25rem;
+	color: #8a8a8a;
+}
+
+/* Hub-Navigation — ähnlich Asgaros-Forum-Tabs. */
+.afspaces-hub-nav {
+	border-bottom: 2px solid #e5e5e5;
+	margin: 1rem 0;
+	padding: 0;
+}
+
+.afspaces-hub-nav ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	gap: 0;
+	flex-wrap: wrap;
+}
+
+.afspaces-hub-nav li {
+	margin: 0;
+	padding: 0;
+}
+
+.afspaces-hub-tab {
+	display: inline-block;
+	padding: 0.75rem 1rem;
+	color: #555d66;
+	text-decoration: none;
+	border-bottom: 3px solid transparent;
+	border-radius: 0;
+	transition: all 0.2s ease;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.afspaces-hub-tab:hover {
+	color: #2271b1;
+	background: #f5f5f5;
+}
+
+.afspaces-hub-tab.is-active {
+	color: #2271b1;
+	border-bottom-color: #2271b1;
+	font-weight: 700;
+}
+
+.afspaces-hub-content {
+	padding: 1.5rem 0;
+}
+
 .afspaces-dashboard,
 .afspaces-members,
 .afspaces-invitations,
@@ -333,6 +417,50 @@
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem;
+}
+
+/*
+ * Innerhalb des Asgaros-Wrappers (#af-wrapper) setzt das Forum eigene
+ * Link-Farben über ID-Selektoren durch. Damit unsere Buttons und Links im
+ * Forum korrekt aussehen, erhöhen wir die Spezifität passend.
+ */
+#af-wrapper .afspaces-forum-panel {
+	box-sizing: border-box;
+}
+
+#af-wrapper .afspaces-button,
+#af-wrapper .afspaces-button:link,
+#af-wrapper .afspaces-button:visited {
+	color: #fff !important;
+	text-decoration: none;
+}
+
+#af-wrapper .afspaces-button:hover,
+#af-wrapper .afspaces-button:focus {
+	color: #fff !important;
+}
+
+#af-wrapper .afspaces-button-secondary,
+#af-wrapper .afspaces-button-secondary:link,
+#af-wrapper .afspaces-button-secondary:visited {
+	background: #50575e !important;
+	border-color: #50575e !important;
+	color: #fff !important;
+}
+
+#af-wrapper .afspaces-forum-panel-heading {
+	color: #1d2327;
+}
+
+/* Toggle-Status des Menüpunkts. */
+a.afspaces-link {
+	cursor: pointer;
+	user-select: none;
+}
+
+a.afspaces-link.is-active {
+	font-weight: 600;
+	opacity: 0.8;
 }
 
 @media (max-width: 780px) {
