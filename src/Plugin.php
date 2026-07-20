@@ -19,11 +19,13 @@ use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
+use AFSpaces\Interface\ForumNavigation;
 use AFSpaces\Interface\FrontendController;
 use AFSpaces\Interface\InvitationsView;
 use AFSpaces\Interface\MembersView;
 use AFSpaces\Interface\MyInvitationsView;
 use AFSpaces\Interface\RestController;
+use AFSpaces\Interface\SpacesHubController;
 
 if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
@@ -78,6 +80,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 				return;
 			}
 
+			$plugin->maybe_upgrade();
+
 			$spaces  = new SpaceRepository();
 			$asgaros = new AsgarosAdapter( $plugin->requirements );
 			$policy  = new SpacePolicy( $spaces );
@@ -91,6 +95,14 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $invite_links, $space_registration );
 			$frontend->init();
+
+			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $invite_links );
+			$hub->init();
+
+			// Integration in die Asgaros-Forum-Navigation.
+			$navigation = new ForumNavigation( $spaces, $inv_repo );
+			$navigation->init();
 
 			// Mitgliederansicht in denselben Shortcode integrieren.
 			add_shortcode(
@@ -184,6 +196,21 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 				return $erasers;
 			} );
+		}
+
+		/**
+		 * Stellt bei Versionswechseln fehlende Strukturen (z. B. Hub-Seite) her.
+		 *
+		 * @return void
+		 */
+		private function maybe_upgrade(): void {
+			$installed = (string) get_option( 'afspaces_installed_version', '' );
+			if ( AFSPACES_VERSION === $installed ) {
+				return;
+			}
+
+			\AFSpaces\Core\Activator::ensure_hub_page();
+			update_option( 'afspaces_installed_version', AFSPACES_VERSION );
 		}
 
 		/**

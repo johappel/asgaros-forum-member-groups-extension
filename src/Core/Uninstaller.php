@@ -27,6 +27,17 @@ if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 			// Capabilities entfernen.
 			Capabilities::remove();
 
+			// Hub-Seite entfernen, falls vorhanden.
+			$hub_page_id = (int) get_option( 'afspaces_hub_page_id', 0 );
+			if ( $hub_page_id > 0 ) {
+				wp_delete_post( $hub_page_id, true );
+			}
+
+			// Plugin-Optionen aufräumen.
+			delete_option( 'afspaces_hub_page_id' );
+			delete_option( 'afspaces_installed_version' );
+			delete_option( 'afspaces_enable_space_creation' );
+
 			// Eigene Tabellen aufräumen (Asgaros-Daten bleiben unangetastet, siehe ARCHITECTURE.md).
 			global $wpdb;
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_spaces" );

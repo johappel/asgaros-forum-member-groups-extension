@@ -84,17 +84,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				<h2 id="afspaces-invitations-heading"><?php echo esc_html( sprintf( __( 'Einladungen - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
 				<?php
-				$dashboard_page = get_page_by_path( 'afspaces-dashboard' );
-				if ( $dashboard_page ) :
-					?>
-					<p>
-						<a href="<?php echo esc_url( get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
-							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-						</a>
-					</p>
-					<?php
-				endif;
+				$dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
 				?>
+				<p>
+					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
+						<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+					</a>
+				</p>
 				<p><strong><?php echo esc_html__( 'Raum:', 'afspaces' ); ?></strong> <?php echo esc_html( $forum_name ); ?></p>
 				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
 				<?php echo $this->render_created_invite_link(); ?>

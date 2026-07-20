@@ -124,17 +124,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 				<?php echo $this->render_message(); ?>
 
 				<?php
-				$dashboard_page = get_page_by_path( 'afspaces-dashboard' );
-				if ( $dashboard_page ) {
-					?>
-					<p>
-						<a href="<?php echo esc_url( get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
-							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-						</a>
-					</p>
-					<?php
-				}
+				$dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
 				?>
+				<p>
+					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
+						<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+					</a>
+				</p>
 
 				<form method="get" class="afspaces-search" role="search" aria-label="<?php echo esc_attr__( 'Mitglieder suchen', 'afspaces' ); ?>">
 					<label for="afp_search"><?php echo esc_html__( 'Person suchen', 'afspaces' ); ?></label>

@@ -54,20 +54,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 
 			$actor = $this->current_user_id();
 			$list  = $this->invitations->list_my_invitations( $actor );
-			$dashboard_page = \get_page_by_path( 'afspaces-dashboard' );
+			$dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
 
 			ob_start();
 			?>
 			<section class="afspaces-my-invitations" aria-labelledby="afspaces-my-invitations-heading">
 				<h2 id="afspaces-my-invitations-heading"><?php echo esc_html__( 'Meine Forum-Einladungen', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<?php if ( $dashboard_page ) : ?>
-					<p>
-						<a href="<?php echo esc_url( \get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
-							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-						</a>
-					</p>
-				<?php endif; ?>
+				<p>
+					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
+						<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+					</a>
+				</p>
 				<p><?php echo esc_html__( 'Mit der Annahme wirst du Mitglied der jeweiligen Raumgruppe.', 'afspaces' ); ?></p>
 				<?php if ( empty( $list ) ) : ?>
 					<p><?php echo esc_html__( 'Du hast aktuell keine Einladungen.', 'afspaces' ); ?></p>
@@ -135,14 +133,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 					<h2 id="afspaces-invite-link-heading"><?php echo esc_html__( 'Raumeinladung', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
 					<p><strong><?php echo esc_html__( 'Raum:', 'afspaces' ); ?></strong> <?php echo esc_html( $preview['forum_name'] ); ?></p>
-					<?php $dashboard_page = \get_page_by_path( 'afspaces-dashboard' ); ?>
-					<?php if ( $dashboard_page ) : ?>
-						<p>
-							<a href="<?php echo esc_url( \get_permalink( $dashboard_page ) ); ?>" class="afspaces-link-back">
-								<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-							</a>
-						</p>
-					<?php endif; ?>
+					<?php $dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ); ?>
+					<p>
+						<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
+							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
+						</a>
+					</p>
 				<h3><?php echo esc_html( $preview['forum_name'] ); ?></h3>
 				<p><?php echo esc_html( $preview['status_message'] ); ?></p>
 

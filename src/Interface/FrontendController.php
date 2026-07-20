@@ -101,10 +101,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		 * @return void
 		 */
 		public function enqueue_assets(): void {
-			if ( ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_dashboard' )
-				&& ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_members' )
-				&& ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_invitations' )
-				&& ! has_shortcode( get_post_field( 'post_content', get_the_ID() ), 'afspaces_my_invitations' ) ) {
+			$content = get_post_field( 'post_content', get_the_ID() );
+			if ( ! has_shortcode( $content, 'afspaces' )
+				&& ! has_shortcode( $content, 'afspaces_dashboard' )
+				&& ! has_shortcode( $content, 'afspaces_members' )
+				&& ! has_shortcode( $content, 'afspaces_invitations' )
+				&& ! has_shortcode( $content, 'afspaces_my_invitations' ) ) {
 				return;
 			}
 			wp_enqueue_style(
@@ -256,34 +258,25 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
 			$ref = wp_get_referer() ?: home_url();
 			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation', 'create_invite_link', 'revoke_invite_link', 'shorten_invite_link' ), true ) ) {
-				$invite_page = get_page_by_path( 'afspaces-invitations' );
-				$redirect_url = $invite_page ? get_permalink( $invite_page ) : $ref;
-				wp_safe_redirect( add_query_arg( 'space_id', $space_id, $redirect_url ) );
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ) );
 				exit;
 			}
 
 			if ( 'register_space' === $action ) {
-				$dashboard_page = get_page_by_path( 'afspaces-dashboard' );
-				$redirect_url = $dashboard_page ? get_permalink( $dashboard_page ) : $ref;
-				wp_safe_redirect( $redirect_url );
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) );
 				exit;
 			}
 
 			if ( in_array( $action, array( 'accept_invitation', 'decline_invitation', 'use_invite_link', 'request_invite_link_registration' ), true ) ) {
-				$mine_page = get_page_by_path( 'afspaces-my-invitations' );
-				$redirect_url = $mine_page ? get_permalink( $mine_page ) : $ref;
-				if ( 'use_invite_link' === $action && '' !== $invite_link_token ) {
-					$redirect_url = add_query_arg( 'invite_link', rawurlencode( $invite_link_token ), $redirect_url );
-				} elseif ( 'request_invite_link_registration' === $action && '' !== $invite_link_token ) {
-					$redirect_url = add_query_arg( 'invite_link', rawurlencode( $invite_link_token ), $redirect_url );
+				$args = array();
+				if ( in_array( $action, array( 'use_invite_link', 'request_invite_link_registration' ), true ) && '' !== $invite_link_token ) {
+					$args['invite_link'] = $invite_link_token;
 				}
-				wp_safe_redirect( $redirect_url );
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_MY_INVITATIONS, $args ) );
 				exit;
 			}
 
-			$members_page = get_page_by_path( 'afspaces-members' );
-			$redirect_url = $members_page ? get_permalink( $members_page ) : $ref;
-			wp_safe_redirect( add_query_arg( 'space_id', $space_id, $redirect_url ) );
+			wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ) );
 			exit;
 		}
 
@@ -362,18 +355,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 								$member_count = (int) ( $members['total'] ?? 0 );
 							}
 							// Link zur Mitgliederseite (nicht zum Dashboard).
-							$members_page = get_page_by_path( 'afspaces-members' );
-							$members_url = $members_page ? get_permalink( $members_page ) : home_url();
-							$manage_url = add_query_arg(
-								array( 'space_id' => $space->id ),
-								$members_url
-							);
-							$invitations_page = get_page_by_path( 'afspaces-invitations' );
-							$invitations_url = $invitations_page ? get_permalink( $invitations_page ) : home_url();
-							$invite_url = add_query_arg(
-								array( 'space_id' => $space->id ),
-								$invitations_url
-							);
+							$manage_url = SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space->id ) );
+							$invite_url = SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space->id ) );
 							?>
 							<li class="afspaces-space-item">
 								<h3><?php echo esc_html( $forum['name'] ); ?></h3>
@@ -431,9 +414,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 											<td>
 												<?php if ( $forum['is_registered'] ) : ?>
 													<?php
-													$members_page = get_page_by_path( 'afspaces-members' );
-													$members_url = $members_page ? get_permalink( $members_page ) : home_url();
-													$manage_url = add_query_arg( 'space_id', (int) $forum['space_id'], $members_url );
+													$manage_url = SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => (int) $forum['space_id'] ) );
 													?>
 													<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>"><?php echo esc_html__( 'Öffnen', 'afspaces' ); ?></a>
 												<?php elseif ( ! $forum['can_register'] ) : ?>

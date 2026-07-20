@@ -241,9 +241,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\InviteLinkService' ) ) {
 		 * @return string
 		 */
 		public function build_link_url( string $token ): string {
-			$page = get_page_by_path( 'afspaces-my-invitations' );
-			$base = $page ? get_permalink( $page ) : home_url( '/afspaces-my-invitations/' );
-			return add_query_arg( 'invite_link', rawurlencode( $token ), $base );
+			return \AFSpaces\Interface\SpacesUrls::hub_url(
+				\AFSpaces\Interface\SpacesUrls::VIEW_MY_INVITATIONS,
+				array( 'invite_link' => $token )
+			);
 		}
 
 		/**

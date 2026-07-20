@@ -70,6 +70,17 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 	}
 }
 
+// sanitize_key-Stub.
+if ( ! function_exists( 'sanitize_key' ) ) {
+	/**
+	 * @param string $key
+	 * @return string
+	 */
+	function sanitize_key( string $key ): string {
+		return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( $key ) );
+	}
+}
+
 // current_time-Stub.
 if ( ! function_exists( 'current_time' ) ) {
 	/**

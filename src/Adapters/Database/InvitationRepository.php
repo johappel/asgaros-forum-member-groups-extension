@@ -286,6 +286,28 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\InvitationRepository' ) ) {
 		}
 
 		/**
+		 * Zählt offene (pending) Einladungen eines Benutzers.
+		 *
+		 * Bewusst leichtgewichtig ohne Statuswechsel, damit die Zahl auch bei
+		 * jedem Forum-Seitenaufruf günstig ermittelt werden kann.
+		 *
+		 * @param int $invitee_user_id Benutzer-ID.
+		 * @return int
+		 */
+		public function count_pending_for_invitee( int $invitee_user_id ): int {
+			$now = gmdate( 'Y-m-d H:i:s' );
+			return (int) $this->db->get_var(
+				$this->db->prepare(
+					"SELECT COUNT(*) FROM {$this->table} WHERE invitee_user_id = %d AND status = %s AND ( expires_at IS NULL OR expires_at = %s OR expires_at > %s );",
+					$invitee_user_id,
+					'pending',
+					'0000-00-00 00:00:00',
+					$now
+				)
+			);
+		}
+
+		/**
 		 * Löscht personenbezogene Nachrichtendaten eines Benutzers.
 		 *
 		 * @param int $user_id Benutzer-ID.

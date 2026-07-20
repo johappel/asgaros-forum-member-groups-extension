@@ -41,3 +41,15 @@ Vor MVP 1 sind zu dokumentieren:
 ## MVP 3 Hinweis
 
 - MVP 3 nutzt keine zusätzlichen Asgaros-Interna. Invite-Links greifen weiter ausschließlich über den vorhandenen Adapter auf Foren-Metadaten, Gruppenmitgliedschaften und Gruppenzuordnungen zu.
+
+## Forum-Navigation (UX-Integration)
+
+Die Frontend-Verwaltung ist über die Asgaros-Forum-Navigation erreichbar. Dafür werden ausschließlich **dokumentierte, öffentliche Asgaros-Hooks** genutzt (keine internen Klassen):
+
+- Filter `asgarosforum_filter_header_menu` — fügt den Menüpunkt „Räume" in die Forum-Navigation ein (nur für berechtigte, angemeldete Benutzer).
+- Action `asgarosforum_overview_custom_content_top` — rendert ein kompaktes Einstiegs-Panel auf der Forum-Übersicht.
+
+Die eigentliche Verwaltung läuft über eine einzelne WordPress-Hub-Seite (Slug `afspaces`) mit dem Shortcode `[afspaces]`. Die Unteransicht wird über den Query-Parameter `afspaces_view` gesteuert (`dashboard`, `members`, `invitations`, `my-invitations`, `create`). Es wird **kein** eigener Asgaros-`current_view` in das Forum-Routing eingehängt, da hierfür keine dokumentierte API existiert.
+
+Alte Einzelseiten (`afspaces-dashboard`, `afspaces-members`, `afspaces-invitations`, `afspaces-my-invitations`) werden per 301 auf die entsprechende Hub-Unteransicht umgeleitet.
+

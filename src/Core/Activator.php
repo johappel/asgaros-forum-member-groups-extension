@@ -48,7 +48,40 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 			// Capabilities registrieren.
 			Capabilities::register();
 
+			// Hub-Seite mit Router-Shortcode sicherstellen.
+			self::ensure_hub_page();
+
 			flush_rewrite_rules();
+		}
+
+		/**
+		 * Legt die zentrale Hub-Seite (Shortcode `[afspaces]`) idempotent an.
+		 *
+		 * @return int Seiten-ID der Hub-Seite (0 bei Fehler).
+		 */
+		public static function ensure_hub_page(): int {
+			$existing = get_page_by_path( \AFSpaces\Interface\SpacesUrls::HUB_SLUG );
+			if ( $existing ) {
+				update_option( \AFSpaces\Interface\SpacesUrls::HUB_PAGE_OPTION, (int) $existing->ID );
+				return (int) $existing->ID;
+			}
+
+			$page_id = wp_insert_post(
+				array(
+					'post_title'   => __( 'Räume', 'afspaces' ),
+					'post_name'    => \AFSpaces\Interface\SpacesUrls::HUB_SLUG,
+					'post_content' => '[afspaces]',
+					'post_status'  => 'publish',
+					'post_type'    => 'page',
+				)
+			);
+
+			if ( is_wp_error( $page_id ) || 0 === (int) $page_id ) {
+				return 0;
+			}
+
+			update_option( \AFSpaces\Interface\SpacesUrls::HUB_PAGE_OPTION, (int) $page_id );
+			return (int) $page_id;
 		}
 	}
 }

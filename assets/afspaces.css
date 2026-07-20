@@ -235,3 +235,117 @@
 		border-bottom: 1px solid #e2e4e7;
 	}
 }
+
+/* Spaces-Hub: Brotkrümel, Unternavigation und Inhalt. */
+.afspaces-hub {
+	max-width: 60rem;
+	margin: 1.5rem 0;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.afspaces-breadcrumb {
+	font-size: 0.9rem;
+	margin-bottom: 0.75rem;
+}
+
+.afspaces-breadcrumb a {
+	color: #2271b1;
+	text-decoration: none;
+}
+
+.afspaces-breadcrumb a:hover,
+.afspaces-breadcrumb a:focus {
+	text-decoration: underline;
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+.afspaces-breadcrumb-sep {
+	color: #646970;
+	padding: 0 0.25rem;
+}
+
+.afspaces-hub-nav {
+	margin: 0 0 1.5rem;
+	border-bottom: 2px solid #c3c4c7;
+}
+
+.afspaces-hub-nav ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}
+
+.afspaces-hub-tab {
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	min-height: 44px;
+	line-height: 1.9;
+	text-decoration: none;
+	color: #2271b1;
+	border: 1px solid transparent;
+	border-bottom: none;
+	border-radius: 4px 4px 0 0;
+}
+
+.afspaces-hub-tab:hover,
+.afspaces-hub-tab:focus {
+	background: #f0f0f1;
+}
+
+.afspaces-hub-tab:focus-visible {
+	outline: 3px solid #ffb900;
+	outline-offset: 2px;
+}
+
+.afspaces-hub-tab.is-active {
+	background: #fff;
+	color: #1d2327;
+	font-weight: 600;
+	border-color: #c3c4c7;
+	border-bottom: 2px solid #fff;
+	margin-bottom: -2px;
+}
+
+/* Einstiegs-Panel innerhalb der Forum-Übersicht. */
+.afspaces-forum-panel {
+	border: 1px solid #c3c4c7;
+	border-left: 4px solid #2271b1;
+	border-radius: 6px;
+	padding: 1rem;
+	margin: 0 0 1.5rem;
+	background: #f6f7f7;
+}
+
+.afspaces-forum-panel-heading {
+	margin: 0 0 0.75rem;
+	font-size: 1.1rem;
+}
+
+.afspaces-forum-panel-links {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+@media (max-width: 780px) {
+	.afspaces-hub-nav ul {
+		flex-direction: column;
+	}
+
+	.afspaces-hub-tab {
+		border-radius: 4px;
+		border: 1px solid #c3c4c7;
+	}
+
+	.afspaces-hub-tab.is-active {
+		margin-bottom: 0;
+	}
+}

@@ -5,7 +5,7 @@ const BASE = runtime.process?.env?.AFSPACES_BASE_URL || 'http://forums.test';
 const MANAGER = { username: 'afp_e2e_manager', password: 'E2ePassw0rd!' };
 const INVITEE = { username: 'afp_e2e_target', password: 'E2ePassw0rd!' };
 const SPACE_ID = 92;
-const INV_PAGE = `${BASE}/afspaces-invitations/?space_id=${SPACE_ID}`;
+const INV_PAGE = `${BASE}/afspaces/?afspaces_view=invitations&space_id=${SPACE_ID}`;
 
 test.describe.configure({ timeout: 240000 });
 

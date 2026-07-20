@@ -11,7 +11,7 @@ const MANAGER = { username: 'afp_e2e_manager', password: 'E2ePassw0rd!' };
 const TARGET = { username: 'afp_e2e_target', password: 'E2ePassw0rd!' };
 
 const SPACE_ID = 92;
-const MEMBERS_PAGE = `${BASE}/afspaces-members/?space_id=${SPACE_ID}`;
+const MEMBERS_PAGE = `${BASE}/afspaces/?afspaces_view=members&space_id=${SPACE_ID}`;
 
 async function waitForLoggedIn(page: Page) {
   // Prüfen, ob die Mitgliederseite erreichbar ist.

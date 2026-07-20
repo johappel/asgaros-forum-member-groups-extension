@@ -266,10 +266,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\InvitationService' ) ) {
 		 * @return string
 		 */
 		public function build_accept_url( Invitation $invitation ): string {
-			$token = rawurlencode( $this->build_token( $invitation ) );
-			$page  = get_page_by_path( 'afspaces-my-invitations' );
-			$base  = $page ? get_permalink( $page ) : home_url( '/afspaces-my-invitations/' );
-			return add_query_arg( 'invitation_token', $token, $base );
+			return \AFSpaces\Interface\SpacesUrls::hub_url(
+				\AFSpaces\Interface\SpacesUrls::VIEW_MY_INVITATIONS,
+				array( 'invitation_token' => $this->build_token( $invitation ) )
+			);
 		}
 
 		/**

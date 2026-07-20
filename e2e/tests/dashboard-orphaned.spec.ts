@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const BASE_URL = 'http://forums.test';
-const DASHBOARD_PAGE = `${BASE_URL}/afspaces-dashboard/`;
+const DASHBOARD_PAGE = `${BASE_URL}/afspaces/`;
 const MANAGER = 'afp_e2e_manager';
 const MANAGER_PASS = 'Test@1234';
 

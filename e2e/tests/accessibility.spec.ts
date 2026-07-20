@@ -10,7 +10,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 const BASE = 'http://forums.test';
 const SPACE_ID = 92;
-const MEMBERS_PAGE = `${BASE}/afspaces-members/?space_id=${SPACE_ID}`;
+const MEMBERS_PAGE = `${BASE}/afspaces/?afspaces_view=members&space_id=${SPACE_ID}`;
 
 const MANAGER = {
   username: 'afp_e2e_manager',

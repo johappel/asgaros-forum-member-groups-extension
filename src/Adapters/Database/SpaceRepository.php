@@ -239,6 +239,21 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 		}
 
 		/**
+		 * Zählt die Spaces, in denen ein Benutzer eine Verantwortungsrolle hat.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int
+		 */
+		public function count_manager_spaces( int $user_id ): int {
+			return (int) $this->db->get_var(
+				$this->db->prepare(
+					"SELECT COUNT(DISTINCT space_id) FROM {$this->managers_table} WHERE user_id = %d;",
+					$user_id
+				)
+			);
+		}
+
+		/**
 		 * Zählt die Owner eines Spaces.
 		 *
 		 * @param int $space_id Space-ID.
