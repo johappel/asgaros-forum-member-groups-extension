@@ -278,7 +278,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			}
 
 			if ( $is_ajax ) {
-				wp_send_json_success( array( 'message' => $this->peek_message_text() ) );
+				wp_send_json_success( $this->peek_message() );
 			}
 
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
@@ -307,20 +307,29 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		}
 
 		/**
-		 * Liefert den aktuellen Nachrichtentext aus der Session (ohne zu löschen).
+		 * Liefert die aktuelle Nachricht aus der Session (ohne zu löschen).
 		 *
-		 * @return string
+		 * @return array<string,string>
 		 */
-		private function peek_message_text(): string {
+		private function peek_message(): array {
 			if ( ! session_id() && ! headers_sent() ) {
 				session_start();
 			}
 
-			if ( empty( $_SESSION['afspaces_message']['message'] ) ) {
-				return '';
+			if ( empty( $_SESSION['afspaces_message'] ) || ! is_array( $_SESSION['afspaces_message'] ) ) {
+				return array(
+					'type'    => 'success',
+					'message' => '',
+				);
 			}
 
-			return (string) $_SESSION['afspaces_message']['message'];
+			$type = isset( $_SESSION['afspaces_message']['type'] ) ? (string) $_SESSION['afspaces_message']['type'] : 'success';
+			$message = isset( $_SESSION['afspaces_message']['message'] ) ? (string) $_SESSION['afspaces_message']['message'] : '';
+
+			return array(
+				'type'    => $type,
+				'message' => $message,
+			);
 		}
 
 		/**

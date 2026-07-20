@@ -111,7 +111,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 				$manager_roles[ (int) $manager->user_id ] = (string) $manager->role;
 			}
 
-			$existing_ids = array_column( $members['members'] ?? array(), 'user_id' );
 			$search_results = array();
 			if ( '' !== $search ) {
 				$search_results = $this->members->search_users( $search, 1, 20 )['members'] ?? array();
@@ -144,9 +143,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 					<h3><?php echo esc_html__( 'Suchergebnisse', 'afspaces' ); ?></h3>
 					<ul class="afspaces-search-results">
 						<?php foreach ( $search_results as $user ) : ?>
+							<?php $is_member = $this->asgaros->is_user_in_group( (int) $user['user_id'], $group_id ); ?>
 							<li>
 								<span><?php echo esc_html( $user['display_name'] ); ?></span>
-								<?php if ( in_array( (int) $user['user_id'], $existing_ids, true ) ) : ?>
+								<?php if ( $is_member ) : ?>
 									<span class="afspaces-tag"><?php echo esc_html__( 'bereits Mitglied', 'afspaces' ); ?></span>
 								<?php else : ?>
 									<form method="post" class="afspaces-inline-form">

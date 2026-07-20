@@ -1,6 +1,56 @@
 (function () {
 	'use strict';
 
+	function getLiveRegion() {
+		var region = document.getElementById('afspaces-live-region');
+		if (region) {
+			return region;
+		}
+
+		region = document.createElement('div');
+		region.id = 'afspaces-live-region';
+		region.className = 'screen-reader-text';
+		region.setAttribute('role', 'status');
+		region.setAttribute('aria-live', 'polite');
+		region.setAttribute('aria-atomic', 'true');
+		document.body.appendChild(region);
+		return region;
+	}
+
+	function announce(message, type) {
+		if (!message) {
+			return;
+		}
+
+		var region = getLiveRegion();
+		region.setAttribute('role', type === 'error' ? 'alert' : 'status');
+		region.textContent = message;
+	}
+
+	function refreshHubDom() {
+		return fetch(window.location.href, {
+			credentials: 'same-origin'
+		})
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error('Refresh failed');
+				}
+				return response.text();
+			})
+			.then(function (html) {
+				var parser = new DOMParser();
+				var doc = parser.parseFromString(html, 'text/html');
+				var currentWrapper = document.querySelector('#af-wrapper.afspaces-wrapper');
+				var newWrapper = doc.querySelector('#af-wrapper.afspaces-wrapper');
+
+				if (!currentWrapper || !newWrapper) {
+					throw new Error('Wrapper not found');
+				}
+
+				currentWrapper.replaceWith(newWrapper);
+			});
+	}
+
 	document.addEventListener('submit', function (event) {
 		var form = event.target;
 		if (!form || form.tagName !== 'FORM' || String(form.method).toLowerCase() !== 'post') {
@@ -49,8 +99,15 @@
 				}
 				return response.json();
 			})
-			.then(function () {
-				window.location.reload();
+			.then(function (payload) {
+				var info = payload && payload.data ? payload.data : {};
+				return refreshHubDom()
+					.then(function () {
+						announce(info.message || '', info.type || 'success');
+					})
+					.catch(function () {
+						announce(info.message || '', info.type || 'success');
+					});
 			})
 			.catch(function () {
 				form.submit();
