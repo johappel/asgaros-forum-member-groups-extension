@@ -92,6 +92,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		public function init(): void {
 			add_shortcode( 'afspaces_dashboard', array( $this, 'render_dashboard' ) );
 			add_action( 'init', array( $this, 'handle_actions' ) );
+			add_action( 'wp_ajax_afspaces_action', array( $this, 'handle_actions' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		}
 
@@ -115,6 +116,22 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				array(),
 				AFSPACES_VERSION
 			);
+
+			wp_enqueue_script(
+				'afspaces-frontend',
+				AFSPACES_URL . 'assets/afspaces.js',
+				array(),
+				AFSPACES_VERSION,
+				true
+			);
+
+			wp_localize_script(
+				'afspaces-frontend',
+				'afspacesFrontend',
+				array(
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				)
+			);
 		}
 
 		/**
@@ -126,6 +143,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			if ( ! isset( $_POST['afspaces_action'] ) ) {
 				return;
 			}
+
+			$is_ajax = wp_doing_ajax() || ( isset( $_POST['afspaces_ajax'] ) && '1' === (string) $_POST['afspaces_ajax'] );
 
 			if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), $this->nonce_action ) ) {
 				wp_die( esc_html__( 'Ungültige Anfrage (Nonce).', 'afspaces' ) );
@@ -253,6 +272,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
+				if ( $is_ajax ) {
+					wp_send_json_error( array( 'message' => $e->getMessage() ), 400 );
+				}
+			}
+
+			if ( $is_ajax ) {
+				wp_send_json_success( array( 'message' => $this->peek_message_text() ) );
 			}
 
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
@@ -278,6 +304,23 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ) );
 			exit;
+		}
+
+		/**
+		 * Liefert den aktuellen Nachrichtentext aus der Session (ohne zu löschen).
+		 *
+		 * @return string
+		 */
+		private function peek_message_text(): string {
+			if ( ! session_id() && ! headers_sent() ) {
+				session_start();
+			}
+
+			if ( empty( $_SESSION['afspaces_message']['message'] ) ) {
+				return '';
+			}
+
+			return (string) $_SESSION['afspaces_message']['message'];
 		}
 
 		/**

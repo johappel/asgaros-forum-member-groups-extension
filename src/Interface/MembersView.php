@@ -135,6 +135,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 				<form method="get" class="afspaces-search" role="search" aria-label="<?php echo esc_attr__( 'Mitglieder suchen', 'afspaces' ); ?>">
 					<label for="afp_search"><?php echo esc_html__( 'Person suchen', 'afspaces' ); ?></label>
 					<input type="search" id="afp_search" name="afp_search" value="<?php echo esc_attr( $search ); ?>" />
+					<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_MEMBERS ); ?>" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Suchen', 'afspaces' ); ?></button>
 				</form>
@@ -269,13 +270,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			}
 			$links = '';
 			for ( $i = 1; $i <= $pages; $i++ ) {
-				$url = add_query_arg(
+				$url = SpacesUrls::hub_url(
+					SpacesUrls::VIEW_MEMBERS,
 					array(
 						'space_id'   => $space_id,
 						'afp_page'   => $i,
 						'afp_search' => $search,
-					),
-					get_permalink()
+					)
 				);
 				$current = ( $i === $page ) ? ' aria-current="page"' : '';
 				$links .= sprintf(

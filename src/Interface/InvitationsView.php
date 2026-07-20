@@ -184,6 +184,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				<form method="get" class="afspaces-search" role="search" aria-label="<?php echo esc_attr__( 'Benutzer für Einladung suchen', 'afspaces' ); ?>">
 					<label for="inv_search"><?php echo esc_html__( 'Person suchen', 'afspaces' ); ?></label>
 					<input type="search" id="inv_search" name="inv_search" value="<?php echo esc_attr( $search ); ?>" />
+					<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_INVITATIONS ); ?>" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Suchen', 'afspaces' ); ?></button>
 				</form>
@@ -220,6 +221,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 
 				<h3><?php echo esc_html__( 'Einladungen dieses Raums', 'afspaces' ); ?></h3>
 				<form method="get" class="afspaces-filter" aria-label="<?php echo esc_attr__( 'Einladungen filtern', 'afspaces' ); ?>">
+					<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_INVITATIONS ); ?>" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 					<label for="inv_status"><?php echo esc_html__( 'Status', 'afspaces' ); ?></label>
 					<select id="inv_status" name="inv_status">
