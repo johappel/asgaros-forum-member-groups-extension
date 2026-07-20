@@ -51,9 +51,58 @@
 			});
 	}
 
+	function refreshFromUrl(url) {
+		return fetch(url, {
+			credentials: 'same-origin'
+		})
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error('Refresh failed');
+				}
+				return response.text();
+			})
+			.then(function (html) {
+				var parser = new DOMParser();
+				var doc = parser.parseFromString(html, 'text/html');
+				var currentWrapper = document.querySelector('#af-wrapper.afspaces-wrapper');
+				var newWrapper = doc.querySelector('#af-wrapper.afspaces-wrapper');
+
+				if (!currentWrapper || !newWrapper) {
+					throw new Error('Wrapper not found');
+				}
+
+				currentWrapper.replaceWith(newWrapper);
+			});
+	}
+
+	function isAjaxSearchForm(form) {
+		return !!form.closest('#afspaces-invitations-view') && (form.classList.contains('afspaces-search') || form.classList.contains('afspaces-filter'));
+	}
+
+	function handleAjaxGetForm(form) {
+		var url = new URL(form.action || window.location.href, window.location.origin);
+		var params = new URLSearchParams(new FormData(form));
+
+		params.forEach(function (value, key) {
+			url.searchParams.set(key, value);
+		});
+
+		return refreshFromUrl(url.toString()).then(function () {
+			history.replaceState({}, '', url.toString());
+		});
+	}
+
 	document.addEventListener('submit', function (event) {
 		var form = event.target;
 		if (!form || form.tagName !== 'FORM' || String(form.method).toLowerCase() !== 'post') {
+			if (!form || form.tagName !== 'FORM' || String(form.method).toLowerCase() !== 'get' || !isAjaxSearchForm(form)) {
+				return;
+			}
+
+			event.preventDefault();
+			handleAjaxGetForm(form).catch(function () {
+				form.submit();
+			});
 			return;
 		}
 

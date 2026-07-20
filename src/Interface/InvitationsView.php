@@ -80,18 +80,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 
 			ob_start();
 			?>
-			<section class="afspaces-invitations" aria-labelledby="afspaces-invitations-heading">
+			<section class="afspaces-invitations" id="afspaces-invitations-view" aria-labelledby="afspaces-invitations-heading">
 				<h2 id="afspaces-invitations-heading"><?php echo esc_html( sprintf( __( 'Einladungen - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<?php
-				$dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
-				?>
-				<p>
-					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
-						<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-					</a>
-				</p>
-				<p><strong><?php echo esc_html__( 'Raum:', 'afspaces' ); ?></strong> <?php echo esc_html( $forum_name ); ?></p>
 				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
 				<?php echo $this->render_created_invite_link(); ?>
 
@@ -192,7 +183,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				<?php if ( ! empty( $search_results ) ) : ?>
 					<p class="description"><?php echo esc_html__( 'Wähle eine Person aus der Liste und sende eine persönliche Einladung mit optionaler Nachricht und Laufzeit.', 'afspaces' ); ?></p>
 					<h3><?php echo esc_html__( 'Benutzer einladen', 'afspaces' ); ?></h3>
-					<ul class="afspaces-search-results">
+					<ul class="afspaces-search-results" id="afspaces-invite-search-results">
 						<?php foreach ( $search_results as $user ) : ?>
 							<li>
 								<div>
@@ -209,7 +200,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 										<input type="text" name="message" maxlength="500" placeholder="<?php echo esc_attr__( 'Optionale Nachricht', 'afspaces' ); ?>" />
 									</label>
 									<label>
-										<span class="screen-reader-text"><?php echo esc_html__( 'Ablauf in Tagen', 'afspaces' ); ?></span>
+										<span><?php echo esc_html__( 'Gültigkeit der Einladung läuft nach x Tagen ab. Zahl der Tage angeben.', 'afspaces' ); ?></span>
 										<input type="number" name="expires_in_days" min="1" max="30" value="7" />
 									</label>
 									<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Einladen', 'afspaces' ); ?></button>
