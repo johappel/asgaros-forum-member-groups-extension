@@ -80,6 +80,8 @@ final class InviteLinkFlowTest extends IntegrationTestCase {
 
 		$this->assertSame( 'request_created', $used['result'] );
 		$this->assertFalse( \AsgarosForumUserGroups::isUserInUserGroup( $target, $this->group_id ) );
+		$pending = $this->join_request_repository->find_pending_for_user( $space_id, $target );
+		$this->assertNotNull( $pending );
 		$this->assertNotEmpty( $this->audit->list_for_space( $space_id ) );
 	}
 

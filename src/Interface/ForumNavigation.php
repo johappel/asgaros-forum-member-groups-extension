@@ -94,9 +94,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			$managed_count = $this->managed_space_count( $user_id );
 			$pending_count = $this->pending_count( $user_id );
 			$can_create    = $this->can_create_spaces( $user_id );
+			$can_discover  = is_user_logged_in();
 
 			// Panel nur anzeigen, wenn es für den Benutzer relevant ist.
-			if ( 0 === $managed_count && 0 === $pending_count && ! $can_create ) {
+			if ( 0 === $managed_count && 0 === $pending_count && ! $can_create && ! $can_discover ) {
 				return;
 			}
 
@@ -146,6 +147,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
 					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ) ),
 					esc_html__( 'Raum gründen', 'afspaces' )
+				);
+			}
+
+			if ( $can_discover ) {
+				printf(
+					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
+					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ) ),
+					esc_html__( 'Raeume entdecken', 'afspaces' )
 				);
 			}
 
@@ -210,6 +219,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			}
 
 			if ( $this->pending_count( $user_id ) > 0 ) {
+				return true;
+			}
+
+			if ( is_user_logged_in() ) {
 				return true;
 			}
 

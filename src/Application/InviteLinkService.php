@@ -37,6 +37,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\InviteLinkService' ) ) {
 		private AsgarosAdapterInterface $asgaros;
 		private SpacePolicy $policy;
 		private AuditRepository $audit;
+		private ?JoinRequestService $join_requests;
 		private InviteLinkToken $tokens;
 
 		public function __construct(
@@ -45,6 +46,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\InviteLinkService' ) ) {
 			AsgarosAdapterInterface $asgaros,
 			SpacePolicy $policy,
 			AuditRepository $audit,
+			?JoinRequestService $join_requests = null,
 			?InviteLinkToken $tokens = null
 		) {
 			$this->spaces  = $spaces;
@@ -52,6 +54,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\InviteLinkService' ) ) {
 			$this->asgaros = $asgaros;
 			$this->policy  = $policy;
 			$this->audit   = $audit;
+			$this->join_requests = $join_requests;
 			$this->tokens  = $tokens ?? new InviteLinkToken();
 		}
 
@@ -218,6 +221,9 @@ if ( ! class_exists( 'AFSpaces\\Application\\InviteLinkService' ) ) {
 			}
 
 			if ( InviteLink::MODE_APPROVAL_REQUIRED === $link->approval_mode ) {
+				if ( $this->join_requests ) {
+					$this->join_requests->create_request( $space->id, $actor_user_id );
+				}
 				$this->audit->log( $space->id, $actor_user_id, $actor_user_id, 'invite_link_join_requested', 'invite_link' );
 				return array(
 					'result'    => 'request_created',

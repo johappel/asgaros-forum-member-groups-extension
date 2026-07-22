@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Core\Capabilities;
@@ -51,6 +52,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private InviteLinkService $invite_links;
 
 		/**
+		 * @var JoinRequestService
+		 */
+		private JoinRequestService $join_requests;
+
+		/**
 		 * @var SpaceRegistrationService
 		 */
 		private SpaceRegistrationService $space_registration;
@@ -73,6 +79,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			AsgarosAdapterInterface $asgaros,
 			MemberService $members,
 			InvitationService $invitations,
+			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
 			SpaceRegistrationService $space_registration
 		) {
@@ -80,6 +87,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$this->asgaros = $asgaros;
 			$this->members = $members;
 			$this->invitations = $invitations;
+			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 			$this->space_registration = $space_registration;
 		}
@@ -257,6 +265,20 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 					wp_safe_redirect( (string) $preview['registration_url'] );
 					exit;
+				} elseif ( 'create_join_request' === $action ) {
+					$message = isset( $_POST['request_message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['request_message'] ) ) : '';
+					$this->join_requests->create_request( $space_id, $actor, $message );
+					$this->set_message( 'success', __( 'Deine Beitrittsanfrage wurde gespeichert.', 'afspaces' ) );
+				} elseif ( 'approve_join_request' === $action ) {
+					$request_id = isset( $_POST['join_request_id'] ) ? (int) $_POST['join_request_id'] : 0;
+					$decision_message = isset( $_POST['decision_message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['decision_message'] ) ) : '';
+					$this->join_requests->approve_request( $request_id, $actor, $decision_message );
+					$this->set_message( 'success', __( 'Die Beitrittsanfrage wurde genehmigt.', 'afspaces' ) );
+				} elseif ( 'reject_join_request' === $action ) {
+					$request_id = isset( $_POST['join_request_id'] ) ? (int) $_POST['join_request_id'] : 0;
+					$decision_message = isset( $_POST['decision_message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['decision_message'] ) ) : '';
+					$this->join_requests->reject_request( $request_id, $actor, $decision_message );
+					$this->set_message( 'success', __( 'Die Beitrittsanfrage wurde abgelehnt.', 'afspaces' ) );
 				} elseif ( 'register_space' === $action ) {
 					$forum_id = isset( $_POST['forum_id'] ) ? (int) $_POST['forum_id'] : 0;
 					$space = $this->space_registration->register_existing_forum( $forum_id, $actor );
@@ -283,7 +305,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
 			$ref = wp_get_referer() ?: home_url();
-			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation', 'create_invite_link', 'revoke_invite_link', 'shorten_invite_link' ), true ) ) {
+			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation', 'create_invite_link', 'revoke_invite_link', 'shorten_invite_link', 'approve_join_request', 'reject_join_request' ), true ) ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ) );
 				exit;
 			}
@@ -299,6 +321,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$args['invite_link'] = $invite_link_token;
 				}
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_MY_INVITATIONS, $args ) );
+				exit;
+			}
+
+			if ( 'create_join_request' === $action ) {
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ) );
 				exit;
 			}
 

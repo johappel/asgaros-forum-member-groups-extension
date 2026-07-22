@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\Capabilities;
 
@@ -29,6 +30,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private AsgarosAdapterInterface $asgaros;
 		private MemberService $members;
 		private InvitationService $invitations;
+		private JoinRequestService $join_requests;
 		private InviteLinkService $invite_links;
 
 		/**
@@ -40,6 +42,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			AsgarosAdapterInterface $asgaros,
 			MemberService $members,
 			InvitationService $invitations,
+			JoinRequestService $join_requests,
 			InviteLinkService $invite_links
 		) {
 			$this->frontend     = $frontend;
@@ -47,6 +50,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->asgaros      = $asgaros;
 			$this->members      = $members;
 			$this->invitations  = $invitations;
+			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 		}
 
@@ -139,12 +143,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return $members_view->render( $space_id );
 
 				case SpacesUrls::VIEW_INVITATIONS:
-					$inv_view = new InvitationsView( $this->spaces, $this->asgaros, $this->invitations, $this->members, $this->invite_links );
+					$inv_view = new InvitationsView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->members, $this->invite_links );
 					return $inv_view->render( $space_id );
 
 				case SpacesUrls::VIEW_MY_INVITATIONS:
-					$mine_view = new MyInvitationsView( $this->invitations, $this->invite_links, $this->spaces, $this->asgaros );
+					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros );
 					return $mine_view->render();
+
+				case SpacesUrls::VIEW_DISCOVER:
+					$discover_view = new DiscoverView( $this->spaces, $this->asgaros, $this->join_requests );
+					return $discover_view->render();
 
 				case SpacesUrls::VIEW_CREATE:
 					return $this->render_create_placeholder();
@@ -218,6 +226,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				'label'  => __( 'Meine Einladungen', 'afspaces' ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_MY_INVITATIONS ),
 				'active' => SpacesUrls::VIEW_MY_INVITATIONS === $view,
+			);
+
+			$tabs[] = array(
+				'view'   => SpacesUrls::VIEW_DISCOVER,
+				'label'  => __( 'Raeume entdecken', 'afspaces' ),
+				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ),
+				'active' => SpacesUrls::VIEW_DISCOVER === $view,
 			);
 
 			// Kontextbezogene Tabs, wenn ein Raum aktiv verwaltet wird.
@@ -319,6 +334,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return __( 'Einladungen', 'afspaces' );
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					return __( 'Meine Einladungen', 'afspaces' );
+				case SpacesUrls::VIEW_DISCOVER:
+					return __( 'Raeume entdecken', 'afspaces' );
 				case SpacesUrls::VIEW_CREATE:
 					return __( 'Raum gründen', 'afspaces' );
 				default:

@@ -428,24 +428,34 @@
 	box-sizing: border-box;
 }
 
-#af-wrapper .afspaces-button,
-#af-wrapper .afspaces-button:link,
-#af-wrapper .afspaces-button:visited {
+#af-wrapper a.afspaces-button:not(a.button):not(a.highlight-admin):not(a.highlight-moderator),
+#af-wrapper a.afspaces-button:link:not(a.button):not(a.highlight-admin):not(a.highlight-moderator),
+#af-wrapper a.afspaces-button:visited:not(a.button):not(a.highlight-admin):not(a.highlight-moderator) {
 	color: #fff !important;
 	text-decoration: none;
 }
+
 
 #af-wrapper .afspaces-button:hover,
 #af-wrapper .afspaces-button:focus {
 	color: #fff !important;
 }
 
-#af-wrapper .afspaces-button-secondary,
-#af-wrapper .afspaces-button-secondary:link,
-#af-wrapper .afspaces-button-secondary:visited {
+
+
+
+#af-wrapper a.afspaces-button-secondary:not(a.button):not(a.highlight-admin):not(a.highlight-moderator),
+#af-wrapper a.afspaces-button-secondary:link:not(a.button):not(a.highlight-admin):not(a.highlight-moderator),
+#af-wrapper a.afspaces-button-secondary:visited:not(a.button):not(a.highlight-admin):not(a.highlight-moderator) {
 	background: #50575e !important;
 	border-color: #50575e !important;
 	color: #fff !important;
+}
+
+#af-wrapper a.afspaces-button-secondary:hover:not(a.button):not(a.highlight-admin):not(a.highlight-moderator)
+{
+  background: #5c677c !important;
+
 }
 
 #af-wrapper .afspaces-forum-panel-heading {

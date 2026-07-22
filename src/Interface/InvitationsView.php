@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\DomainException;
 
@@ -26,16 +27,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
 		private InvitationService $invitations;
+		private JoinRequestService $join_requests;
 		private MemberService $members;
 		private InviteLinkService $invite_links;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, MemberService $members, InviteLinkService $invite_links ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, JoinRequestService $join_requests, MemberService $members, InviteLinkService $invite_links ) {
 			$this->spaces      = $spaces;
 			$this->asgaros     = $asgaros;
 			$this->invitations = $invitations;
+			$this->join_requests = $join_requests;
 			$this->members     = $members;
 			$this->invite_links = $invite_links;
 		}
@@ -63,6 +66,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			try {
 				$list = $this->invitations->list_space_invitations( $space_id, $actor, '' !== $status_filter ? $status_filter : null );
 				$link_list = $this->invite_links->list_links( $space_id, $actor );
+				$join_requests = $this->join_requests->list_space_requests( $space_id, $actor, null );
 			} catch ( DomainException $e ) {
 				return $this->notice( $e->getMessage() );
 			}
@@ -163,6 +167,64 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 												</form>
 											<?php else : ?>
 												<span><?php echo esc_html__( 'Keine Aktion', 'afspaces' ); ?></span>
+											<?php endif; ?>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+					<?php endif; ?>
+				</section>
+
+				<section class="afspaces-join-requests" aria-labelledby="afspaces-join-requests-heading">
+					<h3 id="afspaces-join-requests-heading"><?php echo esc_html__( 'Beitrittsanfragen', 'afspaces' ); ?></h3>
+					<?php if ( empty( $join_requests ) ) : ?>
+						<p><?php echo esc_html__( 'Es sind derzeit keine Beitrittsanfragen vorhanden.', 'afspaces' ); ?></p>
+					<?php else : ?>
+						<table class="afspaces-member-table afspaces-invitations-table">
+							<thead>
+								<tr>
+									<th><?php echo esc_html__( 'Person', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Anfrage', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Entscheidung', 'afspaces' ); ?></th>
+									<th><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php foreach ( $join_requests as $request ) : ?>
+									<?php $requester = get_userdata( $request->requester_user_id ); ?>
+									<tr>
+										<td><?php echo esc_html( $requester ? $requester->display_name : (string) $request->requester_user_id ); ?></td>
+										<td><?php echo esc_html( $request->status ); ?></td>
+										<td><?php echo esc_html( $request->request_message ); ?></td>
+										<td><?php echo esc_html( $request->decision_message ); ?></td>
+										<td>
+											<?php if ( 'pending' === $request->status ) : ?>
+												<form method="post" class="afspaces-inline-form">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="approve_join_request" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="join_request_id" value="<?php echo esc_attr( (string) $request->id ); ?>" />
+													<label>
+														<span class="screen-reader-text"><?php echo esc_html__( 'Hinweis zur Entscheidung', 'afspaces' ); ?></span>
+														<input type="text" name="decision_message" maxlength="500" placeholder="<?php echo esc_attr__( 'Optionale Notiz', 'afspaces' ); ?>" />
+													</label>
+													<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Genehmigen', 'afspaces' ); ?></button>
+												</form>
+												<form method="post" class="afspaces-inline-form">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="reject_join_request" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="join_request_id" value="<?php echo esc_attr( (string) $request->id ); ?>" />
+													<label>
+														<span class="screen-reader-text"><?php echo esc_html__( 'Hinweis zur Entscheidung', 'afspaces' ); ?></span>
+														<input type="text" name="decision_message" maxlength="500" placeholder="<?php echo esc_attr__( 'Optionale Notiz', 'afspaces' ); ?>" />
+													</label>
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Ablehnen', 'afspaces' ); ?></button>
+												</form>
+											<?php else : ?>
+												<span><?php echo esc_html__( 'Bereits entschieden', 'afspaces' ); ?></span>
 											<?php endif; ?>
 										</td>
 									</tr>

@@ -76,7 +76,24 @@
 	}
 
 	function isAjaxSearchForm(form) {
-		return !!form.closest('#afspaces-invitations-view') && (form.classList.contains('afspaces-search') || form.classList.contains('afspaces-filter'));
+		return !!form.closest('#af-wrapper.afspaces-wrapper') && (form.classList.contains('afspaces-search') || form.classList.contains('afspaces-filter'));
+	}
+
+	function scheduleAutoSearch(form) {
+		if (!isAjaxSearchForm(form) || !form.classList.contains('afspaces-search')) {
+			return;
+		}
+
+		var existingTimer = form.__afspacesAutoSearchTimer;
+		if (existingTimer) {
+			window.clearTimeout(existingTimer);
+		}
+
+		form.__afspacesAutoSearchTimer = window.setTimeout(function () {
+			handleAjaxGetForm(form).catch(function () {
+				form.submit();
+			});
+		}, 350);
 	}
 
 	function handleAjaxGetForm(form) {
@@ -166,5 +183,39 @@
 					submitButton.disabled = false;
 				}
 			});
+	});
+
+	document.addEventListener('input', function (event) {
+		var target = event.target;
+		if (!target || target.tagName !== 'INPUT') {
+			return;
+		}
+
+		if (String(target.type).toLowerCase() !== 'search') {
+			return;
+		}
+
+		var form = target.closest('form.afspaces-search');
+		if (!form) {
+			return;
+		}
+
+		scheduleAutoSearch(form);
+	});
+
+	document.addEventListener('change', function (event) {
+		var target = event.target;
+		if (!target || target.tagName !== 'SELECT') {
+			return;
+		}
+
+		var form = target.closest('form.afspaces-filter');
+		if (!form) {
+			return;
+		}
+
+		handleAjaxGetForm(form).catch(function () {
+			form.submit();
+		});
 	});
 })();

@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
@@ -54,6 +55,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		private InviteLinkService $invite_links;
 
 		/**
+		 * @var JoinRequestService
+		 */
+		private JoinRequestService $join_requests;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param SpaceRepository         $spaces  Space-Repository.
@@ -66,12 +72,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			AsgarosAdapterInterface $asgaros,
 			MemberService $members,
 			InvitationService $invitations,
+			JoinRequestService $join_requests,
 			InviteLinkService $invite_links
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
 			$this->members = $members;
 			$this->invitations = $invitations;
+			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 		}
 
@@ -82,6 +90,80 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		 */
 		public function register_routes(): void {
 			$namespace = 'afspaces/v1';
+
+			register_rest_route(
+				$namespace,
+				'/spaces/discover',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'get_discover_spaces' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/join-requests',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'get_join_requests' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+					),
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'create_join_request' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+						'args'                => array(
+							'request_message' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_textarea_field',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/join-requests/(?P<request_id>\d+)/approve',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'approve_join_request' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+						'args'                => array(
+							'decision_message' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_textarea_field',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/join-requests/(?P<request_id>\d+)/reject',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'reject_join_request' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+						'args'                => array(
+							'decision_message' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_textarea_field',
+							),
+						),
+					),
+				)
+			);
 
 			register_rest_route(
 				$namespace,
@@ -884,6 +966,146 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			}
 
 			return new WP_REST_Response( $result, 200 );
+		}
+
+		/**
+		 * GET /spaces/discover
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response
+		 */
+		public function get_discover_spaces( WP_REST_Request $request ): WP_REST_Response {
+			$actor = get_current_user_id();
+			$spaces = $this->spaces->list_spaces();
+			$items = array();
+
+			foreach ( $spaces as $space ) {
+				if ( 'active' !== $space->status ) {
+					continue;
+				}
+				if ( $this->spaces->is_manager( $space->id, $actor ) ) {
+					continue;
+				}
+				if ( $this->asgaros->is_user_in_group( $actor, $space->primary_group_id ) ) {
+					continue;
+				}
+
+				$forum = $this->asgaros->get_forum( $space->forum_id );
+				if ( ! $forum ) {
+					continue;
+				}
+
+				$items[] = array(
+					'space_id'            => $space->id,
+					'forum_name'          => (string) ( $forum['name'] ?? sprintf( 'Space #%d', $space->id ) ),
+					'short_description'   => (string) ( $forum['description'] ?? '' ),
+					'status'              => 'closed',
+				);
+			}
+
+			return new WP_REST_Response( array( 'spaces' => $items ), 200 );
+		}
+
+		/**
+		 * GET /spaces/{id}/join-requests
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function get_join_requests( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor    = get_current_user_id();
+
+			try {
+				$list = $this->join_requests->list_space_requests( $space_id, $actor, null );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_join_request_list_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			$items = array_map(
+				static function ( $request_item ): array {
+					return array(
+						'id'               => $request_item->id,
+						'space_id'         => $request_item->space_id,
+						'requester_user_id' => $request_item->requester_user_id,
+						'request_message'  => $request_item->request_message,
+						'status'           => $request_item->status,
+						'decider_user_id'  => $request_item->decider_user_id,
+						'decision_message' => $request_item->decision_message,
+					);
+				},
+				$list
+			);
+
+			return new WP_REST_Response( array( 'join_requests' => $items ), 200 );
+		}
+
+		/**
+		 * POST /spaces/{id}/join-requests
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function create_join_request( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor    = get_current_user_id();
+			$message  = (string) ( $request['request_message'] ?? '' );
+
+			try {
+				$join_request = $this->join_requests->create_request( $space_id, $actor, $message );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_join_request_create_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response(
+				array(
+					'id'               => $join_request->id,
+					'space_id'         => $join_request->space_id,
+					'requester_user_id' => $join_request->requester_user_id,
+					'status'           => $join_request->status,
+				),
+				201
+			);
+		}
+
+		/**
+		 * POST /spaces/{space_id}/join-requests/{request_id}/approve
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function approve_join_request( WP_REST_Request $request ) {
+			$request_id = (int) $request['request_id'];
+			$actor      = get_current_user_id();
+			$message    = (string) ( $request['decision_message'] ?? '' );
+
+			try {
+				$join_request = $this->join_requests->approve_request( $request_id, $actor, $message );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_join_request_approve_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'id' => $join_request->id, 'status' => $join_request->status ), 200 );
+		}
+
+		/**
+		 * POST /spaces/{space_id}/join-requests/{request_id}/reject
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function reject_join_request( WP_REST_Request $request ) {
+			$request_id = (int) $request['request_id'];
+			$actor      = get_current_user_id();
+			$message    = (string) ( $request['decision_message'] ?? '' );
+
+			try {
+				$join_request = $this->join_requests->reject_request( $request_id, $actor, $message );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_join_request_reject_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'id' => $join_request->id, 'status' => $join_request->status ), 200 );
 		}
 
 		/**

@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Core\DomainException;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
@@ -23,6 +24,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 	class MyInvitationsView {
 
 		private InvitationService $invitations;
+		private JoinRequestService $join_requests;
 		private InviteLinkService $invite_links;
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
@@ -30,8 +32,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( InvitationService $invitations, InviteLinkService $invite_links, SpaceRepository $spaces, AsgarosAdapterInterface $asgaros ) {
+		public function __construct( InvitationService $invitations, JoinRequestService $join_requests, InviteLinkService $invite_links, SpaceRepository $spaces, AsgarosAdapterInterface $asgaros ) {
 			$this->invitations = $invitations;
+			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 			$this->spaces      = $spaces;
 			$this->asgaros     = $asgaros;
@@ -54,6 +57,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 
 			$actor = $this->current_user_id();
 			$list  = $this->invitations->list_my_invitations( $actor );
+			$join_requests = $this->join_requests->list_my_requests( $actor );
 			$dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
 
 			ob_start();
@@ -104,6 +108,30 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 									</div>
 								<?php else : ?>
 									<p><?php echo esc_html__( 'Diese Einladung ist bereits abgeschlossen.', 'afspaces' ); ?></p>
+								<?php endif; ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+
+				<h3><?php echo esc_html__( 'Meine Beitrittsanfragen', 'afspaces' ); ?></h3>
+				<?php if ( empty( $join_requests ) ) : ?>
+					<p><?php echo esc_html__( 'Du hast aktuell keine Beitrittsanfragen.', 'afspaces' ); ?></p>
+				<?php else : ?>
+					<ul class="afspaces-space-list">
+						<?php foreach ( $join_requests as $request ) : ?>
+							<?php
+							$space  = $this->spaces->get_space( $request->space_id );
+							$forum  = $space ? $this->asgaros->get_forum( $space->forum_id ) : null;
+							?>
+							<li class="afspaces-space-item">
+								<h3><?php echo esc_html( $forum['name'] ?? sprintf( 'Space #%d', $request->space_id ) ); ?></h3>
+								<p><strong><?php echo esc_html__( 'Status:', 'afspaces' ); ?></strong> <?php echo esc_html( $request->status ); ?></p>
+								<?php if ( '' !== $request->request_message ) : ?>
+									<p><strong><?php echo esc_html__( 'Deine Nachricht:', 'afspaces' ); ?></strong> <?php echo esc_html( $request->request_message ); ?></p>
+								<?php endif; ?>
+								<?php if ( '' !== $request->decision_message ) : ?>
+									<p><strong><?php echo esc_html__( 'Rueckmeldung:', 'afspaces' ); ?></strong> <?php echo esc_html( $request->decision_message ); ?></p>
 								<?php endif; ?>
 							</li>
 						<?php endforeach; ?>

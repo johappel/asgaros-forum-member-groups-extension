@@ -11,11 +11,13 @@ namespace AFSpaces\Tests\Integration;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapter;
 use AFSpaces\Adapters\Database\AuditRepository;
+use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InviteLinkRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
@@ -91,6 +93,16 @@ abstract class IntegrationTestCase extends TestCase {
 	protected InvitationService $invitation_service;
 
 	/**
+	 * @var JoinRequestRepository
+	 */
+	protected JoinRequestRepository $join_request_repository;
+
+	/**
+	 * @var JoinRequestService
+	 */
+	protected JoinRequestService $join_request_service;
+
+	/**
 	 * @var InviteLinkService
 	 */
 	protected InviteLinkService $invite_link_service;
@@ -116,6 +128,7 @@ abstract class IntegrationTestCase extends TestCase {
 		$this->policy  = new SpacePolicy( $this->spaces );
 		$this->audit   = new AuditRepository();
 		$this->invitation_repository = new InvitationRepository();
+		$this->join_request_repository = new JoinRequestRepository();
 		$this->invite_link_repository = new InviteLinkRepository();
 		$this->members = new MemberService( $this->spaces, $this->asgaros, $this->policy, $this->audit );
 		$this->invitation_service = new InvitationService(
@@ -125,18 +138,27 @@ abstract class IntegrationTestCase extends TestCase {
 			$this->policy,
 			$this->audit
 		);
+		$this->join_request_service = new JoinRequestService(
+			$this->spaces,
+			$this->join_request_repository,
+			$this->asgaros,
+			$this->policy,
+			$this->audit
+		);
 		$this->invite_link_service = new InviteLinkService(
 			$this->spaces,
 			$this->invite_link_repository,
 			$this->asgaros,
 			$this->policy,
-			$this->audit
+			$this->audit,
+			$this->join_request_service
 		);
 
 		// Tabellen sicherstellen.
 		$this->spaces->install();
 		$this->audit->install();
 		$this->invitation_repository->install();
+		$this->join_request_repository->install();
 		$this->invite_link_repository->install();
 
 		// Admin-Capabilities sicherstellen.
@@ -185,6 +207,7 @@ abstract class IntegrationTestCase extends TestCase {
 
 			$tables = array(
 				$wpdb->prefix . 'afspaces_invitations',
+				$wpdb->prefix . 'afspaces_join_requests',
 				$wpdb->prefix . 'afspaces_invite_links',
 				$wpdb->prefix . 'afspaces_audit',
 				$wpdb->prefix . 'afspaces_space_managers',
