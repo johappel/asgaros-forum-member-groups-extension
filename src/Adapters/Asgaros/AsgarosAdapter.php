@@ -173,6 +173,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				'id'          => (int) ( $row['id'] ?? 0 ),
 				'category_id' => $category_id,
 				'name'        => $row['name'] ?? '',
+				'slug'        => (string) ( $row['slug'] ?? '' ),
 				'parent_forum' => (int) ( $row['parent_forum'] ?? 0 ),
 			);
 		}

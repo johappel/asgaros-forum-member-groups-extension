@@ -2,7 +2,7 @@
 
 ## Ziel
 
-Nicht eingeladene, angemeldete Benutzer koennen geschlossene Raeume entdecken und einen Beitritt anfragen. Raumverantwortliche koennen Anfragen genehmigen oder ablehnen.
+Nicht eingeladene, angemeldete Benutzer koennen geschlossene Räume entdecken und einen Beitritt anfragen. Raumverantwortliche koennen Anfragen genehmigen oder ablehnen.
 
 ## Bereits abgeschlossen
 
@@ -32,6 +32,7 @@ Nicht eingeladene, angemeldete Benutzer koennen geschlossene Raeume entdecken un
 - [x] Frontend-Actions create_join_request, approve_join_request, reject_join_request umgesetzt.
 - [x] Manager-Ansicht in InvitationsView um Beitrittsanfragen erweitert.
 - [x] Nutzeransicht MyInvitationsView um eigene Beitrittsanfragen erweitert.
+- [x] Dashboard zeigt fuer reine Mitglieder (ohne Managerrolle) ihre Mitgliedschaften inkl. Einstiegslink ins Forum.
 
 ### M3.1.5 Invite-Link-Integration
 
@@ -57,7 +58,7 @@ Nicht eingeladene, angemeldete Benutzer koennen geschlossene Raeume entdecken un
 
 - [x] Integrationstests in lauffaehiger WP-Umgebung (inkl. mysqli) ausfuehren.
 - [x] REST-Sicherheitstests fuer neue Endpunkte erweitern (Permission, IDOR, Fehlermeldungen).
-- [ ] E2E-Tests fuer Discover + Join-Request + Manager-Entscheidung erstellen.
+- [x] E2E-Tests fuer Discover + Join-Request + Manager-Entscheidung erstellen.
 - [ ] Axe/Keyboard-Checks fuer neue Discover-/Join-Request-Oberflaechen ergaenzen.
 
 ### M3.1.9 Privacy und Doku
@@ -68,4 +69,4 @@ Nicht eingeladene, angemeldete Benutzer koennen geschlossene Raeume entdecken un
 
 ## Akzeptanzkriterien
 
-MVP 3.1 ist abgeschlossen, wenn ein angemeldeter Nicht-Mitgliedsbenutzer geschlossene Raeume sehen und idempotent einen Beitritt anfragen kann, Raumverantwortliche die Anfrage entscheiden koennen, Genehmigung zur Mitgliedschaft fuehrt, Ablehnung keine Mitgliedschaft erzeugt, und die neuen Flows durch Unit-, Integration-, REST-, E2E- sowie Accessibility-Tests abgedeckt sind.
+MVP 3.1 ist abgeschlossen, wenn ein angemeldeter Nicht-Mitgliedsbenutzer geschlossene Räume sehen und idempotent einen Beitritt anfragen kann, Raumverantwortliche die Anfrage entscheiden koennen, Genehmigung zur Mitgliedschaft fuehrt, Ablehnung keine Mitgliedschaft erzeugt, und die neuen Flows durch Unit-, Integration-, REST-, E2E- sowie Accessibility-Tests abgedeckt sind.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Frontend-Ansicht zum Entdecken von Raeumen und Senden von Beitrittsanfragen.
+ * Frontend-Ansicht zum Entdecken von Räumen und Senden von Beitrittsanfragen.
  *
  * @package AFSpaces
  */
@@ -70,12 +70,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DiscoverView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-discover" aria-labelledby="afspaces-discover-heading">
-				<h2 id="afspaces-discover-heading"><?php echo esc_html__( 'Raeume entdecken', 'afspaces' ); ?></h2>
+				<h2 id="afspaces-discover-heading"><?php echo esc_html__( 'Räume entdecken', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier kannst du geschlossene Raeume sehen und einen Beitritt anfragen.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier kannst du geschlossene Räume sehen und einen Beitritt anfragen.', 'afspaces' ); ?></p>
 
 				<?php if ( empty( $discoverable ) ) : ?>
-					<p><?php echo esc_html__( 'Derzeit sind keine weiteren Raeume fuer dich verfuegbar.', 'afspaces' ); ?></p>
+					<p><?php echo esc_html__( 'Derzeit sind keine weiteren Räume fuer dich verfuegbar.', 'afspaces' ); ?></p>
 				<?php else : ?>
 					<ul class="afspaces-space-list">
 						<?php foreach ( $discoverable as $item ) : ?>

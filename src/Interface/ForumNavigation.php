@@ -154,7 +154,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				printf(
 					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
 					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ) ),
-					esc_html__( 'Raeume entdecken', 'afspaces' )
+					esc_html__( 'Räume entdecken', 'afspaces' )
 				);
 			}
 

@@ -403,13 +403,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$registrable_forums = $this->space_registration->list_registrable_forums( $actor );
 
 			$manageable = array();
+			$member_spaces = array();
 			foreach ( $spaces as $space ) {
+				// Skip orphaned spaces (forum_id points to non-existent forum).
+				$forum = $this->asgaros->get_forum( $space->forum_id );
+				if ( empty( $forum ) ) {
+					continue;
+				}
+
 				if ( $this->can_manage_space( $space->id, $actor ) ) {
-					// Skip orphaned spaces (forum_id points to non-existent forum).
-					$forum = $this->asgaros->get_forum( $space->forum_id );
-					if ( ! empty( $forum ) ) {
-						$manageable[] = $space;
-					}
+					$manageable[] = $space;
+					continue;
+				}
+
+				if ( $this->is_member_of_space( $space, $actor ) ) {
+					$member_spaces[] = $space;
 				}
 			}
 
@@ -419,9 +427,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				<h2 id="afspaces-dashboard-heading"><?php echo esc_html__( 'Meine Räume', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
 
-				<?php if ( empty( $manageable ) ) : ?>
+				<?php if ( empty( $manageable ) && empty( $member_spaces ) ) : ?>
 					<p><?php echo esc_html__( 'Dir sind noch keine Räume zugeordnet.', 'afspaces' ); ?></p>
-				<?php else : ?>
+				<?php endif; ?>
+
+				<?php if ( ! empty( $manageable ) ) : ?>
 					<ul class="afspaces-space-list">
 						<?php foreach ( $manageable as $space ) : ?>
 							<?php
@@ -451,6 +461,30 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							</li>
 						<?php endforeach; ?>
 					</ul>
+				<?php endif; ?>
+
+				<?php if ( ! empty( $member_spaces ) ) : ?>
+					<section class="afspaces-member-spaces" aria-labelledby="afspaces-member-spaces-heading">
+						<h3 id="afspaces-member-spaces-heading"><?php echo esc_html__( 'Meine Mitgliedschaften', 'afspaces' ); ?></h3>
+						<p><?php echo esc_html__( 'Du bist in diesen Räumen als Mitglied eingetragen.', 'afspaces' ); ?></p>
+						<ul class="afspaces-space-list">
+							<?php foreach ( $member_spaces as $space ) : ?>
+								<?php
+								$forum = $this->asgaros->get_forum( $space->forum_id );
+								$forum_url = (string) apply_filters( 'afspaces_space_forum_url', $this->space_forum_url( $forum ), $space, $forum, $actor );
+								?>
+								<li class="afspaces-space-item">
+									<h3><?php echo esc_html( $forum['name'] ); ?></h3>
+									<p><?php echo esc_html__( 'Du kannst diesen Raum direkt im Forum öffnen.', 'afspaces' ); ?></p>
+									<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
+										<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>">
+											<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
+										</a>
+									</div>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</section>
 				<?php endif; ?>
 
 				<?php if ( $this->can_register_spaces( $actor ) ) : ?>
@@ -531,6 +565,48 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				return true;
 			}
 			return $this->spaces->is_manager( $space_id, $actor );
+		}
+
+		/**
+		 * Prüft, ob ein Benutzer Mitglied der Zugriffsgruppe eines Spaces ist.
+		 *
+		 * @param \AFSpaces\Domain\Space $space Space.
+		 * @param int                      $actor Benutzer-ID.
+		 * @return bool
+		 */
+		private function is_member_of_space( \AFSpaces\Domain\Space $space, int $actor ): bool {
+			$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
+			if ( empty( $group_ids ) && $space->primary_group_id > 0 ) {
+				$group_ids = array( (int) $space->primary_group_id );
+			}
+
+			foreach ( $group_ids as $group_id ) {
+				if ( $this->asgaros->is_user_in_group( $actor, (int) $group_id ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/**
+		 * Baut die direkte URL zur Asgaros-Forumseite.
+		 *
+		 * @param array<string,mixed>|null $forum Forumdaten.
+		 * @return string
+		 */
+		private function space_forum_url( ?array $forum ): string {
+			$fallback = home_url( '/forum/' );
+			if ( empty( $forum ) ) {
+				return $fallback;
+			}
+
+			$slug = isset( $forum['slug'] ) ? sanitize_title( (string) $forum['slug'] ) : '';
+			if ( '' === $slug ) {
+				return $fallback;
+			}
+
+			return home_url( '/forum/forum/' . $slug . '/' );
 		}
 
 		/**

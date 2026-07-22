@@ -230,7 +230,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			$tabs[] = array(
 				'view'   => SpacesUrls::VIEW_DISCOVER,
-				'label'  => __( 'Raeume entdecken', 'afspaces' ),
+				'label'  => __( 'Räume entdecken', 'afspaces' ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ),
 				'active' => SpacesUrls::VIEW_DISCOVER === $view,
 			);
@@ -335,7 +335,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					return __( 'Meine Einladungen', 'afspaces' );
 				case SpacesUrls::VIEW_DISCOVER:
-					return __( 'Raeume entdecken', 'afspaces' );
+					return __( 'Räume entdecken', 'afspaces' );
 				case SpacesUrls::VIEW_CREATE:
 					return __( 'Raum gründen', 'afspaces' );
 				default:

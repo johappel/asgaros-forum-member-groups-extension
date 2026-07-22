@@ -1,0 +1,246 @@
+
+
+Zum Inhalt springen
+				
+					
+					
+				
+					
+				
+			
+				
+			
+
+
+	About
+
+	About
+	Verabredungen
+
+
+Das Netzwerk
+
+	Menschen
+	Organisationen
+
+
+Veranstaltungen
+
+	Veranstaltungsübersicht
+
+
+Forum
+
+	Netzwerk-Forum
+	Forum Live
+
+
+Ressourcen
+
+	Ressourcenübersicht
+
+
+News
+
+	Newsübersicht
+	Newsletter
+
+
+Hilfe
+
+
+
+
+	
+
+
+				
+	
+
+
+
+	
+		Das Netzwerk für Evangelische Familienbildung	
+
+
+
+
+	About
+
+	About
+	Verabredungen
+
+
+Das Netzwerk
+
+	Menschen
+	Organisationen
+
+
+Veranstaltungen
+
+	Veranstaltungsübersicht
+
+
+Forum
+
+	Netzwerk-Forum
+	Forum Live
+
+
+Ressourcen
+
+	Ressourcenübersicht
+
+
+News
+
+	Newsübersicht
+	Newsletter
+
+
+Hilfe
+
+
+Anmelden
+
+
+				
+	
+
+
+
+
+	Menü
+
+	
+		
+		
+		
+	
+Anmelden
+	
+
+		
+	
+
+		
+		
+	
+
+		
+		
+		
+		
+			MenüForum-NavigationForumAnmeldenRegistrierenEntschuldigung, nur angemeldete Benutzer haben Zugang zum Forum.
+		
+
+		
+		
+		
+		
+	
+
+	
+		
+			
+
+	
+
+	
+
+
+	© 2026 - Netzwerk Evangelische Familienbildung
+
+
+
+	Impressum
+Cookie-Richtlinie
+Datenschutzerklärung
+Haftungsausschluss
+Allgemeine Geschäftsbedingungen
+
+
+
+	
+		
+
+	
+
+
+
+	
+			
+
+
+
+	
+			
+
+
+
+	
+			
+
+
+
+
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/blocksy/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+
+            
+                Jetzt anmelden!
+            
+                    
+            .searchwp-live-search-results {
+                opacity: 0;
+                transition: opacity .25s ease-in-out;
+                -moz-transition: opacity .25s ease-in-out;
+                -webkit-transition: opacity .25s ease-in-out;
+                height: 0;
+                overflow: hidden;
+                z-index: 9999995; /* Exceed SearchWP Modal Search Form overlay. */
+                position: absolute;
+                display: none;
+            }
+
+            .searchwp-live-search-results-showing {
+                display: block;
+                opacity: 1;
+                height: auto;
+                overflow: auto;
+            }
+
+            .searchwp-live-search-no-results {
+                padding: 3em 2em 0;
+                text-align: center;
+            }
+
+            .searchwp-live-search-no-min-chars:after {
+                content: "Weiterschreiben";
+                display: block;
+                text-align: center;
+                padding: 2em 2em 0;
+            }
+        
+                
+            var _SEARCHWP_LIVE_AJAX_SEARCH_BLOCKS = true;
+            var _SEARCHWP_LIVE_AJAX_SEARCH_ENGINE = 'default';
+            var _SEARCHWP_LIVE_AJAX_SEARCH_CONFIG = 'default';
+        
+        
+
+
+
+var ct_localizations = {"ajax_url":"http://forums.test/wp-admin/admin-ajax.php","public_url":"http://forums.test/wp-content/themes/blocksy/static/bundle/","rest_url":"http://forums.test/wp-json/","search_url":"http://forums.test/search/QUERY_STRING/","show_more_text":"Mehr anzeigen","more_text":"Mehr","search_live_results":"Suchergebnisse","search_live_no_results":"Keine Ergebnisse","search_live_results_closed":"Search results closed.","search_live_no_result":"Keine Ergebnisse","search_live_one_result":"Du hast %s Ergebnis erhalten. Bitte dr\u00fccke Tab, um es auszuw\u00e4hlen.","search_live_many_results":"Du hast %s Ergebnisse erhalten. Bitte dr\u00fccke Tab, um eines auszuw\u00e4hlen.","search_live_stock_status_texts":{"instock":"Vorr\u00e4tig","outofstock":"Nicht vorr\u00e4tig"},"clipboard_copied":"Kopiert!","clipboard_failed":"Kopieren fehlgeschlagen","expand_submenu":"Dropdown-Men\u00fc erweitern","collapse_submenu":"Dropdown-Men\u00fc ausklappen","dynamic_js_chunks":[{"id":"blocksy_pro_micro_popups","selector":".ct-popup","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/framework/premium/static/bundle/micro-popups.js?ver=2.1.49","version":"2.1.49"},{"id":"blocksy_adv_cpt_filtering","selector":".ct-dynamic-filter a","trigger":"click","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/framework/premium/extensions/post-types-extra/static/bundle/filtering.js?ver=2.1.49","version":"2.1.49"},{"id":"blocksy_adv_cpt_filtering","selector":".ct-dynamic-filter, .ct-dynamic-filter + .entries","trigger":"hover","skipOnTouchDevices":true,"url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/framework/premium/extensions/post-types-extra/static/bundle/filtering.js?ver=2.1.49","version":"2.1.49"},{"id":"blocksy_mega_menu","selector":".menu .ct-ajax-pending","trigger":"slight-mousemove","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/framework/premium/extensions/mega-menu/static/bundle/main.js?ver=2.1.49","global_data":[{"var":"blocksyMegaMenu","data":{"persistence_key":"blocksy:mega-menu:8965c8"}}],"version":"2.1.49"},{"id":"blocksy_account","selector":".ct-account-item[href*=\"account-modal\"], .must-log-in a","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/static/bundle/account.js?ver=2.1.49","deps":[],"global_data":[],"trigger":"click","version":"2.1.49","deps_data":[]},{"id":"blocksy_sticky_header","selector":"header [data-sticky]","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/static/bundle/sticky.js?ver=2.1.49","version":"2.1.49"}],"dynamic_styles":{"lazy_load":"http://forums.test/wp-content/themes/blocksy/static/bundle/non-critical-styles.min.css?ver=2.1.49","search_lazy":"http://forums.test/wp-content/themes/blocksy/static/bundle/non-critical-search-styles.min.css?ver=2.1.49","back_to_top":"http://forums.test/wp-content/themes/blocksy/static/bundle/back-to-top.min.css?ver=2.1.49"},"dynamic_styles_selectors":[{"selector":".ct-header-cart, #woo-cart-panel","url":"http://forums.test/wp-content/themes/blocksy/static/bundle/cart-header-element-lazy.min.css?ver=2.1.49"},{"selector":".flexy","url":"http://forums.test/wp-content/themes/blocksy/static/bundle/flexy.min.css?ver=2.1.49"},{"selector":".ct-pagination","url":"http://forums.test/wp-content/themes/blocksy/static/bundle/pagination.min.css?ver=2.1.49"},{"selector":".ct-popup","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/framework/premium/static/bundle/popups.min.css?ver=2.1.49"},{"selector":".ct-media-container[data-media-id], .ct-dynamic-media[data-media-id]","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/framework/premium/static/bundle/video-lazy.min.css?ver=2.1.49"},{"selector":"#account-modal","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/static/bundle/header-account-modal-lazy.min.css?ver=2.1.49"},{"selector":".ct-header-account","url":"http://forums.test/wp-content/plugins/blocksy-companion-pro/static/bundle/header-account-dropdown-lazy.min.css?ver=2.1.49"}],"login_generic_error_msg":"An unexpected error occurred. Please try again later."};
+//# sourceURL=ct-scripts-js-extra
+
+
+
+var searchwp_live_search_params = [];
+searchwp_live_search_params = {"ajaxurl":"http:\/\/forums.test\/wp-admin\/admin-ajax.php","origin_id":2847,"config":{"default":{"engine":"default","input":{"delay":300,"min_chars":3},"results":{"position":"bottom","width":"auto","offset":{"x":0,"y":5}},"spinner":{"lines":12,"length":8,"width":3,"radius":8,"scale":1,"corners":1,"color":"#424242","fadeColor":"transparent","speed":1,"rotate":0,"animation":"searchwp-spinner-line-fade-quick","direction":1,"zIndex":2000000000,"className":"spinner","top":"50%","left":"50%","shadow":"0 0 1px transparent","position":"absolute"}}},"msg_no_config_found":"Keine g\u00fcltige Konfiguration f\u00fcr SearchWP Live Search gefunden!","aria_instructions":"Wenn automatisch vervollst\u00e4ndigte Ergebnisse verf\u00fcgbar sind, dann verwende die Pfeile nach oben und unten zur Auswahl und die Eingabetaste, um zur gew\u00fcnschten Seite zu gelangen. Benutzer von Touch-Ger\u00e4ten erkunden mit Touch oder mit Wischgesten."};;
+//# sourceURL=swp-live-search-client-js-extra
+
+
+
+
+
