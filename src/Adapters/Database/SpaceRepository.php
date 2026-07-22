@@ -254,6 +254,27 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 		}
 
 		/**
+		 * Gibt alle Space-IDs zurück, in denen ein Benutzer Verantwortung trägt.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int[]
+		 */
+		public function list_manager_space_ids( int $user_id ): array {
+			$rows = $this->db->get_col(
+				$this->db->prepare(
+					"SELECT DISTINCT space_id FROM {$this->managers_table} WHERE user_id = %d ORDER BY space_id ASC;",
+					$user_id
+				)
+			);
+
+			if ( empty( $rows ) ) {
+				return array();
+			}
+
+			return array_values( array_map( 'intval', $rows ) );
+		}
+
+		/**
 		 * Zählt die Owner eines Spaces.
 		 *
 		 * @param int $space_id Space-ID.

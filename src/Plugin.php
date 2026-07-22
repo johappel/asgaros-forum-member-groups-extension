@@ -105,7 +105,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$hub->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
-			$navigation = new ForumNavigation( $spaces, $inv_repo );
+			$navigation = new ForumNavigation( $spaces, $inv_repo, $join_repo );
 			$navigation->init();
 
 			// Mitgliederansicht in denselben Shortcode integrieren.
@@ -122,11 +122,11 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			add_shortcode(
 				'afspaces_invitations',
-				static function () use ( $spaces, $asgaros, $invites, $join_requests, $members, $invite_links ): string {
+				static function () use ( $spaces, $asgaros, $invites, $members, $invite_links ): string {
 					if ( ! isset( $_GET['space_id'] ) ) {
 						return '';
 					}
-					$view = new InvitationsView( $spaces, $asgaros, $invites, $join_requests, $members, $invite_links );
+					$view = new InvitationsView( $spaces, $asgaros, $invites, $members, $invite_links );
 					return $view->render( (int) $_GET['space_id'] );
 				}
 			);

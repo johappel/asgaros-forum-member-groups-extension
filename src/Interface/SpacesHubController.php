@@ -143,8 +143,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return $members_view->render( $space_id );
 
 				case SpacesUrls::VIEW_INVITATIONS:
-					$inv_view = new InvitationsView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->members, $this->invite_links );
+					$inv_view = new InvitationsView( $this->spaces, $this->asgaros, $this->invitations, $this->members, $this->invite_links );
 					return $inv_view->render( $space_id );
+
+				case SpacesUrls::VIEW_JOIN_REQUESTS:
+					$requests_view = new JoinRequestsView( $this->spaces, $this->asgaros, $this->join_requests );
+					return $requests_view->render( $space_id );
 
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros );
@@ -249,6 +253,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ),
 					'active' => SpacesUrls::VIEW_INVITATIONS === $view,
 				);
+				$tabs[] = array(
+					'view'   => SpacesUrls::VIEW_JOIN_REQUESTS,
+					'label'  => __( 'Beitrittsanfragen', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_JOIN_REQUESTS === $view,
+				);
 			}
 
 			if ( $this->can_create_spaces( $actor ) ) {
@@ -334,6 +344,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return __( 'Einladungen', 'afspaces' );
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					return __( 'Meine Einladungen', 'afspaces' );
+				case SpacesUrls::VIEW_JOIN_REQUESTS:
+					return __( 'Beitrittsanfragen', 'afspaces' );
 				case SpacesUrls::VIEW_DISCOVER:
 					return __( 'Räume entdecken', 'afspaces' );
 				case SpacesUrls::VIEW_CREATE:

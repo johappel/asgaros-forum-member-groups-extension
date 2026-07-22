@@ -194,5 +194,53 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\JoinRequestRepository' ) ) {
 
 			return array_map( static fn( $row ) => new JoinRequest( $row ), $rows );
 		}
+
+		/**
+		 * Zählt offene Beitrittsanfragen über mehrere Spaces.
+		 *
+		 * @param int[] $space_ids Space-IDs.
+		 * @return int
+		 */
+		public function count_pending_for_spaces( array $space_ids ): int {
+			$space_ids = array_values( array_filter( array_map( 'intval', $space_ids ), static fn( int $id ): bool => $id > 0 ) );
+			if ( empty( $space_ids ) ) {
+				return 0;
+			}
+
+			$placeholders = implode( ', ', array_fill( 0, count( $space_ids ), '%d' ) );
+			$args = array_merge( $space_ids, array( JoinRequest::STATUS_PENDING ) );
+
+			return (int) $this->db->get_var(
+				$this->db->prepare(
+					"SELECT COUNT(*) FROM {$this->table} WHERE space_id IN ({$placeholders}) AND status = %s;",
+					$args
+				)
+			);
+		}
+
+		/**
+		 * Gibt eine Space-ID mit mindestens einer offenen Anfrage zurück.
+		 *
+		 * @param int[] $space_ids Space-IDs.
+		 * @return int
+		 */
+		public function first_space_with_pending( array $space_ids ): int {
+			$space_ids = array_values( array_filter( array_map( 'intval', $space_ids ), static fn( int $id ): bool => $id > 0 ) );
+			if ( empty( $space_ids ) ) {
+				return 0;
+			}
+
+			$placeholders = implode( ', ', array_fill( 0, count( $space_ids ), '%d' ) );
+			$args = array_merge( $space_ids, array( JoinRequest::STATUS_PENDING ) );
+
+			$space_id = $this->db->get_var(
+				$this->db->prepare(
+					"SELECT space_id FROM {$this->table} WHERE space_id IN ({$placeholders}) AND status = %s ORDER BY id DESC LIMIT 1;",
+					$args
+				)
+			);
+
+			return (int) $space_id;
+		}
 	}
 }

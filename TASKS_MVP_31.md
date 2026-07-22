@@ -30,7 +30,7 @@ Nicht eingeladene, angemeldete Benutzer koennen geschlossene Räume entdecken un
 - [x] Neue Hub-Ansicht discover hinzugefuegt.
 - [x] DiscoverView zum Entdecken und Anfragen erstellt.
 - [x] Frontend-Actions create_join_request, approve_join_request, reject_join_request umgesetzt.
-- [x] Manager-Ansicht in InvitationsView um Beitrittsanfragen erweitert.
+- [x] Manager-Ansicht um dedizierten Tab fuer Beitrittsanfragen erweitert (getrennt von Einladungen).
 - [x] Nutzeransicht MyInvitationsView um eigene Beitrittsanfragen erweitert.
 - [x] Dashboard zeigt fuer reine Mitglieder (ohne Managerrolle) ihre Mitgliedschaften inkl. Einstiegslink ins Forum.
 

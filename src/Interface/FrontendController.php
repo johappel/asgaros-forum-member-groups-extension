@@ -305,8 +305,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			// Redirect zurück zur sauberen URL (Post/Redirect/Get).
 			$ref = wp_get_referer() ?: home_url();
-			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation', 'create_invite_link', 'revoke_invite_link', 'shorten_invite_link', 'approve_join_request', 'reject_join_request' ), true ) ) {
+			if ( in_array( $action, array( 'create_invitation', 'revoke_invitation', 'resend_invitation', 'create_invite_link', 'revoke_invite_link', 'shorten_invite_link' ), true ) ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ) );
+				exit;
+			}
+
+			if ( in_array( $action, array( 'approve_join_request', 'reject_join_request' ), true ) ) {
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $space_id ) ) );
 				exit;
 			}
 

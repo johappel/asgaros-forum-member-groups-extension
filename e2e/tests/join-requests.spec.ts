@@ -70,9 +70,9 @@ async function ensureRequesterRemovedFromMembers(page: Page, spaceId: number) {
 }
 
 async function clearPendingJoinRequests(page: Page, spaceId: number) {
-  const invitationsPage = `${BASE}/afspaces/?afspaces_view=invitations&space_id=${spaceId}`;
-  await page.goto(invitationsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
-  await expect(page.locator('h2#afspaces-invitations-heading')).toBeVisible({ timeout: 15000 });
+  const joinRequestsPage = `${BASE}/afspaces/?afspaces_view=join-requests&space_id=${spaceId}`;
+  await page.goto(joinRequestsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
+  await expect(page.locator('h2#afspaces-join-requests-heading')).toBeVisible({ timeout: 15000 });
 
   for (let i = 0; i < 6; i++) {
     const pendingRow = page.locator('.afspaces-join-requests table tbody tr', { hasText: TARGET_LOGIN }).filter({
@@ -85,7 +85,7 @@ async function clearPendingJoinRequests(page: Page, spaceId: number) {
 
     await pendingRow.locator('button:has-text("Ablehnen")').click({ noWaitAfter: true });
     await page.waitForTimeout(1200);
-    await page.goto(invitationsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await page.goto(joinRequestsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
   }
 }
 
@@ -111,7 +111,7 @@ test.describe('Join-Request-Flow', () => {
   test('Anfrage erscheint bei Raumverantwortlichen als pending', async ({ page, context }) => {
     await login(page, MANAGER);
     const spaceId = await getManagedSpaceId(page);
-    const invitationsPage = `${BASE}/afspaces/?afspaces_view=invitations&space_id=${spaceId}`;
+    const joinRequestsPage = `${BASE}/afspaces/?afspaces_view=join-requests&space_id=${spaceId}`;
 
     await ensureRequesterRemovedFromMembers(page, spaceId);
     await clearPendingJoinRequests(page, spaceId);
@@ -122,7 +122,7 @@ test.describe('Join-Request-Flow', () => {
 
     await context.clearCookies();
     await login(page, MANAGER);
-    await page.goto(invitationsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await page.goto(joinRequestsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
     const row = page.locator('.afspaces-join-requests table tbody tr', { hasText: TARGET_LOGIN }).first();
     await expect(row).toBeVisible({ timeout: 15000 });
     await expect(row).toContainText('pending');
@@ -131,7 +131,7 @@ test.describe('Join-Request-Flow', () => {
   test('Manager kann Anfrage genehmigen und ablehnen', async ({ page, context }) => {
     await login(page, MANAGER);
     const spaceId = await getManagedSpaceId(page);
-    const invitationsPage = `${BASE}/afspaces/?afspaces_view=invitations&space_id=${spaceId}`;
+    const joinRequestsPage = `${BASE}/afspaces/?afspaces_view=join-requests&space_id=${spaceId}`;
     const membersPage = `${BASE}/afspaces/?afspaces_view=members&space_id=${spaceId}`;
 
     await ensureRequesterRemovedFromMembers(page, spaceId);
@@ -143,7 +143,7 @@ test.describe('Join-Request-Flow', () => {
 
     await context.clearCookies();
     await login(page, MANAGER);
-    await page.goto(invitationsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await page.goto(joinRequestsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
 
     const approveRow = page.locator('.afspaces-join-requests table tbody tr', { hasText: TARGET_LOGIN }).filter({
       has: page.locator('button:has-text("Genehmigen")'),
@@ -168,7 +168,7 @@ test.describe('Join-Request-Flow', () => {
 
     await context.clearCookies();
     await login(page, MANAGER);
-    await page.goto(invitationsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await page.goto(joinRequestsPage, { waitUntil: 'domcontentloaded' }).catch(() => {});
     const rejectRow = page.locator('.afspaces-join-requests table tbody tr', { hasText: TARGET_LOGIN }).filter({
       has: page.locator('button:has-text("Ablehnen")'),
     }).first();

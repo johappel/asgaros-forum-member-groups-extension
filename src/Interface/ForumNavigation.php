@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Interface;
 
+use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Core\Capabilities;
@@ -27,13 +28,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 
 		private SpaceRepository $spaces;
 		private InvitationRepository $invitations;
+		private JoinRequestRepository $join_requests;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations ) {
-			$this->spaces      = $spaces;
-			$this->invitations = $invitations;
+		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations, JoinRequestRepository $join_requests ) {
+			$this->spaces        = $spaces;
+			$this->invitations   = $invitations;
+			$this->join_requests = $join_requests;
 		}
 
 		/**
@@ -64,9 +67,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				return $menu_entries;
 			}
 
+			$pending_requests = $this->pending_join_request_count( $user_id );
+			$menu_label = esc_html__( 'Räume', 'afspaces' );
+			if ( $pending_requests > 0 ) {
+				$menu_label = sprintf(
+					/* translators: %d: Anzahl offener Beitrittsanfragen */
+					esc_html__( 'Räume (%d)', 'afspaces' ),
+					$pending_requests
+				);
+			}
+
 			$menu_entries['afspaces'] = array(
 				'menu_class'        => 'afspaces-link',
-				'menu_link_text'    => esc_html__( 'Räume', 'afspaces' ),
+				'menu_link_text'    => $menu_label,
 			'menu_url'          => '#',
 			'menu_login_status' => 1,
 			'menu_new_tab'      => false,
@@ -93,6 +106,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 
 			$managed_count = $this->managed_space_count( $user_id );
 			$pending_count = $this->pending_count( $user_id );
+			$pending_join_request_count = $this->pending_join_request_count( $user_id );
+			$pending_join_request_space_id = $this->pending_join_request_space_id( $user_id );
 			$can_create    = $this->can_create_spaces( $user_id );
 			$can_discover  = is_user_logged_in();
 
@@ -137,6 +152,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 							/* translators: %d: Anzahl verwalteter Räume */
 							_n( 'Verwaltete Räume (%d)', 'Verwaltete Räume (%d)', $managed_count, 'afspaces' ),
 							$managed_count
+						)
+					)
+				);
+			}
+
+			if ( $pending_join_request_count > 0 ) {
+				$requests_url = $pending_join_request_space_id > 0
+					? SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $pending_join_request_space_id ) )
+					: SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
+
+				printf(
+					'<li><a class="afspaces-button" href="%1$s">%2$s</a></li>',
+					esc_url( $requests_url ),
+					esc_html(
+						sprintf(
+							/* translators: %d: Anzahl offener Beitrittsanfragen */
+							_n( 'Beitrittsanfrage (%d offen)', 'Beitrittsanfragen (%d offen)', $pending_join_request_count, 'afspaces' ),
+							$pending_join_request_count
 						)
 					)
 				);
@@ -271,6 +304,63 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				'afspaces_pending_count_' . $user_id,
 				fn (): int => $this->invitations->count_pending_for_invitee( $user_id )
 			);
+		}
+
+		/**
+		 * Ermittelt die Zahl offener Beitrittsanfragen für verwaltete Räume.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int
+		 */
+		private function pending_join_request_count( int $user_id ): int {
+			return $this->cached_count(
+				'afspaces_pending_join_requests_' . $user_id,
+				function () use ( $user_id ): int {
+					$space_ids = $this->managed_space_ids( $user_id );
+					if ( empty( $space_ids ) ) {
+						return 0;
+					}
+					return $this->join_requests->count_pending_for_spaces( $space_ids );
+				}
+			);
+		}
+
+		/**
+		 * Liefert eine Space-ID mit offener Beitrittsanfrage für Deep-Links.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int
+		 */
+		private function pending_join_request_space_id( int $user_id ): int {
+			return $this->cached_count(
+				'afspaces_pending_join_space_' . $user_id,
+				function () use ( $user_id ): int {
+					$space_ids = $this->managed_space_ids( $user_id );
+					if ( empty( $space_ids ) ) {
+						return 0;
+					}
+					return $this->join_requests->first_space_with_pending( $space_ids );
+				}
+			);
+		}
+
+		/**
+		 * Ermittelt die verwalteten Space-IDs eines Benutzers.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int[]
+		 */
+		private function managed_space_ids( int $user_id ): array {
+			if ( user_can( $user_id, Capabilities::MANAGE_ALL_SPACES ) ) {
+				return array_values(
+					array_map(
+						static fn( $space ): int => (int) $space->id,
+						$this->spaces->list_spaces()
+					)
+				);
+			}
+
+			return $this->spaces->list_manager_space_ids( $user_id );
 		}
 
 		/**
