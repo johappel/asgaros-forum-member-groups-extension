@@ -3,7 +3,7 @@
 /* Forum-ähnliche Wrapper-Struktur für Spaces-Hub. */
 #af-wrapper.afspaces-wrapper {
 	/* width: 100%; */
-	max-width: 100%;
+	max-width: 1394px;
 	margin: 0;
 	padding: 1rem;
 	background: #fff;
@@ -20,7 +20,7 @@
   border: 1px solid var(--theme-palette-color-5) !important;
   padding: 50px;
   box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
-  margin: 50px!important;
+  margin: 50px auto !important;
 
 }
 #af-wrapper.afspaces-wrapper {
@@ -108,9 +108,23 @@
 	padding: 1.5rem 0;
 }
 
+.afspaces-space-context {
+	margin: 1rem 0 0;
+}
+
+.afspaces-space-context-title {
+	margin: 0;
+	font-size: 1.25rem;
+}
+
+.afspaces-space-nav {
+	margin-top: 0.5rem;
+}
+
 .afspaces-dashboard,
 .afspaces-members,
 .afspaces-invitations,
+.afspaces-join-requests,
 .afspaces-my-invitations {
 	max-width: 60rem;
 	margin: 1.5rem 0;
@@ -123,6 +137,8 @@
 .afspaces-members h3,
 .afspaces-invitations h2,
 .afspaces-invitations h3,
+.afspaces-join-requests h2,
+.afspaces-join-requests h3,
 .afspaces-my-invitations h2 {
 	margin-top: 1.5rem;
 }

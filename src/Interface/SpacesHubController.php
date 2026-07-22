@@ -121,6 +121,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		<div id="af-wrapper" class="afspaces-wrapper">
 			<?php echo $this->render_breadcrumb( $view, $space_id ); ?>
 			<?php echo $this->render_navigation( $view, $space_id, $actor ); ?>
+			<?php echo $this->render_space_context_navigation( $view, $space_id, $actor ); ?>
 			<div class="afspaces-hub-content">
 				<?php echo $content; // Bereits escaped in den jeweiligen Views. ?>
 			</div>
@@ -239,28 +240,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				'active' => SpacesUrls::VIEW_DISCOVER === $view,
 			);
 
-			// Kontextbezogene Tabs, wenn ein Raum aktiv verwaltet wird.
-			if ( $space_id > 0 && $this->can_manage_space( $space_id, $actor ) ) {
-				$tabs[] = array(
-					'view'   => SpacesUrls::VIEW_MEMBERS,
-					'label'  => __( 'Mitglieder', 'afspaces' ),
-					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ),
-					'active' => SpacesUrls::VIEW_MEMBERS === $view,
-				);
-				$tabs[] = array(
-					'view'   => SpacesUrls::VIEW_INVITATIONS,
-					'label'  => __( 'Einladungen', 'afspaces' ),
-					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ),
-					'active' => SpacesUrls::VIEW_INVITATIONS === $view,
-				);
-				$tabs[] = array(
-					'view'   => SpacesUrls::VIEW_JOIN_REQUESTS,
-					'label'  => __( 'Beitrittsanfragen', 'afspaces' ),
-					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $space_id ) ),
-					'active' => SpacesUrls::VIEW_JOIN_REQUESTS === $view,
-				);
-			}
-
 			if ( $this->can_create_spaces( $actor ) ) {
 				$tabs[] = array(
 					'view'   => SpacesUrls::VIEW_CREATE,
@@ -295,6 +274,81 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			return sprintf(
 				'<nav class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav>',
 				esc_attr__( 'Raumverwaltung', 'afspaces' ),
+				$items
+			);
+		}
+
+		/**
+		 * Rendert raumbezogene Verwaltungstabs unter dem Raumtitel.
+		 *
+		 * @param string $view     Aktive Unteransicht.
+		 * @param int    $space_id Space-ID.
+		 * @param int    $actor    Benutzer-ID.
+		 * @return string
+		 */
+		private function render_space_context_navigation( string $view, int $space_id, int $actor ): string {
+			if ( 0 === $space_id || 0 === $actor || ! $this->can_manage_space( $space_id, $actor ) ) {
+				return '';
+			}
+
+			$space = $this->spaces->get_space( $space_id );
+			if ( ! $space ) {
+				return '';
+			}
+
+			$forum = $this->asgaros->get_forum( $space->forum_id );
+			$room_name = trim( (string) ( $forum['name'] ?? '' ) );
+			if ( '' === $room_name ) {
+				$room_name = sprintf( __( 'Raum #%d', 'afspaces' ), $space_id );
+			}
+
+			$tabs = array(
+				array(
+					'view'   => SpacesUrls::VIEW_MEMBERS,
+					'label'  => __( 'Mitglieder', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_MEMBERS === $view,
+				),
+				array(
+					'view'   => SpacesUrls::VIEW_INVITATIONS,
+					'label'  => __( 'Einladungen', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_INVITATIONS === $view,
+				),
+				array(
+					'view'   => SpacesUrls::VIEW_JOIN_REQUESTS,
+					'label'  => __( 'Beitrittsanfragen', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_JOIN_REQUESTS === $view,
+				),
+			);
+
+			/**
+			 * Erlaubt Erweiterungen für raumbezogene Verwaltungstabs.
+			 *
+			 * @param array<int,array<string,mixed>> $tabs     Tab-Definitionen.
+			 * @param string                         $view     Aktive Ansicht.
+			 * @param int                            $space_id Space-ID.
+			 * @param int                            $actor    Benutzer-ID.
+			 */
+			$tabs = (array) apply_filters( 'afspaces_hub_space_navigation_tabs', $tabs, $view, $space_id, $actor );
+
+			$items = '';
+			foreach ( $tabs as $tab ) {
+				$active = ! empty( $tab['active'] );
+				$items .= sprintf(
+					'<li><a href="%1$s" class="afspaces-hub-tab%2$s"%3$s>%4$s</a></li>',
+					esc_url( (string) $tab['url'] ),
+					$active ? ' is-active' : '',
+					$active ? ' aria-current="page"' : '',
+					esc_html( (string) $tab['label'] )
+				);
+			}
+
+			return sprintf(
+				'<section class="afspaces-space-context" aria-labelledby="afspaces-space-context-heading"><h2 id="afspaces-space-context-heading" class="afspaces-space-context-title">%1$s</h2><nav class="afspaces-hub-nav afspaces-space-nav" aria-label="%2$s"><ul>%3$s</ul></nav></section>',
+				esc_html( sprintf( __( 'Raum verwalten: %s', 'afspaces' ), $room_name ) ),
+				esc_attr__( 'Raumbezogene Verwaltung', 'afspaces' ),
 				$items
 			);
 		}

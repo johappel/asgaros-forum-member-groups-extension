@@ -31,9 +31,11 @@ Serverseitig gerenderte Formulare sind die Basis. REST und JavaScript verbessern
 
 ## Forum-Integration und Hub-Seite
 
-Die gesamte Frontend-Verwaltung ist unter einer einzigen WordPress-Hub-Seite (Slug `afspaces`, Shortcode `[afspaces]`) gebündelt. Ein Router (`SpacesHubController`) wählt anhand des Query-Parameters `afspaces_view` die passende Unteransicht (Dashboard, Mitglieder, Einladungen, meine Einladungen, später Raumgründung) und rendert eine gemeinsame, forum-nahe Unternavigation samt Brotkrümel.
+Die gesamte Frontend-Verwaltung ist unter einer einzigen WordPress-Hub-Seite (Slug `afspaces`, Shortcode `[afspaces]`) gebündelt. Ein Router (`SpacesHubController`) wählt anhand des Query-Parameters `afspaces_view` die passende Unteransicht (Dashboard, Mitglieder, Einladungen, Beitrittsanfragen, meine Einladungen, später Raumgründung) und rendert Brotkrümel plus zweistufige Navigation.
 
 - `SpacesUrls` ist der zentrale URL- und View-Namensraum; alle internen Links und Redirects laufen darüber.
+- Die globale Hub-Navigation enthält nur hubweite Ansichten (`Meine Räume`, `Meine Einladungen`, `Räume entdecken`, optional `Raum gründen`).
+- Raumbezogene Verwaltungstabs (`Mitglieder`, `Einladungen`, `Beitrittsanfragen`) werden nur im Verwaltungskontext und direkt unter einem Raumtitel angezeigt.
 - `ForumNavigation` hängt über dokumentierte Asgaros-Hooks (`asgarosforum_filter_header_menu`, `asgarosforum_overview_custom_content_top`) einen Menüpunkt „Räume" und ein Einstiegs-Panel in das Forum ein.
 - Die bestehenden Views (`MembersView`, `InvitationsView`, `MyInvitationsView`) und `FrontendController::render_dashboard` bleiben unverändert in ihrer Fachlogik und werden vom Router eingebettet.
 - Erweiterungspunkte (`afspaces_hub_navigation_tabs`, `afspaces_render_space_creation`, Option/Filter `afspaces_enable_space_creation`) bereiten die MVP-4-Raumgründung vor, ohne sie sichtbar zu aktivieren.
