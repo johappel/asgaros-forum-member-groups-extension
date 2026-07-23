@@ -9,6 +9,8 @@ Dieses Paket beschreibt ein eigenständiges WordPress-Plugin für eine verständ
 - `TASKS_MVP_1.md` — Frontend-Mitgliederverwaltung
 - `TASKS_MVP_2.md` — persönliche Einladungen
 - `TASKS_MVP_3.md` — sichere Einladungslinks
+- `TASKS_MVP_31.md` — Beitrittsanfragen für bestehende Räume
+- `TASKS_MVP_32.md` — Arbeitsgruppenmodell für efabiNet
 - `TASKS_MVP_4.md` — private Räume selbst gründen
 - `ARCHITECTURE.md` — technische Schichten und Abhängigkeiten
 - `SECURITY_PRIVACY.md` — Sicherheit und Datenschutz

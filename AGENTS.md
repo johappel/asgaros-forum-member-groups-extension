@@ -10,12 +10,14 @@ Arbeite inkrementell entlang dieser Dokumente:
 2. `TASKS_MVP_1.md`
 3. `TASKS_MVP_2.md`
 4. `TASKS_MVP_3.md`
-5. `TASKS_MVP_4.md`
-6. `ARCHITECTURE.md`
-7. `SECURITY_PRIVACY.md`
-8. `ACCESSIBILITY.md`
-9. `TESTING.md`
-10. `COMPATIBILITY.md`
+5. `TASKS_MVP_31.md`
+6. `TASKS_MVP_32.md`
+7. `TASKS_MVP_4.md`
+8. `ARCHITECTURE.md`
+9. `SECURITY_PRIVACY.md`
+10. `ACCESSIBILITY.md`
+11. `TESTING.md`
+12. `COMPATIBILITY.md`
 
 Eine spätere MVP-Stufe darf die Architektur der früheren Stufen vorbereiten, aber keine unfertigen Funktionen sichtbar aktivieren.
 

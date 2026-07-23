@@ -110,4 +110,6 @@ Das Produkt gilt als erfolgreich, wenn eine erstmals nutzende Raumverantwortlich
 1. **MVP 1:** Frontend-Mitgliederverwaltung für bestehende Foren.
 2. **MVP 2:** Persönliche Einladungen für bestehende WordPress-Benutzer.
 3. **MVP 3:** Sichere Einladungslinks.
-4. **MVP 4:** Kontrollierte Gründung eigener privater Forenräume.
+4. **MVP 3.1:** Beitrittsanfragen für bestehende geschlossene Räume.
+5. **MVP 3.2:** Arbeitsgruppenmodell für efabiNet auf Basis bestehender Räume.
+6. **MVP 4:** Kontrollierte Gründung eigener privater Forenräume.
