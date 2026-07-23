@@ -82,33 +82,39 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 							$sender = \get_userdata( $inv->inviter_user_id );
 							$token  = $this->invitations->build_token( $inv );
 							?>
-							<li class="afspaces-space-item">
-								<h3><?php echo esc_html( $forum['name'] ?? sprintf( 'Space #%d', $inv->space_id ) ); ?></h3>
-								<p><strong><?php echo esc_html__( 'Absender:', 'afspaces' ); ?></strong> <?php echo esc_html( $sender ? $sender->display_name : '-' ); ?></p>
-								<p><strong><?php echo esc_html__( 'Status:', 'afspaces' ); ?></strong> <?php echo esc_html( $inv->effective_status() ); ?></p>
-								<p><strong><?php echo esc_html__( 'Ablauf:', 'afspaces' ); ?></strong> <?php echo esc_html( $inv->expires_at ); ?></p>
-								<?php if ( '' !== $inv->message ) : ?>
-									<p><strong><?php echo esc_html__( 'Nachricht:', 'afspaces' ); ?></strong> <?php echo esc_html( $inv->message ); ?></p>
-								<?php endif; ?>
-
-								<?php if ( 'pending' === $inv->effective_status() ) : ?>
-									<div class="afspaces-inline-form" role="group" aria-label="<?php echo esc_attr__( 'Einladung beantworten', 'afspaces' ); ?>">
-										<form method="post" class="afspaces-inline-form">
-											<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-											<input type="hidden" name="afspaces_action" value="accept_invitation" />
-											<input type="hidden" name="invitation_token" value="<?php echo esc_attr( $token ); ?>" />
-											<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Annehmen', 'afspaces' ); ?></button>
-										</form>
-										<form method="post" class="afspaces-inline-form">
-											<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-											<input type="hidden" name="afspaces_action" value="decline_invitation" />
-											<input type="hidden" name="invitation_token" value="<?php echo esc_attr( $token ); ?>" />
-											<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Ablehnen', 'afspaces' ); ?></button>
-										</form>
+							<li class="afspaces-space-item content-container afspaces-content-container">
+								<div class="content-element forum afspaces-forum-row">
+									<div class="forum-status read" aria-hidden="true"><i class="fas fa-envelope"></i></div>
+									<div class="forum-name">
+										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Space #%d', $inv->space_id ) ); ?></span>
+										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Absender: %s', 'afspaces' ), $sender ? $sender->display_name : '-' ) ); ?></small>
+										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), $inv->effective_status() ) ); ?></small>
+										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Ablauf: %s', 'afspaces' ), $inv->expires_at ) ); ?></small>
+										<?php if ( '' !== $inv->message ) : ?>
+											<small class="forum-description"><?php echo esc_html( sprintf( __( 'Nachricht: %s', 'afspaces' ), $inv->message ) ); ?></small>
+										<?php endif; ?>
 									</div>
-								<?php else : ?>
-									<p><?php echo esc_html__( 'Diese Einladung ist bereits abgeschlossen.', 'afspaces' ); ?></p>
-								<?php endif; ?>
+									<div class="forum-poster">
+										<?php if ( 'pending' === $inv->effective_status() ) : ?>
+											<div class="afspaces-inline-form" role="group" aria-label="<?php echo esc_attr__( 'Einladung beantworten', 'afspaces' ); ?>">
+												<form method="post" class="afspaces-inline-form">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="accept_invitation" />
+													<input type="hidden" name="invitation_token" value="<?php echo esc_attr( $token ); ?>" />
+													<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Annehmen', 'afspaces' ); ?></button>
+												</form>
+												<form method="post" class="afspaces-inline-form">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="decline_invitation" />
+													<input type="hidden" name="invitation_token" value="<?php echo esc_attr( $token ); ?>" />
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Ablehnen', 'afspaces' ); ?></button>
+												</form>
+											</div>
+										<?php else : ?>
+											<p><?php echo esc_html__( 'Diese Einladung ist bereits abgeschlossen.', 'afspaces' ); ?></p>
+										<?php endif; ?>
+									</div>
+								</div>
 							</li>
 						<?php endforeach; ?>
 					</ul>
@@ -124,15 +130,20 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 							$space  = $this->spaces->get_space( $request->space_id );
 							$forum  = $space ? $this->asgaros->get_forum( $space->forum_id ) : null;
 							?>
-							<li class="afspaces-space-item">
-								<h3><?php echo esc_html( $forum['name'] ?? sprintf( 'Space #%d', $request->space_id ) ); ?></h3>
-								<p><strong><?php echo esc_html__( 'Status:', 'afspaces' ); ?></strong> <?php echo esc_html( $request->status ); ?></p>
-								<?php if ( '' !== $request->request_message ) : ?>
-									<p><strong><?php echo esc_html__( 'Deine Nachricht:', 'afspaces' ); ?></strong> <?php echo esc_html( $request->request_message ); ?></p>
-								<?php endif; ?>
-								<?php if ( '' !== $request->decision_message ) : ?>
-									<p><strong><?php echo esc_html__( 'Rueckmeldung:', 'afspaces' ); ?></strong> <?php echo esc_html( $request->decision_message ); ?></p>
-								<?php endif; ?>
+							<li class="afspaces-space-item content-container afspaces-content-container">
+								<div class="content-element forum afspaces-forum-row">
+									<div class="forum-status read" aria-hidden="true"><i class="fas fa-user-clock"></i></div>
+									<div class="forum-name">
+										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Space #%d', $request->space_id ) ); ?></span>
+										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), $request->status ) ); ?></small>
+										<?php if ( '' !== $request->request_message ) : ?>
+											<small class="forum-description"><?php echo esc_html( sprintf( __( 'Deine Nachricht: %s', 'afspaces' ), $request->request_message ) ); ?></small>
+										<?php endif; ?>
+										<?php if ( '' !== $request->decision_message ) : ?>
+											<small class="forum-description"><?php echo esc_html( sprintf( __( 'Rueckmeldung: %s', 'afspaces' ), $request->decision_message ) ); ?></small>
+										<?php endif; ?>
+									</div>
+								</div>
 							</li>
 						<?php endforeach; ?>
 					</ul>

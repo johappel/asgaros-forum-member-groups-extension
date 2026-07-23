@@ -70,6 +70,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier entscheidest du über offene Beitrittsanfragen für diesen Raum.', 'afspaces' ); ?></p>
 
+				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-space-join-requests-heading">
+					<div id="afspaces-space-join-requests-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Anfragen dieses Raums', 'afspaces' ); ?></div>
 				<?php if ( empty( $requests ) ) : ?>
 					<p><?php echo esc_html__( 'Es sind derzeit keine Beitrittsanfragen vorhanden.', 'afspaces' ); ?></p>
 				<?php else : ?>
@@ -124,6 +126,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 						</tbody>
 					</table>
 				<?php endif; ?>
+				</section>
 			</section>
 			<?php
 			return (string) ob_get_clean();

@@ -449,20 +449,27 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 								$members = $this->asgaros->list_group_members( (int) $group_ids[0], array( 'per_page' => 1 ) );
 								$member_count = (int) ( $members['total'] ?? 0 );
 							}
-							// Link zur Mitgliederseite (nicht zum Dashboard).
 							$manage_url = SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space->id ) );
 							$invite_url = SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space->id ) );
 							?>
-							<li class="afspaces-space-item">
-								<h3><?php echo esc_html( $forum['name'] ); ?></h3>
-								<p><?php echo esc_html( sprintf( __( '%d Mitglieder', 'afspaces' ), $member_count ) ); ?></p>
-								<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
-									<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
-										<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>
-									</a>
-									<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $invite_url ); ?>">
-										<?php echo esc_html__( 'Einladungen und Invite-Links', 'afspaces' ); ?>
-									</a>
+							<li class="afspaces-space-item content-container afspaces-content-container">
+								<div class="content-element forum afspaces-forum-row">
+									<div class="forum-status read" aria-hidden="true"><i class="fas fa-comments"></i></div>
+									<div class="forum-name">
+										<a class="forum-title" href="<?php echo esc_url( $manage_url ); ?>"><?php echo esc_html( $forum['name'] ); ?></a>
+										<small class="forum-description"><?php echo esc_html__( 'Du verwaltest diesen Raum im Frontend.', 'afspaces' ); ?></small>
+										<small class="forum-stats"><?php echo esc_html( sprintf( __( '%d Mitglieder', 'afspaces' ), $member_count ) ); ?></small>
+									</div>
+									<div class="forum-poster">
+										<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
+											<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
+												<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>
+											</a>
+											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $invite_url ); ?>">
+												<?php echo esc_html__( 'Einladungen und Invite-Links', 'afspaces' ); ?>
+											</a>
+										</div>
+									</div>
 								</div>
 							</li>
 						<?php endforeach; ?>
@@ -479,13 +486,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 								$forum = $this->asgaros->get_forum( $space->forum_id );
 								$forum_url = (string) apply_filters( 'afspaces_space_forum_url', $this->space_forum_url( $forum ), $space, $forum, $actor );
 								?>
-								<li class="afspaces-space-item">
-									<h3><?php echo esc_html( $forum['name'] ); ?></h3>
-									<p><?php echo esc_html__( 'Du kannst diesen Raum direkt im Forum öffnen.', 'afspaces' ); ?></p>
-									<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
-										<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>">
-											<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
-										</a>
+								<li class="afspaces-space-item content-container afspaces-content-container">
+									<div class="content-element forum afspaces-forum-row">
+										<div class="forum-status read" aria-hidden="true"><i class="fas fa-comments"></i></div>
+										<div class="forum-name">
+											<a class="forum-title" href="<?php echo esc_url( $forum_url ); ?>"><?php echo esc_html( $forum['name'] ); ?></a>
+											<small class="forum-description"><?php echo esc_html__( 'Du bist in diesem Raum als Mitglied eingetragen.', 'afspaces' ); ?></small>
+											<small class="forum-stats"><?php echo esc_html__( 'Direkter Einstieg ins Forum', 'afspaces' ); ?></small>
+										</div>
+										<div class="forum-poster">
+											<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
+												<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>">
+													<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
+												</a>
+											</div>
+										</div>
 									</div>
 								</li>
 							<?php endforeach; ?>

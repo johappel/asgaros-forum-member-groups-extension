@@ -131,38 +131,44 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 					</a>
 				</p>
 
-				<form method="get" class="afspaces-search" role="search" aria-label="<?php echo esc_attr__( 'Mitglieder suchen', 'afspaces' ); ?>">
-					<label for="afp_search"><?php echo esc_html__( 'Person suchen', 'afspaces' ); ?></label>
-					<input type="search" id="afp_search" name="afp_search" value="<?php echo esc_attr( $search ); ?>" />
-					<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_MEMBERS ); ?>" />
-					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
-					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Suchen', 'afspaces' ); ?></button>
-				</form>
+				<div class="afspaces-section-card content-container">
+					<div class="title-element afspaces-section-title"><?php echo esc_html__( 'Mitglieder suchen', 'afspaces' ); ?></div>
+					<form method="get" class="afspaces-search" role="search" aria-label="<?php echo esc_attr__( 'Mitglieder suchen', 'afspaces' ); ?>">
+						<label for="afp_search"><?php echo esc_html__( 'Person suchen', 'afspaces' ); ?></label>
+						<input type="search" id="afp_search" name="afp_search" value="<?php echo esc_attr( $search ); ?>" />
+						<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_MEMBERS ); ?>" />
+						<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+						<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Suchen', 'afspaces' ); ?></button>
+					</form>
+				</div>
 
 				<?php if ( ! empty( $search_results ) ) : ?>
-					<h3><?php echo esc_html__( 'Suchergebnisse', 'afspaces' ); ?></h3>
-					<ul class="afspaces-search-results">
-						<?php foreach ( $search_results as $user ) : ?>
-							<?php $is_member = $this->asgaros->is_user_in_group( (int) $user['user_id'], $group_id ); ?>
-							<li>
-								<span><?php echo esc_html( $user['display_name'] ); ?></span>
-								<?php if ( $is_member ) : ?>
-									<span class="afspaces-tag"><?php echo esc_html__( 'bereits Mitglied', 'afspaces' ); ?></span>
-								<?php else : ?>
-									<form method="post" class="afspaces-inline-form">
-										<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
-										<input type="hidden" name="afspaces_action" value="add_member" />
-										<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
-										<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $user['user_id'] ); ?>" />
-										<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Hinzufügen', 'afspaces' ); ?></button>
-									</form>
-								<?php endif; ?>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+					<section class="afspaces-section-card content-container" aria-labelledby="afspaces-search-results-heading">
+						<div id="afspaces-search-results-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Suchergebnisse', 'afspaces' ); ?></div>
+						<ul class="afspaces-search-results">
+							<?php foreach ( $search_results as $user ) : ?>
+								<?php $is_member = $this->asgaros->is_user_in_group( (int) $user['user_id'], $group_id ); ?>
+								<li>
+									<span><?php echo esc_html( $user['display_name'] ); ?></span>
+									<?php if ( $is_member ) : ?>
+										<span class="afspaces-tag"><?php echo esc_html__( 'bereits Mitglied', 'afspaces' ); ?></span>
+									<?php else : ?>
+										<form method="post" class="afspaces-inline-form">
+											<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
+											<input type="hidden" name="afspaces_action" value="add_member" />
+											<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+											<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $user['user_id'] ); ?>" />
+											<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Hinzufügen', 'afspaces' ); ?></button>
+										</form>
+									<?php endif; ?>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</section>
 				<?php endif; ?>
 
-				<h3><?php echo esc_html__( 'Aktuelle Mitglieder', 'afspaces' ); ?></h3>
+				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-current-members-heading">
+					<div id="afspaces-current-members-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Aktuelle Mitglieder', 'afspaces' ); ?></div>
 				<?php if ( empty( $members['members'] ) ) : ?>
 					<?php if ( '' !== $search ) : ?>
 						<p><?php echo esc_html__( 'Für die aktuelle Suche wurden keine bestehenden Mitglieder gefunden.', 'afspaces' ); ?></p>
@@ -236,6 +242,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 
 					<?php echo $this->pagination( $space_id, $page, (int) ceil( ( $members['total'] ?? 0 ) / $per_page ), $search ); ?>
 				<?php endif; ?>
+				</section>
 			</section>
 			<?php
 			return (string) ob_get_clean();
