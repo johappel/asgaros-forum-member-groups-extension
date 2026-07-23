@@ -119,8 +119,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			ob_start();
 			?>
 		<div id="af-wrapper" class="afspaces-wrapper">
-			<?php echo $this->render_breadcrumb( $view, $space_id ); ?>
 			<?php echo $this->render_navigation( $view, $space_id, $actor ); ?>
+			<?php echo $this->render_breadcrumb( $view, $space_id ); ?>
 			<?php echo $this->render_space_context_navigation( $view, $space_id, $actor ); ?>
 			<div class="afspaces-hub-content">
 				<?php echo $content; // Bereits escaped in den jeweiligen Views. ?>
@@ -198,7 +198,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			}
 
 			return sprintf(
-				'<nav class="afspaces-breadcrumb" aria-label="%1$s">%2$s</nav>',
+				'<nav id="forum-breadcrumbs" class="afspaces-breadcrumb" aria-label="%1$s">%2$s</nav>',
 				esc_attr__( 'Brotkrümelnavigation', 'afspaces' ),
 				implode( '<span class="afspaces-breadcrumb-sep" aria-hidden="true"> › </span>', $items )
 			);
@@ -284,10 +284,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				);
 			}
 
+			$search_url = home_url( '/forum/search/' );
+			$search_url = (string) apply_filters( 'afspaces_forum_search_url', $search_url );
+
 			return sprintf(
-				'<nav class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav>',
+				'<div id="forum-header" class="afspaces-forum-header"><nav id="forum-navigation" class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav><div id="forum-search" class="afspaces-forum-search"><span class="search-icon fas fa-search" aria-hidden="true"></span><form method="get" action="%3$s"><input name="keywords" type="search" placeholder="%4$s" value="" /></form></div><div class="clear"></div></div>',
 				esc_attr__( 'Raumverwaltung', 'afspaces' ),
-				$items
+				$items,
+				esc_url( $search_url ),
+				esc_attr__( 'Suchen ...', 'afspaces' )
 			);
 		}
 

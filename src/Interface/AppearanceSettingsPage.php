@@ -17,6 +17,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 	class AppearanceSettingsPage {
 
 		private const OPTION_KEY = 'afspaces_appearance_options';
+		private const PRESET_ASGAROS = 'asgaros';
+		private const PRESET_NEUTRAL = 'neutral';
+		private const PRESET_CONTRAST = 'contrast';
 
 		private static bool $inline_style_added = false;
 
@@ -63,25 +66,76 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 		 */
 		public static function defaults(): array {
 			return array(
-				'base_font_family'       => 'Verdana, Tahoma, sans-serif',
-				'heading_font_family'    => 'inherit',
-				'base_font_size'         => 16,
-				'heading_color'          => '#224c75',
-				'text_color'             => '#2f3f50',
+				'base_font_family'       => 'Quicksand, sans-serif',
+				'heading_font_family'    => 'Quicksand, sans-serif',
+				'base_font_size'         => 20,
+				'heading_color'          => '#f6a81d',
+				'text_color'             => '#444444',
 				'link_color'             => '#2d5d7f',
-				'breadcrumb_text_color'  => '#6b7b8c',
-				'wrapper_background'     => '#f7f9fc',
-				'wrapper_border_color'   => '#d8e0e8',
+				'breadcrumb_text_color'  => '#888888',
+				'wrapper_background'     => '#fafbfc',
+				'wrapper_border_color'   => '#e1e8ed',
 				'wrapper_border_radius'  => 30,
-				'nav_background'         => '#356486',
+				'nav_background'         => '#2d5d7f',
 				'nav_text_color'         => '#ffffff',
 				'nav_active_background'  => '#ffffff',
 				'nav_active_text_color'  => '#1d2f43',
-				'pager_background'       => '#f2f4f7',
-				'pager_text_color'       => '#2f3f50',
-				'button_primary_bg'      => '#2f74ae',
-				'button_secondary_bg'    => '#667789',
+				'pager_background'       => '#f2f2f2',
+				'pager_text_color'       => '#888888',
+				'button_primary_bg'      => '#2d5d7f',
+				'button_secondary_bg'    => '#7f98ac',
 				'button_text_color'      => '#ffffff',
+			);
+		}
+
+		/**
+		 * @return array<string,array<string,mixed>>
+		 */
+		public static function presets(): array {
+			return array(
+				self::PRESET_ASGAROS  => self::defaults(),
+				self::PRESET_NEUTRAL  => array(
+					'base_font_family'       => 'Segoe UI, Arial, sans-serif',
+					'heading_font_family'    => 'Segoe UI, Arial, sans-serif',
+					'base_font_size'         => 18,
+					'heading_color'          => '#1f3f5b',
+					'text_color'             => '#2d3742',
+					'link_color'             => '#2d5d7f',
+					'breadcrumb_text_color'  => '#687482',
+					'wrapper_background'     => '#ffffff',
+					'wrapper_border_color'   => '#d9e0e6',
+					'wrapper_border_radius'  => 18,
+					'nav_background'         => '#345d79',
+					'nav_text_color'         => '#ffffff',
+					'nav_active_background'  => '#eef3f7',
+					'nav_active_text_color'  => '#203448',
+					'pager_background'       => '#f5f7f9',
+					'pager_text_color'       => '#52606d',
+					'button_primary_bg'      => '#2f74ae',
+					'button_secondary_bg'    => '#6d7f90',
+					'button_text_color'      => '#ffffff',
+				),
+				self::PRESET_CONTRAST => array(
+					'base_font_family'       => 'Arial, sans-serif',
+					'heading_font_family'    => 'Arial, sans-serif',
+					'base_font_size'         => 20,
+					'heading_color'          => '#c66d00',
+					'text_color'             => '#1a1a1a',
+					'link_color'             => '#003d73',
+					'breadcrumb_text_color'  => '#444444',
+					'wrapper_background'     => '#ffffff',
+					'wrapper_border_color'   => '#b7c2cb',
+					'wrapper_border_radius'  => 12,
+					'nav_background'         => '#184a6b',
+					'nav_text_color'         => '#ffffff',
+					'nav_active_background'  => '#ffffff',
+					'nav_active_text_color'  => '#111111',
+					'pager_background'       => '#ffffff',
+					'pager_text_color'       => '#1a1a1a',
+					'button_primary_bg'      => '#005b99',
+					'button_secondary_bg'    => '#4f5f6f',
+					'button_text_color'      => '#ffffff',
+				),
 			);
 		}
 
@@ -130,7 +184,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				'#af-wrapper.afspaces-wrapper { font-family: %1$s; font-size: %2$dpx; color: %3$s; background: %4$s; border-color: %5$s !important; border-radius: %6$dpx; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-dashboard h2, #af-wrapper.afspaces-wrapper .afspaces-members h2, #af-wrapper.afspaces-wrapper .afspaces-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-join-requests h2, #af-wrapper.afspaces-wrapper .afspaces-my-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-space-context-title { color: %7$s; font-family: %8$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-breadcrumb, #af-wrapper.afspaces-wrapper .afspaces-breadcrumb a { color: %9$s; }'
-				. '#af-wrapper.afspaces-wrapper .afspaces-hub-nav { background: %10$s; border-color: %10$s; }'
+				. '#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header, #af-wrapper.afspaces-wrapper .afspaces-space-nav { background: %10$s; border-color: %10$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-hub-tab { color: %11$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-hub-tab.is-active { background: %12$s; color: %13$s; border-bottom-color: %12$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-pagination a { background: %14$s; color: %15$s; }'
@@ -166,6 +220,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 		 */
 		public function sanitize_options( $input ): array {
 			$input = is_array( $input ) ? $input : array();
+
+			if ( isset( $_POST['afspaces_reset_defaults'] ) ) {
+				return self::defaults();
+			}
+
+			if ( isset( $_POST['afspaces_apply_preset'] ) ) {
+				$preset_key = isset( $_POST['afspaces_preset_key'] ) ? sanitize_key( (string) wp_unslash( $_POST['afspaces_preset_key'] ) ) : '';
+				$presets = self::presets();
+				if ( isset( $presets[ $preset_key ] ) ) {
+					return $presets[ $preset_key ];
+				}
+			}
+
 			$out   = self::defaults();
 
 			$out['base_font_family']      = $this->sanitize_font_stack( $input['base_font_family'] ?? $out['base_font_family'] );
@@ -224,12 +291,28 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 			}
 
 			$opts = self::get_settings();
+			$presets = self::presets();
 			?>
 			<div class="wrap">
 				<h1><?php echo esc_html__( 'AFSpaces Look & Feel', 'afspaces' ); ?></h1>
 				<p><?php echo esc_html__( 'Hier kannst du Farben, Schrift und Grundlayout der AFSpaces-Oberfläche an das Asgaros-Design anpassen.', 'afspaces' ); ?></p>
 				<form method="post" action="options.php">
 					<?php settings_fields( 'afspaces_appearance_group' ); ?>
+					<table class="form-table" role="presentation">
+						<tr>
+							<th scope="row"><label for="afspaces_preset_key"><?php echo esc_html__( 'Preset', 'afspaces' ); ?></label></th>
+							<td>
+								<select id="afspaces_preset_key" name="afspaces_preset_key">
+									<option value="<?php echo esc_attr( self::PRESET_ASGAROS ); ?>"><?php echo esc_html__( 'Asgaros-Nah', 'afspaces' ); ?></option>
+									<option value="<?php echo esc_attr( self::PRESET_NEUTRAL ); ?>"><?php echo esc_html__( 'Neutral', 'afspaces' ); ?></option>
+									<option value="<?php echo esc_attr( self::PRESET_CONTRAST ); ?>"><?php echo esc_html__( 'Kontrastreich', 'afspaces' ); ?></option>
+								</select>
+								<button type="submit" name="afspaces_apply_preset" class="button button-secondary" value="1"><?php echo esc_html__( 'Preset laden', 'afspaces' ); ?></button>
+								<button type="submit" name="afspaces_reset_defaults" class="button" value="1"><?php echo esc_html__( 'Auf Standard zurücksetzen', 'afspaces' ); ?></button>
+								<p class="description"><?php echo esc_html__( 'Ein Preset überschreibt die aktuellen Werte. Zurücksetzen lädt die AFSpaces-Standardwerte neu.', 'afspaces' ); ?></p>
+							</td>
+						</tr>
+					</table>
 					<table class="form-table" role="presentation">
 						<tr>
 							<th scope="row"><label for="afspaces_base_font_family"><?php echo esc_html__( 'Grundschrift', 'afspaces' ); ?></label></th>
@@ -302,6 +385,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 						<tr>
 							<th scope="row"><label for="afspaces_button_secondary_bg"><?php echo esc_html__( 'Sekundär-Button Hintergrund', 'afspaces' ); ?></label></th>
 							<td><input type="color" id="afspaces_button_secondary_bg" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_secondary_bg]" value="<?php echo esc_attr( (string) $opts['button_secondary_bg'] ); ?>" /></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="afspaces_button_text_color"><?php echo esc_html__( 'Button-Textfarbe', 'afspaces' ); ?></label></th>
+							<td><input type="color" id="afspaces_button_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_text_color]" value="<?php echo esc_attr( (string) $opts['button_text_color'] ); ?>" /></td>
 						</tr>
 					</table>
 					<?php submit_button(); ?>

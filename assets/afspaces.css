@@ -646,3 +646,461 @@ a.afspaces-link.is-active {
 		margin-bottom: 0;
 	}
 }
+
+/* Final Asgaros-aligned integration baseline. */
+#af-wrapper.afspaces-wrapper {
+	max-width: 1290px;
+	margin: 0 auto !important;
+	padding: 20px 20px 5px;
+	background: #fafbfc;
+	border: 1px solid #e1e8ed !important;
+	border-radius: 30px;
+	box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+	font-family: Quicksand, sans-serif;
+	font-size: 20px;
+	font-weight: 500;
+	line-height: normal !important;
+	color: #444;
+}
+
+#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header {
+	display: flex;
+	align-items: stretch;
+	gap: 10px;
+	padding: 2px;
+	margin: 0;
+	background: #2d5d7f;
+	border: 0;
+	border-radius: 9px;
+}
+
+#af-wrapper.afspaces-wrapper #forum-navigation.afspaces-hub-nav {
+	flex: 1 1 auto;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	border-radius: 9px;
+	overflow: hidden;
+}
+
+#af-wrapper.afspaces-wrapper #forum-navigation.afspaces-hub-nav ul {
+	gap: 0;
+	align-items: stretch;
+	height: 44px;
+	flex-wrap: nowrap;
+}
+
+#af-wrapper.afspaces-wrapper #forum-navigation.afspaces-hub-nav li + li {
+	border-left: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+#af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab {
+	display: inline-flex;
+	align-items: center;
+	padding: 0 24px;
+	height: 44px;
+	line-height: 44px;
+	font-family: Quicksand, sans-serif;
+	font-size: 20px;
+	font-weight: 500;
+	color: #fff;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	white-space: nowrap;
+}
+
+#af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab:hover,
+#af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab:focus {
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
+	border-radius: 0;
+}
+
+#af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab.is-active {
+	background: #fff;
+	color: #1d2327;
+	font-weight: 700;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+}
+
+#af-wrapper.afspaces-wrapper #forum-search.afspaces-forum-search {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 238px;
+	height: 44px;
+	padding: 0 14px;
+	background: #fff;
+	border: 0;
+	border-radius: 9px;
+	color: #444;
+	box-sizing: border-box;
+	flex: 0 0 238px;
+	margin-left: auto;
+}
+
+#af-wrapper.afspaces-wrapper #forum-search .search-icon {
+	font-size: 20px;
+	color: #444;
+	line-height: 1;
+}
+
+#af-wrapper.afspaces-wrapper #forum-search form {
+	flex: 1 1 auto;
+	margin: 0;
+}
+
+#af-wrapper.afspaces-wrapper #forum-search input[type="search"] {
+	width: 100%;
+	height: auto;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	font-family: Quicksand, sans-serif;
+	font-size: 13px;
+	font-weight: 500;
+	color: #444;
+	outline: none;
+	min-width: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-breadcrumb,
+#af-wrapper.afspaces-wrapper #forum-breadcrumbs.afspaces-breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	padding: 0 8px;
+	margin: 0;
+	font-family: Quicksand, sans-serif;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 26px;
+	color: #888;
+	list-style: none;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-breadcrumb a {
+	padding-right: 6px;
+	color: #888;
+	text-decoration: none;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-breadcrumb-sep {
+	padding: 0 8px 0 2px;
+	margin: 0;
+	color: #888;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-hub-content {
+	padding: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-dashboard,
+#af-wrapper.afspaces-wrapper .afspaces-members,
+#af-wrapper.afspaces-wrapper .afspaces-invitations,
+#af-wrapper.afspaces-wrapper .afspaces-join-requests,
+#af-wrapper.afspaces-wrapper .afspaces-my-invitations {
+	max-width: none;
+	margin: 0 0 15px;
+	font-family: Quicksand, sans-serif;
+	font-size: 20px;
+	font-weight: 500;
+	line-height: normal;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-dashboard h2,
+#af-wrapper.afspaces-wrapper .afspaces-members h2,
+#af-wrapper.afspaces-wrapper .afspaces-invitations h2,
+#af-wrapper.afspaces-wrapper .afspaces-join-requests h2,
+#af-wrapper.afspaces-wrapper .afspaces-my-invitations h2 {
+	margin: 0;
+	padding: 16px 0;
+	font-family: Quicksand, sans-serif;
+	font-size: 42px;
+	font-weight: 700;
+	line-height: 40px;
+	color: #f6a81d;
+	letter-spacing: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-context {
+	margin: 10px 0 15px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-context-title {
+	margin: 0 0 10px;
+	padding: 0;
+	font-family: Quicksand, sans-serif;
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: #2d5d7f;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-nav {
+	margin-top: 0;
+	background: #2d5d7f;
+	border: 0;
+	border-radius: 9px;
+	padding: 2px;
+	overflow: hidden;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-nav ul {
+	gap: 0;
+	flex-wrap: wrap;
+	min-height: 44px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-nav li + li {
+	border-left: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-nav .afspaces-hub-tab {
+	padding: 0 24px;
+	height: 44px;
+	line-height: 44px;
+	font-size: 20px;
+	font-weight: 500;
+	color: #fff;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	display: inline-flex;
+	align-items: center;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-nav .afspaces-hub-tab.is-active {
+	background: #fff;
+	color: #1d2327;
+	font-weight: 700;
+	margin: 0;
+	border: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-list {
+	gap: 15px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-search,
+#af-wrapper.afspaces-wrapper .afspaces-filter,
+#af-wrapper.afspaces-wrapper .afspaces-message,
+#af-wrapper.afspaces-wrapper .afspaces-notice,
+#af-wrapper.afspaces-wrapper .afspaces-created-invite-link,
+#af-wrapper.afspaces-wrapper .afspaces-search-results li {
+	background: #fff;
+	border: 1px solid #eee;
+	border-radius: 9px;
+	box-shadow: none;
+	box-sizing: border-box;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-search,
+#af-wrapper.afspaces-wrapper .afspaces-filter,
+#af-wrapper.afspaces-wrapper .afspaces-created-invite-link {
+	padding: 14px 16px;
+	margin: 0 0 15px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-message,
+#af-wrapper.afspaces-wrapper .afspaces-notice {
+	padding: 12px 16px;
+	margin: 0 0 15px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-search-results {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 15px;
+	display: grid;
+	gap: 15px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-search-results li {
+	padding: 14px 16px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item,
+#af-wrapper.afspaces-wrapper .afspaces-member-table {
+	background: #fff;
+	border: 1px solid #eee;
+	border-radius: 9px;
+	box-shadow: none;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item {
+	padding: 18px 20px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item p,
+#af-wrapper.afspaces-wrapper .afspaces-search-results li p,
+#af-wrapper.afspaces-wrapper .afspaces-members p,
+#af-wrapper.afspaces-wrapper .afspaces-invitations p,
+#af-wrapper.afspaces-wrapper .afspaces-join-requests p,
+#af-wrapper.afspaces-wrapper .afspaces-my-invitations p {
+	font-size: 20px;
+	line-height: 1.45;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item h3,
+#af-wrapper.afspaces-wrapper .afspaces-members h3,
+#af-wrapper.afspaces-wrapper .afspaces-invitations h3,
+#af-wrapper.afspaces-wrapper .afspaces-join-requests h3,
+#af-wrapper.afspaces-wrapper .afspaces-my-invitations h3 {
+	font-family: Quicksand, sans-serif;
+	font-weight: 700;
+	color: #2d5d7f;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item h3 {
+	font-size: 28px;
+	line-height: 1.2;
+	margin: 0 0 12px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-members h3,
+#af-wrapper.afspaces-wrapper .afspaces-invitations h3,
+#af-wrapper.afspaces-wrapper .afspaces-join-requests h3,
+#af-wrapper.afspaces-wrapper .afspaces-my-invitations h3 {
+	font-size: 26px;
+	line-height: 1.25;
+	margin: 0 0 12px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-table {
+	overflow: hidden;
+	border-collapse: separate;
+	border-spacing: 0;
+	margin: 0 0 15px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-table th,
+#af-wrapper.afspaces-wrapper .afspaces-member-table td {
+	padding: 14px 16px;
+	font-family: Quicksand, sans-serif;
+	font-size: 18px;
+	line-height: 1.35;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-table th {
+	background: #f7f8fa;
+	color: #4e6173;
+	font-size: 16px;
+	font-weight: 700;
+	text-transform: none;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-table tbody tr:nth-child(even) td {
+	background: #fcfcfd;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-search label,
+#af-wrapper.afspaces-wrapper .afspaces-filter label {
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	font-weight: 700;
+	color: #4e6173;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-search input[type="search"],
+#af-wrapper.afspaces-wrapper .afspaces-filter select,
+#af-wrapper.afspaces-wrapper .afspaces-inline-form input[type="text"],
+#af-wrapper.afspaces-wrapper .afspaces-inline-form input[type="number"],
+#af-wrapper.afspaces-wrapper .afspaces-inline-form input[type="datetime-local"],
+#af-wrapper.afspaces-wrapper .afspaces-invite-link-form select,
+#af-wrapper.afspaces-wrapper .afspaces-invite-link-form input[type="number"] {
+	min-height: 40px;
+	padding: 8px 10px;
+	border: 1px solid #d5dce3;
+	border-radius: 6px;
+	background: #fff;
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	color: #444;
+	box-sizing: border-box;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-tag {
+	background: #edf3f8;
+	color: #2d5d7f;
+	font-family: Quicksand, sans-serif;
+	font-size: 14px;
+	font-weight: 700;
+	border-radius: 999px;
+	padding: 4px 10px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-button,
+#af-wrapper.afspaces-wrapper .afspaces-button-secondary,
+#af-wrapper.afspaces-wrapper .afspaces-button-danger {
+	min-height: 37px;
+	padding: 0 14px;
+	border-radius: 4px;
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 37px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-pagination {
+	gap: 6px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-pagination a {
+	min-height: 37px;
+	padding: 0 14px;
+	border-radius: 4px;
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 37px;
+	background: #f2f2f2;
+	border-color: #ddd;
+	color: #888;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-pagination a[aria-current="page"] {
+	background: #2d5d7f;
+	border-color: #2d5d7f;
+	color: #fff;
+}
+
+@media (max-width: 1100px) {
+	#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header {
+		flex-wrap: wrap;
+	}
+
+	#af-wrapper.afspaces-wrapper #forum-search.afspaces-forum-search {
+		width: 100%;
+		flex-basis: 100%;
+	}
+}
+
+@media (max-width: 780px) {
+	#af-wrapper.afspaces-wrapper {
+		padding: 16px 16px 4px;
+	}
+
+	#af-wrapper.afspaces-wrapper #forum-navigation.afspaces-hub-nav ul,
+	#af-wrapper.afspaces-wrapper .afspaces-space-nav ul {
+		flex-wrap: wrap;
+		height: auto;
+	}
+
+	#af-wrapper.afspaces-wrapper #forum-navigation.afspaces-hub-nav li,
+	#af-wrapper.afspaces-wrapper .afspaces-space-nav li {
+		border-left: 0 !important;
+	}
+
+	#af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab,
+	#af-wrapper.afspaces-wrapper .afspaces-space-nav .afspaces-hub-tab {
+		width: 100%;
+		justify-content: flex-start;
+	}
+}
