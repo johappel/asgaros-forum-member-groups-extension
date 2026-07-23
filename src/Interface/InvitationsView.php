@@ -54,7 +54,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 
 			$space = $this->spaces->get_space( $space_id );
 			if ( ! $space ) {
-				return $this->notice( __( 'Raum nicht gefunden.', 'afspaces' ) );
+				return $this->notice( __( 'Arbeitsgruppe nicht gefunden.', 'afspaces' ) );
 			}
 
 			$status_filter = isset( $_GET['inv_status'] ) ? sanitize_text_field( wp_unslash( $_GET['inv_status'] ) ) : '';
@@ -75,7 +75,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			$forum_data = $this->asgaros->get_forum( $space->forum_id );
 			$forum_name = trim( (string) ( $forum_data['name'] ?? '' ) );
 			if ( '' === $forum_name ) {
-				$forum_name = sprintf( 'Space #%d', $space_id );
+				$forum_name = sprintf( 'Arbeitsgruppe #%d', $space_id );
 			}
 
 			ob_start();
@@ -83,7 +83,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			<section class="afspaces-invitations" id="afspaces-invitations-view" aria-labelledby="afspaces-invitations-heading">
 				<h2 id="afspaces-invitations-heading"><?php echo esc_html( sprintf( __( 'Einladungen - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich in diese Arbeitsgruppe einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
 				<?php echo $this->render_created_invite_link(); ?>
 
 				<section class="afspaces-invite-links afspaces-section-card content-container" aria-labelledby="afspaces-invite-links-heading">
@@ -216,7 +216,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				<?php endif; ?>
 
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-space-invitations-heading">
-					<div id="afspaces-space-invitations-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Einladungen dieses Raums', 'afspaces' ); ?></div>
+					<div id="afspaces-space-invitations-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Einladungen dieser Arbeitsgruppe', 'afspaces' ); ?></div>
 					<form method="get" class="afspaces-filter" aria-label="<?php echo esc_attr__( 'Einladungen filtern', 'afspaces' ); ?>">
 					<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_INVITATIONS ); ?>" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />

@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\AuditRepository;
 use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InviteLinkRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
+use AFSpaces\Adapters\Database\SpaceMetaRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
@@ -88,6 +89,11 @@ abstract class IntegrationTestCase extends TestCase {
 	protected InviteLinkRepository $invite_link_repository;
 
 	/**
+	 * @var SpaceMetaRepository
+	 */
+	protected SpaceMetaRepository $space_meta_repository;
+
+	/**
 	 * @var InvitationService
 	 */
 	protected InvitationService $invitation_service;
@@ -130,6 +136,7 @@ abstract class IntegrationTestCase extends TestCase {
 		$this->invitation_repository = new InvitationRepository();
 		$this->join_request_repository = new JoinRequestRepository();
 		$this->invite_link_repository = new InviteLinkRepository();
+		$this->space_meta_repository = new SpaceMetaRepository();
 		$this->members = new MemberService( $this->spaces, $this->asgaros, $this->policy, $this->audit );
 		$this->invitation_service = new InvitationService(
 			$this->spaces,
@@ -160,6 +167,7 @@ abstract class IntegrationTestCase extends TestCase {
 		$this->invitation_repository->install();
 		$this->join_request_repository->install();
 		$this->invite_link_repository->install();
+		$this->space_meta_repository->install();
 
 		// Admin-Capabilities sicherstellen.
 		Capabilities::register();
@@ -211,6 +219,7 @@ abstract class IntegrationTestCase extends TestCase {
 				$wpdb->prefix . 'afspaces_invite_links',
 				$wpdb->prefix . 'afspaces_audit',
 				$wpdb->prefix . 'afspaces_space_managers',
+				$wpdb->prefix . 'afspaces_space_meta',
 			);
 
 			foreach ( $tables as $table ) {

@@ -68,11 +68,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			}
 
 			$pending_requests = $this->pending_join_request_count( $user_id );
-			$menu_label = esc_html__( 'Räume', 'afspaces' );
+			$menu_label = esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::PLURAL ) );
 			if ( $pending_requests > 0 ) {
 				$menu_label = sprintf(
 					/* translators: %d: Anzahl offener Beitrittsanfragen */
-					esc_html__( 'Räume (%d)', 'afspaces' ),
+					esc_html__( 'Arbeitsgruppen (%d)', 'afspaces' ),
 					$pending_requests
 				);
 			}
@@ -119,7 +119,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			echo '<section class="afspaces-forum-panel" id="afspaces-forum-panel" style="display: none;" aria-labelledby="afspaces-forum-panel-heading">';
 			printf(
 				'<h2 id="afspaces-forum-panel-heading" class="afspaces-forum-panel-heading">%s</h2>',
-				esc_html__( 'Deine Räume', 'afspaces' )
+				esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ) )
 			);
 			echo '<ul class="afspaces-forum-panel-links">';
 
@@ -149,8 +149,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) ),
 					esc_html(
 						sprintf(
-							/* translators: %d: Anzahl verwalteter Räume */
-							_n( 'Verwaltete Räume (%d)', 'Verwaltete Räume (%d)', $managed_count, 'afspaces' ),
+								/* translators: %d: Anzahl verwalteter Arbeitsgruppen */
+								_n( 'Verwaltete Arbeitsgruppe (%d)', 'Verwaltete Arbeitsgruppen (%d)', $managed_count, 'afspaces' ),
 							$managed_count
 						)
 					)
@@ -179,7 +179,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				printf(
 					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
 					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ) ),
-					esc_html__( 'Raum gründen', 'afspaces' )
+					esc_html__( 'Arbeitsgruppe gründen', 'afspaces' )
 				);
 			}
 
@@ -187,7 +187,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				printf(
 					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
 					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ) ),
-					esc_html__( 'Räume entdecken', 'afspaces' )
+					esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER ) )
 				);
 			}
 

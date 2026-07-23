@@ -327,6 +327,106 @@
 	outline-offset: 2px;
 }
 
+.afspaces-working-group-card {
+	border-left: 4px solid var(--afspaces-accent, #2271b1);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 248, 251, 0.95));
+}
+
+.afspaces-working-group-card-header {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	margin-bottom: 0.75rem;
+}
+
+.afspaces-working-group-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--afspaces-accent, #2271b1) 12%, white);
+	color: var(--afspaces-accent, #2271b1);
+	font-size: 1.2rem;
+	flex: 0 0 auto;
+}
+
+.afspaces-responsibles-list {
+	list-style: none;
+	padding: 0;
+	margin: 0.5rem 0 0;
+	display: grid;
+	gap: 0.5rem;
+}
+
+.afspaces-responsibles-list li {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.afspaces-form-grid {
+	display: grid;
+	gap: 0.75rem;
+	margin: 1rem 0;
+}
+
+.afspaces-form-grid label {
+	font-weight: 600;
+}
+
+.afspaces-form-grid input[type="text"],
+.afspaces-form-grid input[type="search"],
+.afspaces-form-grid input[type="color"],
+.afspaces-form-grid select,
+.afspaces-form-grid textarea,
+.afspaces-discover-filter input[type="search"],
+.afspaces-discover-filter select {
+	width: 100%;
+	max-width: 100%;
+	min-height: 44px;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.afspaces-form-grid textarea {
+	min-height: 8rem;
+	resize: vertical;
+}
+
+.afspaces-discover-filter,
+.afspaces-filter {
+	display: flex;
+	gap: 0.75rem;
+	align-items: end;
+	flex-wrap: wrap;
+	margin: 1rem 0;
+}
+
+.afspaces-discover-filter label,
+.afspaces-filter label {
+	font-weight: 600;
+}
+
+.afspaces-profile-view,
+.afspaces-working-group-view,
+.afspaces-working-group-settings,
+.afspaces-discover {
+	max-width: 68rem;
+	margin: 1.5rem 0;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.afspaces-inline-hint {
+	margin: 0;
+	color: #4f5f6f;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	* {
 		transition: none !important;
@@ -357,6 +457,16 @@
 	.afspaces-member-table td {
 		border: 0;
 		border-bottom: 1px solid #e2e4e7;
+	}
+
+	.afspaces-working-group-card-header {
+		flex-direction: column;
+	}
+
+	.afspaces-form-grid,
+	.afspaces-discover-filter,
+	.afspaces-filter {
+		grid-template-columns: 1fr;
 	}
 }
 

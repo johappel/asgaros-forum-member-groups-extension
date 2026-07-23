@@ -19,7 +19,7 @@ use AFSpaces\Core\DomainException;
 if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 
 	/**
-	 * Rendert „Meine Forum-Einladungen“ inklusive Accept/Decline.
+	 * Rendert „Meine Arbeitsgruppen-Einladungen“ inklusive Accept/Decline.
 	 */
 	class MyInvitationsView {
 
@@ -58,22 +58,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 			$actor = $this->current_user_id();
 			$list  = $this->invitations->list_my_invitations( $actor );
 			$join_requests = $this->join_requests->list_my_requests( $actor );
-			$dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
 
 			ob_start();
 			?>
 			<section class="afspaces-my-invitations" aria-labelledby="afspaces-my-invitations-heading">
-				<h2 id="afspaces-my-invitations-heading"><?php echo esc_html__( 'Meine Forum-Einladungen', 'afspaces' ); ?></h2>
+				<h2 id="afspaces-my-invitations-heading"><?php echo esc_html__( 'Meine Arbeitsgruppen-Einladungen', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p>
-					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
-						<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-					</a>
-				</p>
 				<?php if ( empty( $list ) ) : ?>
 					<p><?php echo esc_html__( 'Du hast aktuell keine Einladungen.', 'afspaces' ); ?></p>
 				<?php else : ?>
-					<p><?php echo esc_html__( 'Mit der Annahme wirst du Mitglied der jeweiligen Raumgruppe.', 'afspaces' ); ?></p>
+					<p><?php echo esc_html__( 'Mit der Annahme wirst du Mitglied der jeweiligen Arbeitsgruppe.', 'afspaces' ); ?></p>
 					<ul class="afspaces-space-list">
 						<?php foreach ( $list as $inv ) : ?>
 							<?php
@@ -86,7 +80,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 								<div class="content-element forum afspaces-forum-row">
 									<div class="forum-status read" aria-hidden="true"><i class="fas fa-envelope"></i></div>
 									<div class="forum-name">
-										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Space #%d', $inv->space_id ) ); ?></span>
+										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $inv->space_id ) ); ?></span>
 										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Absender: %s', 'afspaces' ), $sender ? $sender->display_name : '-' ) ); ?></small>
 										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), $inv->effective_status() ) ); ?></small>
 										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Ablauf: %s', 'afspaces' ), $inv->expires_at ) ); ?></small>
@@ -134,7 +128,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 								<div class="content-element forum afspaces-forum-row">
 									<div class="forum-status read" aria-hidden="true"><i class="fas fa-user-clock"></i></div>
 									<div class="forum-name">
-										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Space #%d', $request->space_id ) ); ?></span>
+										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $request->space_id ) ); ?></span>
 										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), $request->status ) ); ?></small>
 										<?php if ( '' !== $request->request_message ) : ?>
 											<small class="forum-description"><?php echo esc_html( sprintf( __( 'Deine Nachricht: %s', 'afspaces' ), $request->request_message ) ); ?></small>
@@ -169,15 +163,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-my-invitations afspaces-invite-link-landing" aria-labelledby="afspaces-invite-link-heading">
-					<h2 id="afspaces-invite-link-heading"><?php echo esc_html__( 'Raumeinladung', 'afspaces' ); ?></h2>
+					<h2 id="afspaces-invite-link-heading"><?php echo esc_html__( 'Arbeitsgruppeneinladung', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
-					<p><strong><?php echo esc_html__( 'Raum:', 'afspaces' ); ?></strong> <?php echo esc_html( $preview['forum_name'] ); ?></p>
-					<?php $dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ); ?>
-					<p>
-						<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
-							<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-						</a>
-					</p>
+					<p><strong><?php echo esc_html__( 'Arbeitsgruppe:', 'afspaces' ); ?></strong> <?php echo esc_html( $preview['forum_name'] ); ?></p>
 				<h3><?php echo esc_html( $preview['forum_name'] ); ?></h3>
 				<p><?php echo esc_html( $preview['status_message'] ); ?></p>
 

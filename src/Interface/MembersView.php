@@ -66,18 +66,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 		public function render( int $space_id ): string {
 			$space = $this->spaces->get_space( $space_id );
 			if ( ! $space ) {
-				return $this->notice( __( 'Dieser Raum existiert nicht.', 'afspaces' ) );
+				return $this->notice( __( 'Diese Arbeitsgruppe existiert nicht.', 'afspaces' ) );
 			}
 
 			$forum = $this->asgaros->get_forum( $space->forum_id );
 			$forum_name = (string) ( $forum['name'] ?? '' );
 			if ( '' === $forum_name ) {
-				$forum_name = sprintf( __( 'Raum #%d', 'afspaces' ), $space->id );
+				$forum_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space->id );
 			}
 
 			$actor = get_current_user_id();
 			if ( ! $this->can_manage( $space_id, $actor ) ) {
-				return $this->notice( __( 'Du bist nicht berechtigt, diesen Raum zu verwalten.', 'afspaces' ) );
+				return $this->notice( __( 'Du bist nicht berechtigt, diese Arbeitsgruppe zu verwalten.', 'afspaces' ) );
 			}
 
 			$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
@@ -121,15 +121,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			<section class="afspaces-members" aria-labelledby="afspaces-members-heading">
 				<h2 id="afspaces-members-heading"><?php echo esc_html( sprintf( __( 'Mitglieder - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
-
-				<?php
-				$dashboard_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
-				?>
-				<p>
-					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="afspaces-link-back">
-						<?php echo esc_html__( '← Zurück zu Meine Räume', 'afspaces' ); ?>
-					</a>
-				</p>
+				<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten hier Mitgliedschaften. Die Moderation von Forenbeiträgen bleibt weiterhin in Asgaros getrennt.', 'afspaces' ); ?></p>
 
 				<div class="afspaces-section-card content-container">
 					<div class="title-element afspaces-section-title"><?php echo esc_html__( 'Mitglieder suchen', 'afspaces' ); ?></div>
@@ -173,17 +165,17 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 					<?php if ( '' !== $search ) : ?>
 						<p><?php echo esc_html__( 'Für die aktuelle Suche wurden keine bestehenden Mitglieder gefunden.', 'afspaces' ); ?></p>
 					<?php elseif ( 0 === $total_members ) : ?>
-						<p><?php echo esc_html__( 'Dieser Raum hat noch keine Mitglieder.', 'afspaces' ); ?></p>
+						<p><?php echo esc_html__( 'Diese Arbeitsgruppe hat noch keine Mitglieder.', 'afspaces' ); ?></p>
 					<?php else : ?>
 						<p><?php echo esc_html__( 'Auf dieser Seite wurden keine Mitglieder gefunden.', 'afspaces' ); ?></p>
 					<?php endif; ?>
 				<?php else : ?>
 					<table class="afspaces-member-table">
-						<caption class="screen-reader-text"><?php echo esc_html__( 'Liste der Raummitglieder', 'afspaces' ); ?></caption>
+						<caption class="screen-reader-text"><?php echo esc_html__( 'Liste der Arbeitsgruppenmitglieder', 'afspaces' ); ?></caption>
 						<thead>
 							<tr>
 								<th scope="col"><?php echo esc_html__( 'Name', 'afspaces' ); ?></th>
-								<th scope="col"><?php echo esc_html__( 'Rolle im Raum', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Rolle in der Arbeitsgruppe', 'afspaces' ); ?></th>
 								<th scope="col"><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
 							</tr>
 						</thead>
@@ -196,12 +188,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 								$is_manager = ( 'manager' === $role );
 								?>
 								<tr>
-									<td><?php echo esc_html( $member['display_name'] ); ?></td>
+									<td><a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => $user_id ) ) ); ?>"><?php echo esc_html( $member['display_name'] ); ?></a></td>
 									<td>
 										<?php if ( $is_owner ) : ?>
 											<span class="afspaces-tag"><?php echo esc_html__( 'Owner', 'afspaces' ); ?></span>
 										<?php elseif ( $is_manager ) : ?>
-											<span class="afspaces-tag"><?php echo esc_html__( 'Raumverantwortlich', 'afspaces' ); ?></span>
+											<span class="afspaces-tag"><?php echo esc_html__( 'Arbeitsgruppenverantwortlich', 'afspaces' ); ?></span>
 										<?php else : ?>
 											<span class="afspaces-tag"><?php echo esc_html__( 'Mitglied', 'afspaces' ); ?></span>
 										<?php endif; ?>
@@ -214,15 +206,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 													<input type="hidden" name="afspaces_action" value="assign_manager" />
 													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 													<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $member['user_id'] ); ?>" />
-													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Als Raumverantwortliche festlegen', 'afspaces' ); ?></button>
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Als Arbeitsgruppenverantwortliche festlegen', 'afspaces' ); ?></button>
 												</form>
 											<?php elseif ( $is_manager ) : ?>
-												<form method="post" class="afspaces-inline-form" onsubmit="return confirm('<?php echo esc_js( __( 'Raumverantwortung wirklich entziehen?', 'afspaces' ) ); ?>');">
+												<form method="post" class="afspaces-inline-form" onsubmit="return confirm('<?php echo esc_js( __( 'Arbeitsgruppenverantwortung wirklich entziehen?', 'afspaces' ) ); ?>');">
 													<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
 													<input type="hidden" name="afspaces_action" value="revoke_manager" />
 													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 													<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $member['user_id'] ); ?>" />
-													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Raumverantwortung entziehen', 'afspaces' ); ?></button>
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Arbeitsgruppenverantwortung entziehen', 'afspaces' ); ?></button>
 												</form>
 											<?php endif; ?>
 

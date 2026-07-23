@@ -80,6 +80,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\JoinRequestService' ) ) {
 			);
 
 			$this->audit->log( $space_id, $actor_user_id, $actor_user_id, 'join_request_created', 'join_request' );
+			$this->notify_responsibles( $request );
 			return $request;
 		}
 
@@ -187,21 +188,14 @@ if ( ! class_exists( 'AFSpaces\\Application\\JoinRequestService' ) ) {
 				return;
 			}
 
-			$space = $this->spaces->get_space( $request->space_id );
-			$forum_name = sprintf( 'Space #%d', $request->space_id );
-			if ( $space ) {
-				$forum = $this->asgaros->get_forum( $space->forum_id );
-				if ( ! empty( $forum['name'] ) ) {
-					$forum_name = (string) $forum['name'];
-				}
-			}
+			$forum_name = $this->working_group_name( $request->space_id );
 
 			$subject = $approved
 				? sprintf( __( 'Deine Beitrittsanfrage fuer "%s" wurde genehmigt', 'afspaces' ), $forum_name )
 				: sprintf( __( 'Deine Beitrittsanfrage fuer "%s" wurde abgelehnt', 'afspaces' ), $forum_name );
 
 			$body = $approved
-				? __( 'Deine Beitrittsanfrage wurde genehmigt. Du kannst den Raum nun nutzen.', 'afspaces' )
+				? __( 'Deine Beitrittsanfrage wurde genehmigt. Du kannst die Arbeitsgruppe nun nutzen.', 'afspaces' )
 				: __( 'Deine Beitrittsanfrage wurde abgelehnt.', 'afspaces' );
 
 			if ( '' !== $request->decision_message ) {
@@ -209,6 +203,72 @@ if ( ! class_exists( 'AFSpaces\\Application\\JoinRequestService' ) ) {
 			}
 
 			wp_mail( (string) $user->user_email, $subject, $body );
+			$this->audit->log( $request->space_id, 0, $request->requester_user_id, $approved ? 'join_request_requester_notified_approved' : 'join_request_requester_notified_rejected', 'notification' );
+		}
+
+		/**
+		 * @param JoinRequest $request Anfrage.
+		 * @return void
+		 */
+		private function notify_responsibles( JoinRequest $request ): void {
+			$emails = array();
+			foreach ( $this->spaces->get_managers( $request->space_id ) as $manager ) {
+				$user = get_userdata( $manager->user_id );
+				if ( ! $user || empty( $user->user_email ) ) {
+					continue;
+				}
+
+				$emails[ strtolower( (string) $user->user_email ) ] = array(
+					'email' => (string) $user->user_email,
+					'user_id' => (int) $user->ID,
+				);
+			}
+
+			$central = (string) get_option( 'afspaces_central_notification_email', '' );
+			$central = (string) apply_filters( 'afspaces_central_notification_email', $central, $request );
+
+			$requester = get_userdata( $request->requester_user_id );
+			$requester_name = $requester ? (string) $requester->display_name : (string) $request->requester_user_id;
+			$forum_name = $this->working_group_name( $request->space_id );
+			$subject = sprintf( __( 'Neue Beitrittsanfrage fuer "%s"', 'afspaces' ), $forum_name );
+			$body = sprintf( __( 'Für die Arbeitsgruppe "%s" ist eine neue Beitrittsanfrage eingegangen.', 'afspaces' ), $forum_name );
+			$body .= "\n\n" . sprintf( __( 'Anfragende Person: %s', 'afspaces' ), $requester_name );
+
+			if ( '' !== $request->request_message ) {
+				$body .= "\n\n" . __( 'Nachricht:', 'afspaces' ) . "\n" . $request->request_message;
+			}
+
+			if ( class_exists( '\\AFSpaces\\Interface\\SpacesUrls' ) ) {
+				$body .= "\n\n" . __( 'Verwaltung:', 'afspaces' ) . "\n" . \AFSpaces\Interface\SpacesUrls::hub_url( \AFSpaces\Interface\SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $request->space_id ) );
+			}
+
+			foreach ( $emails as $entry ) {
+				wp_mail( $entry['email'], $subject, $body );
+				$this->audit->log( $request->space_id, 0, (int) $entry['user_id'], 'join_request_manager_notified', 'notification' );
+			}
+
+			if ( '' !== $central && is_email( $central ) ) {
+				wp_mail( $central, $subject, $body );
+				$this->audit->log( $request->space_id, 0, 0, 'join_request_central_notified', 'notification' );
+			}
+		}
+
+		/**
+		 * @param int $space_id Space-ID.
+		 * @return string
+		 */
+		private function working_group_name( int $space_id ): string {
+			$space = $this->spaces->get_space( $space_id );
+			if ( ! $space ) {
+				return sprintf( 'Arbeitsgruppe #%d', $space_id );
+			}
+
+			$forum = $this->asgaros->get_forum( $space->forum_id );
+			if ( ! empty( $forum['name'] ) ) {
+				return (string) $forum['name'];
+			}
+
+			return sprintf( 'Arbeitsgruppe #%d', $space_id );
 		}
 	}
 }

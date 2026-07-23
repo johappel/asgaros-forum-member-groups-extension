@@ -11,6 +11,7 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
@@ -32,6 +33,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private InvitationService $invitations;
 		private JoinRequestService $join_requests;
 		private InviteLinkService $invite_links;
+		private WorkingGroupService $working_groups;
 
 		/**
 		 * Konstruktor.
@@ -43,7 +45,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			MemberService $members,
 			InvitationService $invitations,
 			JoinRequestService $join_requests,
-			InviteLinkService $invite_links
+			InviteLinkService $invite_links,
+			WorkingGroupService $working_groups
 		) {
 			$this->frontend     = $frontend;
 			$this->spaces       = $spaces;
@@ -52,6 +55,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->invitations  = $invitations;
 			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
+			$this->working_groups = $working_groups;
 		}
 
 		/**
@@ -151,12 +155,25 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					$requests_view = new JoinRequestsView( $this->spaces, $this->asgaros, $this->join_requests );
 					return $requests_view->render( $space_id );
 
+				case SpacesUrls::VIEW_GROUP:
+					$group_view = new WorkingGroupView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->working_groups );
+					return $group_view->render( $space_id );
+
+				case SpacesUrls::VIEW_PROFILE:
+					$profile_user_id = isset( $_GET['user_id'] ) ? (int) $_GET['user_id'] : 0;
+					$profile_view = new ProfileView( $this->spaces, $this->asgaros, $this->working_groups );
+					return $profile_view->render( $profile_user_id );
+
+				case SpacesUrls::VIEW_SETTINGS:
+					$settings_view = new WorkingGroupSettingsView( $this->spaces, $this->asgaros, $this->working_groups );
+					return $settings_view->render( $space_id );
+
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros );
 					return $mine_view->render();
 
 				case SpacesUrls::VIEW_DISCOVER:
-					$discover_view = new DiscoverView( $this->spaces, $this->asgaros, $this->join_requests );
+					$discover_view = new DiscoverView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->working_groups );
 					return $discover_view->render();
 
 				case SpacesUrls::VIEW_CREATE:
@@ -187,12 +204,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			);
 
 			if ( SpacesUrls::VIEW_DASHBOARD === $view ) {
-				$items[] = sprintf( '<span aria-current="page">%s</span>', esc_html__( 'Räume', 'afspaces' ) );
+				$items[] = sprintf( '<span aria-current="page">%s</span>', esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::PLURAL ) ) );
 			} else {
 				$items[] = sprintf(
 					'<a href="%1$s">%2$s</a>',
 					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) ),
-					esc_html__( 'Räume', 'afspaces' )
+					esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::PLURAL ) )
 				);
 				$items[] = sprintf( '<span aria-current="page">%s</span>', esc_html( $this->view_label( $view, $space_id ) ) );
 			}
@@ -219,7 +236,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			$room_context_active = $space_id > 0
 				&& $this->can_manage_space( $space_id, $actor )
-				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS ), true );
+				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS, SpacesUrls::VIEW_SETTINGS ), true );
 
 			$tabs = array();
 
@@ -234,7 +251,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			$tabs[] = array(
 				'view'   => SpacesUrls::VIEW_DASHBOARD,
-				'label'  => __( 'Meine Räume', 'afspaces' ),
+				'label'  => WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ),
 				'active' => SpacesUrls::VIEW_DASHBOARD === $view || $room_context_active,
 			);
@@ -247,16 +264,23 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			);
 
 			$tabs[] = array(
+				'view'   => SpacesUrls::VIEW_PROFILE,
+				'label'  => __( 'Mein Arbeitsgruppenprofil', 'afspaces' ),
+				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE ),
+				'active' => SpacesUrls::VIEW_PROFILE === $view,
+			);
+
+			$tabs[] = array(
 				'view'   => SpacesUrls::VIEW_DISCOVER,
-				'label'  => __( 'Räume entdecken', 'afspaces' ),
+				'label'  => WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ),
-				'active' => SpacesUrls::VIEW_DISCOVER === $view,
+				'active' => SpacesUrls::VIEW_DISCOVER === $view || ( SpacesUrls::VIEW_GROUP === $view && ! $this->can_manage_space( $space_id, $actor ) ),
 			);
 
 			if ( $this->can_create_spaces( $actor ) ) {
 				$tabs[] = array(
 					'view'   => SpacesUrls::VIEW_CREATE,
-					'label'  => __( 'Raum gründen', 'afspaces' ),
+					'label'  => __( 'Arbeitsgruppe gründen', 'afspaces' ),
 					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ),
 					'active' => SpacesUrls::VIEW_CREATE === $view,
 				);
@@ -289,7 +313,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			return sprintf(
 				'<div id="forum-header" class="afspaces-forum-header"><nav id="forum-navigation" class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav><div id="forum-search" class="afspaces-forum-search"><span class="search-icon fas fa-search" aria-hidden="true"></span><form method="get" action="%3$s"><input name="keywords" type="search" placeholder="%4$s" value="" /></form></div><div class="clear"></div></div>',
-				esc_attr__( 'Raumverwaltung', 'afspaces' ),
+				esc_attr__( 'Arbeitsgruppenverwaltung', 'afspaces' ),
 				$items,
 				esc_url( $search_url ),
 				esc_attr__( 'Suchen ...', 'afspaces' )
@@ -297,7 +321,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		}
 
 		/**
-		 * Rendert raumbezogene Verwaltungstabs unter dem Raumtitel.
+		 * Rendert arbeitsgruppenbezogene Verwaltungstabs unter dem Gruppentitel.
 		 *
 		 * @param string $view     Aktive Unteransicht.
 		 * @param int    $space_id Space-ID.
@@ -317,10 +341,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$forum = $this->asgaros->get_forum( $space->forum_id );
 			$room_name = trim( (string) ( $forum['name'] ?? '' ) );
 			if ( '' === $room_name ) {
-				$room_name = sprintf( __( 'Raum #%d', 'afspaces' ), $space_id );
+				$room_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space_id );
 			}
 
 			$tabs = array(
+				array(
+					'view'   => SpacesUrls::VIEW_SETTINGS,
+					'label'  => __( 'Details', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_SETTINGS === $view,
+				),
 				array(
 					'view'   => SpacesUrls::VIEW_MEMBERS,
 					'label'  => __( 'Mitglieder', 'afspaces' ),
@@ -365,8 +395,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			return sprintf(
 				'<section class="afspaces-space-context" aria-labelledby="afspaces-space-context-heading"><h2 id="afspaces-space-context-heading" class="afspaces-space-context-title">%1$s</h2><nav class="afspaces-hub-nav afspaces-space-nav" aria-label="%2$s"><ul>%3$s</ul></nav></section>',
-				esc_html( sprintf( __( 'Raum verwalten: %s', 'afspaces' ), $room_name ) ),
-				esc_attr__( 'Raumbezogene Verwaltung', 'afspaces' ),
+				esc_html( WorkingGroupTerminology::manage_context( $room_name ) ),
+				esc_attr__( 'Arbeitsgruppenbezogene Verwaltung', 'afspaces' ),
 				$items
 			);
 		}
@@ -381,14 +411,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			if ( ! $this->can_create_spaces( $actor ) ) {
 				return sprintf(
 					'<p class="afspaces-notice" role="status">%s</p>',
-					esc_html__( 'Die Raumgründung ist derzeit nicht verfügbar.', 'afspaces' )
+					esc_html__( 'Die Arbeitsgruppengründung ist derzeit nicht verfügbar.', 'afspaces' )
 				);
 			}
 
 			ob_start();
 			?>
 			<section class="afspaces-create" aria-labelledby="afspaces-create-heading">
-				<h2 id="afspaces-create-heading"><?php echo esc_html__( 'Raum gründen', 'afspaces' ); ?></h2>
+				<h2 id="afspaces-create-heading"><?php echo esc_html__( 'Arbeitsgruppe gründen', 'afspaces' ); ?></h2>
 				<p><?php echo esc_html__( 'Diese Funktion wird mit der nächsten Ausbaustufe verfügbar sein.', 'afspaces' ); ?></p>
 				<?php
 				/**
@@ -414,16 +444,22 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return __( 'Mitglieder', 'afspaces' );
 				case SpacesUrls::VIEW_INVITATIONS:
 					return __( 'Einladungen', 'afspaces' );
+					case SpacesUrls::VIEW_GROUP:
+						return __( 'Arbeitsgruppe', 'afspaces' );
+					case SpacesUrls::VIEW_PROFILE:
+						return __( 'Arbeitsgruppenprofil', 'afspaces' );
+					case SpacesUrls::VIEW_SETTINGS:
+						return __( 'Arbeitsgruppen-Details', 'afspaces' );
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					return __( 'Meine Einladungen', 'afspaces' );
 				case SpacesUrls::VIEW_JOIN_REQUESTS:
 					return __( 'Beitrittsanfragen', 'afspaces' );
 				case SpacesUrls::VIEW_DISCOVER:
-					return __( 'Räume entdecken', 'afspaces' );
+					return WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER );
 				case SpacesUrls::VIEW_CREATE:
-					return __( 'Raum gründen', 'afspaces' );
+					return __( 'Arbeitsgruppe gründen', 'afspaces' );
 				default:
-					return __( 'Meine Räume', 'afspaces' );
+					return WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL );
 			}
 		}
 

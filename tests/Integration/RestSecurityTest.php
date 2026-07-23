@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Tests\Integration;
 
+use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 
 /**
@@ -300,5 +301,55 @@ final class RestSecurityTest extends IntegrationTestCase {
 		$this->assertTrue( \AsgarosForumUserGroups::isUserInUserGroup( $requester, $this->group_id ) );
 
 		$this->cleanup_user_from_group( $requester );
+	}
+
+	public function test_non_manager_cannot_update_working_group_metadata(): void {
+		$owner = $this->make_user_with_cap( 'wg_owner_forbid', Capabilities::MANAGE_ALL_SPACES );
+		$other = $this->make_user_with_cap( 'wg_other_forbid' );
+		$space_id = $this->create_test_space( $owner );
+
+		wp_set_current_user( $other );
+		$request = new \WP_REST_Request( 'POST', '/afspaces/v1/spaces/' . $space_id . '/working-group' );
+		$request->set_param( 'description', 'Verbotene Aenderung' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	public function test_manager_can_update_working_group_metadata_via_rest(): void {
+		$owner = $this->make_user_with_cap( 'wg_owner_ok', Capabilities::MANAGE_ALL_SPACES );
+		$space_id = $this->create_test_space( $owner );
+
+		wp_set_current_user( $owner );
+		$request = new \WP_REST_Request( 'POST', '/afspaces/v1/spaces/' . $space_id . '/working-group' );
+		$request->set_param( 'description', 'REST aktualisierte Beschreibung' );
+		$request->set_param( 'join_policy', 'invite_only' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'REST aktualisierte Beschreibung', $data['description'] );
+		$this->assertSame( 'invite_only', $data['join_policy'] );
+	}
+
+	public function test_profile_endpoint_does_not_leak_hidden_membership(): void {
+		$owner = $this->make_user_with_cap( 'wg_owner_hidden', Capabilities::MANAGE_ALL_SPACES );
+		$member = $this->make_user_with_cap( 'wg_member_hidden' );
+		$outsider = $this->make_user_with_cap( 'wg_outsider_hidden' );
+		$space_id = $this->create_test_space( $owner );
+
+		$this->members->add_member( $space_id, $owner, $member );
+		$service = new WorkingGroupService( $this->spaces, $this->space_meta_repository, $this->asgaros, $this->policy, $this->audit );
+		$service->save_metadata( $space_id, $owner, array( 'directory_visibility' => 'hidden' ) );
+
+		wp_set_current_user( $outsider );
+		$request = new \WP_REST_Request( 'GET', '/afspaces/v1/profiles/' . $member . '/working-groups' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( array(), $data['working_groups'] );
+
+		$this->cleanup_user_from_group( $member );
 	}
 }

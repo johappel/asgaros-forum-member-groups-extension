@@ -25,12 +25,18 @@ final class SpacesUrlsTest extends TestCase {
 		$this->assertContains( SpacesUrls::VIEW_MEMBERS, $views );
 		$this->assertContains( SpacesUrls::VIEW_INVITATIONS, $views );
 		$this->assertContains( SpacesUrls::VIEW_MY_INVITATIONS, $views );
+		$this->assertContains( SpacesUrls::VIEW_GROUP, $views );
+		$this->assertContains( SpacesUrls::VIEW_PROFILE, $views );
+		$this->assertContains( SpacesUrls::VIEW_SETTINGS, $views );
 		$this->assertContains( SpacesUrls::VIEW_CREATE, $views );
 	}
 
 	public function test_normalize_view_accepts_valid_views(): void {
 		$this->assertSame( SpacesUrls::VIEW_MEMBERS, SpacesUrls::normalize_view( 'members' ) );
 		$this->assertSame( SpacesUrls::VIEW_MY_INVITATIONS, SpacesUrls::normalize_view( 'my-invitations' ) );
+		$this->assertSame( SpacesUrls::VIEW_GROUP, SpacesUrls::normalize_view( 'working-group' ) );
+		$this->assertSame( SpacesUrls::VIEW_PROFILE, SpacesUrls::normalize_view( 'profile' ) );
+		$this->assertSame( SpacesUrls::VIEW_SETTINGS, SpacesUrls::normalize_view( 'working-group-settings' ) );
 		$this->assertSame( SpacesUrls::VIEW_CREATE, SpacesUrls::normalize_view( 'create' ) );
 	}
 

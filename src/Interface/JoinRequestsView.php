@@ -48,7 +48,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 
 			$space = $this->spaces->get_space( $space_id );
 			if ( ! $space ) {
-				return $this->notice( __( 'Raum nicht gefunden.', 'afspaces' ) );
+				return $this->notice( __( 'Arbeitsgruppe nicht gefunden.', 'afspaces' ) );
 			}
 
 			try {
@@ -60,7 +60,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 			$forum_data = $this->asgaros->get_forum( $space->forum_id );
 			$forum_name = trim( (string) ( $forum_data['name'] ?? '' ) );
 			if ( '' === $forum_name ) {
-				$forum_name = sprintf( 'Space #%d', $space_id );
+				$forum_name = sprintf( 'Arbeitsgruppe #%d', $space_id );
 			}
 
 			ob_start();
@@ -68,10 +68,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 			<section class="afspaces-join-requests" id="afspaces-join-requests-view" aria-labelledby="afspaces-join-requests-heading">
 				<h2 id="afspaces-join-requests-heading"><?php echo esc_html( sprintf( __( 'Beitrittsanfragen - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier entscheidest du über offene Beitrittsanfragen für diesen Raum.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier entscheidest du über offene Beitrittsanfragen für diese Arbeitsgruppe.', 'afspaces' ); ?></p>
+				<p class="description"><?php echo esc_html__( 'Diese Verantwortung umfasst Mitgliedschaften, Einladungen und Anfragen. Beitragsmoderation bleibt weiterhin außerhalb von AFSpaces.', 'afspaces' ); ?></p>
 
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-space-join-requests-heading">
-					<div id="afspaces-space-join-requests-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Anfragen dieses Raums', 'afspaces' ); ?></div>
+					<div id="afspaces-space-join-requests-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Anfragen dieser Arbeitsgruppe', 'afspaces' ); ?></div>
 				<?php if ( empty( $requests ) ) : ?>
 					<p><?php echo esc_html__( 'Es sind derzeit keine Beitrittsanfragen vorhanden.', 'afspaces' ); ?></p>
 				<?php else : ?>
