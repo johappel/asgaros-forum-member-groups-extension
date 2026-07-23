@@ -13,11 +13,13 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapter;
 use AFSpaces\Adapters\Database\AuditRepository;
 use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
+use AFSpaces\Adapters\Database\SpaceMetaRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Application\SpaceRegistrationService;
+use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
@@ -27,8 +29,11 @@ use AFSpaces\Interface\FrontendController;
 use AFSpaces\Interface\InvitationsView;
 use AFSpaces\Interface\MembersView;
 use AFSpaces\Interface\MyInvitationsView;
+use AFSpaces\Interface\ProfileView;
 use AFSpaces\Interface\RestController;
 use AFSpaces\Interface\SpacesHubController;
+use AFSpaces\Interface\WorkingGroupSettingsView;
+use AFSpaces\Interface\WorkingGroupView;
 
 if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
@@ -92,20 +97,22 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$inv_repo = new InvitationRepository();
 			$join_repo = new JoinRequestRepository();
 			$link_repo = new \AFSpaces\Adapters\Database\InviteLinkRepository();
+			$space_meta = new SpaceMetaRepository();
 			$members = new MemberService( $spaces, $asgaros, $policy, $audit );
 			$invites = new InvitationService( $spaces, $inv_repo, $asgaros, $policy, $audit );
 			$join_requests = new JoinRequestService( $spaces, $join_repo, $asgaros, $policy, $audit );
 			$invite_links = new \AFSpaces\Application\InviteLinkService( $spaces, $link_repo, $asgaros, $policy, $audit, $join_requests );
+			$working_groups = new WorkingGroupService( $spaces, $space_meta, $asgaros, $policy, $audit );
 			$space_registration = new SpaceRegistrationService( $spaces, $asgaros );
 
-			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $space_registration );
+			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration );
 			$frontend->init();
 
 			$appearance = new AppearanceSettingsPage();
 			$appearance->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
-			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links );
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups );
 			$hub->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
@@ -144,7 +151,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			);
 
 			// REST-API registrieren.
-			$rest = new RestController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links );
+			$rest = new RestController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups );
 			add_action( 'rest_api_init', array( $rest, 'register_routes' ) );
 
 			add_filter( 'wp_privacy_personal_data_exporters', static function ( array $exporters ) use ( $inv_repo ): array {

@@ -10,8 +10,22 @@ const ADMIN = { username: 'afp_e2e_admin', password: 'E2ePassw0rd!' };
 const MANAGER = { username: 'afp_e2e_manager', password: 'E2ePassw0rd!' };
 const TARGET = { username: 'afp_e2e_target', password: 'E2ePassw0rd!' };
 
-const SPACE_ID = Number(process.env.AFSPACES_SPACE_ID) || 262;
-const MEMBERS_PAGE = `${BASE}/afspaces/?afspaces_view=members&space_id=${SPACE_ID}`;
+function membersPage(spaceId: number) {
+  return `${BASE}/afspaces/?afspaces_view=members&space_id=${spaceId}`;
+}
+
+async function getManagedSpaceId(page: Page): Promise<number> {
+  await page.goto(`${BASE}/afspaces/`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+  const membersLink = page.locator('a[href*="afspaces_view=members"][href*="space_id="]').first();
+  await expect(membersLink).toBeVisible({ timeout: 15000 });
+
+  const href = (await membersLink.getAttribute('href')) || '';
+  const parsed = new URL(href, BASE);
+  const value = Number(parsed.searchParams.get('space_id') || '0');
+  expect(value).toBeGreaterThan(0);
+
+  return value;
+}
 
 async function waitForLoggedIn(page: Page) {
   // Prüfen, ob die Mitgliederseite erreichbar ist.
@@ -30,9 +44,6 @@ async function login(page: Page, user: { username: string; password: string }) {
   await page.click('#wp-submit', { noWaitAfter: true });
   // Warten, bis der Login verarbeitet ist (Cookies gesetzt).
   await page.waitForTimeout(10000);
-  // Nach dem Login zur Mitgliederseite navigieren (WP leitet evtl. woanders hin).
-  await page.goto(MEMBERS_PAGE, { waitUntil: 'domcontentloaded' }).catch(() => {});
-  await waitForLoggedIn(page);
 }
 
 const TARGET_ROW = '.afspaces-member-table tbody tr';
@@ -46,31 +57,31 @@ function targetRow(page: Page) {
  * WP+Asgaros feuert kein `load`-Event, daher kann nicht auf domcontentloaded
  * gewartet werden — wir pollen auf einen konkreten Selektor.
  */
-async function gotoMembers(page: Page) {
-  await page.goto(MEMBERS_PAGE, { waitUntil: 'domcontentloaded' }).catch(() => {});
+async function gotoMembers(page: Page, spaceId: number) {
+  await page.goto(membersPage(spaceId), { waitUntil: 'domcontentloaded' }).catch(() => {});
   await expect(page.locator('h2#afspaces-members-heading')).toBeVisible({ timeout: 15000 });
 }
 
 /** Stellt sicher, dass der Zielbenutzer KEIN Mitglied ist (entfernt ggf.). */
-async function ensureTargetRemoved(page: Page) {
-  await gotoMembers(page);
+async function ensureTargetRemoved(page: Page, spaceId: number) {
+  await gotoMembers(page, spaceId);
   const row = await targetRow(page);
   if (await row.count() > 0) {
     page.once('dialog', (dialog) => dialog.accept());
     await row.locator('button:has-text("Entfernen")').click({ noWaitAfter: true });
     // Nach dem Entfernen neu laden und sicherstellen, dass der Benutzer weg ist.
     await page.waitForTimeout(2000);
-    await gotoMembers(page);
+    await gotoMembers(page, spaceId);
     await expect(await targetRow(page).count()).toBe(0);
   }
 }
 
 /** Stellt sicher, dass der Zielbenutzer Mitglied ist (fügt ggf. hinzu). */
-async function ensureTargetAdded(page: Page) {
-  await gotoMembers(page);
+async function ensureTargetAdded(page: Page, spaceId: number) {
+  await gotoMembers(page, spaceId);
   if ((await targetRow(page).count()) === 0) {
-    await page.goto(`${MEMBERS_PAGE}&afp_search=afp_e2e_target`, { waitUntil: 'domcontentloaded' }).catch(() => {});
-    await expect(page.locator('h3:has-text("Suchergebnisse")')).toBeVisible({ timeout: 15000 });
+    await page.goto(`${membersPage(spaceId)}&afp_search=afp_e2e_target`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await expect(page.locator('.afspaces-section-title', { hasText: 'Suchergebnisse' })).toBeVisible({ timeout: 15000 });
     const addButton = page.locator('form.afspaces-inline-form button:has-text("Hinzufügen")').first();
     await expect(addButton).toBeVisible({ timeout: 15000 });
     await addButton.click({ noWaitAfter: true });
@@ -81,20 +92,26 @@ async function ensureTargetAdded(page: Page) {
 test.describe('Mitglieder-Verwaltung (mit JavaScript)', () => {
   test('Manager kann einen Benutzer suchen und hinzufügen', async ({ page }) => {
     await login(page, MANAGER);
-    await ensureTargetRemoved(page);
-    await ensureTargetAdded(page);
+    const spaceId = await getManagedSpaceId(page);
+    await gotoMembers(page, spaceId);
+    await waitForLoggedIn(page);
+    await ensureTargetRemoved(page, spaceId);
+    await ensureTargetAdded(page, spaceId);
 
     // Mitglied erscheint in der Tabelle.
-    await gotoMembers(page);
+    await gotoMembers(page, spaceId);
     await expect(targetRow(page)).toBeVisible({ timeout: 15000 });
     await expect(page.locator('.afspaces-member-table')).toContainText('afp_e2e_target');
   });
 
   test('Manager kann einen Benutzer entfernen', async ({ page }) => {
     await login(page, MANAGER);
-    await ensureTargetAdded(page);
+    const spaceId = await getManagedSpaceId(page);
+    await gotoMembers(page, spaceId);
+    await waitForLoggedIn(page);
+    await ensureTargetAdded(page, spaceId);
 
-    await gotoMembers(page);
+    await gotoMembers(page, spaceId);
     const row = await targetRow(page);
     await expect(row).toBeVisible();
 
@@ -110,15 +127,18 @@ test.describe('Barrierefreiheit: Tastaturbedienung ohne JavaScript', () => {
   // Cookies in einen JS-freien Context und führen den eigentlichen Test dort aus.
   test('Kernfunktion funktioniert ohne JavaScript', async ({ browser, context, page }) => {
     await login(page, MANAGER);
+    const spaceId = await getManagedSpaceId(page);
+    await gotoMembers(page, spaceId);
+    await waitForLoggedIn(page);
     const cookies = await context.cookies();
 
     const noJsContext = await browser.newContext({ javaScriptEnabled: false });
     await noJsContext.addCookies(cookies);
     const noJsPage = await noJsContext.newPage();
 
-    await ensureTargetRemoved(noJsPage);
+    await ensureTargetRemoved(noJsPage, spaceId);
 
-    await gotoMembers(noJsPage);
+    await gotoMembers(noJsPage, spaceId);
 
     // Suche per Tastatur ausfüllen und absenden.
     await noJsPage.focus('#afp_search');
@@ -138,13 +158,16 @@ test.describe('Barrierefreiheit: Tastaturbedienung ohne JavaScript', () => {
 
   test('Mitgliederliste ist semantische Tabelle mit Überschriften', async ({ browser, context, page }) => {
     await login(page, MANAGER);
+    const spaceId = await getManagedSpaceId(page);
+    await gotoMembers(page, spaceId);
+    await waitForLoggedIn(page);
     const cookies = await context.cookies();
 
     const noJsContext = await browser.newContext({ javaScriptEnabled: false });
     await noJsContext.addCookies(cookies);
     const noJsPage = await noJsContext.newPage();
 
-    await gotoMembers(noJsPage);
+    await gotoMembers(noJsPage, spaceId);
 
     const table = noJsPage.locator('table.afspaces-member-table');
     await expect(table).toBeVisible();

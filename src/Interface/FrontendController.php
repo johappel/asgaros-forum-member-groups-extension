@@ -16,6 +16,7 @@ use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Application\SpaceRegistrationService;
+use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
 
@@ -81,6 +82,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			InvitationService $invitations,
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
+				WorkingGroupService $working_groups,
 			SpaceRegistrationService $space_registration
 		) {
 			$this->spaces  = $spaces;
@@ -89,6 +91,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$this->invitations = $invitations;
 			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
+						$this->working_groups = $working_groups;
 			$this->space_registration = $space_registration;
 		}
 
@@ -176,11 +179,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				} elseif ( 'assign_manager' === $action ) {
 					$target = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
 					$this->members->assign_manager( $space_id, $actor, $target );
-					$this->set_message( 'success', __( 'Die Person ist jetzt Raumverantwortliche.', 'afspaces' ) );
+					$this->set_message( 'success', __( 'Die Person ist jetzt Arbeitsgruppenverantwortliche.', 'afspaces' ) );
 				} elseif ( 'revoke_manager' === $action ) {
 					$target = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
 					$this->members->revoke_manager( $space_id, $actor, $target );
-					$this->set_message( 'success', __( 'Die Raumverantwortung wurde entzogen.', 'afspaces' ) );
+					$this->set_message( 'success', __( 'Die Arbeitsgruppenverantwortung wurde entzogen.', 'afspaces' ) );
 				} elseif ( 'create_invitation' === $action ) {
 					$target = isset( $_POST['invitee_user_id'] ) ? (int) $_POST['invitee_user_id'] : 0;
 					$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
@@ -239,13 +242,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$result = $this->invite_links->use_link( $invite_link_token, $actor );
 
 					if ( 'joined' === $result['result'] ) {
-						$this->set_message( 'success', __( 'Du bist dem Raum beigetreten.', 'afspaces' ) );
+						$this->set_message( 'success', __( 'Du bist der Arbeitsgruppe beigetreten.', 'afspaces' ) );
 						wp_safe_redirect( $result['forum_url'] );
 						exit;
 					}
 
 					if ( 'already_member' === $result['result'] ) {
-						$this->set_message( 'success', __( 'Du bist bereits Mitglied dieses Raums.', 'afspaces' ) );
+						$this->set_message( 'success', __( 'Du bist bereits Mitglied dieser Arbeitsgruppe.', 'afspaces' ) );
 						wp_safe_redirect( $result['forum_url'] );
 						exit;
 					}
@@ -288,7 +291,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 						'success',
 						sprintf(
 							/* translators: %s: Forumsname */
-							__( 'Das Forum "%s" wurde als Raum registriert.', 'afspaces' ),
+							__( 'Das Forum "%s" wurde als Arbeitsgruppe registriert.', 'afspaces' ),
 							(string) ( $forum['name'] ?? (string) $space->forum_id )
 						)
 					);
@@ -401,7 +404,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		 */
 		public function render_dashboard(): string {
 			if ( ! is_user_logged_in() ) {
-				return $this->notice( __( 'Bitte melde dich an, um deine Räume zu verwalten.', 'afspaces' ) );
+				return $this->notice( __( 'Bitte melde dich an, um deine Arbeitsgruppen zu verwalten.', 'afspaces' ) );
 			}
 
 			$actor = get_current_user_id();
@@ -430,11 +433,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-dashboard" aria-labelledby="afspaces-dashboard-heading">
-				<h2 id="afspaces-dashboard-heading"><?php echo esc_html__( 'Meine Räume', 'afspaces' ); ?></h2>
+				<h2 id="afspaces-dashboard-heading"><?php echo esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
+				<p><a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE ) ); ?>"><?php echo esc_html__( 'Mein Arbeitsgruppenprofil öffnen', 'afspaces' ); ?></a></p>
 
 				<?php if ( empty( $manageable ) && empty( $member_spaces ) ) : ?>
-					<p><?php echo esc_html__( 'Dir sind noch keine Räume zugeordnet.', 'afspaces' ); ?></p>
+					<p><?php echo esc_html__( 'Dir sind noch keine Arbeitsgruppen zugeordnet.', 'afspaces' ); ?></p>
 				<?php endif; ?>
 
 				<?php if ( ! empty( $manageable ) ) : ?>
@@ -448,21 +452,35 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							if ( ! empty( $group_ids ) ) {
 								$members = $this->asgaros->list_group_members( (int) $group_ids[0], array( 'per_page' => 1 ) );
 								$member_count = (int) ( $members['total'] ?? 0 );
+														$meta = $this->working_groups->get_metadata( $space->id );
 							}
-							// Link zur Mitgliederseite (nicht zum Dashboard).
 							$manage_url = SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space->id ) );
 							$invite_url = SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space->id ) );
+														$group_url = SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) );
+														$settings_url = SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space->id ) );
 							?>
-							<li class="afspaces-space-item">
-								<h3><?php echo esc_html( $forum['name'] ); ?></h3>
-								<p><?php echo esc_html( sprintf( __( '%d Mitglieder', 'afspaces' ), $member_count ) ); ?></p>
-								<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
-									<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
-										<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>
-									</a>
-									<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $invite_url ); ?>">
-										<?php echo esc_html__( 'Einladungen und Invite-Links', 'afspaces' ); ?>
-									</a>
+							<li class="afspaces-space-item content-container afspaces-content-container">
+								<div class="content-element forum afspaces-forum-row">
+									<div class="forum-status read" aria-hidden="true"><i class="<?php echo esc_attr( WorkingGroupService::icon_class( $meta->icon ) ); ?>"></i></div>
+									<div class="forum-name">
+										<a class="forum-title" href="<?php echo esc_url( $group_url ); ?>"><?php echo esc_html( $forum['name'] ); ?></a>
+										<small class="forum-description"><?php echo esc_html__( 'Du verwaltest diese Arbeitsgruppe im Frontend.', 'afspaces' ); ?></small>
+										<?php if ( '' !== $meta->description ) : ?><small class="forum-description"><?php echo esc_html( $meta->description ); ?></small><?php endif; ?>
+										<small class="forum-stats"><?php echo esc_html( WorkingGroupTerminology::membership_count( $member_count ) ); ?></small>
+									</div>
+									<div class="forum-poster">
+										<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Arbeitsgruppenaktionen', 'afspaces' ); ?>">
+											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $group_url ); ?>">
+												<?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?>
+											</a>
+											<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
+												<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>
+											</a>
+											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $invite_url ); ?>">
+												<?php echo esc_html__( 'Einladungen und Invite-Links', 'afspaces' ); ?>
+											</a>
+										</div>
+									</div>
 								</div>
 							</li>
 						<?php endforeach; ?>
@@ -472,20 +490,41 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				<?php if ( ! empty( $member_spaces ) ) : ?>
 					<section class="afspaces-member-spaces" aria-labelledby="afspaces-member-spaces-heading">
 						<h3 id="afspaces-member-spaces-heading"><?php echo esc_html__( 'Meine Mitgliedschaften', 'afspaces' ); ?></h3>
-						<p><?php echo esc_html__( 'Du bist in diesen Räumen als Mitglied eingetragen.', 'afspaces' ); ?></p>
+						<p><?php echo esc_html__( 'Du bist in diesen Arbeitsgruppen als Mitglied eingetragen.', 'afspaces' ); ?></p>
 						<ul class="afspaces-space-list">
 							<?php foreach ( $member_spaces as $space ) : ?>
+																$meta = $this->working_groups->get_metadata( $space->id );
+																$group_url = SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) );
 								<?php
 								$forum = $this->asgaros->get_forum( $space->forum_id );
 								$forum_url = (string) apply_filters( 'afspaces_space_forum_url', $this->space_forum_url( $forum ), $space, $forum, $actor );
 								?>
-								<li class="afspaces-space-item">
-									<h3><?php echo esc_html( $forum['name'] ); ?></h3>
-									<p><?php echo esc_html__( 'Du kannst diesen Raum direkt im Forum öffnen.', 'afspaces' ); ?></p>
-									<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Raumaktionen', 'afspaces' ); ?>">
-										<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>">
-											<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
-										</a>
+								<li class="afspaces-space-item content-container afspaces-content-container">
+									<div class="content-element forum afspaces-forum-row">
+										<div class="forum-status read" aria-hidden="true"><i class="<?php echo esc_attr( WorkingGroupService::icon_class( $meta->icon ) ); ?>"></i></div>
+										<div class="forum-name">
+											<a class="forum-title" href="<?php echo esc_url( $group_url ); ?>"><?php echo esc_html( $forum['name'] ); ?></a>
+											<small class="forum-description"><?php echo esc_html__( 'Du bist in dieser Arbeitsgruppe als Mitglied eingetragen.', 'afspaces' ); ?></small>
+											<?php if ( '' !== $meta->description ) : ?><small class="forum-description"><?php echo esc_html( $meta->description ); ?></small><?php endif; ?>
+											<small class="forum-stats"><?php echo esc_html__( 'Direkter Einstieg ins Forum', 'afspaces' ); ?></small>
+										</div>
+										<div class="forum-poster">
+											<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Arbeitsgruppenaktionen', 'afspaces' ); ?>">
+												<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $group_url ); ?>">
+													<?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?>
+												</a>
+																} elseif ( 'save_working_group_meta' === $action ) {
+																	$this->working_groups->save_metadata( $space_id, $actor, wp_unslash( $_POST ) );
+																	$this->set_message( 'success', __( 'Die Arbeitsgruppen-Details wurden gespeichert.', 'afspaces' ) );
+															if ( 'save_working_group_meta' === $action ) {
+																wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
+																exit;
+															}
+												<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>">
+													<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
+												</a>
+											</div>
+										</div>
 									</div>
 								</li>
 							<?php endforeach; ?>
@@ -495,8 +534,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 				<?php if ( $this->can_register_spaces( $actor ) ) : ?>
 					<section class="afspaces-space-registration" aria-labelledby="afspaces-space-registration-heading">
-						<h3 id="afspaces-space-registration-heading"><?php echo esc_html__( 'Bestehendes Forum als Raum registrieren', 'afspaces' ); ?></h3>
-						<p><?php echo esc_html__( 'Ein Raum wird aus einem bestehenden Asgaros-Forum plus seiner zugeordneten Asgaros-Benutzergruppe gebildet.', 'afspaces' ); ?></p>
+						<h3 id="afspaces-space-registration-heading"><?php echo esc_html__( 'Bestehendes Forum als Arbeitsgruppe registrieren', 'afspaces' ); ?></h3>
+						<p><?php echo esc_html__( 'Eine Arbeitsgruppe wird aus einem bestehenden Asgaros-Forum plus seiner zugeordneten Asgaros-Benutzergruppe gebildet.', 'afspaces' ); ?></p>
 
 						<?php if ( empty( $registrable_forums ) ) : ?>
 							<p><?php echo esc_html__( 'Es wurden keine verwaltbaren Foren gefunden.', 'afspaces' ); ?></p>
@@ -543,7 +582,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 														<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 														<input type="hidden" name="afspaces_action" value="register_space" />
 														<input type="hidden" name="forum_id" value="<?php echo esc_attr( (string) $forum['forum_id'] ); ?>" />
-														<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Als Raum registrieren', 'afspaces' ); ?></button>
+														<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Als Arbeitsgruppe registrieren', 'afspaces' ); ?></button>
 													</form>
 												<?php endif; ?>
 											</td>

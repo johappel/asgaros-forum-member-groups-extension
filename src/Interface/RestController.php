@@ -15,6 +15,7 @@ use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
 use WP_Error;
@@ -60,6 +61,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		private JoinRequestService $join_requests;
 
 		/**
+		 * @var WorkingGroupService
+		 */
+		private WorkingGroupService $working_groups;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param SpaceRepository         $spaces  Space-Repository.
@@ -73,7 +79,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			MemberService $members,
 			InvitationService $invitations,
 			JoinRequestService $join_requests,
-			InviteLinkService $invite_links
+			InviteLinkService $invite_links,
+			WorkingGroupService $working_groups
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -81,6 +88,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			$this->invitations = $invitations;
 			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
+			$this->working_groups = $working_groups;
 		}
 
 		/**
@@ -98,6 +106,47 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 					array(
 						'methods'             => WP_REST_Server::READABLE,
 						'callback'            => array( $this, 'get_discover_spaces' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+						'args'                => array(
+							'search' => array(
+								'type' => 'string',
+								'required' => false,
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+							'topic_id' => array(
+								'type' => 'integer',
+								'required' => false,
+								'sanitize_callback' => 'absint',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/working-group',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'get_working_group' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+					),
+					array(
+						'methods'             => WP_REST_Server::EDITABLE,
+						'callback'            => array( $this, 'update_working_group' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/profiles/(?P<user_id>\d+)/working-groups',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'get_profile_working_groups' ),
 						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
 					),
 				)
@@ -977,16 +1026,22 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		public function get_discover_spaces( WP_REST_Request $request ): WP_REST_Response {
 			$actor = get_current_user_id();
 			$spaces = $this->spaces->list_spaces();
+			$search = isset( $request['search'] ) ? strtolower( (string) $request['search'] ) : '';
+			$topic_id = isset( $request['topic_id'] ) ? (int) $request['topic_id'] : 0;
+			$invitations = $this->invitations->list_my_invitations( $actor );
+			$requests = $this->join_requests->list_my_requests( $actor );
+			$invitation_by_space = array();
+			$requests_by_space = array();
+			foreach ( $invitations as $invitation ) {
+				$invitation_by_space[ (int) $invitation->space_id ] = $invitation;
+			}
+			foreach ( $requests as $request_item ) {
+				$requests_by_space[ (int) $request_item->space_id ] = $request_item;
+			}
 			$items = array();
 
 			foreach ( $spaces as $space ) {
 				if ( 'active' !== $space->status ) {
-					continue;
-				}
-				if ( $this->spaces->is_manager( $space->id, $actor ) ) {
-					continue;
-				}
-				if ( $this->asgaros->is_user_in_group( $actor, $space->primary_group_id ) ) {
 					continue;
 				}
 
@@ -995,15 +1050,175 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 					continue;
 				}
 
+				$meta = $this->working_groups->get_metadata( $space->id );
+				$is_manager = $this->spaces->is_manager( $space->id, $actor ) || user_can( $actor, Capabilities::MANAGE_ALL_SPACES );
+				$is_member = $this->asgaros->is_user_in_group( $actor, $space->primary_group_id );
+				if ( ! $this->working_groups->can_view_group( $meta, $is_member, $is_manager ) ) {
+					continue;
+				}
+
+				if ( '' !== $search ) {
+					$haystack = strtolower( implode( ' ', array( (string) ( $forum['name'] ?? '' ), $meta->description, $meta->contact_text ) ) );
+					if ( false === strpos( $haystack, $search ) ) {
+						continue;
+					}
+				}
+
+				if ( $topic_id > 0 && ! in_array( $topic_id, $meta->topic_ids, true ) ) {
+					continue;
+				}
+
+				$current_invitation = $invitation_by_space[ $space->id ] ?? null;
+				$current_request = $requests_by_space[ $space->id ] ?? null;
+				$can_request = $this->working_groups->can_request_join(
+					$meta,
+					$is_member,
+					$is_manager,
+					null !== $current_request && 'pending' === $current_request->status,
+					null !== $current_invitation && 'pending' === $current_invitation->effective_status()
+				);
+
 				$items[] = array(
-					'space_id'            => $space->id,
-					'forum_name'          => (string) ( $forum['name'] ?? sprintf( 'Space #%d', $space->id ) ),
-					'short_description'   => (string) ( $forum['description'] ?? '' ),
-					'status'              => 'closed',
+					'space_id'                => $space->id,
+					'forum_name'              => (string) ( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $space->id ) ),
+					'description'             => '' !== $meta->description ? $meta->description : (string) ( $forum['description'] ?? '' ),
+					'accent_color'            => $meta->accent_color,
+					'icon'                    => $meta->icon,
+					'contact_text'            => $meta->contact_text,
+					'directory_visibility'    => $meta->directory_visibility,
+					'join_policy'             => $meta->join_policy,
+					'join_requests_enabled'   => $meta->join_requests_enabled,
+					'topic_names'             => $this->working_groups->topic_names( $meta ),
+					'responsibles'            => $this->working_groups->list_responsibles( $space->id ),
+					'current_user_status'     => $this->working_group_state_label( $is_manager, $is_member, $current_request, $current_invitation ),
+					'can_request_join'        => $can_request,
 				);
 			}
 
 			return new WP_REST_Response( array( 'spaces' => $items ), 200 );
+		}
+
+		/**
+		 * GET /spaces/{space_id}/working-group
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function get_working_group( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor = get_current_user_id();
+			$space = $this->spaces->get_space( $space_id );
+			if ( ! $space ) {
+				return new WP_Error( 'afspaces_rest_working_group_not_found', __( 'Arbeitsgruppe nicht gefunden.', 'afspaces' ), array( 'status' => 404 ) );
+			}
+
+			$forum = $this->asgaros->get_forum( $space->forum_id );
+			if ( ! $forum ) {
+				return new WP_Error( 'afspaces_rest_working_group_forum_missing', __( 'Das zugehörige Forum ist nicht verfügbar.', 'afspaces' ), array( 'status' => 404 ) );
+			}
+
+			$meta = $this->working_groups->get_metadata( $space_id );
+			$is_manager = $this->spaces->is_manager( $space_id, $actor ) || user_can( $actor, Capabilities::MANAGE_ALL_SPACES );
+			$is_member = $this->asgaros->is_user_in_group( $actor, $space->primary_group_id );
+			if ( ! $this->working_groups->can_view_group( $meta, $is_member, $is_manager ) ) {
+				return new WP_Error( 'afspaces_rest_working_group_forbidden', __( 'Diese Arbeitsgruppe ist für dich nicht sichtbar.', 'afspaces' ), array( 'status' => 403 ) );
+			}
+
+			$invitations = $this->invitations->list_my_invitations( $actor );
+			$requests = $this->join_requests->list_my_requests( $actor );
+			$current_invitation = $this->first_matching_space_item( $invitations, $space_id );
+			$current_request = $this->first_matching_space_item( $requests, $space_id );
+			$can_request = $this->working_groups->can_request_join(
+				$meta,
+				$is_member,
+				$is_manager,
+				null !== $current_request && 'pending' === $current_request->status,
+				null !== $current_invitation && 'pending' === $current_invitation->effective_status()
+			);
+
+			return new WP_REST_Response(
+				array(
+					'space_id'              => $space_id,
+					'forum_name'            => (string) ( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $space_id ) ),
+					'description'           => '' !== $meta->description ? $meta->description : (string) ( $forum['description'] ?? '' ),
+					'accent_color'          => $meta->accent_color,
+					'icon'                  => $meta->icon,
+					'contact_text'          => $meta->contact_text,
+					'directory_visibility'  => $meta->directory_visibility,
+					'join_policy'           => $meta->join_policy,
+					'join_requests_enabled' => $meta->join_requests_enabled,
+					'topic_names'           => $this->working_groups->topic_names( $meta ),
+					'responsibles'          => $this->working_groups->list_responsibles( $space_id ),
+					'current_user_status'   => $this->working_group_state_label( $is_manager, $is_member, $current_request, $current_invitation ),
+					'can_request_join'      => $can_request,
+				),
+				200
+			);
+		}
+
+		/**
+		 * PATCH /spaces/{space_id}/working-group
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function update_working_group( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor = get_current_user_id();
+
+			try {
+				$meta = $this->working_groups->save_metadata( $space_id, $actor, $request->get_params() );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_working_group_update_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( $meta->to_array(), 200 );
+		}
+
+		/**
+		 * GET /profiles/{user_id}/working-groups
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function get_profile_working_groups( WP_REST_Request $request ) {
+			$viewer = get_current_user_id();
+			$profile_user_id = (int) $request['user_id'];
+			$user = get_userdata( $profile_user_id );
+			if ( ! $user ) {
+				return new WP_Error( 'afspaces_rest_profile_not_found', __( 'Profil nicht gefunden.', 'afspaces' ), array( 'status' => 404 ) );
+			}
+
+			$items = array();
+			foreach ( $this->spaces->list_spaces() as $space ) {
+				$forum = $this->asgaros->get_forum( $space->forum_id );
+				if ( ! $forum ) {
+					continue;
+				}
+
+				$is_profile_manager = $this->spaces->is_manager( $space->id, $profile_user_id );
+				$is_profile_member = $this->asgaros->is_user_in_group( $profile_user_id, $space->primary_group_id );
+				if ( ! $is_profile_manager && ! $is_profile_member ) {
+					continue;
+				}
+
+				$meta = $this->working_groups->get_metadata( $space->id );
+				$viewer_is_manager = $this->spaces->is_manager( $space->id, $viewer ) || user_can( $viewer, Capabilities::MANAGE_ALL_SPACES );
+				$viewer_is_member = $this->asgaros->is_user_in_group( $viewer, $space->primary_group_id );
+				if ( ! $this->working_groups->can_view_group( $meta, $viewer_is_member, $viewer_is_manager, $viewer === $profile_user_id ) ) {
+					continue;
+				}
+
+				$items[] = array(
+					'space_id'     => $space->id,
+					'forum_name'   => (string) ( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $space->id ) ),
+					'description'  => '' !== $meta->description ? $meta->description : (string) ( $forum['description'] ?? '' ),
+					'role'         => $is_profile_manager ? __( 'Arbeitsgruppenverantwortlich', 'afspaces' ) : __( 'Mitglied', 'afspaces' ),
+					'topic_names'  => $this->working_groups->topic_names( $meta ),
+				);
+			}
+
+			return new WP_REST_Response( array( 'user_id' => $profile_user_id, 'working_groups' => $items ), 200 );
 		}
 
 		/**
@@ -1106,6 +1321,52 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			}
 
 			return new WP_REST_Response( array( 'id' => $join_request->id, 'status' => $join_request->status ), 200 );
+		}
+
+		/**
+		 * @param array<int,mixed> $items Items.
+		 * @param int $space_id Space-ID.
+		 * @return mixed|null
+		 */
+		private function first_matching_space_item( array $items, int $space_id ) {
+			foreach ( $items as $item ) {
+				if ( $space_id === (int) $item->space_id ) {
+					return $item;
+				}
+			}
+
+			return null;
+		}
+
+		/**
+		 * @param bool $is_manager Verantwortlich?
+		 * @param bool $is_member Mitglied?
+		 * @param mixed $request Antrag.
+		 * @param mixed $invitation Einladung.
+		 * @return string
+		 */
+		private function working_group_state_label( bool $is_manager, bool $is_member, $request, $invitation ): string {
+			if ( $is_manager ) {
+				return __( 'Arbeitsgruppenverantwortlich', 'afspaces' );
+			}
+
+			if ( $is_member ) {
+				return __( 'Mitglied', 'afspaces' );
+			}
+
+			if ( null !== $invitation && 'pending' === $invitation->effective_status() ) {
+				return __( 'Eingeladen', 'afspaces' );
+			}
+
+			if ( null !== $request && 'pending' === $request->status ) {
+				return __( 'Anfrage offen', 'afspaces' );
+			}
+
+			if ( null !== $request && 'rejected' === $request->status ) {
+				return __( 'Anfrage abgelehnt', 'afspaces' );
+			}
+
+			return __( 'Keine Zugehörigkeit', 'afspaces' );
 		}
 
 		/**

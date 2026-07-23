@@ -47,11 +47,12 @@ test.describe('Forum-integrierte Navigation', () => {
     const nav = page.locator('nav.afspaces-hub-nav');
     await expect(nav).toBeVisible({ timeout: 15000 });
     await expect(nav.locator('a', { hasText: 'Forum' })).toBeVisible();
-    await expect(nav.locator('a', { hasText: 'Meine Räume' })).toBeVisible();
+    await expect(nav.locator('a', { hasText: 'Meine Arbeitsgruppen' })).toBeVisible();
+    await expect(nav.locator('a', { hasText: 'Mein Arbeitsgruppenprofil' })).toBeVisible();
     await expect(nav.locator('a', { hasText: 'Meine Einladungen' })).toBeVisible();
 
     // Aktiver Tab ist als solcher gekennzeichnet (nicht nur farblich).
-    await expect(page.locator('a.afspaces-hub-tab.is-active[aria-current="page"]')).toHaveText('Meine Räume');
+    await expect(page.locator('a.afspaces-hub-tab.is-active[aria-current="page"]')).toHaveText('Meine Arbeitsgruppen');
   });
 
   test('Breadcrumb und kontextbezogene Tabs auf der Mitgliederseite', async ({ page }) => {
@@ -62,11 +63,12 @@ test.describe('Forum-integrierte Navigation', () => {
 
     await expect(page.locator('h2#afspaces-members-heading')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('nav.afspaces-breadcrumb')).toBeVisible();
-    await expect(page.locator('nav.afspaces-hub-nav a.afspaces-hub-tab.is-active[aria-current="page"]', { hasText: 'Meine Räume' })).toBeVisible();
+    await expect(page.locator('nav.afspaces-hub-nav a.afspaces-hub-tab.is-active[aria-current="page"]', { hasText: 'Meine Arbeitsgruppen' })).toBeVisible();
 
-    await expect(page.locator('h2.afspaces-space-context-title')).toContainText('Raum verwalten:', { timeout: 15000 });
+    await expect(page.locator('h2.afspaces-space-context-title')).toContainText('Arbeitsgruppe verwalten:', { timeout: 15000 });
 
     const spaceNav = page.locator('nav.afspaces-space-nav');
+    await expect(spaceNav.getByRole('link', { name: 'Details', exact: true })).toBeVisible();
     await expect(spaceNav.getByRole('link', { name: 'Mitglieder', exact: true })).toBeVisible();
     await expect(spaceNav.getByRole('link', { name: 'Einladungen', exact: true })).toBeVisible();
     await expect(spaceNav.getByRole('link', { name: 'Beitrittsanfragen', exact: true })).toBeVisible();

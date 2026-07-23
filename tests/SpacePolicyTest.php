@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Domain\Space;
 use AFSpaces\Domain\SpaceManager;
 use AFSpaces\Domain\SpacePolicy;
+use AFSpaces\Domain\WorkingGroupMeta;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -170,5 +171,37 @@ final class SpacePolicyTest extends TestCase {
 	public function test_non_manager_cannot_create_unlimited_invite_links(): void {
 		$this->repo->set_is_manager( false );
 		$this->assertFalse( $this->policy->can_create_unlimited_invite_links( 1, 42 ) );
+	}
+
+	public function test_listed_working_group_is_visible_to_logged_in_viewer(): void {
+		$meta = new WorkingGroupMeta( array( 'directory_visibility' => WorkingGroupMeta::DIRECTORY_LISTED ) );
+		$this->assertTrue( $this->policy->can_view_working_group( $meta, false, false ) );
+	}
+
+	public function test_hidden_working_group_is_only_visible_to_subject_or_manager(): void {
+		$meta = new WorkingGroupMeta( array( 'directory_visibility' => WorkingGroupMeta::DIRECTORY_HIDDEN ) );
+		$this->assertFalse( $this->policy->can_view_working_group( $meta, false, false, false ) );
+		$this->assertTrue( $this->policy->can_view_working_group( $meta, false, true, false ) );
+		$this->assertTrue( $this->policy->can_view_working_group( $meta, false, false, true ) );
+	}
+
+	public function test_join_request_policy_respects_metadata_and_existing_state(): void {
+		$requestable = new WorkingGroupMeta(
+			array(
+				'join_policy'           => WorkingGroupMeta::JOIN_POLICY_REQUEST,
+				'join_requests_enabled' => true,
+			)
+		);
+		$closed = new WorkingGroupMeta(
+			array(
+				'join_policy'           => WorkingGroupMeta::JOIN_POLICY_CLOSED,
+				'join_requests_enabled' => true,
+			)
+		);
+
+		$this->assertTrue( $this->policy->can_request_to_join( $requestable, false, false ) );
+		$this->assertFalse( $this->policy->can_request_to_join( $requestable, true, false ) );
+		$this->assertFalse( $this->policy->can_request_to_join( $requestable, false, false, true ) );
+		$this->assertFalse( $this->policy->can_request_to_join( $closed, false, false ) );
 	}
 }

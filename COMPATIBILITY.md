@@ -38,9 +38,11 @@ Vor MVP 1 sind zu dokumentieren:
 - Adaptertests laufen gegen jede offiziell unterstützte Version.
 - Änderungen an internen APIs führen zu einer neuen Adapterversion, nicht zu Änderungen in Domain oder UI.
 
-## MVP 3 Hinweis
+## MVP 3, 3.1 und 3.2 Hinweis
 
-- MVP 3 nutzt keine zusätzlichen Asgaros-Interna. Invite-Links greifen weiter ausschließlich über den vorhandenen Adapter auf Foren-Metadaten, Gruppenmitgliedschaften und Gruppenzuordnungen zu.
+- MVP 3 (sichere Einladungslinks), MVP 3.1 (Beitrittsanfragen) und MVP 3.2 (Arbeitsgruppenmodell) nutzen keine zusätzlichen Asgaros-Interna.
+- Sie greifen weiter ausschließlich über den vorhandenen Adapter auf Foren-Metadaten, Gruppenmitgliedschaften und Gruppenzuordnungen zu.
+- MVP 4 (Raumgründung) wird bei neuen Asgaros-APIs weiterhin nur über den Adapter arbeiten.
 
 ## Forum-Navigation (UX-Integration)
 

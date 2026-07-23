@@ -327,6 +327,106 @@
 	outline-offset: 2px;
 }
 
+.afspaces-working-group-card {
+	border-left: 4px solid var(--afspaces-accent, #2271b1);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 248, 251, 0.95));
+}
+
+.afspaces-working-group-card-header {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	margin-bottom: 0.75rem;
+}
+
+.afspaces-working-group-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--afspaces-accent, #2271b1) 12%, white);
+	color: var(--afspaces-accent, #2271b1);
+	font-size: 1.2rem;
+	flex: 0 0 auto;
+}
+
+.afspaces-responsibles-list {
+	list-style: none;
+	padding: 0;
+	margin: 0.5rem 0 0;
+	display: grid;
+	gap: 0.5rem;
+}
+
+.afspaces-responsibles-list li {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.afspaces-form-grid {
+	display: grid;
+	gap: 0.75rem;
+	margin: 1rem 0;
+}
+
+.afspaces-form-grid label {
+	font-weight: 600;
+}
+
+.afspaces-form-grid input[type="text"],
+.afspaces-form-grid input[type="search"],
+.afspaces-form-grid input[type="color"],
+.afspaces-form-grid select,
+.afspaces-form-grid textarea,
+.afspaces-discover-filter input[type="search"],
+.afspaces-discover-filter select {
+	width: 100%;
+	max-width: 100%;
+	min-height: 44px;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.afspaces-form-grid textarea {
+	min-height: 8rem;
+	resize: vertical;
+}
+
+.afspaces-discover-filter,
+.afspaces-filter {
+	display: flex;
+	gap: 0.75rem;
+	align-items: end;
+	flex-wrap: wrap;
+	margin: 1rem 0;
+}
+
+.afspaces-discover-filter label,
+.afspaces-filter label {
+	font-weight: 600;
+}
+
+.afspaces-profile-view,
+.afspaces-working-group-view,
+.afspaces-working-group-settings,
+.afspaces-discover {
+	max-width: 68rem;
+	margin: 1.5rem 0;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.afspaces-inline-hint {
+	margin: 0;
+	color: #4f5f6f;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	* {
 		transition: none !important;
@@ -357,6 +457,16 @@
 	.afspaces-member-table td {
 		border: 0;
 		border-bottom: 1px solid #e2e4e7;
+	}
+
+	.afspaces-working-group-card-header {
+		flex-direction: column;
+	}
+
+	.afspaces-form-grid,
+	.afspaces-discover-filter,
+	.afspaces-filter {
+		grid-template-columns: 1fr;
 	}
 }
 
@@ -901,11 +1011,45 @@ a.afspaces-link.is-active {
 	box-sizing: border-box;
 }
 
+#af-wrapper.afspaces-wrapper .afspaces-section-card {
+	padding: 0 16px 16px;
+	margin: 0 0 15px;
+	overflow: hidden;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-section-title {
+	margin: 0 -16px 14px;
+	padding: 12px 16px;
+	background: #f7f8fa;
+	border-bottom: 1px solid #eee;
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: #4e6173;
+}
+
 #af-wrapper.afspaces-wrapper .afspaces-search,
 #af-wrapper.afspaces-wrapper .afspaces-filter,
 #af-wrapper.afspaces-wrapper .afspaces-created-invite-link {
 	padding: 14px 16px;
 	margin: 0 0 15px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-section-card > .afspaces-search,
+#af-wrapper.afspaces-wrapper .afspaces-section-card > .afspaces-filter,
+#af-wrapper.afspaces-wrapper .afspaces-section-card > .afspaces-created-invite-link {
+	padding: 0;
+	margin: 0 0 15px;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-section-card > .afspaces-search:last-child,
+#af-wrapper.afspaces-wrapper .afspaces-section-card > .afspaces-filter:last-child,
+#af-wrapper.afspaces-wrapper .afspaces-section-card > .afspaces-created-invite-link:last-child {
+	margin-bottom: 0;
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-message,
@@ -926,6 +1070,10 @@ a.afspaces-link.is-active {
 	padding: 14px 16px;
 }
 
+#af-wrapper.afspaces-wrapper .afspaces-section-card > .afspaces-search-results {
+	margin-bottom: 0;
+}
+
 #af-wrapper.afspaces-wrapper .afspaces-space-item,
 #af-wrapper.afspaces-wrapper .afspaces-member-table {
 	background: #fff;
@@ -936,6 +1084,82 @@ a.afspaces-link.is-active {
 
 #af-wrapper.afspaces-wrapper .afspaces-space-item {
 	padding: 18px 20px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	padding: 0;
+	min-height: 96px;
+	line-height: normal;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 46px;
+	height: 46px;
+	border-radius: 50%;
+	background: #eef3f7;
+	color: #2d5d7f;
+	flex: 0 0 46px;
+	font-size: 22px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-name {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 4px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-title {
+	display: inline-block;
+	font-family: Quicksand, sans-serif;
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #2d5d7f;
+	text-decoration: none;
+	margin: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-title:hover,
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-title:focus {
+	text-decoration: underline;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-description,
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-stats {
+	display: block;
+	margin: 0;
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1.35;
+	color: #5b6670;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-stats {
+	color: #444;
+	font-weight: 700;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-poster {
+	flex: 0 0 auto;
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	max-width: 42%;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-forum-row .afspaces-space-actions {
+	justify-content: flex-end;
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-space-item p,
@@ -1101,6 +1325,18 @@ a.afspaces-link.is-active {
 	#af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab,
 	#af-wrapper.afspaces-wrapper .afspaces-space-nav .afspaces-hub-tab {
 		width: 100%;
+		justify-content: flex-start;
+	}
+
+	#af-wrapper.afspaces-wrapper .afspaces-forum-row {
+		flex-wrap: wrap;
+		align-items: flex-start;
+	}
+
+	#af-wrapper.afspaces-wrapper .afspaces-forum-row .forum-poster {
+		max-width: none;
+		width: 100%;
+		margin-left: 0;
 		justify-content: flex-start;
 	}
 }

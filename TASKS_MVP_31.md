@@ -70,3 +70,7 @@ Nicht eingeladene, angemeldete Benutzer koennen geschlossene Räume entdecken un
 ## Akzeptanzkriterien
 
 MVP 3.1 ist abgeschlossen, wenn ein angemeldeter Nicht-Mitgliedsbenutzer geschlossene Räume sehen und idempotent einen Beitritt anfragen kann, Raumverantwortliche die Anfrage entscheiden koennen, Genehmigung zur Mitgliedschaft fuehrt, Ablehnung keine Mitgliedschaft erzeugt, und die neuen Flows durch Unit-, Integration-, REST-, E2E- sowie Accessibility-Tests abgedeckt sind.
+
+## Nächste Stufe (MVP 3.2)
+
+MVP 3.2 baut direkt auf MVP 3.1 auf und führt eine sichtbare Arbeitsgruppenlogik für efabiNet ein: Begriffe, Metadaten, Profilintegration und Benachrichtigungspfade werden fachlich umgestellt, bevor MVP 4 die Selbstgründung von Arbeitsgruppen ermöglicht.

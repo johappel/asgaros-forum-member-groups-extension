@@ -142,5 +142,48 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpacePolicy' ) ) {
 
 			return true;
 		}
+
+		/**
+		 * Darf eine Arbeitsgruppe fuer den Betrachter sichtbar sein?
+		 *
+		 * @param WorkingGroupMeta $meta Metadaten.
+		 * @param bool             $viewer_is_member Betrachter ist Mitglied.
+		 * @param bool             $viewer_is_manager Betrachter verwaltet die Gruppe.
+		 * @param bool             $viewer_is_subject Es geht um das eigene Profil.
+		 * @return bool
+		 */
+		public function can_view_working_group( WorkingGroupMeta $meta, bool $viewer_is_member, bool $viewer_is_manager, bool $viewer_is_subject = false ): bool {
+			if ( $viewer_is_manager || $viewer_is_subject ) {
+				return true;
+			}
+
+			if ( WorkingGroupMeta::DIRECTORY_LISTED === $meta->directory_visibility ) {
+				return true;
+			}
+
+			if ( WorkingGroupMeta::DIRECTORY_MEMBERS === $meta->directory_visibility ) {
+				return $viewer_is_member;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Darf der Betrachter eine Beitrittsanfrage fuer die Arbeitsgruppe stellen?
+		 *
+		 * @param WorkingGroupMeta $meta Metadaten.
+		 * @param bool             $actor_is_member Akteur ist Mitglied.
+		 * @param bool             $actor_is_manager Akteur verwaltet die Gruppe.
+		 * @param bool             $has_pending_request Offene Anfrage vorhanden.
+		 * @param bool             $has_open_invitation Offene Einladung vorhanden.
+		 * @return bool
+		 */
+		public function can_request_to_join( WorkingGroupMeta $meta, bool $actor_is_member, bool $actor_is_manager, bool $has_pending_request = false, bool $has_open_invitation = false ): bool {
+			if ( $actor_is_member || $actor_is_manager || $has_pending_request || $has_open_invitation ) {
+				return false;
+			}
+
+			return $meta->join_requests_enabled && WorkingGroupMeta::JOIN_POLICY_REQUEST === $meta->join_policy;
+		}
 	}
 }

@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Database\AuditRepository;
 use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InviteLinkRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
+use AFSpaces\Adapters\Database\SpaceMetaRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Core\Capabilities;
 
@@ -47,6 +48,8 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 			$invite_links->install();
 			$join_requests = new JoinRequestRepository();
 			$join_requests->install();
+			$space_meta = new SpaceMetaRepository();
+			$space_meta->install();
 
 			// Capabilities registrieren.
 			Capabilities::register();
@@ -65,13 +68,21 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 		public static function ensure_hub_page(): int {
 			$existing = get_page_by_path( \AFSpaces\Interface\SpacesUrls::HUB_SLUG );
 			if ( $existing ) {
+				if ( 'Räume' === (string) $existing->post_title ) {
+					wp_update_post(
+						array(
+							'ID' => (int) $existing->ID,
+							'post_title' => __( 'Arbeitsgruppen', 'afspaces' ),
+						)
+					);
+				}
 				update_option( \AFSpaces\Interface\SpacesUrls::HUB_PAGE_OPTION, (int) $existing->ID );
 				return (int) $existing->ID;
 			}
 
 			$page_id = wp_insert_post(
 				array(
-					'post_title'   => __( 'Räume', 'afspaces' ),
+					'post_title'   => __( 'Arbeitsgruppen', 'afspaces' ),
 					'post_name'    => \AFSpaces\Interface\SpacesUrls::HUB_SLUG,
 					'post_content' => '[afspaces]',
 					'post_status'  => 'publish',

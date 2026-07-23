@@ -42,6 +42,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 		public const VIEW_JOIN_REQUESTS  = 'join-requests';
 		public const VIEW_MY_INVITATIONS = 'my-invitations';
 		public const VIEW_DISCOVER       = 'discover';
+		public const VIEW_GROUP          = 'working-group';
+		public const VIEW_PROFILE        = 'profile';
+		public const VIEW_SETTINGS       = 'working-group-settings';
 		public const VIEW_CREATE         = 'create';
 
 		/**
@@ -72,6 +75,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 				self::VIEW_JOIN_REQUESTS,
 				self::VIEW_MY_INVITATIONS,
 				self::VIEW_DISCOVER,
+				self::VIEW_GROUP,
+				self::VIEW_PROFILE,
+				self::VIEW_SETTINGS,
 				self::VIEW_CREATE,
 			);
 		}
