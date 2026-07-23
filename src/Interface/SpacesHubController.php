@@ -217,13 +217,26 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				return '';
 			}
 
+			$room_context_active = $space_id > 0
+				&& $this->can_manage_space( $space_id, $actor )
+				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS ), true );
+
 			$tabs = array();
+
+			$forum_home = home_url( '/forum/' );
+			$forum_home = (string) apply_filters( 'afspaces_forum_home_url', $forum_home );
+			$tabs[] = array(
+				'view'   => 'forum',
+				'label'  => __( 'Forum', 'afspaces' ),
+				'url'    => $forum_home,
+				'active' => false,
+			);
 
 			$tabs[] = array(
 				'view'   => SpacesUrls::VIEW_DASHBOARD,
 				'label'  => __( 'Meine Räume', 'afspaces' ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ),
-				'active' => SpacesUrls::VIEW_DASHBOARD === $view,
+				'active' => SpacesUrls::VIEW_DASHBOARD === $view || $room_context_active,
 			);
 
 			$tabs[] = array(

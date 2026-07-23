@@ -46,6 +46,7 @@ test.describe('Forum-integrierte Navigation', () => {
 
     const nav = page.locator('nav.afspaces-hub-nav');
     await expect(nav).toBeVisible({ timeout: 15000 });
+    await expect(nav.locator('a', { hasText: 'Forum' })).toBeVisible();
     await expect(nav.locator('a', { hasText: 'Meine Räume' })).toBeVisible();
     await expect(nav.locator('a', { hasText: 'Meine Einladungen' })).toBeVisible();
 
@@ -61,6 +62,7 @@ test.describe('Forum-integrierte Navigation', () => {
 
     await expect(page.locator('h2#afspaces-members-heading')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('nav.afspaces-breadcrumb')).toBeVisible();
+    await expect(page.locator('nav.afspaces-hub-nav a.afspaces-hub-tab.is-active[aria-current="page"]', { hasText: 'Meine Räume' })).toBeVisible();
 
     await expect(page.locator('h2.afspaces-space-context-title')).toContainText('Raum verwalten:', { timeout: 15000 });
 
