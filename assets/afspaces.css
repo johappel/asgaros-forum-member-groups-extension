@@ -520,6 +520,118 @@ a.afspaces-link.is-active {
 	opacity: 0.8;
 }
 
+/*
+ * Asgaros-nahe Baseline fuer AFSpaces.
+ * Feintuning kann ueber die AFSpaces-Look-&-Feel-Einstellungen erfolgen.
+ */
+#af-wrapper.afspaces-wrapper {
+	max-width: 1380px;
+	margin: 40px auto !important;
+	padding: 34px;
+	background: #f7f9fc;
+	border: 1px solid #d8e0e8 !important;
+	border-radius: 30px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+	font-family: Verdana, Tahoma, sans-serif;
+	font-size: 16px;
+	line-height: 1.55;
+	color: #2f3f50;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-breadcrumb {
+	font-size: 0.95rem;
+	margin: 0 0 0.9rem;
+	color: #6b7b8c;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-breadcrumb a {
+	color: #2d5d7f;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-hub-nav {
+	background: #356486;
+	border: 1px solid #356486;
+	border-radius: 16px;
+	overflow: hidden;
+	margin: 0 0 1.5rem;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-hub-nav ul {
+	gap: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-hub-tab {
+	padding: 0.65rem 1.2rem;
+	min-height: 44px;
+	line-height: 1.7;
+	color: #ffffff;
+	border-radius: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-hub-tab:hover,
+#af-wrapper.afspaces-wrapper .afspaces-hub-tab:focus {
+	background: rgba(255, 255, 255, 0.16);
+	color: #ffffff;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-hub-tab.is-active {
+	background: #ffffff;
+	color: #1d2f43;
+	font-weight: 700;
+	border-bottom: none;
+	margin-bottom: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-dashboard h2,
+#af-wrapper.afspaces-wrapper .afspaces-members h2,
+#af-wrapper.afspaces-wrapper .afspaces-invitations h2,
+#af-wrapper.afspaces-wrapper .afspaces-join-requests h2,
+#af-wrapper.afspaces-wrapper .afspaces-my-invitations h2,
+#af-wrapper.afspaces-wrapper .afspaces-space-context-title {
+	color: #224c75;
+	font-size: clamp(2rem, 4.5vw, 2.9rem);
+	line-height: 1.15;
+	letter-spacing: 0.01em;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-context-title {
+	font-size: 1.55rem;
+	margin-bottom: 0.35rem;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item {
+	background: #ffffff;
+	border: 1px solid #ced7e0;
+	border-radius: 8px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-table th {
+	background: #ecf1f6;
+	color: #203648;
+	font-weight: 700;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-table td,
+#af-wrapper.afspaces-wrapper .afspaces-member-table th {
+	border-color: #d5dee7;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-pagination a {
+	background: #f2f4f7;
+	color: #2f3f50;
+	border-color: #cad4de;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-button {
+	background: #2f74ae !important;
+	border-color: #2f74ae !important;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-button-secondary {
+	background: #667789 !important;
+	border-color: #667789 !important;
+}
+
 @media (max-width: 780px) {
 	.afspaces-hub-nav ul {
 		flex-direction: column;

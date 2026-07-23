@@ -38,5 +38,6 @@ Die gesamte Frontend-Verwaltung ist unter einer einzigen WordPress-Hub-Seite (Sl
 - Raumbezogene Verwaltungstabs (`Mitglieder`, `Einladungen`, `Beitrittsanfragen`) werden nur im Verwaltungskontext und direkt unter einem Raumtitel angezeigt.
 - `ForumNavigation` hängt über dokumentierte Asgaros-Hooks (`asgarosforum_filter_header_menu`, `asgarosforum_overview_custom_content_top`) einen Menüpunkt „Räume" und ein Einstiegs-Panel in das Forum ein.
 - Die bestehenden Views (`MembersView`, `InvitationsView`, `MyInvitationsView`) und `FrontendController::render_dashboard` bleiben unverändert in ihrer Fachlogik und werden vom Router eingebettet.
+- Das Erscheinungsbild wird standardmäßig Asgaros-nah ausgeliefert und kann über die Admin-Seite `Einstellungen -> AFSpaces Look & Feel` konfiguriert werden. Die Werte werden als Option gespeichert und per Inline-CSS auf den Frontend-Style angewendet.
 - Erweiterungspunkte (`afspaces_hub_navigation_tabs`, `afspaces_render_space_creation`, Option/Filter `afspaces_enable_space_creation`) bereiten die MVP-4-Raumgründung vor, ohne sie sichtbar zu aktivieren.
 

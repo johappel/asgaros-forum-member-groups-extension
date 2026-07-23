@@ -49,7 +49,9 @@ Die Frontend-Verwaltung ist über die Asgaros-Forum-Navigation erreichbar. Dafü
 - Filter `asgarosforum_filter_header_menu` — fügt den Menüpunkt „Räume" in die Forum-Navigation ein (nur für berechtigte, angemeldete Benutzer).
 - Action `asgarosforum_overview_custom_content_top` — rendert ein kompaktes Einstiegs-Panel auf der Forum-Übersicht.
 
-Die eigentliche Verwaltung läuft über eine einzelne WordPress-Hub-Seite (Slug `afspaces`) mit dem Shortcode `[afspaces]`. Die Unteransicht wird über den Query-Parameter `afspaces_view` gesteuert (`dashboard`, `members`, `invitations`, `my-invitations`, `create`). Es wird **kein** eigener Asgaros-`current_view` in das Forum-Routing eingehängt, da hierfür keine dokumentierte API existiert.
+Die eigentliche Verwaltung läuft über eine einzelne WordPress-Hub-Seite (Slug `afspaces`) mit dem Shortcode `[afspaces]`. Die Unteransicht wird über den Query-Parameter `afspaces_view` gesteuert (`dashboard`, `members`, `invitations`, `join-requests`, `my-invitations`, `discover`, `create`). Es wird **kein** eigener Asgaros-`current_view` in das Forum-Routing eingehängt, da hierfür keine dokumentierte API existiert.
 
 Alte Einzelseiten (`afspaces-dashboard`, `afspaces-members`, `afspaces-invitations`, `afspaces-my-invitations`) werden per 301 auf die entsprechende Hub-Unteransicht umgeleitet.
+
+Die neue Seite `Einstellungen -> AFSpaces Look & Feel` nutzt ausschließlich WordPress-Settings-APIs und beeinflusst nur AFSpaces-Frontend-CSS (keine Asgaros-Interna).
 
