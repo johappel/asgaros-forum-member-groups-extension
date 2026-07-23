@@ -21,6 +21,7 @@ use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
+use AFSpaces\Interface\AppearanceSettingsPage;
 use AFSpaces\Interface\ForumNavigation;
 use AFSpaces\Interface\FrontendController;
 use AFSpaces\Interface\InvitationsView;
@@ -99,6 +100,9 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $space_registration );
 			$frontend->init();
+
+			$appearance = new AppearanceSettingsPage();
+			$appearance->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
 			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links );

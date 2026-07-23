@@ -124,6 +124,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				array(),
 				AFSPACES_VERSION
 			);
+			AppearanceSettingsPage::enqueue_inline_style();
 
 			wp_enqueue_script(
 				'afspaces-frontend',

@@ -234,6 +234,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				array(),
 				AFSPACES_VERSION
 			);
+			AppearanceSettingsPage::enqueue_inline_style();
 		}
 
 		/**
