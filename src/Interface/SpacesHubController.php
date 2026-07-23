@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Core\Capabilities;
 
@@ -29,6 +30,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private AsgarosAdapterInterface $asgaros;
 		private MemberService $members;
 		private InvitationService $invitations;
+		private JoinRequestService $join_requests;
 		private InviteLinkService $invite_links;
 
 		/**
@@ -40,6 +42,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			AsgarosAdapterInterface $asgaros,
 			MemberService $members,
 			InvitationService $invitations,
+			JoinRequestService $join_requests,
 			InviteLinkService $invite_links
 		) {
 			$this->frontend     = $frontend;
@@ -47,6 +50,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->asgaros      = $asgaros;
 			$this->members      = $members;
 			$this->invitations  = $invitations;
+			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 		}
 
@@ -115,8 +119,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			ob_start();
 			?>
 		<div id="af-wrapper" class="afspaces-wrapper">
-			<?php echo $this->render_breadcrumb( $view, $space_id ); ?>
 			<?php echo $this->render_navigation( $view, $space_id, $actor ); ?>
+			<?php echo $this->render_breadcrumb( $view, $space_id ); ?>
+			<?php echo $this->render_space_context_navigation( $view, $space_id, $actor ); ?>
 			<div class="afspaces-hub-content">
 				<?php echo $content; // Bereits escaped in den jeweiligen Views. ?>
 			</div>
@@ -142,9 +147,17 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					$inv_view = new InvitationsView( $this->spaces, $this->asgaros, $this->invitations, $this->members, $this->invite_links );
 					return $inv_view->render( $space_id );
 
+				case SpacesUrls::VIEW_JOIN_REQUESTS:
+					$requests_view = new JoinRequestsView( $this->spaces, $this->asgaros, $this->join_requests );
+					return $requests_view->render( $space_id );
+
 				case SpacesUrls::VIEW_MY_INVITATIONS:
-					$mine_view = new MyInvitationsView( $this->invitations, $this->invite_links, $this->spaces, $this->asgaros );
+					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros );
 					return $mine_view->render();
+
+				case SpacesUrls::VIEW_DISCOVER:
+					$discover_view = new DiscoverView( $this->spaces, $this->asgaros, $this->join_requests );
+					return $discover_view->render();
 
 				case SpacesUrls::VIEW_CREATE:
 					return $this->render_create_placeholder();
@@ -185,7 +198,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			}
 
 			return sprintf(
-				'<nav class="afspaces-breadcrumb" aria-label="%1$s">%2$s</nav>',
+				'<nav id="forum-breadcrumbs" class="afspaces-breadcrumb" aria-label="%1$s">%2$s</nav>',
 				esc_attr__( 'Brotkrümelnavigation', 'afspaces' ),
 				implode( '<span class="afspaces-breadcrumb-sep" aria-hidden="true"> › </span>', $items )
 			);
@@ -204,13 +217,26 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				return '';
 			}
 
+			$room_context_active = $space_id > 0
+				&& $this->can_manage_space( $space_id, $actor )
+				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS ), true );
+
 			$tabs = array();
+
+			$forum_home = home_url( '/forum/' );
+			$forum_home = (string) apply_filters( 'afspaces_forum_home_url', $forum_home );
+			$tabs[] = array(
+				'view'   => 'forum',
+				'label'  => __( 'Forum', 'afspaces' ),
+				'url'    => $forum_home,
+				'active' => false,
+			);
 
 			$tabs[] = array(
 				'view'   => SpacesUrls::VIEW_DASHBOARD,
 				'label'  => __( 'Meine Räume', 'afspaces' ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ),
-				'active' => SpacesUrls::VIEW_DASHBOARD === $view,
+				'active' => SpacesUrls::VIEW_DASHBOARD === $view || $room_context_active,
 			);
 
 			$tabs[] = array(
@@ -220,21 +246,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				'active' => SpacesUrls::VIEW_MY_INVITATIONS === $view,
 			);
 
-			// Kontextbezogene Tabs, wenn ein Raum aktiv verwaltet wird.
-			if ( $space_id > 0 && $this->can_manage_space( $space_id, $actor ) ) {
-				$tabs[] = array(
-					'view'   => SpacesUrls::VIEW_MEMBERS,
-					'label'  => __( 'Mitglieder', 'afspaces' ),
-					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ),
-					'active' => SpacesUrls::VIEW_MEMBERS === $view,
-				);
-				$tabs[] = array(
-					'view'   => SpacesUrls::VIEW_INVITATIONS,
-					'label'  => __( 'Einladungen', 'afspaces' ),
-					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ),
-					'active' => SpacesUrls::VIEW_INVITATIONS === $view,
-				);
-			}
+			$tabs[] = array(
+				'view'   => SpacesUrls::VIEW_DISCOVER,
+				'label'  => __( 'Räume entdecken', 'afspaces' ),
+				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ),
+				'active' => SpacesUrls::VIEW_DISCOVER === $view,
+			);
 
 			if ( $this->can_create_spaces( $actor ) ) {
 				$tabs[] = array(
@@ -267,9 +284,89 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				);
 			}
 
+			$search_url = home_url( '/forum/search/' );
+			$search_url = (string) apply_filters( 'afspaces_forum_search_url', $search_url );
+
 			return sprintf(
-				'<nav class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav>',
+				'<div id="forum-header" class="afspaces-forum-header"><nav id="forum-navigation" class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav><div id="forum-search" class="afspaces-forum-search"><span class="search-icon fas fa-search" aria-hidden="true"></span><form method="get" action="%3$s"><input name="keywords" type="search" placeholder="%4$s" value="" /></form></div><div class="clear"></div></div>',
 				esc_attr__( 'Raumverwaltung', 'afspaces' ),
+				$items,
+				esc_url( $search_url ),
+				esc_attr__( 'Suchen ...', 'afspaces' )
+			);
+		}
+
+		/**
+		 * Rendert raumbezogene Verwaltungstabs unter dem Raumtitel.
+		 *
+		 * @param string $view     Aktive Unteransicht.
+		 * @param int    $space_id Space-ID.
+		 * @param int    $actor    Benutzer-ID.
+		 * @return string
+		 */
+		private function render_space_context_navigation( string $view, int $space_id, int $actor ): string {
+			if ( 0 === $space_id || 0 === $actor || ! $this->can_manage_space( $space_id, $actor ) ) {
+				return '';
+			}
+
+			$space = $this->spaces->get_space( $space_id );
+			if ( ! $space ) {
+				return '';
+			}
+
+			$forum = $this->asgaros->get_forum( $space->forum_id );
+			$room_name = trim( (string) ( $forum['name'] ?? '' ) );
+			if ( '' === $room_name ) {
+				$room_name = sprintf( __( 'Raum #%d', 'afspaces' ), $space_id );
+			}
+
+			$tabs = array(
+				array(
+					'view'   => SpacesUrls::VIEW_MEMBERS,
+					'label'  => __( 'Mitglieder', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_MEMBERS === $view,
+				),
+				array(
+					'view'   => SpacesUrls::VIEW_INVITATIONS,
+					'label'  => __( 'Einladungen', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_INVITATIONS === $view,
+				),
+				array(
+					'view'   => SpacesUrls::VIEW_JOIN_REQUESTS,
+					'label'  => __( 'Beitrittsanfragen', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_JOIN_REQUESTS === $view,
+				),
+			);
+
+			/**
+			 * Erlaubt Erweiterungen für raumbezogene Verwaltungstabs.
+			 *
+			 * @param array<int,array<string,mixed>> $tabs     Tab-Definitionen.
+			 * @param string                         $view     Aktive Ansicht.
+			 * @param int                            $space_id Space-ID.
+			 * @param int                            $actor    Benutzer-ID.
+			 */
+			$tabs = (array) apply_filters( 'afspaces_hub_space_navigation_tabs', $tabs, $view, $space_id, $actor );
+
+			$items = '';
+			foreach ( $tabs as $tab ) {
+				$active = ! empty( $tab['active'] );
+				$items .= sprintf(
+					'<li><a href="%1$s" class="afspaces-hub-tab%2$s"%3$s>%4$s</a></li>',
+					esc_url( (string) $tab['url'] ),
+					$active ? ' is-active' : '',
+					$active ? ' aria-current="page"' : '',
+					esc_html( (string) $tab['label'] )
+				);
+			}
+
+			return sprintf(
+				'<section class="afspaces-space-context" aria-labelledby="afspaces-space-context-heading"><h2 id="afspaces-space-context-heading" class="afspaces-space-context-title">%1$s</h2><nav class="afspaces-hub-nav afspaces-space-nav" aria-label="%2$s"><ul>%3$s</ul></nav></section>',
+				esc_html( sprintf( __( 'Raum verwalten: %s', 'afspaces' ), $room_name ) ),
+				esc_attr__( 'Raumbezogene Verwaltung', 'afspaces' ),
 				$items
 			);
 		}
@@ -319,6 +416,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return __( 'Einladungen', 'afspaces' );
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					return __( 'Meine Einladungen', 'afspaces' );
+				case SpacesUrls::VIEW_JOIN_REQUESTS:
+					return __( 'Beitrittsanfragen', 'afspaces' );
+				case SpacesUrls::VIEW_DISCOVER:
+					return __( 'Räume entdecken', 'afspaces' );
 				case SpacesUrls::VIEW_CREATE:
 					return __( 'Raum gründen', 'afspaces' );
 				default:

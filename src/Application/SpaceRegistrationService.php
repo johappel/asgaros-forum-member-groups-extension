@@ -90,6 +90,15 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceRegistrationService' ) ) {
 				throw new DomainException( __( 'Dieses Forum hat noch keine zugriffssteuernde Asgaros-Gruppe. Ordne zuerst der Kategorie eine Benutzergruppe zu.', 'afspaces' ) );
 			}
 
+			$category_id = (int) ( $forum['category_id'] ?? 0 );
+			if ( $category_id > 0 ) {
+				$access_level = get_term_meta( $category_id, 'category_access', true );
+				if ( '' === (string) $access_level ) {
+					// Asgaros blendet Kategorien ohne category_access fuer Normalnutzer aus.
+					update_term_meta( $category_id, 'category_access', 'loggedin' );
+				}
+			}
+
 			$space_id = $this->spaces->create_space(
 				new Space(
 					array(

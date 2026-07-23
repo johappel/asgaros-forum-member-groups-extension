@@ -39,7 +39,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 		public const VIEW_DASHBOARD      = 'dashboard';
 		public const VIEW_MEMBERS        = 'members';
 		public const VIEW_INVITATIONS    = 'invitations';
+		public const VIEW_JOIN_REQUESTS  = 'join-requests';
 		public const VIEW_MY_INVITATIONS = 'my-invitations';
+		public const VIEW_DISCOVER       = 'discover';
 		public const VIEW_CREATE         = 'create';
 
 		/**
@@ -53,6 +55,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 				'afspaces-members'         => self::VIEW_MEMBERS,
 				'afspaces-invitations'     => self::VIEW_INVITATIONS,
 				'afspaces-my-invitations'  => self::VIEW_MY_INVITATIONS,
+				'afspaces-discover'        => self::VIEW_DISCOVER,
 			);
 		}
 
@@ -66,7 +69,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 				self::VIEW_DASHBOARD,
 				self::VIEW_MEMBERS,
 				self::VIEW_INVITATIONS,
+				self::VIEW_JOIN_REQUESTS,
 				self::VIEW_MY_INVITATIONS,
+				self::VIEW_DISCOVER,
 				self::VIEW_CREATE,
 			);
 		}

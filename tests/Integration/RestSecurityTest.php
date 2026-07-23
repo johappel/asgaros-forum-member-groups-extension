@@ -225,4 +225,80 @@ final class RestSecurityTest extends IntegrationTestCase {
 		$this->assertArrayHasKey( 'invite_links', $list_data );
 		$this->assertArrayNotHasKey( 'url', $list_data['invite_links'][0] );
 	}
+
+	/**
+	 * Test: Anonymer Benutzer darf keine Join-Request erstellen.
+	 */
+	public function test_anonymous_cannot_create_join_request(): void {
+		$owner    = $this->make_user_with_cap( 'jr_owner_anon', Capabilities::MANAGE_ALL_SPACES );
+		$space_id = $this->create_test_space( $owner );
+
+		wp_set_current_user( 0 );
+		$request = new \WP_REST_Request( 'POST', '/afspaces/v1/spaces/' . $space_id . '/join-requests' );
+		$request->set_param( 'request_message', 'Bitte aufnehmen' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test: Angemeldeter Nicht-Mitgliedsbenutzer kann Join-Request erstellen.
+	 */
+	public function test_logged_in_user_can_create_join_request(): void {
+		$owner      = $this->make_user_with_cap( 'jr_owner_create', Capabilities::MANAGE_ALL_SPACES );
+		$requester  = $this->make_user_with_cap( 'jr_requester_create' );
+		$space_id   = $this->create_test_space( $owner );
+
+		wp_set_current_user( $requester );
+		$request = new \WP_REST_Request( 'POST', '/afspaces/v1/spaces/' . $space_id . '/join-requests' );
+		$request->set_param( 'request_message', 'Ich moechte beitreten' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'pending', $data['status'] );
+	}
+
+	/**
+	 * Test: Nicht-Manager darf Join-Request nicht genehmigen.
+	 */
+	public function test_non_manager_cannot_approve_join_request(): void {
+		$owner      = $this->make_user_with_cap( 'jr_owner_forbid', Capabilities::MANAGE_ALL_SPACES );
+		$requester  = $this->make_user_with_cap( 'jr_requester_forbid' );
+		$other_user = $this->make_user_with_cap( 'jr_other_forbid' );
+		$space_id   = $this->create_test_space( $owner );
+
+		$jr = $this->join_request_service->create_request( $space_id, $requester, '' );
+
+		wp_set_current_user( $other_user );
+		$request = new \WP_REST_Request( 'POST', '/afspaces/v1/spaces/' . $space_id . '/join-requests/' . $jr->id . '/approve' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * Test: Manager kann Join-Request genehmigen.
+	 */
+	public function test_manager_can_approve_join_request(): void {
+		$owner      = $this->make_user_with_cap( 'jr_owner_ok', Capabilities::MANAGE_ALL_SPACES );
+		$requester  = $this->make_user_with_cap( 'jr_requester_ok' );
+		$space_id   = $this->create_test_space( $owner );
+
+		$jr = $this->join_request_service->create_request( $space_id, $requester, '' );
+
+		add_filter( 'pre_wp_mail', '__return_true' );
+		wp_set_current_user( $owner );
+		$request = new \WP_REST_Request( 'POST', '/afspaces/v1/spaces/' . $space_id . '/join-requests/' . $jr->id . '/approve' );
+		$request->set_param( 'decision_message', 'Willkommen' );
+		$response = rest_get_server()->dispatch( $request );
+		remove_filter( 'pre_wp_mail', '__return_true' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'approved', $data['status'] );
+		$this->assertTrue( \AsgarosForumUserGroups::isUserInUserGroup( $requester, $this->group_id ) );
+
+		$this->cleanup_user_from_group( $requester );
+	}
 }
