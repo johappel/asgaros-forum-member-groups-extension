@@ -28,6 +28,10 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 	 * - `AsgarosForum::get_forums( $category_id )` und `get_subforums( $forum_id )`
 	 * - `AsgarosForumUserGroups::$taxonomyName` (Term-Taxonomie `asgarosforum-usergroup`)
 	 * - `AsgarosForumPermissions::isAdministrator( $user_id )`
+	 * - `AsgarosForum::content->get_categories()` (liefert zugängliche Kategorien)
+	 * - `AsgarosForum::rewrite->get_post_link( $post_id, $topic_id )` (Deep-Link mit `?part=N#postid-ID`)
+	 * - Tabellen `$forum->tables->{posts,topics,forums}` mit FULLTEXT auf `posts.text` und `topics.name`
+	 *   (Volltextsuche via `MATCH ... AGAINST ( ... IN BOOLEAN MODE )`).
 	 *
 	 * Gruppenmitgliedschaften werden in Asgaros als WP-Term-Zuordnung
 	 * (Taxonomie `asgarosforum-usergroup`) an Benutzer gespeichert.
@@ -347,6 +351,178 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			}
 
 			return (bool) \AsgarosForumUserGroups::isUserInUserGroup( $user_id, $group_id );
+		}
+
+		/**
+		 * Gibt die für den aktuellen Benutzer zugänglichen Kategorie-Term-IDs zurück.
+		 *
+		 * Nutzt `AsgarosForum::content->get_categories()`, das intern bereits die
+		 * Zugriffsprüfung (Benutzergruppen, `category_access`) vornimmt. Damit
+		 * verhält sich die Suche identisch zur regulären Asgaros-Sichtbarkeit.
+		 *
+		 * @param object $forum Asgaros-Forum-Instanz.
+		 * @return int[]
+		 */
+		private function accessible_category_ids( object $forum ): array {
+			if ( ! isset( $forum->content ) || ! method_exists( $forum->content, 'get_categories' ) ) {
+				return array();
+			}
+
+			$categories = $forum->content->get_categories();
+			if ( empty( $categories ) ) {
+				return array();
+			}
+
+			$ids = array();
+			foreach ( $categories as $category ) {
+				$term_id = (int) ( $category->term_id ?? $category->id ?? 0 );
+				if ( $term_id > 0 ) {
+					$ids[] = $term_id;
+				}
+			}
+
+			return array_values( array_unique( $ids ) );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function search_posts( string $keywords, array $args = [] ): array {
+			$empty = array(
+				'results' => array(),
+				'total'   => 0,
+			);
+
+			$forum = $this->forum();
+			if ( null === $forum ) {
+				return $empty;
+			}
+
+			$keywords = trim( sanitize_text_field( $keywords ) );
+			if ( '' === $keywords ) {
+				return $empty;
+			}
+
+			$category_ids = $this->accessible_category_ids( $forum );
+			if ( empty( $category_ids ) ) {
+				return $empty;
+			}
+
+			$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
+			$per_page = isset( $args['per_page'] ) ? max( 1, min( 100, (int) $args['per_page'] ) ) : 20;
+			$sort     = ( isset( $args['sort'] ) && 'date' === $args['sort'] ) ? 'date' : 'relevance';
+			$offset   = ( $page - 1 ) * $per_page;
+
+			$db     = $forum->db;
+			$posts  = $forum->tables->posts;
+			$topics = $forum->tables->topics;
+			$forums = $forum->tables->forums;
+
+			// Kategorie-IDs sind bereits zu int normalisiert und daher sicher.
+			$cats_csv = implode( ',', array_map( 'intval', $category_ids ) );
+
+			// Boolean-Modus mit Präfixsuche, analog zur Asgaros-Bestandssuche.
+			$match_term = $keywords . '*';
+
+			// Vereinigt Treffer aus Beitragstexten (post-genau) und Thementiteln
+			// (dem Eröffnungsbeitrag des Themas zugeordnet). Titeltreffer werden
+			// stärker gewichtet.
+			$hits_sql =
+				"SELECT hits.post_id AS post_id, MAX(hits.score) AS score FROM ("
+				. "SELECT p.id AS post_id, MATCH(p.text) AGAINST (%s IN BOOLEAN MODE) AS score "
+				. "FROM {$posts} p "
+				. "INNER JOIN {$topics} t ON p.parent_id = t.id "
+				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+				. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) "
+				. "AND MATCH(p.text) AGAINST (%s IN BOOLEAN MODE) "
+				. "UNION ALL "
+				. "SELECT (SELECT MIN(p2.id) FROM {$posts} p2 WHERE p2.parent_id = t.id) AS post_id, "
+				. "MATCH(t.name) AGAINST (%s IN BOOLEAN MODE) * 2 AS score "
+				. "FROM {$topics} t "
+				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+				. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) "
+				. "AND MATCH(t.name) AGAINST (%s IN BOOLEAN MODE)"
+				. ") AS hits WHERE hits.post_id IS NOT NULL GROUP BY hits.post_id";
+
+			// Gesamtzahl der eindeutigen Beitragstreffer.
+			$count_sql   = "SELECT COUNT(*) FROM ({$hits_sql}) AS counted";
+			$total       = (int) $db->get_var(
+				$db->prepare( $count_sql, $match_term, $match_term, $match_term, $match_term )
+			);
+
+			if ( 0 === $total ) {
+				return $empty;
+			}
+
+			$order_by = ( 'date' === $sort )
+				? 'p.date DESC, p.id DESC'
+				: 'hits.score DESC, p.date DESC, p.id DESC';
+
+			$page_sql =
+				"SELECT p.id AS post_id, p.parent_id AS topic_id, p.forum_id AS forum_id, "
+				. "p.author_id AS author_id, p.text AS post_text, p.date AS post_date, "
+				. "t.name AS topic_name, f.name AS forum_name, hits.score AS score "
+				. "FROM ({$hits_sql}) AS hits "
+				. "INNER JOIN {$posts} p ON p.id = hits.post_id "
+				. "INNER JOIN {$topics} t ON p.parent_id = t.id "
+				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+				. "ORDER BY {$order_by} LIMIT %d, %d";
+
+			$rows = $db->get_results(
+				$db->prepare(
+					$page_sql,
+					$match_term,
+					$match_term,
+					$match_term,
+					$match_term,
+					$offset,
+					$per_page
+				),
+				ARRAY_A
+			);
+
+			$results = array();
+			if ( ! empty( $rows ) ) {
+				foreach ( $rows as $row ) {
+					$post_id  = (int) ( $row['post_id'] ?? 0 );
+					$topic_id = (int) ( $row['topic_id'] ?? 0 );
+					if ( $post_id < 1 || $topic_id < 1 ) {
+						continue;
+					}
+
+					$results[] = array(
+						'post_id'    => $post_id,
+						'topic_id'   => $topic_id,
+						'forum_id'   => (int) ( $row['forum_id'] ?? 0 ),
+						'author_id'  => (int) ( $row['author_id'] ?? 0 ),
+						'post_text'  => (string) ( $row['post_text'] ?? '' ),
+						'post_date'  => (string) ( $row['post_date'] ?? '' ),
+						'topic_name' => (string) ( $row['topic_name'] ?? '' ),
+						'forum_name' => (string) ( $row['forum_name'] ?? '' ),
+						'score'      => (float) ( $row['score'] ?? 0 ),
+						'url'        => $this->get_post_link( $post_id, $topic_id ),
+					);
+				}
+			}
+
+			return array(
+				'results' => $results,
+				'total'   => $total,
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get_post_link( int $post_id, int $topic_id ): string {
+			$forum = $this->forum();
+			if ( null === $forum || ! isset( $forum->rewrite ) || ! method_exists( $forum->rewrite, 'get_post_link' ) ) {
+				return '';
+			}
+
+			$topic = $topic_id > 0 ? $topic_id : false;
+
+			return (string) $forum->rewrite->get_post_link( $post_id, $topic );
 		}
 	}
 }

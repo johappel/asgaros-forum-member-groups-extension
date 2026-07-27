@@ -57,3 +57,20 @@ Alte Einzelseiten (`afspaces-dashboard`, `afspaces-members`, `afspaces-invitatio
 
 Die neue Seite `Einstellungen -> AFSpaces Look & Feel` nutzt ausschließlich WordPress-Settings-APIs und beeinflusst nur AFSpaces-Frontend-CSS (keine Asgaros-Interna).
 
+## Forensuche (post-genaue Suche mit Deep-Links)
+
+Die eigene Forensuche (`AFSpaces\Interface\SearchView`, `AFSpaces\Application\ForumSearchService`) ersetzt die Trefferdarstellung der Asgaros-Bestandssuche, ohne den Asgaros-Core zu verändern. Sie kapselt folgende **internen** Asgaros-Schnittstellen ausschließlich im Adapter (`AsgarosAdapter`, geprüft gegen Asgaros `3.4.0`):
+
+- `AsgarosForum::content->get_categories()` — liefert die für den aktuellen Benutzer zugänglichen Kategorien (Zugriffsprüfung inklusive `category_access` und Benutzergruppen). Wird als alleinige Sichtbarkeitsgrenze der Suche verwendet.
+- `AsgarosForum::rewrite->get_post_link( $post_id, $topic_id )` — berechnet den Deep-Link `.../topic/<slug>/?part=<N>#postid-<ID>` mit derselben Sortierung und Seitengröße (`options['posts_per_page']`) wie die Themenansicht.
+- Tabellen `$forum->tables->posts`, `$forum->tables->topics`, `$forum->tables->forums` (Zugriff über `$forum->db`, ausschließlich mit `$wpdb->prepare()`).
+  - Spalten: `posts(id, text, parent_id=topic_id, forum_id, date, author_id)`, `topics(id, parent_id=forum_id, author_id, name, approved, slug)`, `forums(id, name, parent_id=category_term_id, forum_status)`.
+  - Es werden die vorhandenen **FULLTEXT-Indizes** auf `posts.text` und `topics.name` genutzt (`MATCH ... AGAINST ( ... IN BOOLEAN MODE )`), analog zur Asgaros-Bestandssuche.
+
+Verhalten bei inkompatibler/unbekannter Version: Fehlen `content->get_categories()` oder `rewrite->get_post_link()`, liefert der Adapter leere Ergebnisse bzw. leere Links, statt einen Fehler auszulösen (defensive Guards via `method_exists`).
+
+Zugriffsschutz: Es werden ausschließlich freigegebene Themen (`t.approved = 1`) aus zugänglichen Kategorien zurückgegeben. Damit legt die Suche weder Titel noch Textausschnitte aus Foren offen, auf die die suchende Person keinen Zugriff hat.
+
+REST: `GET /wp-json/afspaces/v1/search` (`permission_callback`: angemeldet), Parameter `q`, `sort` (`relevance|date`), `page`, `per_page`; die Zugriffsprüfung erfolgt serverseitig im Adapter.
+
+

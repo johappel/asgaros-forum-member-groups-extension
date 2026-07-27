@@ -88,27 +88,27 @@ Das Modul übernimmt die Suchansicht vollständig, während Asgaros weiterhin f�
 
 ### MVP 1: Suche wieder benutzbar machen
 
-* [ ] Suche auf Beitragsebene statt nur auf Themenebene durchführen.
-* [ ] `post_id` jedes Treffers erhalten.
-* [ ] richtige Themenseite für jeden Beitrag berechnen.
-* [ ] direkt zu `#postid-{ID}` verlinken.
-* [ ] Thementitel anzeigen.
-* [ ] Autor:in und Beitragsdatum anzeigen.
-* [ ] passenden Textausschnitt darstellen.
-* [ ] Suchbegriff im Ausschnitt hervorheben.
-* [ ] mehrere Treffer aus demselben Thema getrennt anzeigen.
-* [ ] nur Beiträge aus zugänglichen Foren berücksichtigen.
-* [ ] gelöschte, nicht freigegebene oder verborgene Beiträge ausschließen.
+* [x] Suche auf Beitragsebene statt nur auf Themenebene durchführen.
+* [x] `post_id` jedes Treffers erhalten.
+* [x] richtige Themenseite für jeden Beitrag berechnen.
+* [x] direkt zu `#postid-{ID}` verlinken.
+* [x] Thementitel anzeigen.
+* [x] Autor:in und Beitragsdatum anzeigen.
+* [x] passenden Textausschnitt darstellen.
+* [x] Suchbegriff im Ausschnitt hervorheben.
+* [x] mehrere Treffer aus demselben Thema getrennt anzeigen.
+* [x] nur Beiträge aus zugänglichen Foren berücksichtigen.
+* [x] gelöschte, nicht freigegebene oder verborgene Beiträge ausschließen.
 
 ### MVP 2: sinnvolle Trefferliste
 
-* [ ] Forum beziehungsweise Arbeitsgruppe anzeigen.
-* [ ] Treffer nach Relevanz oder Datum sortierbar machen.
+* [x] Forum beziehungsweise Arbeitsgruppe anzeigen.
+* [x] Treffer nach Relevanz oder Datum sortierbar machen.
 * [ ] Filter nach Arbeitsgruppe anbieten.
 * [ ] Filter nach Autor:in anbieten.
 * [ ] Filter nach Zeitraum anbieten.
-* [ ] Suchbegriff in Seitentitel und Suchfeld erhalten.
-* [ ] Suchpagination unabhängig von der Themenpagination umsetzen.
+* [x] Suchbegriff in Seitentitel und Suchfeld erhalten.
+* [x] Suchpagination unabhängig von der Themenpagination umsetzen.
 
 ### MVP 3: bessere Suchqualität
 

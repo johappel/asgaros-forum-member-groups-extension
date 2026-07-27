@@ -18,6 +18,7 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\ForumSearchService;
 use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
@@ -31,6 +32,7 @@ use AFSpaces\Interface\MembersView;
 use AFSpaces\Interface\MyInvitationsView;
 use AFSpaces\Interface\ProfileView;
 use AFSpaces\Interface\RestController;
+use AFSpaces\Interface\SearchView;
 use AFSpaces\Interface\SpacesHubController;
 use AFSpaces\Interface\WorkingGroupSettingsView;
 use AFSpaces\Interface\WorkingGroupView;
@@ -104,6 +106,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$invite_links = new \AFSpaces\Application\InviteLinkService( $spaces, $link_repo, $asgaros, $policy, $audit, $join_requests );
 			$working_groups = new WorkingGroupService( $spaces, $space_meta, $asgaros, $policy, $audit );
 			$space_registration = new SpaceRegistrationService( $spaces, $asgaros );
+			$forum_search = new ForumSearchService( $asgaros );
 
 			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration );
 			$frontend->init();
@@ -112,7 +115,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$appearance->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
-			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups );
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $forum_search );
 			$hub->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
@@ -151,6 +154,14 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			);
 
 			add_shortcode(
+				'afspaces_search',
+				static function () use ( $forum_search ): string {
+					$view = new SearchView( $forum_search );
+					return $view->render();
+				}
+			);
+
+			add_shortcode(
 				'afspaces_profile',
 				static function ( $atts = array() ) use ( $spaces, $asgaros, $working_groups ): string {
 					$atts = shortcode_atts(
@@ -169,7 +180,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			);
 
 			// REST-API registrieren.
-			$rest = new RestController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups );
+			$rest = new RestController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $forum_search );
 			add_action( 'rest_api_init', array( $rest, 'register_routes' ) );
 
 			add_filter( 'wp_privacy_personal_data_exporters', static function ( array $exporters ) use ( $inv_repo ): array {

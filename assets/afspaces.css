@@ -1738,3 +1738,64 @@ a.afspaces-link.is-active {
 		justify-content: flex-start;
 	}
 }
+
+/* ===== Forensuche (AFSpaces Search) ===== */
+#af-wrapper .afspaces-search-form {
+display: flex;
+flex-wrap: wrap;
+gap: 0.75rem;
+align-items: flex-end;
+}
+#af-wrapper .afspaces-search-form .afspaces-field {
+display: flex;
+flex-direction: column;
+gap: 0.25rem;
+margin: 0;
+}
+#af-wrapper .afspaces-search-form input[type="search"],
+#af-wrapper .afspaces-search-form select {
+min-height: 2.5rem;
+padding: 0.35rem 0.6rem;
+}
+#af-wrapper .afspaces-search-status {
+margin: 1rem 0 0.5rem;
+font-weight: 600;
+}
+#af-wrapper .afspaces-search-results-list {
+list-style: none;
+margin: 0;
+padding: 0;
+}
+#af-wrapper .afspaces-search-result {
+padding: 1rem 0;
+border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+#af-wrapper .afspaces-search-result-title {
+margin: 0 0 0.25rem;
+font-size: 1.1rem;
+}
+#af-wrapper .afspaces-search-result-meta {
+margin: 0 0 0.4rem;
+font-size: 0.9rem;
+opacity: 0.85;
+}
+#af-wrapper .afspaces-search-result-snippet {
+margin: 0 0 0.4rem;
+line-height: 1.5;
+}
+#af-wrapper .afspaces-search-result-snippet mark {
+padding: 0 0.1em;
+background: #fff3b0;
+color: inherit;
+}
+#af-wrapper .afspaces-search-pagination {
+margin-top: 1rem;
+}
+#af-wrapper .afspaces-pagination-list {
+list-style: none;
+display: flex;
+gap: 1rem;
+align-items: center;
+margin: 0;
+padding: 0;
+}

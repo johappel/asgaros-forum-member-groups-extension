@@ -15,6 +15,7 @@ use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\ForumSearchService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
@@ -66,6 +67,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		private WorkingGroupService $working_groups;
 
 		/**
+		 * @var ForumSearchService
+		 */
+		private ForumSearchService $forum_search;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param SpaceRepository         $spaces  Space-Repository.
@@ -80,7 +86,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			InvitationService $invitations,
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
-			WorkingGroupService $working_groups
+			WorkingGroupService $working_groups,
+			ForumSearchService $forum_search
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -89,6 +96,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 			$this->working_groups = $working_groups;
+			$this->forum_search = $forum_search;
 		}
 
 		/**
@@ -253,6 +261,42 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 								'type'     => 'integer',
 								'required' => true,
 								'minimum'  => 1,
+								'sanitize_callback' => 'absint',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/search',
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'search_forum' ),
+						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+						'args'                => array(
+							'q' => array(
+								'type'              => 'string',
+								'required'          => true,
+								'sanitize_callback' => 'sanitize_text_field',
+								'validate_callback' => static fn( $v ) => is_string( $v ) && strlen( $v ) <= 200,
+							),
+							'sort' => array(
+								'type'              => 'string',
+								'default'           => 'relevance',
+								'sanitize_callback' => 'sanitize_key',
+								'validate_callback' => static fn( $v ) => in_array( $v, array( 'relevance', 'date' ), true ),
+							),
+							'page' => array(
+								'type'              => 'integer',
+								'default'           => 1,
+								'sanitize_callback' => 'absint',
+							),
+							'per_page' => array(
+								'type'              => 'integer',
+								'default'           => 10,
 								'sanitize_callback' => 'absint',
 							),
 						),
@@ -680,6 +724,64 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 				),
 				200
 			);
+		}
+
+		/**
+		 * GET /search — post-genaue Forensuche mit Deep-Links.
+		 *
+		 * Liefert ausschließlich Treffer aus für den aktuellen Benutzer
+		 * zugänglichen Foren; die Zugriffsprüfung erfolgt im Adapter.
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response
+		 */
+		public function search_forum( WP_REST_Request $request ): WP_REST_Response {
+			$query    = (string) $request['q'];
+			$sort     = (string) $request['sort'];
+			$page     = (int) $request['page'];
+			$per_page = (int) $request['per_page'];
+
+			$result = $this->forum_search->search( $query, $sort, $page, $per_page );
+
+			$hits = array();
+			foreach ( (array) $result['hits'] as $hit ) {
+				$hits[] = array(
+					'source'        => $hit->source,
+					'title'         => $hit->title,
+					'url'           => $hit->url,
+					'author'        => $hit->author_name,
+					'date'          => $hit->date,
+					'context'       => $hit->context_label,
+					'snippet'       => $this->plain_snippet( $hit->snippet ),
+					'score'         => $hit->score,
+				);
+			}
+
+			return new WP_REST_Response(
+				array(
+					'results'     => $hits,
+					'total'       => (int) ( $result['total'] ?? 0 ),
+					'page'        => (int) ( $result['page'] ?? 1 ),
+					'per_page'    => (int) ( $result['per_page'] ?? $per_page ),
+					'total_pages' => (int) ( $result['total_pages'] ?? 0 ),
+				),
+				200
+			);
+		}
+
+		/**
+		 * Wandelt Ausschnitt-Segmente in einen einfachen Text um.
+		 *
+		 * @param array<int,array{text:string,mark:bool}> $segments Segmente.
+		 * @return string
+		 */
+		private function plain_snippet( array $segments ): string {
+			$text = '';
+			foreach ( $segments as $segment ) {
+				$text .= (string) ( $segment['text'] ?? '' );
+			}
+
+			return $text;
 		}
 
 		/**

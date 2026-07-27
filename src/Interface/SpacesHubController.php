@@ -16,6 +16,7 @@ use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\ForumSearchService;
 use AFSpaces\Core\Capabilities;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
@@ -34,6 +35,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private JoinRequestService $join_requests;
 		private InviteLinkService $invite_links;
 		private WorkingGroupService $working_groups;
+		private ForumSearchService $forum_search;
 
 		/**
 		 * Konstruktor.
@@ -46,7 +48,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			InvitationService $invitations,
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
-			WorkingGroupService $working_groups
+			WorkingGroupService $working_groups,
+			ForumSearchService $forum_search
 		) {
 			$this->frontend     = $frontend;
 			$this->spaces       = $spaces;
@@ -56,6 +59,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 			$this->working_groups = $working_groups;
+			$this->forum_search = $forum_search;
 		}
 
 		/**
@@ -176,6 +180,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					$discover_view = new DiscoverView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->working_groups );
 					return $discover_view->render();
 
+				case SpacesUrls::VIEW_SEARCH:
+					$search_view = new SearchView( $this->forum_search );
+					return $search_view->render();
+
 				case SpacesUrls::VIEW_CREATE:
 					return $this->render_create_placeholder();
 
@@ -277,6 +285,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				'active' => in_array( $view, array( SpacesUrls::VIEW_DISCOVER, SpacesUrls::VIEW_GROUP ), true ),
 			);
 
+			$tabs[] = array(
+				'view'   => SpacesUrls::VIEW_SEARCH,
+				'label'  => __( 'Suche', 'afspaces' ),
+				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_SEARCH ),
+				'active' => SpacesUrls::VIEW_SEARCH === $view,
+			);
+
 			if ( $this->can_create_spaces( $actor ) ) {
 				$tabs[] = array(
 					'view'   => SpacesUrls::VIEW_CREATE,
@@ -308,15 +323,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				);
 			}
 
-			$search_url = home_url( '/forum/search/' );
+			$search_url = SpacesUrls::hub_url( SpacesUrls::VIEW_SEARCH );
 			$search_url = (string) apply_filters( 'afspaces_forum_search_url', $search_url );
 
+			$search_hidden = ( SpacesUrls::hub_page_id() > 0 )
+				? sprintf( '<input type="hidden" name="%1$s" value="%2$s" />', esc_attr( SpacesUrls::VIEW_PARAM ), esc_attr( SpacesUrls::VIEW_SEARCH ) )
+				: '';
+
 			return sprintf(
-				'<div id="forum-header" class="afspaces-forum-header"><nav id="forum-navigation" class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav><div id="forum-search" class="afspaces-forum-search"><span class="search-icon fas fa-search" aria-hidden="true"></span><form method="get" action="%3$s"><input name="keywords" type="search" placeholder="%4$s" value="" /></form></div><div class="clear"></div></div>',
+				'<div id="forum-header" class="afspaces-forum-header"><nav id="forum-navigation" class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav><div id="forum-search" class="afspaces-forum-search"><span class="search-icon fas fa-search" aria-hidden="true"></span><form method="get" action="%3$s" role="search"><label class="screen-reader-text" for="afspaces-header-search">%4$s</label>%5$s<input id="afspaces-header-search" name="%6$s" type="search" placeholder="%4$s" value="" /></form></div><div class="clear"></div></div>',
 				esc_attr__( 'Arbeitsgruppenverwaltung', 'afspaces' ),
 				$items,
 				esc_url( $search_url ),
-				esc_attr__( 'Suchen ...', 'afspaces' )
+				esc_attr__( 'Forum durchsuchen', 'afspaces' ),
+				$search_hidden,
+				esc_attr( SearchView::PARAM_QUERY )
 			);
 		}
 

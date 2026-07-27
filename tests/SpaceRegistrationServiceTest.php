@@ -98,6 +98,14 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 	public function is_user_in_group( int $user_id, int $group_id ): bool {
 		return false;
 	}
+
+	public function search_posts( string $keywords, array $args = [] ): array {
+		return array( 'results' => array(), 'total' => 0 );
+	}
+
+	public function get_post_link( int $post_id, int $topic_id ): string {
+		return '';
+	}
 }
 
 final class SpaceRegistrationServiceTest extends TestCase {

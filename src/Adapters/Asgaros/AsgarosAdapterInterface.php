@@ -91,5 +91,33 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return bool
 		 */
 		public function is_user_in_group( int $user_id, int $group_id ): bool;
+
+		/**
+		 * Durchsucht Forenbeiträge post-genau per Volltext.
+		 *
+		 * Die Treffer werden NICHT nach Thema zusammengefasst: jeder gefundene
+		 * Beitrag bleibt ein eigenständiges Ergebnis mit eigener `post_id` und
+		 * eigenem Deep-Link. Es werden ausschließlich Beiträge aus den für den
+		 * aktuellen Benutzer zugänglichen Kategorien berücksichtigt; nicht
+		 * freigegebene Themen werden ausgeschlossen.
+		 *
+		 * @param string              $keywords Suchbegriff(e).
+		 * @param array<string,mixed> $args     Optionen: sort ('relevance'|'date'),
+		 *                                       page (int), per_page (int).
+		 * @return array{results: array<int,array<string,mixed>>, total: int}
+		 */
+		public function search_posts( string $keywords, array $args = [] ): array;
+
+		/**
+		 * Baut den Deep-Link zu einem einzelnen Beitrag.
+		 *
+		 * Verwendet dieselbe Sortierung und Seitengröße wie die Themenansicht
+		 * und ergibt eine URL der Form `.../topic/<slug>/?part=<N>#postid-<ID>`.
+		 *
+		 * @param int $post_id  Beitrags-ID.
+		 * @param int $topic_id Themen-ID.
+		 * @return string
+		 */
+		public function get_post_link( int $post_id, int $topic_id ): string;
 	}
 }
