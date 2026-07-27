@@ -129,7 +129,8 @@ if ( ! class_exists( 'AFSpaces\\Application\\ForumSearchService' ) ) {
 				$author_name,
 				$date,
 				$context,
-				(float) ( $row['score'] ?? 0 )
+				(float) ( $row['score'] ?? 0 ),
+				'forum:' . (int) ( $row['post_id'] ?? 0 )
 			);
 		}
 

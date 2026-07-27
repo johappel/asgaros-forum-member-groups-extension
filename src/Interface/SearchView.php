@@ -9,8 +9,9 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Interface;
 
-use AFSpaces\Application\ForumSearchService;
+use AFSpaces\Application\HybridSearchService;
 use AFSpaces\Search\SearchHit;
+use AFSpaces\Search\SearchSettings;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 
@@ -35,11 +36,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		public const PARAM_PAGE = 'afspaces_spage';
 
 		/**
+		 * Query-Parameter für den Suchbereich.
+		 */
+		public const PARAM_SCOPE = 'afspaces_scope';
+
+		/**
+		 * Query-Parameter für die semantische Suche.
+		 */
+		public const PARAM_SEMANTIC = 'afspaces_semantic';
+
+		/**
 		 * Suchdienst.
 		 *
-		 * @var ForumSearchService
+		 * @var HybridSearchService
 		 */
-		private ForumSearchService $search;
+		private HybridSearchService $search;
 
 		/**
 		 * Treffer pro Seite.
@@ -51,9 +62,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		/**
 		 * Konstruktor.
 		 *
-		 * @param ForumSearchService $search Suchdienst.
+		 * @param HybridSearchService $search Suchdienst.
 		 */
-		public function __construct( ForumSearchService $search ) {
+		public function __construct( HybridSearchService $search ) {
 			$this->search = $search;
 		}
 
@@ -66,10 +77,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 			$query = isset( $_GET[ self::PARAM_QUERY ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_QUERY ] ) ) : '';
 			$sort  = isset( $_GET[ self::PARAM_SORT ] ) ? sanitize_key( wp_unslash( $_GET[ self::PARAM_SORT ] ) ) : 'relevance';
 			$page  = isset( $_GET[ self::PARAM_PAGE ] ) ? max( 1, (int) $_GET[ self::PARAM_PAGE ] ) : 1;
+			$scope = isset( $_GET[ self::PARAM_SCOPE ] ) ? sanitize_key( wp_unslash( $_GET[ self::PARAM_SCOPE ] ) ) : HybridSearchService::SCOPE_ALL;
 			$sort  = in_array( $sort, array( 'relevance', 'date' ), true ) ? $sort : 'relevance';
+			$scope = in_array( $scope, array( HybridSearchService::SCOPE_ALL, HybridSearchService::SCOPE_FORUM, HybridSearchService::SCOPE_WP ), true ) ? $scope : HybridSearchService::SCOPE_ALL;
+
+			$semantic_available = SearchSettings::is_semantic_enabled();
+			$semantic           = $semantic_available && ! empty( $_GET[ self::PARAM_SEMANTIC ] );
 
 			$results = ( '' !== $query )
-				? $this->search->search( $query, $sort, $page, $this->per_page )
+				? $this->search->search(
+					$query,
+					array(
+						'scope'    => $scope,
+						'sort'     => $sort,
+						'semantic' => $semantic,
+						'page'     => $page,
+						'per_page' => $this->per_page,
+					)
+				)
 				: null;
 
 			ob_start();
@@ -89,6 +114,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 						</p>
 
 						<p class="afspaces-field">
+							<label for="afspaces-search-scope"><?php echo esc_html__( 'Bereich', 'afspaces' ); ?></label>
+							<select id="afspaces-search-scope" name="<?php echo esc_attr( self::PARAM_SCOPE ); ?>">
+								<option value="all" <?php selected( HybridSearchService::SCOPE_ALL, $scope ); ?>><?php echo esc_html__( 'Alles', 'afspaces' ); ?></option>
+								<option value="forum" <?php selected( HybridSearchService::SCOPE_FORUM, $scope ); ?>><?php echo esc_html__( 'Foren', 'afspaces' ); ?></option>
+								<option value="wp" <?php selected( HybridSearchService::SCOPE_WP, $scope ); ?>><?php echo esc_html__( 'Beiträge & Seiten', 'afspaces' ); ?></option>
+							</select>
+						</p>
+
+						<p class="afspaces-field">
 							<label for="afspaces-search-sort"><?php echo esc_html__( 'Sortierung', 'afspaces' ); ?></label>
 							<select id="afspaces-search-sort" name="<?php echo esc_attr( self::PARAM_SORT ); ?>">
 								<option value="relevance" <?php selected( 'relevance', $sort ); ?>><?php echo esc_html__( 'Relevanz', 'afspaces' ); ?></option>
@@ -96,11 +130,20 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 							</select>
 						</p>
 
+						<?php if ( $semantic_available ) : ?>
+							<p class="afspaces-field afspaces-field-checkbox">
+								<label for="afspaces-search-semantic">
+									<input type="checkbox" id="afspaces-search-semantic" name="<?php echo esc_attr( self::PARAM_SEMANTIC ); ?>" value="1" <?php checked( $semantic ); ?> />
+									<?php echo esc_html__( 'Semantische Suche einbeziehen', 'afspaces' ); ?>
+								</label>
+							</p>
+						<?php endif; ?>
+
 						<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Suchen', 'afspaces' ); ?></button>
 					</form>
 				</div>
 
-				<?php echo $this->render_results( $results, $query, $sort ); ?>
+				<?php echo $this->render_results( $results, $query, $sort, $scope, $semantic ); ?>
 			</section>
 			<?php
 			return (string) ob_get_clean();
@@ -109,12 +152,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		/**
 		 * Rendert den Ergebnisbereich.
 		 *
-		 * @param array<string,mixed>|null $results Suchergebnis oder null.
-		 * @param string                   $query   Suchbegriff.
-		 * @param string                   $sort    Sortierung.
+		 * @param array<string,mixed>|null $results  Suchergebnis oder null.
+		 * @param string                   $query    Suchbegriff.
+		 * @param string                   $sort     Sortierung.
+		 * @param string                   $scope    Suchbereich.
+		 * @param bool                     $semantic Semantik aktiv?
 		 * @return string
 		 */
-		private function render_results( ?array $results, string $query, string $sort ): string {
+		private function render_results( ?array $results, string $query, string $sort, string $scope, bool $semantic ): string {
 			if ( null === $results ) {
 				return '';
 			}
@@ -154,7 +199,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 					}
 					?>
 				</ol>
-				<?php echo $this->render_pagination( $results, $query, $sort ); ?>
+				<?php echo $this->render_pagination( $results, $query, $sort, $scope, $semantic ); ?>
 			<?php endif; ?>
 			<?php
 			return (string) ob_get_clean();
@@ -174,6 +219,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 					<a href="<?php echo esc_url( $hit->url ); ?>"><?php echo esc_html( $hit->title ); ?></a>
 				</h3>
 				<p class="afspaces-search-result-meta">
+					<span class="afspaces-tag afspaces-source-<?php echo esc_attr( $hit->source ); ?>"><?php echo esc_html( $this->source_label( $hit->source ) ); ?></span>
 					<?php if ( '' !== $hit->context_label ) : ?>
 						<span class="afspaces-tag"><?php echo esc_html( $hit->context_label ); ?></span>
 					<?php endif; ?>
@@ -217,27 +263,44 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		}
 
 		/**
-		 * Rendert die von der Themenpagination unabhängige Trefferpagination.
+		 * Liefert das Quellen-Label für ein Badge.
 		 *
-		 * @param array<string,mixed> $results Suchergebnis.
-		 * @param string              $query   Suchbegriff.
-		 * @param string              $sort    Sortierung.
+		 * @param string $source Quelle (forum|wp).
 		 * @return string
 		 */
-		private function render_pagination( array $results, string $query, string $sort ): string {
+		private function source_label( string $source ): string {
+			if ( SearchHit::SOURCE_WP === $source ) {
+				return __( 'Beitrag', 'afspaces' );
+			}
+			return __( 'Forum', 'afspaces' );
+		}
+
+		/**
+		 * Rendert die von der Themenpagination unabhängige Trefferpagination.
+		 *
+		 * @param array<string,mixed> $results  Suchergebnis.
+		 * @param string              $query    Suchbegriff.
+		 * @param string              $sort     Sortierung.
+		 * @param string              $scope    Suchbereich.
+		 * @param bool                $semantic Semantik aktiv?
+		 * @return string
+		 */
+		private function render_pagination( array $results, string $query, string $sort, string $scope, bool $semantic ): string {
 			$total_pages = (int) ( $results['total_pages'] ?? 0 );
 			$current     = (int) ( $results['page'] ?? 1 );
 			if ( $total_pages < 2 ) {
 				return '';
 			}
 
-			$link = function ( int $page ) use ( $query, $sort ): string {
+			$link = function ( int $page ) use ( $query, $sort, $scope, $semantic ): string {
 				return SpacesUrls::hub_url(
 					SpacesUrls::VIEW_SEARCH,
 					array(
-						self::PARAM_QUERY => $query,
-						self::PARAM_SORT  => $sort,
-						self::PARAM_PAGE  => $page,
+						self::PARAM_QUERY    => $query,
+						self::PARAM_SORT     => $sort,
+						self::PARAM_SCOPE    => $scope,
+						self::PARAM_SEMANTIC => $semantic ? '1' : '',
+						self::PARAM_PAGE     => $page,
 					)
 				);
 			};

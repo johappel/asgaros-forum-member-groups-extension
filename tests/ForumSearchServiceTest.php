@@ -74,6 +74,18 @@ final class FakeSearchAdapter implements AsgarosAdapterInterface {
 	public function get_post_link( int $post_id, int $topic_id ): string {
 		return '/forum/topic/x/?part=2#postid-' . $post_id;
 	}
+
+	public function list_accessible_category_ids(): array {
+		return array();
+	}
+
+	public function count_all_posts(): int {
+		return 0;
+	}
+
+	public function list_posts_for_index( int $limit, int $offset ): array {
+		return array();
+	}
 }
 
 final class ForumSearchServiceTest extends TestCase {

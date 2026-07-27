@@ -22,6 +22,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\Deactivator' ) ) {
 		 * @return void
 		 */
 		public static function deactivate(): void {
+			\AFSpaces\Application\SearchIndexer::unschedule();
 			flush_rewrite_rules();
 		}
 	}

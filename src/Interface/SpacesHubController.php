@@ -16,7 +16,7 @@ use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
-use AFSpaces\Application\ForumSearchService;
+use AFSpaces\Application\HybridSearchService;
 use AFSpaces\Core\Capabilities;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
@@ -35,7 +35,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private JoinRequestService $join_requests;
 		private InviteLinkService $invite_links;
 		private WorkingGroupService $working_groups;
-		private ForumSearchService $forum_search;
+		private HybridSearchService $forum_search;
 
 		/**
 		 * Konstruktor.
@@ -49,7 +49,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
 			WorkingGroupService $working_groups,
-			ForumSearchService $forum_search
+			HybridSearchService $forum_search
 		) {
 			$this->frontend     = $frontend;
 			$this->spaces       = $spaces;

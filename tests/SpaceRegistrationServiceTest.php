@@ -106,6 +106,18 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 	public function get_post_link( int $post_id, int $topic_id ): string {
 		return '';
 	}
+
+	public function list_accessible_category_ids(): array {
+		return array();
+	}
+
+	public function count_all_posts(): int {
+		return 0;
+	}
+
+	public function list_posts_for_index( int $limit, int $offset ): array {
+		return array();
+	}
 }
 
 final class SpaceRegistrationServiceTest extends TestCase {

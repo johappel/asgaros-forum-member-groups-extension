@@ -79,6 +79,13 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchHit' ) ) {
 		public float $score;
 
 		/**
+		 * Stabiler Schlüssel (z. B. `forum:142` oder `wp:37`).
+		 *
+		 * @var string
+		 */
+		public string $key;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param string                                  $source        Quelle.
@@ -89,6 +96,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchHit' ) ) {
 		 * @param string                                  $date          Datum.
 		 * @param string                                  $context_label Kontext-Label.
 		 * @param float                                   $score         Relevanz.
+		 * @param string                                  $key           Stabiler Schlüssel.
 		 */
 		public function __construct(
 			string $source,
@@ -98,7 +106,8 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchHit' ) ) {
 			string $author_name,
 			string $date,
 			string $context_label,
-			float $score = 0.0
+			float $score = 0.0,
+			string $key = ''
 		) {
 			$this->source        = $source;
 			$this->title         = $title;
@@ -108,6 +117,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchHit' ) ) {
 			$this->date          = $date;
 			$this->context_label = $context_label;
 			$this->score         = $score;
+			$this->key           = $key;
 		}
 	}
 }

@@ -50,12 +50,17 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 			$join_requests->install();
 			$space_meta = new SpaceMetaRepository();
 			$space_meta->install();
+			$search_index = new \AFSpaces\Adapters\Database\SearchIndexRepository();
+			$search_index->install();
 
 			// Capabilities registrieren.
 			Capabilities::register();
 
 			// Hub-Seite mit Router-Shortcode sicherstellen.
 			self::ensure_hub_page();
+
+			// Wiederkehrenden Reindex-Lauf planen.
+			\AFSpaces\Application\SearchIndexer::schedule();
 
 			flush_rewrite_rules();
 		}

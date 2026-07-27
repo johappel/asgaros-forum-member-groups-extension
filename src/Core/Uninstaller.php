@@ -37,6 +37,12 @@ if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 			delete_option( 'afspaces_hub_page_id' );
 			delete_option( 'afspaces_installed_version' );
 			delete_option( 'afspaces_enable_space_creation' );
+			delete_option( 'afspaces_search_options' );
+
+			// Geplanten Reindex-Lauf entfernen.
+			if ( function_exists( 'wp_clear_scheduled_hook' ) ) {
+				wp_clear_scheduled_hook( 'afspaces_reindex_search' );
+			}
 
 			// Eigene Tabellen aufräumen (Asgaros-Daten bleiben unangetastet, siehe ARCHITECTURE.md).
 			global $wpdb;
@@ -47,6 +53,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_invite_links" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_join_requests" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_space_meta" );
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_search_index" );
 		}
 	}
 }

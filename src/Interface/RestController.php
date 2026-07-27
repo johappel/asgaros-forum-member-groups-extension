@@ -15,7 +15,7 @@ use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
-use AFSpaces\Application\ForumSearchService;
+use AFSpaces\Application\HybridSearchService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
@@ -69,7 +69,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		/**
 		 * @var ForumSearchService
 		 */
-		private ForumSearchService $forum_search;
+		private HybridSearchService $forum_search;
 
 		/**
 		 * Konstruktor.
@@ -87,7 +87,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
 			WorkingGroupService $working_groups,
-			ForumSearchService $forum_search
+			HybridSearchService $forum_search
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -288,6 +288,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 								'default'           => 'relevance',
 								'sanitize_callback' => 'sanitize_key',
 								'validate_callback' => static fn( $v ) => in_array( $v, array( 'relevance', 'date' ), true ),
+							),
+							'scope' => array(
+								'type'              => 'string',
+								'default'           => 'all',
+								'sanitize_callback' => 'sanitize_key',
+								'validate_callback' => static fn( $v ) => in_array( $v, array( 'all', 'forum', 'wp' ), true ),
+							),
+							'semantic' => array(
+								'type'              => 'boolean',
+								'default'           => false,
 							),
 							'page' => array(
 								'type'              => 'integer',
@@ -741,7 +751,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			$page     = (int) $request['page'];
 			$per_page = (int) $request['per_page'];
 
-			$result = $this->forum_search->search( $query, $sort, $page, $per_page );
+			$result = $this->forum_search->search(
+				$query,
+				array(
+					'scope'    => (string) $request['scope'],
+					'sort'     => $sort,
+					'semantic' => (bool) $request['semantic'],
+					'page'     => $page,
+					'per_page' => $per_page,
+				)
+			);
 
 			$hits = array();
 			foreach ( (array) $result['hits'] as $hit ) {
@@ -759,11 +778,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 
 			return new WP_REST_Response(
 				array(
-					'results'     => $hits,
-					'total'       => (int) ( $result['total'] ?? 0 ),
-					'page'        => (int) ( $result['page'] ?? 1 ),
-					'per_page'    => (int) ( $result['per_page'] ?? $per_page ),
-					'total_pages' => (int) ( $result['total_pages'] ?? 0 ),
+					'results'       => $hits,
+					'total'         => (int) ( $result['total'] ?? 0 ),
+					'page'          => (int) ( $result['page'] ?? 1 ),
+					'per_page'      => (int) ( $result['per_page'] ?? $per_page ),
+					'total_pages'   => (int) ( $result['total_pages'] ?? 0 ),
+					'semantic_used' => (bool) ( $result['semantic_used'] ?? false ),
 				),
 				200
 			);

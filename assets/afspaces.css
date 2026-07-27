@@ -1799,3 +1799,18 @@ align-items: center;
 margin: 0;
 padding: 0;
 }
+
+/* Hybrid-Suche: Semantik-Schalter & Quellen-Badges */
+#af-wrapper .afspaces-search-form .afspaces-field-checkbox {
+flex-direction: row;
+align-items: center;
+gap: 0.4rem;
+}
+#af-wrapper .afspaces-tag.afspaces-source-forum {
+background: #2d5d7f;
+color: #fff;
+}
+#af-wrapper .afspaces-tag.afspaces-source-wp {
+background: #4a7c59;
+color: #fff;
+}

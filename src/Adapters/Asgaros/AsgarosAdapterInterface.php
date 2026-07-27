@@ -119,5 +119,30 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return string
 		 */
 		public function get_post_link( int $post_id, int $topic_id ): string;
+
+		/**
+		 * Gibt die für den aktuellen Benutzer zugänglichen Kategorie-Term-IDs zurück.
+		 *
+		 * @return int[]
+		 */
+		public function list_accessible_category_ids(): array;
+
+		/**
+		 * Zählt alle Forenbeiträge (für die Indexierung).
+		 *
+		 * @return int
+		 */
+		public function count_all_posts(): int;
+
+		/**
+		 * Lädt Forenbeiträge inkl. Kontext für die Indexierung (batchweise).
+		 *
+		 * @param int $limit  Maximale Anzahl.
+		 * @param int $offset Versatz.
+		 * @return array<int,array<string,mixed>> Zeilen mit post_id, topic_id,
+		 *         forum_id, category_id, is_private, author_id, post_date,
+		 *         post_text, topic_name, forum_name.
+		 */
+		public function list_posts_for_index( int $limit, int $offset ): array;
 	}
 }

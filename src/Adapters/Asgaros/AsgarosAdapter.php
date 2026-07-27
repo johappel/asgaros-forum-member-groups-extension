@@ -524,5 +524,79 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 
 			return (string) $forum->rewrite->get_post_link( $post_id, $topic );
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function list_accessible_category_ids(): array {
+			$forum = $this->forum();
+			if ( null === $forum ) {
+				return array();
+			}
+			return $this->accessible_category_ids( $forum );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function count_all_posts(): int {
+			$forum = $this->forum();
+			if ( null === $forum ) {
+				return 0;
+			}
+			return (int) $forum->db->get_var( "SELECT COUNT(*) FROM {$forum->tables->posts}" );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function list_posts_for_index( int $limit, int $offset ): array {
+			$forum = $this->forum();
+			if ( null === $forum ) {
+				return array();
+			}
+
+			$limit  = max( 1, $limit );
+			$offset = max( 0, $offset );
+
+			$db     = $forum->db;
+			$posts  = $forum->tables->posts;
+			$topics = $forum->tables->topics;
+			$forums = $forum->tables->forums;
+
+			$sql =
+				"SELECT p.id AS post_id, p.parent_id AS topic_id, p.forum_id AS forum_id, "
+				. "p.author_id AS author_id, p.text AS post_text, p.date AS post_date, "
+				. "t.name AS topic_name, t.approved AS approved, "
+				. "f.name AS forum_name, f.parent_id AS category_id, f.forum_status AS forum_status "
+				. "FROM {$posts} p "
+				. "INNER JOIN {$topics} t ON p.parent_id = t.id "
+				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+				. "WHERE t.approved = 1 "
+				. "ORDER BY p.id ASC LIMIT %d OFFSET %d";
+
+			$rows = $db->get_results( $db->prepare( $sql, $limit, $offset ), ARRAY_A );
+			if ( empty( $rows ) ) {
+				return array();
+			}
+
+			$result = array();
+			foreach ( $rows as $row ) {
+				$result[] = array(
+					'post_id'    => (int) ( $row['post_id'] ?? 0 ),
+					'topic_id'   => (int) ( $row['topic_id'] ?? 0 ),
+					'forum_id'   => (int) ( $row['forum_id'] ?? 0 ),
+					'category_id' => (int) ( $row['category_id'] ?? 0 ),
+					'is_private' => ( 'private' === (string) ( $row['forum_status'] ?? '' ) ),
+					'author_id'  => (int) ( $row['author_id'] ?? 0 ),
+					'post_date'  => (string) ( $row['post_date'] ?? '' ),
+					'post_text'  => (string) ( $row['post_text'] ?? '' ),
+					'topic_name' => (string) ( $row['topic_name'] ?? '' ),
+					'forum_name' => (string) ( $row['forum_name'] ?? '' ),
+				);
+			}
+
+			return $result;
+		}
 	}
 }

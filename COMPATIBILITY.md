@@ -73,4 +73,14 @@ Zugriffsschutz: Es werden ausschließlich freigegebene Themen (`t.approved = 1`)
 
 REST: `GET /wp-json/afspaces/v1/search` (`permission_callback`: angemeldet), Parameter `q`, `sort` (`relevance|date`), `page`, `per_page`; die Zugriffsprüfung erfolgt serverseitig im Adapter.
 
+### Hybride & semantische Suche (Phase 2–4)
+
+- **WordPress-Beiträge:** `WpPostSearch` nutzt ausschließlich `WP_Query` (kein Asgaros-Interna). SearchWP verbessert die Suche transparent im Native-Modus, ist aber keine Voraussetzung; es besteht keine harte Abhängigkeit zu SearchWP oder Relevanssi.
+- **Fusion:** `HybridSearchService` + `ResultFusion` (Reciprocal Rank Fusion) führen Foren-, WP- und semantische Ranglisten zusammen. Rein interne Logik, keine externen APIs.
+- **Indexierung:** `AsgarosAdapter::list_posts_for_index()` / `count_all_posts()` lesen dieselben Tabellen (`posts`/`topics`/`forums`) wie die Keyword-Suche (nur `t.approved = 1`). `SearchIndexer` läuft über `wp_cron` (`afspaces_reindex_search`, täglich) sowie die dokumentierten WP-Hooks `save_post`, `trashed_post`, `deleted_post`.
+- **Embedding-API:** `EmbeddingClient` spricht eine OpenRouter-kompatible API via `wp_remote_post` an (Modell-Default `perplexity/pplx-embed-v1-0.6b`). Standardmäßig deaktiviert; siehe SECURITY_PRIVACY.md.
+- **Eigene Tabelle:** `wp_afspaces_search_index` (Embeddings) via `dbDelta`; bei Deinstallation entfernt. Kein Bezug zu Asgaros-Tabellen.
+- **Verhalten ohne Konfiguration:** Ist kein API-Schlüssel gesetzt, liefern Vektorsuche und Reindex einen sauberen No-op (keine Fehler); die Keyword-/Hybridsuche bleibt voll funktionsfähig.
+
+
 

@@ -193,6 +193,16 @@ if ( ! class_exists( 'AFSpaces\\Search\\SnippetBuilder' ) ) {
 		 * @param string $raw Rohtext.
 		 * @return string
 		 */
+		public static function plain( string $raw ): string {
+			return self::to_plain_text( $raw );
+		}
+
+		/**
+		 * Wandelt Beitragsmarkup in reinen, kompakten Text um.
+		 *
+		 * @param string $raw Rohtext.
+		 * @return string
+		 */
 		private static function to_plain_text( string $raw ): string {
 			// HTML-Tags entfernen.
 			$text = preg_replace( '/<[^>]*>/u', ' ', $raw );

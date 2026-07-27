@@ -118,11 +118,42 @@ Das Modul übernimmt die Suchansicht vollständig, während Asgaros weiterhin f�
 * [ ] reine Titelsuche optional anbieten.
 * [ ] „alle Wörter“ versus „eines der Wörter“ ermöglichen.
 * [ ] sehr kurze Suchwörter verständlich behandeln.
-* [ ] gegebenenfalls Relevanzgewichtung:
+* [x] gegebenenfalls Relevanzgewichtung:
 
   * Titel stärker,
   * Beitragstext normal,
   * aktuellere Beiträge leicht bevorzugt.
+
+## Umsetzungsstand
+
+### Phase 0–1 (Keyword-Deeplink-Suche) — umgesetzt & live verifiziert
+
+Post-genaue Forensuche mit Deep-Links (`?part=N#postid-ID`), Zugriffsprüfung über
+zugängliche Kategorien, Snippet + Highlight, Sortierung, unabhängige Pagination.
+REST `GET /afspaces/v1/search`, Hub-View `search`, Shortcode `[afspaces_search]`.
+
+### Phase 2 (WordPress-Beiträge + Hybrid-Merge) — umgesetzt & live verifiziert
+
+- `WpPostSearch` durchsucht öffentliche Beiträge/Seiten via `WP_Query` (SearchWP
+  verbessert dies transparent im Native-Modus; keine harte Abhängigkeit).
+- `HybridSearchService` fusioniert Foren- und WP-Keyword-Treffer via Reciprocal
+  Rank Fusion (`ResultFusion`), mit Bereichsauswahl (Alles / Foren / Beiträge) und
+  Quellen-Badges in der Trefferliste.
+
+### Phase 3–4 (semantische & hybride Suche) — umgesetzt
+
+- Admin-Seite `Einstellungen → AFSpaces Suche` (Option `afspaces_search_options`):
+  API-Endpunkt, Schlüssel (maskiert), Modell, Aktivierung, WP-Indexierung,
+  Opt-in für private Inhalte, Gewichtungen; Button „Jetzt neu indexieren“.
+- `EmbeddingClient` (OpenRouter-kompatibel, `wp_remote_post`, Batch),
+  `SearchIndexRepository` (Tabelle `wp_afspaces_search_index`, Embedding-BLOB,
+  `content_hash`-Skip), `SearchIndexer` (Batch-Reindex + `wp_cron` + `save_post`-Hooks;
+  private Inhalte nur bei Opt-in), `VectorSearch` (PHP-Cosine, Live-Zugriffsfilter).
+- `HybridSearchService` bezieht die semantische Rangliste gewichtet in die RRF-Fusion
+  ein; ohne konfigurierten API-Schlüssel degradiert alles ohne Fehler.
+
+Offen: Filter (Autor/Zeitraum/Arbeitsgruppe), „alle/eines der Wörter“, echte
+Phrasensuche auf Query-Ebene, sehr kurze Suchwörter.
 
 ## Wichtige Sonderfälle
 
