@@ -71,6 +71,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 			$responsibles = $this->working_groups->list_responsibles( $space_id );
 			$topics = $this->working_groups->topic_names( $meta );
 
+			$members_result = $this->asgaros->list_group_members( $space->primary_group_id, array( 'per_page' => 100 ) );
+			$members = is_array( $members_result['members'] ?? null ) ? $members_result['members'] : array();
+			$member_count = (int) ( $members_result['total'] ?? count( $members ) );
+
 			ob_start();
 			?>
 			<section class="afspaces-working-group-view" aria-labelledby="afspaces-working-group-view-heading">
@@ -110,19 +114,42 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 						<p><strong><?php echo esc_html__( 'Kontakt:', 'afspaces' ); ?></strong> <?php echo esc_html( $meta->contact_text ); ?></p>
 					<?php endif; ?>
 
-					<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Arbeitsgruppenaktionen', 'afspaces' ); ?>">
-						<?php if ( $can_request ) : ?>
-							<form method="post" class="afspaces-inline-form">
+					<div class="afspaces-working-group-members">
+						<strong><?php echo esc_html( sprintf( __( 'Mitglieder (%s):', 'afspaces' ), WorkingGroupTerminology::membership_count( $member_count ) ) ); ?></strong>
+						<?php if ( empty( $members ) ) : ?>
+							<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine Mitglieder sichtbar.', 'afspaces' ); ?></p>
+						<?php else : ?>
+							<ul class="afspaces-members-list afspaces-members-grid">
+								<?php foreach ( $members as $member ) : ?>
+									<?php $member_profile_url = SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => (int) $member['user_id'] ) ); ?>
+									<li class="afspaces-member-card">
+										<a class="afspaces-member-link" href="<?php echo esc_url( $member_profile_url ); ?>">
+											<span class="afspaces-member-avatar" aria-hidden="true"><?php echo get_avatar( (int) $member['user_id'], 40 ); ?></span>
+											<span class="afspaces-member-name"><?php echo esc_html( (string) $member['display_name'] ); ?></span>
+										</a>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
+					</div>
+
+					<?php if ( $can_request ) : ?>
+						<div class="afspaces-join-panel">
+							<h3 class="afspaces-join-heading"><?php echo esc_html__( 'Dieser Arbeitsgruppe beitreten', 'afspaces' ); ?></h3>
+							<p class="afspaces-join-intro"><?php echo esc_html__( 'Sende eine Beitrittsanfrage an die Arbeitsgruppenverantwortlichen. Du wirst benachrichtigt, sobald über deine Anfrage entschieden wurde.', 'afspaces' ); ?></p>
+							<form method="post" class="afspaces-join-form">
 								<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 								<input type="hidden" name="afspaces_action" value="create_join_request" />
 								<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
-								<label>
-									<span class="screen-reader-text"><?php echo esc_html__( 'Nachricht an Arbeitsgruppenverantwortliche', 'afspaces' ); ?></span>
-									<input type="text" name="request_message" maxlength="500" placeholder="<?php echo esc_attr__( 'Optionale Nachricht', 'afspaces' ); ?>" />
-								</label>
-								<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Beitritt anfragen', 'afspaces' ); ?></button>
+								<label class="afspaces-join-label" for="afspaces-join-message-<?php echo esc_attr( (string) $space_id ); ?>"><?php echo esc_html__( 'Nachricht an die Verantwortlichen (optional)', 'afspaces' ); ?></label>
+								<textarea id="afspaces-join-message-<?php echo esc_attr( (string) $space_id ); ?>" name="request_message" maxlength="500" rows="2" class="afspaces-join-textarea" placeholder="<?php echo esc_attr__( 'z. B. warum du beitreten möchtest', 'afspaces' ); ?>"></textarea>
+								<button type="submit" class="afspaces-button afspaces-join-submit"><?php echo esc_html__( 'Beitritt anfragen', 'afspaces' ); ?></button>
 							</form>
-						<?php else : ?>
+						</div>
+					<?php endif; ?>
+
+					<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Arbeitsgruppenaktionen', 'afspaces' ); ?>">
+						<?php if ( ! $can_request ) : ?>
 							<p class="afspaces-inline-hint"><?php echo esc_html( $this->availability_hint( $is_manager, $is_member, $request, $invitation, $meta ) ); ?></p>
 						<?php endif; ?>
 

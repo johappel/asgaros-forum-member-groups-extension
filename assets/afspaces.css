@@ -367,6 +367,232 @@
 	flex-wrap: wrap;
 }
 
+/* Arbeitsgruppen als Kacheln (Discover + Profil) */
+.afspaces-group-tiles {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 1rem;
+	align-items: start;
+}
+
+.afspaces-group-tile {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	padding: 1.15rem 1.25rem;
+	border: 1px solid #e2e6ea;
+	border-top: 4px solid var(--afspaces-accent, #2d5d7f);
+	border-radius: 16px;
+	background: #fff;
+	box-shadow: 0 2px 10px rgba(16, 42, 67, 0.06);
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.afspaces-group-tile:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 22px rgba(16, 42, 67, 0.12);
+}
+
+.afspaces-group-tile-head {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.afspaces-group-avatar {
+	flex: 0 0 auto;
+}
+
+.afspaces-group-tile-heading {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.afspaces-group-tile-title {
+	margin: 0;
+	font-size: 1.15rem;
+	line-height: 1.25;
+}
+
+.afspaces-role-tag {
+	align-self: flex-start;
+}
+
+.afspaces-group-tile-desc {
+	margin: 0;
+	color: #3c434a;
+}
+
+.afspaces-group-tile-topics {
+	margin: 0;
+	font-size: 0.85rem;
+	color: #6b7280;
+}
+
+.afspaces-group-tile-actions {
+	margin-top: auto;
+	padding-top: 0.35rem;
+}
+
+/* Mitglieder-Accordion */
+.afspaces-members-accordion {
+	border-top: 1px solid #eef1f4;
+	padding-top: 0.5rem;
+}
+
+.afspaces-members-summary {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	list-style: none;
+	font-weight: 700;
+	color: var(--afspaces-accent, #2d5d7f);
+	padding: 0.35rem 0.15rem;
+	border-radius: 8px;
+}
+
+.afspaces-members-summary::-webkit-details-marker {
+	display: none;
+}
+
+.afspaces-members-summary-hint::before {
+	content: "\25BE";
+	display: inline-block;
+	transition: transform 0.15s ease;
+	font-size: 0.8em;
+	color: #6b7280;
+}
+
+.afspaces-members-accordion[open] .afspaces-members-summary-hint::before {
+	transform: rotate(180deg);
+}
+
+.afspaces-members-summary:hover,
+.afspaces-members-summary:focus-visible {
+	text-decoration: underline;
+	outline: none;
+}
+
+.afspaces-members-empty {
+	margin: 0.5rem 0 0;
+	color: #6b7280;
+}
+
+/* Mitgliederliste mit Avataren */
+.afspaces-working-group-members {
+	margin: 1.25rem 0;
+}
+
+.afspaces-working-group-members > strong {
+	display: block;
+	margin-bottom: 0.6rem;
+	font-size: 1.05rem;
+}
+
+.afspaces-members-grid {
+	list-style: none;
+	padding: 0;
+	margin: 0.5rem 0 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 0.6rem;
+}
+
+.afspaces-member-card {
+	margin: 0;
+}
+
+.afspaces-member-link {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	padding: 0.5rem 0.7rem;
+	border: 1px solid #e2e6ea;
+	border-left: 3px solid var(--afspaces-accent, #2d5d7f);
+	border-radius: 12px;
+	background: #fff;
+	text-decoration: none;
+	color: inherit;
+	box-shadow: 0 1px 2px rgba(16, 42, 67, 0.05);
+	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.afspaces-member-link:hover,
+.afspaces-member-link:focus {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(16, 42, 67, 0.12);
+	border-color: color-mix(in srgb, var(--afspaces-accent, #2d5d7f) 45%, #e2e6ea);
+}
+
+.afspaces-member-avatar {
+	flex: 0 0 44px;
+	width: 44px;
+	height: 44px;
+	line-height: 0;
+}
+
+.afspaces-member-avatar img {
+	display: block;
+	width: 44px;
+	height: 44px;
+	border-radius: 999px;
+	object-fit: cover;
+	background: #eef3f7;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 3px color-mix(in srgb, var(--afspaces-accent, #2d5d7f) 20%, #fff);
+}
+
+.afspaces-member-name {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Geführtes Beitritts-Panel */
+.afspaces-join-panel {
+	margin: 1rem 0;
+	padding: 1rem;
+	border: 1px solid color-mix(in srgb, var(--afspaces-accent, #2271b1) 30%, #dcdcde);
+	border-radius: 10px;
+	background: color-mix(in srgb, var(--afspaces-accent, #2271b1) 5%, white);
+}
+
+.afspaces-join-heading {
+	margin: 0 0 0.35rem;
+	font-size: 1.05rem;
+}
+
+.afspaces-join-intro {
+	margin: 0 0 0.65rem;
+	color: #3c434a;
+}
+
+.afspaces-join-form {
+	display: grid;
+	gap: 0.5rem;
+}
+
+.afspaces-join-label {
+	font-weight: 600;
+}
+
+.afspaces-join-textarea {
+	width: 100%;
+	resize: vertical;
+}
+
+.afspaces-join-submit {
+	justify-self: start;
+}
+
 .afspaces-form-grid {
 	display: grid;
 	gap: 0.75rem;
@@ -797,8 +1023,8 @@ a.afspaces-link.is-active {
 #af-wrapper.afspaces-wrapper #forum-navigation.afspaces-hub-nav ul {
 	gap: 0;
 	align-items: stretch;
-	height: 44px;
-	flex-wrap: nowrap;
+	height: auto;
+	flex-wrap: wrap;
 }
 
 #af-wrapper.afspaces-wrapper #forum-navigation.afspaces-hub-nav li + li {
@@ -808,12 +1034,13 @@ a.afspaces-link.is-active {
 #af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab {
 	display: inline-flex;
 	align-items: center;
-	padding: 0 24px;
+	padding: 0 17px;
 	height: 44px;
 	line-height: 44px;
 	font-family: Quicksand, sans-serif;
-	font-size: 20px;
-	font-weight: 500;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
 	color: #fff;
 	background: transparent;
 	border: 0;
@@ -1258,6 +1485,177 @@ a.afspaces-link.is-active {
 	font-weight: 700;
 	border-radius: 999px;
 	padding: 4px 10px;
+}
+
+/* --- Mitglieder-Karten & Avatare (Theme-Override) --- */
+#af-wrapper.afspaces-wrapper .afspaces-members-grid {
+	grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+	gap: 10px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-link {
+	padding: 8px 12px;
+	border-radius: 14px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-avatar {
+	flex: 0 0 46px;
+	width: 46px;
+	height: 46px;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-avatar img {
+	width: 46px !important;
+	height: 46px !important;
+	max-width: 46px !important;
+	min-width: 46px;
+	border-radius: 999px;
+	object-fit: cover;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-member-name {
+	font-family: Quicksand, sans-serif;
+	font-size: 15px;
+	font-weight: 600;
+	color: #2d5d7f;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-working-group-members > strong {
+	font-family: Quicksand, sans-serif;
+	font-size: 18px;
+	font-weight: 700;
+	color: #2d5d7f;
+}
+
+/* --- Arbeitsgruppen-Karte Feinschliff --- */
+#af-wrapper.afspaces-wrapper .afspaces-working-group-card {
+	border: 1px solid #e2e6ea;
+	border-left: 5px solid var(--afspaces-accent, #2d5d7f);
+	border-radius: 16px;
+	padding: 1.5rem;
+	box-shadow: 0 2px 10px rgba(16, 42, 67, 0.06);
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-working-group-view h2 {
+	font-family: Quicksand, sans-serif;
+	color: #2d5d7f;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-working-group-card-header {
+	gap: 1rem;
+	align-items: center;
+	padding-bottom: 1rem;
+	margin-bottom: 1rem;
+	border-bottom: 1px solid #eef1f4;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-working-group-icon {
+	width: 3.25rem;
+	height: 3.25rem;
+	font-size: 1.4rem;
+	background: color-mix(in srgb, var(--afspaces-accent, #2d5d7f) 14%, #fff);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--afspaces-accent, #2d5d7f) 25%, #fff);
+}
+
+/* --- Geführtes Beitritts-Panel --- */
+#af-wrapper.afspaces-wrapper .afspaces-join-panel {
+	margin: 1.25rem 0;
+	padding: 1.25rem 1.5rem;
+	border: 1px solid color-mix(in srgb, var(--afspaces-accent, #2d5d7f) 25%, #e2e6ea);
+	border-radius: 16px;
+	background: linear-gradient(180deg, color-mix(in srgb, var(--afspaces-accent, #2d5d7f) 7%, #fff), #fff);
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-join-heading {
+	font-family: Quicksand, sans-serif;
+	font-size: 19px;
+	font-weight: 700;
+	color: #2d5d7f;
+	margin: 0 0 0.35rem;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-join-textarea {
+	min-height: 60px;
+	padding: 0.6rem 0.8rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 10px;
+	font-family: inherit;
+	font-size: 15px;
+}
+
+/* --- Verantwortlichen-Liste als Chips --- */
+#af-wrapper.afspaces-wrapper .afspaces-responsibles-list li {
+	padding: 4px 6px;
+}
+
+/* --- Arbeitsgruppen-Kacheln (Discover + Profil) --- */
+#af-wrapper.afspaces-wrapper .afspaces-group-tiles {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 18px;
+	align-items: start;
+	margin: 0;
+	padding: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item.afspaces-group-tile {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	padding: 1.25rem 1.35rem;
+	border: 1px solid #e2e6ea;
+	border-top: 4px solid var(--afspaces-accent, #2d5d7f);
+	border-radius: 18px;
+	background: #fff;
+	box-shadow: 0 2px 12px rgba(16, 42, 67, 0.07);
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-space-item.afspaces-group-tile:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 10px 26px rgba(16, 42, 67, 0.14);
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-group-tile .afspaces-group-tile-title {
+	font-family: Quicksand, sans-serif;
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.2;
+	margin: 0;
+	color: #2d5d7f;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-group-tile .afspaces-group-tile-title a {
+	color: #2d5d7f;
+	text-decoration: none;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-group-tile .afspaces-group-tile-title a:hover,
+#af-wrapper.afspaces-wrapper .afspaces-group-tile .afspaces-group-tile-title a:focus {
+	text-decoration: underline;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-group-tile .afspaces-group-tile-desc {
+	font-size: 16px;
+	line-height: 1.5;
+	margin: 0;
+	color: #4a545e;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-group-tile .afspaces-group-tile-topics {
+	font-size: 14px;
+	margin: 0;
+	color: #6b7280;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-members-summary {
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--afspaces-accent, #2d5d7f);
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-members-accordion[open] {
+	padding-bottom: 0.25rem;
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-button,

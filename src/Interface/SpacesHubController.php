@@ -265,16 +265,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			$tabs[] = array(
 				'view'   => SpacesUrls::VIEW_PROFILE,
-				'label'  => __( 'Mein Arbeitsgruppenprofil', 'afspaces' ),
+				'label'  => __( 'Mein Profil', 'afspaces' ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE ),
 				'active' => SpacesUrls::VIEW_PROFILE === $view,
 			);
 
 			$tabs[] = array(
 				'view'   => SpacesUrls::VIEW_DISCOVER,
-				'label'  => WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER ),
+				'label'  => __( 'Entdecken', 'afspaces' ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ),
-				'active' => SpacesUrls::VIEW_DISCOVER === $view || ( SpacesUrls::VIEW_GROUP === $view && ! $this->can_manage_space( $space_id, $actor ) ),
+				'active' => in_array( $view, array( SpacesUrls::VIEW_DISCOVER, SpacesUrls::VIEW_GROUP ), true ),
 			);
 
 			if ( $this->can_create_spaces( $actor ) ) {

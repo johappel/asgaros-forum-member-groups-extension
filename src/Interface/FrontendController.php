@@ -113,12 +113,20 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		 * @return void
 		 */
 		public function enqueue_assets(): void {
-			$content = get_post_field( 'post_content', get_the_ID() );
-			if ( ! has_shortcode( $content, 'afspaces' )
+			$content = (string) get_post_field( 'post_content', get_the_ID() );
+
+			// Profilseiten (efabi-`profil`-CPT o. ä.) laden die Assets immer, da der
+			// Shortcode dort auch in einem ACF-Feld statt im Post-Content stehen kann.
+			$profile_post_types  = (array) apply_filters( 'afspaces_profile_post_types', array( 'profil' ) );
+			$is_profile_context  = ! empty( $profile_post_types ) && is_singular( $profile_post_types );
+
+			if ( ! $is_profile_context
+				&& ! has_shortcode( $content, 'afspaces' )
 				&& ! has_shortcode( $content, 'afspaces_dashboard' )
 				&& ! has_shortcode( $content, 'afspaces_members' )
 				&& ! has_shortcode( $content, 'afspaces_invitations' )
-				&& ! has_shortcode( $content, 'afspaces_my_invitations' ) ) {
+				&& ! has_shortcode( $content, 'afspaces_my_invitations' )
+				&& ! has_shortcode( $content, 'afspaces_profile' ) ) {
 				return;
 			}
 			wp_enqueue_style(
@@ -295,6 +303,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							(string) ( $forum['name'] ?? (string) $space->forum_id )
 						)
 					);
+				} elseif ( 'save_working_group_meta' === $action ) {
+					$this->working_groups->save_metadata( $space_id, $actor, wp_unslash( $_POST ) );
+					$this->set_message( 'success', __( 'Die Arbeitsgruppen-Details wurden gespeichert.', 'afspaces' ) );
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
@@ -321,6 +332,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			if ( 'register_space' === $action ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) );
+				exit;
+			}
+
+			if ( 'save_working_group_meta' === $action ) {
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
 				exit;
 			}
 
@@ -449,10 +465,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							// $forum is guaranteed to be non-empty due to filtering in render_dashboard().
 							$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
 							$member_count = 0;
+							$meta = $this->working_groups->get_metadata( $space->id );
 							if ( ! empty( $group_ids ) ) {
 								$members = $this->asgaros->list_group_members( (int) $group_ids[0], array( 'per_page' => 1 ) );
 								$member_count = (int) ( $members['total'] ?? 0 );
-														$meta = $this->working_groups->get_metadata( $space->id );
 							}
 							$manage_url = SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space->id ) );
 							$invite_url = SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space->id ) );
@@ -493,9 +509,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 						<p><?php echo esc_html__( 'Du bist in diesen Arbeitsgruppen als Mitglied eingetragen.', 'afspaces' ); ?></p>
 						<ul class="afspaces-space-list">
 							<?php foreach ( $member_spaces as $space ) : ?>
-																$meta = $this->working_groups->get_metadata( $space->id );
-																$group_url = SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) );
 								<?php
+								$meta = $this->working_groups->get_metadata( $space->id );
+								$group_url = SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) );
 								$forum = $this->asgaros->get_forum( $space->forum_id );
 								$forum_url = (string) apply_filters( 'afspaces_space_forum_url', $this->space_forum_url( $forum ), $space, $forum, $actor );
 								?>
@@ -513,13 +529,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 												<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $group_url ); ?>">
 													<?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?>
 												</a>
-																} elseif ( 'save_working_group_meta' === $action ) {
-																	$this->working_groups->save_metadata( $space_id, $actor, wp_unslash( $_POST ) );
-																	$this->set_message( 'success', __( 'Die Arbeitsgruppen-Details wurden gespeichert.', 'afspaces' ) );
-															if ( 'save_working_group_meta' === $action ) {
-																wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
-																exit;
-															}
+
 												<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>">
 													<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
 												</a>

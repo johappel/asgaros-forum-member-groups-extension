@@ -60,10 +60,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 		}
 
 		/**
-		 * @param string $icon Icon-Schluessel.
+		 * @param string|null $icon Icon-Schluessel.
 		 * @return string
 		 */
-		public static function icon_class( string $icon ): string {
+		public static function icon_class( ?string $icon ): string {
 			$map = array(
 				'users'     => 'fas fa-users',
 				'comments'  => 'fas fa-comments',
@@ -72,7 +72,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 				'lightbulb' => 'fas fa-lightbulb',
 			);
 
-			return $map[ $icon ] ?? $map[ self::DEFAULT_ICON ];
+			return $map[ (string) $icon ] ?? $map[ self::DEFAULT_ICON ];
 		}
 
 		/**

@@ -84,6 +84,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DiscoverView' ) ) {
 					continue;
 				}
 
+				$members = $this->asgaros->list_group_members( $space->primary_group_id, array( 'per_page' => 100 ) );
+
 				$discoverable[] = array(
 					'space'        => $space,
 					'forum'        => $forum,
@@ -94,6 +96,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DiscoverView' ) ) {
 					'is_manager'   => $is_manager,
 					'responsibles' => $this->working_groups->list_responsibles( $space->id ),
 					'topics'       => $this->working_groups->topic_names( $meta ),
+					'member_count' => (int) ( $members['total'] ?? 0 ),
+					'members'      => isset( $members['members'] ) && is_array( $members['members'] ) ? $members['members'] : array(),
 				);
 			}
 
@@ -123,57 +127,46 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DiscoverView' ) ) {
 				<?php if ( empty( $discoverable ) ) : ?>
 					<p><?php echo esc_html__( 'Derzeit sind keine passenden Arbeitsgruppen für dich sichtbar.', 'afspaces' ); ?></p>
 				<?php else : ?>
-					<ul class="afspaces-space-list">
-						<?php foreach ( $discoverable as $item ) : ?>
-							<?php
+					<ul class="afspaces-space-list afspaces-group-tiles">
+						<?php
+						foreach ( $discoverable as $item ) {
 							$space = $item['space'];
 							$forum = $item['forum'];
-							$meta = $item['meta'];
-							$request = $item['request'];
-							$invitation = $item['invitation'];
-							$can_request = $this->working_groups->can_request_join( $meta, (bool) $item['is_member'], (bool) $item['is_manager'], null !== $request && 'pending' === $request->status, null !== $invitation && 'pending' === $invitation->effective_status() );
-							?>
-							<li class="afspaces-space-item afspaces-working-group-card" style="--afspaces-accent: <?php echo esc_attr( $meta->accent_color ); ?>;">
-								<h3><a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) ) ); ?>"><?php echo esc_html( (string) ( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $space->id ) ) ); ?></a></h3>
-								<p><strong><?php echo esc_html__( 'Status:', 'afspaces' ); ?></strong> <span class="afspaces-tag"><?php echo esc_html( $this->status_label( $item ) ); ?></span></p>
-								<?php if ( '' !== $meta->description ) : ?>
-									<p><?php echo esc_html( $meta->description ); ?></p>
-								<?php elseif ( ! empty( $forum['description'] ) ) : ?>
-									<p><?php echo esc_html( (string) $forum['description'] ); ?></p>
-								<?php endif; ?>
-								<p><strong><?php echo esc_html__( 'Beitritt:', 'afspaces' ); ?></strong> <?php echo esc_html( $this->join_policy_label( $meta ) ); ?></p>
-								<?php if ( ! empty( $item['responsibles'] ) ) : ?>
-									<p><strong><?php echo esc_html__( 'Arbeitsgruppenverantwortliche:', 'afspaces' ); ?></strong> <?php echo esc_html( implode( ', ', array_map( static fn( array $responsible ): string => (string) $responsible['display_name'], $item['responsibles'] ) ) ); ?></p>
-								<?php endif; ?>
-								<?php if ( ! empty( $item['topics'] ) ) : ?>
-									<p><strong><?php echo esc_html__( 'Themen:', 'afspaces' ); ?></strong> <?php echo esc_html( implode( ', ', $item['topics'] ) ); ?></p>
-								<?php endif; ?>
+							$meta  = $item['meta'];
 
-								<?php if ( null !== $request && 'pending' === $request->status ) : ?>
-									<p><?php echo esc_html__( 'Deine Beitrittsanfrage ist offen.', 'afspaces' ); ?></p>
-								<?php elseif ( null !== $request && 'approved' === $request->status ) : ?>
-									<p><?php echo esc_html__( 'Deine letzte Anfrage wurde genehmigt.', 'afspaces' ); ?></p>
-								<?php elseif ( null !== $request && 'rejected' === $request->status ) : ?>
-									<p><?php echo esc_html__( 'Deine letzte Anfrage wurde abgelehnt. Du kannst erneut anfragen.', 'afspaces' ); ?></p>
-								<?php endif; ?>
+							$description = '' !== $meta->description
+								? $meta->description
+								: (string) ( $forum['description'] ?? '' );
 
-								<?php if ( $can_request ) : ?>
-									<form method="post" class="afspaces-inline-form">
-										<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-										<input type="hidden" name="afspaces_action" value="create_join_request" />
-										<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-										<label>
-											<span class="screen-reader-text"><?php echo esc_html__( 'Nachricht für Arbeitsgruppenverantwortliche', 'afspaces' ); ?></span>
-											<input type="text" name="request_message" maxlength="500" placeholder="<?php echo esc_attr__( 'Optionale Nachricht', 'afspaces' ); ?>" />
-										</label>
-										<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Beitritt anfragen', 'afspaces' ); ?></button>
-									</form>
-								<?php else : ?>
-									<p><?php echo esc_html( $this->availability_hint( $item, $meta ) ); ?></p>
-								<?php endif; ?>
-								<p><a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) ) ); ?>"><?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?></a></p>
-							</li>
-						<?php endforeach; ?>
+							$role = '';
+							if ( $item['is_manager'] ) {
+								$role = __( 'Arbeitsgruppenverantwortlich', 'afspaces' );
+							} elseif ( $item['is_member'] ) {
+								$role = __( 'Mitglied', 'afspaces' );
+							}
+
+							$can_view_forum = (bool) $item['is_member'] || (bool) $item['is_manager'];
+							$forum_slug = sanitize_title( (string) ( $forum['slug'] ?? '' ) );
+							$forum_url = '' !== $forum_slug ? home_url( '/forum/forum/' . $forum_slug . '/' ) : home_url( '/forum/' );
+							$forum_url = (string) apply_filters( 'afspaces_space_forum_url', $forum_url, $space, $forum, $actor );
+
+							echo WorkingGroupTile::render(
+								array(
+									'name'         => (string) ( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $space->id ) ),
+									'url'          => SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) ),
+									'description'  => $description,
+									'icon'         => WorkingGroupService::icon_class( $meta->icon ),
+									'accent'       => $meta->accent_color,
+									'member_count' => (int) $item['member_count'],
+									'members'      => $item['members'],
+									'role'         => $role,
+									'topics'       => $item['topics'],
+									'forum_url'    => $forum_url,
+									'can_view_forum' => $can_view_forum,
+								)
+							);
+						}
+						?>
 					</ul>
 				<?php endif; ?>
 			</section>

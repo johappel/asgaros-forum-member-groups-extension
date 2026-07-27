@@ -150,6 +150,24 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 				}
 			);
 
+			add_shortcode(
+				'afspaces_profile',
+				static function ( $atts = array() ) use ( $spaces, $asgaros, $working_groups ): string {
+					$atts = shortcode_atts(
+						array(
+							'user_id' => 0,
+						),
+						is_array( $atts ) ? $atts : array(),
+						'afspaces_profile'
+					);
+
+					$profile_user_id = self::resolve_profile_user_id( (int) $atts['user_id'] );
+
+					$view = new ProfileView( $spaces, $asgaros, $working_groups );
+					return $view->render( $profile_user_id, true );
+				}
+			);
+
 			// REST-API registrieren.
 			$rest = new RestController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups );
 			add_action( 'rest_api_init', array( $rest, 'register_routes' ) );
@@ -235,6 +253,100 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 		 */
 		public function get_requirements(): Requirements {
 			return $this->requirements;
+		}
+
+		/**
+		 * Ermittelt die anzuzeigende Profil-Benutzer-ID aus dem aktuellen Kontext.
+		 *
+		 * Deckt gängige Profilsysteme ab (Ultimate Member, BuddyPress,
+		 * Autoren-Archiv, Asgaros `?member=`) und fällt sonst auf den
+		 * eingeloggten Benutzer zurück. Über den Filter
+		 * `afspaces_profile_user_id` kann die Erkennung überschrieben werden.
+		 *
+		 * @param int $explicit_user_id Optional per Shortcode-Attribut gesetzte ID.
+		 * @return int
+		 */
+		private static function resolve_profile_user_id( int $explicit_user_id = 0 ): int {
+			$user_id = 0;
+
+			// 1. Primär: aktuell angezeigtes Profil aus dem Query-Kontext.
+			//    Deckt den efabi-`profil`-CPT (post_author = Profilinhaber) sowie
+			//    Autoren-Archive und User-Query-Objekte ab. Dies hat Vorrang, damit
+			//    der Shortcode auf einer Profilseite immer die richtige Person zeigt.
+			$queried = get_queried_object();
+			if ( $queried instanceof \WP_Post ) {
+				$profile_post_types = (array) apply_filters( 'afspaces_profile_post_types', array( 'profil' ) );
+				if ( in_array( $queried->post_type, $profile_post_types, true ) && (int) $queried->post_author > 0 ) {
+					$user_id = (int) $queried->post_author;
+				}
+			} elseif ( $queried instanceof \WP_User ) {
+				$user_id = (int) $queried->ID;
+			}
+
+			// 2. Explizites Shortcode-Attribut (z. B. dynamischer Token außerhalb von Profilseiten).
+			if ( 0 === $user_id && $explicit_user_id > 0 ) {
+				$user_id = $explicit_user_id;
+			}
+
+			// 3. Query-Parameter (Asgaros: ?member=, generisch: ?user_id=).
+			if ( 0 === $user_id && isset( $_GET['member'] ) ) {
+				$user_id = (int) $_GET['member'];
+			}
+			if ( 0 === $user_id && isset( $_GET['user_id'] ) ) {
+				$user_id = (int) $_GET['user_id'];
+			}
+
+			// 4. Ultimate Member.
+			if ( 0 === $user_id && function_exists( 'um_get_requested_user' ) ) {
+				$um_id = (int) um_get_requested_user();
+				if ( $um_id > 0 ) {
+					$user_id = $um_id;
+				}
+			}
+
+			// 5. BuddyPress / BuddyBoss.
+			if ( 0 === $user_id && function_exists( 'bp_displayed_user_id' ) ) {
+				$bp_id = (int) bp_displayed_user_id();
+				if ( $bp_id > 0 ) {
+					$user_id = $bp_id;
+				}
+			}
+
+			// 6. Autoren-Archiv.
+			if ( 0 === $user_id && function_exists( 'is_author' ) && is_author() ) {
+				$author_id = (int) get_query_var( 'author' );
+				if ( $author_id > 0 ) {
+					$user_id = $author_id;
+				}
+			}
+
+			// 7. Slug aus dem letzten URL-Pfadsegment (z. B. /profil/anastasia-neumann-schneider/).
+			if ( 0 === $user_id && isset( $_SERVER['REQUEST_URI'] ) ) {
+				$path = wp_parse_url( esc_url_raw( wp_unslash( (string) $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH );
+				if ( is_string( $path ) && '' !== $path ) {
+					$segments = array_values( array_filter( explode( '/', $path ) ) );
+					$slug     = end( $segments );
+					if ( is_string( $slug ) && '' !== $slug ) {
+						$user = get_user_by( 'slug', sanitize_title( $slug ) );
+						if ( $user instanceof \WP_User ) {
+							$user_id = (int) $user->ID;
+						}
+					}
+				}
+			}
+
+			// 8. Fallback: eingeloggter Benutzer.
+			if ( 0 === $user_id ) {
+				$user_id = get_current_user_id();
+			}
+
+			/**
+			 * Erlaubt die Überschreibung der erkannten Profil-Benutzer-ID.
+			 *
+			 * @param int $user_id          Erkannte Benutzer-ID.
+			 * @param int $explicit_user_id Per Shortcode gesetzte ID (0 = keine).
+			 */
+			return (int) apply_filters( 'afspaces_profile_user_id', $user_id, $explicit_user_id );
 		}
 	}
 }

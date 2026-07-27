@@ -31,7 +31,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 			$this->working_groups = $working_groups;
 		}
 
-		public function render( int $profile_user_id = 0 ): string {
+		public function render( int $profile_user_id = 0, bool $compact = false ): string {
 			if ( ! is_user_logged_in() ) {
 				return $this->notice( __( 'Bitte melde dich an.', 'afspaces' ) );
 			}
@@ -63,47 +63,67 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 					continue;
 				}
 
+				$members = $this->asgaros->list_group_members( $space->primary_group_id, array( 'per_page' => 100 ) );
+				$member_count = (int) ( $members['total'] ?? 0 );
+				$member_list = isset( $members['members'] ) && is_array( $members['members'] ) ? $members['members'] : array();
+
+				$forum_slug = sanitize_title( (string) ( $forum['slug'] ?? '' ) );
+				$forum_url = '' !== $forum_slug ? home_url( '/forum/forum/' . $forum_slug . '/' ) : home_url( '/forum/' );
+				$forum_url = (string) apply_filters( 'afspaces_space_forum_url', $forum_url, $space, $forum, $viewer );
+
 				$items[] = array(
 					'space_id'     => $space->id,
 					'name'         => (string) $forum['name'],
 					'description'  => '' !== $meta->description ? $meta->description : (string) ( $forum['description'] ?? '' ),
 					'role'         => $is_profile_manager ? __( 'Arbeitsgruppenverantwortlich', 'afspaces' ) : __( 'Mitglied', 'afspaces' ),
 					'can_manage'   => $viewer_is_manager,
+					'member_count' => $member_count,
+					'members'      => $member_list,
+					'icon'         => WorkingGroupService::icon_class( $meta->icon ),
+					'accent'       => $meta->accent_color,
 					'topics'       => $this->working_groups->topic_names( $meta ),
+					'forum_url'    => $forum_url,
+					'can_view_forum' => $viewer_is_member || $viewer_is_manager,
 				);
 			}
 
-			$heading = $viewer === $profile_user_id
+			$is_own = $viewer === $profile_user_id;
+			$heading = $is_own
 				? __( 'Mein Arbeitsgruppenprofil', 'afspaces' )
-				: sprintf( __( 'Arbeitsgruppenprofil: %s', 'afspaces' ), $profile_user->display_name );
+				: sprintf( __( 'Arbeitsgruppen von %s', 'afspaces' ), $profile_user->display_name );
 
 			ob_start();
 			?>
 			<section class="afspaces-profile-view" aria-labelledby="afspaces-profile-view-heading">
-				<h2 id="afspaces-profile-view-heading"><?php echo esc_html( $heading ); ?></h2>
-				<p><?php echo esc_html__( 'Hier siehst du sichtbare Mitgliedschaften und Verantwortlichkeiten im Arbeitsgruppenmodell.', 'afspaces' ); ?></p>
-				<?php if ( empty( $items ) ) : ?>
-					<p><?php echo esc_html( $viewer === $profile_user_id ? __( 'Für dein Profil sind aktuell keine sichtbaren Arbeitsgruppen hinterlegt.', 'afspaces' ) : __( 'Für dieses Profil sind keine sichtbaren Arbeitsgruppen freigegeben.', 'afspaces' ) ); ?></p>
+				<?php if ( ! $compact ) : ?>
+					<h2 id="afspaces-profile-view-heading"><?php echo esc_html( $heading ); ?></h2>
+					<p><?php echo esc_html__( 'Hier siehst du sichtbare Mitgliedschaften und Verantwortlichkeiten im Arbeitsgruppenmodell.', 'afspaces' ); ?></p>
 				<?php else : ?>
-					<ul class="afspaces-space-list">
-						<?php foreach ( $items as $item ) : ?>
-							<li class="afspaces-space-item afspaces-working-group-card">
-								<h3><a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $item['space_id'] ) ) ); ?>"><?php echo esc_html( $item['name'] ); ?></a></h3>
-								<p><span class="afspaces-tag"><?php echo esc_html( $item['role'] ); ?></span></p>
-								<?php if ( '' !== $item['description'] ) : ?>
-									<p><?php echo esc_html( $item['description'] ); ?></p>
-								<?php endif; ?>
-								<?php if ( ! empty( $item['topics'] ) ) : ?>
-									<p><strong><?php echo esc_html__( 'Themen:', 'afspaces' ); ?></strong> <?php echo esc_html( implode( ', ', $item['topics'] ) ); ?></p>
-								<?php endif; ?>
-								<div class="afspaces-space-actions">
-									<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $item['space_id'] ) ) ); ?>"><?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?></a>
-									<?php if ( $item['can_manage'] ) : ?>
-										<a class="afspaces-button" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $item['space_id'] ) ) ); ?>"><?php echo esc_html__( 'Verwaltung öffnen', 'afspaces' ); ?></a>
-									<?php endif; ?>
-								</div>
-							</li>
-						<?php endforeach; ?>
+					<h3 id="afspaces-profile-view-heading" class="screen-reader-text"><?php echo esc_html( $heading ); ?></h3>
+				<?php endif; ?>
+				<?php if ( empty( $items ) ) : ?>
+					<p class="afspaces-empty"><?php echo esc_html( $is_own ? __( 'Für dein Profil sind aktuell keine sichtbaren Arbeitsgruppen hinterlegt.', 'afspaces' ) : __( 'Für dieses Profil sind keine sichtbaren Arbeitsgruppen freigegeben.', 'afspaces' ) ); ?></p>
+				<?php else : ?>
+					<ul class="afspaces-space-list afspaces-group-tiles afspaces-profile-groups">
+						<?php
+						foreach ( $items as $item ) {
+							echo WorkingGroupTile::render(
+								array(
+									'name'         => $item['name'],
+									'url'          => SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $item['space_id'] ) ),
+									'description'  => $item['description'],
+									'icon'         => $item['icon'],
+									'accent'       => $item['accent'],
+									'member_count' => $item['member_count'],
+									'members'      => $item['members'],
+									'role'         => $item['role'],
+									'topics'       => $item['topics'],
+									'forum_url'    => $item['forum_url'],
+									'can_view_forum' => $item['can_view_forum'],
+								)
+							);
+						}
+						?>
 					</ul>
 				<?php endif; ?>
 			</section>
