@@ -70,6 +70,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		public function init(): void {
 			add_shortcode( 'afspaces', array( $this, 'render' ) );
 			add_action( 'template_redirect', array( $this, 'redirect_legacy_pages' ) );
+			add_action( 'template_redirect', array( $this, 'redirect_forum_search' ) );
 		}
 
 		/**
@@ -109,6 +110,39 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			}
 
 			wp_safe_redirect( SpacesUrls::hub_url( $map[ $post->post_name ], $args ), 301 );
+			exit;
+		}
+
+		/**
+		 * Ersetzt die eingebaute Asgaros-Suche durch die AFSpaces-Suche.
+		 *
+		 * Wird die Asgaros-Suchansicht aufgerufen (z. B. über das Suchfeld im
+		 * Forum), erfolgt eine Weiterleitung auf die eigene, post-genaue Suche.
+		 *
+		 * @return void
+		 */
+		public function redirect_forum_search(): void {
+			if ( is_admin() ) {
+				return;
+			}
+
+			if ( ! $this->asgaros->is_search_request() ) {
+				return;
+			}
+
+			// Nicht umleiten, wenn die Hub-Seite selbst angezeigt wird (Schleifenschutz).
+			$hub_page_id = SpacesUrls::hub_page_id();
+			if ( 0 === $hub_page_id || (int) get_queried_object_id() === $hub_page_id ) {
+				return;
+			}
+
+			$args     = array();
+			$keywords = isset( $_GET['keywords'] ) ? sanitize_text_field( wp_unslash( $_GET['keywords'] ) ) : '';
+			if ( '' !== $keywords ) {
+				$args[ SearchView::PARAM_QUERY ] = $keywords;
+			}
+
+			wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SEARCH, $args ) );
 			exit;
 		}
 

@@ -81,6 +81,12 @@ REST: `GET /wp-json/afspaces/v1/search` (`permission_callback`: angemeldet), Par
 - **Embedding-API:** `EmbeddingClient` spricht eine OpenRouter-kompatible API via `wp_remote_post` an (Modell-Default `perplexity/pplx-embed-v1-0.6b`). Standardmäßig deaktiviert; siehe SECURITY_PRIVACY.md.
 - **Eigene Tabelle:** `wp_afspaces_search_index` (Embeddings) via `dbDelta`; bei Deinstallation entfernt. Kein Bezug zu Asgaros-Tabellen.
 - **Verhalten ohne Konfiguration:** Ist kein API-Schlüssel gesetzt, liefern Vektorsuche und Reindex einen sauberen No-op (keine Fehler); die Keyword-/Hybridsuche bleibt voll funktionsfähig.
+- **Relevanzschwelle:** Semantische Treffer unter einer konfigurierbaren Cosine-Mindestähnlichkeit (`semantic_min_score`, Default `0.30`) werden verworfen. Kalibrierung an der Testinstanz: echte Treffer ≈ 0.48–0.54, verwandte ≈ 0.36–0.42, Rauschen ≈ 0.20–0.28 — daher blendet 0.30 unpassende „Treffer“ (z. B. für Begriffe ohne Korpusbezug) aus.
+
+### Ersatz der eingebauten Asgaros-Suche
+
+Die Asgaros-Bestandssuche wird durch die AFSpaces-Suche ersetzt: `SpacesHubController::redirect_forum_search()` leitet per `template_redirect` (302) von der Asgaros-Suchansicht auf `.../afspaces/?afspaces_view=search&afspaces_q=<keywords>` um. Die Erkennung der Suchansicht ist im Adapter gekapselt (`AsgarosAdapter::is_search_request()` prüft `$asgarosforum->current_view === 'search'`); es werden keine Asgaros-Interna außerhalb des Adapters verwendet. Schleifenschutz: Auf der Hub-Seite selbst wird nicht umgeleitet.
+
 
 
 

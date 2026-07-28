@@ -598,5 +598,16 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 
 			return $result;
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function is_search_request(): bool {
+			$forum = $this->forum();
+			if ( null === $forum || ! isset( $forum->current_view ) ) {
+				return false;
+			}
+			return 'search' === $forum->current_view;
+		}
 	}
 }

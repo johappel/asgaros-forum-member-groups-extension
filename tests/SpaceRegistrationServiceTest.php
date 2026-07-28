@@ -118,6 +118,10 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 	public function list_posts_for_index( int $limit, int $offset ): array {
 		return array();
 	}
+
+	public function is_search_request(): bool {
+		return false;
+	}
 }
 
 final class SpaceRegistrationServiceTest extends TestCase {

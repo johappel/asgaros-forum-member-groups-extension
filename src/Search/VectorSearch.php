@@ -65,6 +65,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\VectorSearch' ) ) {
 
 			$accessible_categories = array_flip( $this->asgaros->list_accessible_category_ids() );
 			$candidates            = $this->index->get_candidates( $source_types );
+			$min_score             = SearchSettings::semantic_min_score();
 
 			$scored = array();
 			foreach ( $candidates as $row ) {
@@ -84,6 +85,12 @@ if ( ! class_exists( 'AFSpaces\\Search\\VectorSearch' ) ) {
 				}
 
 				$score = VectorMath::dot( $query_vec, $candidate_vec );
+
+				// Schwache Ähnlichkeiten (Rauschen) verwerfen, damit die
+				// Ergebnisse nachvollziehbar bleiben.
+				if ( $score < $min_score ) {
+					continue;
+				}
 
 				$scored[] = array(
 					'key'   => $source_type . ':' . $source_id,

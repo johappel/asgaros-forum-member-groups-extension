@@ -144,5 +144,15 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 *         post_text, topic_name, forum_name.
 		 */
 		public function list_posts_for_index( int $limit, int $offset ): array;
+
+		/**
+		 * Gibt zurück, ob die aktuelle Anfrage die Asgaros-Suchansicht ist.
+		 *
+		 * Ermöglicht es, die eingebaute Asgaros-Suche durch die eigene
+		 * Suchansicht zu ersetzen.
+		 *
+		 * @return bool
+		 */
+		public function is_search_request(): bool;
 	}
 }

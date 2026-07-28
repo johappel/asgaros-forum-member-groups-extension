@@ -196,6 +196,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 							<th scope="row"><label for="afspaces-kw-weight"><?php echo esc_html__( 'Gewichtung Keyword', 'afspaces' ); ?></label></th>
 							<td><input type="number" step="0.1" min="0" id="afspaces-kw-weight" name="<?php echo esc_attr( SearchSettings::OPTION_KEY ); ?>[keyword_weight]" value="<?php echo esc_attr( (string) $o['keyword_weight'] ); ?>" /></td>
 						</tr>
+						<tr>
+							<th scope="row"><label for="afspaces-min-score"><?php echo esc_html__( 'Mindest-Ähnlichkeit (semantisch)', 'afspaces' ); ?></label></th>
+							<td>
+								<input type="number" step="0.05" min="0" max="1" id="afspaces-min-score" name="<?php echo esc_attr( SearchSettings::OPTION_KEY ); ?>[semantic_min_score]" value="<?php echo esc_attr( (string) $o['semantic_min_score'] ); ?>" />
+								<p class="description"><?php echo esc_html__( 'Semantische Treffer mit geringerer Cosine-Ähnlichkeit werden ausgeblendet (0–1). Höhere Werte = strengere, nachvollziehbarere Ergebnisse. Empfehlung: 0.30.', 'afspaces' ); ?></p>
+							</td>
+						</tr>
 					</table>
 					<?php submit_button(); ?>
 				</form>

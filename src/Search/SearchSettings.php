@@ -36,6 +36,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 				'wp_post_types'       => array( 'post', 'page' ),
 				'semantic_weight'     => 1.0,
 				'keyword_weight'      => 1.0,
+				'semantic_min_score'  => 0.30,
 			);
 		}
 
@@ -118,6 +119,19 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 		}
 
 		/**
+		 * Mindest-Cosine-Ähnlichkeit, damit ein semantischer Treffer zählt.
+		 *
+		 * Filtert schwache „Treffer“ heraus, die sonst bei kleinen Korpora
+		 * unverständliche Ergebnisse liefern.
+		 *
+		 * @return float
+		 */
+		public static function semantic_min_score(): float {
+			$o = self::all();
+			return min( 1.0, max( 0.0, (float) $o['semantic_min_score'] ) );
+		}
+
+		/**
 		 * API-Endpunkt.
 		 *
 		 * @return string
@@ -184,6 +198,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 
 			$out['semantic_weight'] = isset( $input['semantic_weight'] ) ? max( 0.0, (float) $input['semantic_weight'] ) : 1.0;
 			$out['keyword_weight']  = isset( $input['keyword_weight'] ) ? max( 0.0, (float) $input['keyword_weight'] ) : 1.0;
+			$out['semantic_min_score'] = isset( $input['semantic_min_score'] ) ? min( 1.0, max( 0.0, (float) $input['semantic_min_score'] ) ) : 0.30;
 
 			return $out;
 		}
