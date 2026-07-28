@@ -77,13 +77,15 @@ if ( ! class_exists( 'AFSpaces\\Application\\ForumSearchService' ) ) {
 			$response = $this->asgaros->search_posts(
 				$keywords,
 				array(
-					'sort'      => $sort,
-					'page'      => $page,
-					'per_page'  => $per_page,
-					'author_id' => (int) ( $filters['author_id'] ?? 0 ),
-					'forum_id'  => (int) ( $filters['forum_id'] ?? 0 ),
-					'date_from' => (string) ( $filters['date_from'] ?? '' ),
-					'date_to'   => (string) ( $filters['date_to'] ?? '' ),
+					'sort'       => $sort,
+					'page'       => $page,
+					'per_page'   => $per_page,
+					'author_id'  => (int) ( $filters['author_id'] ?? 0 ),
+					'forum_id'   => (int) ( $filters['forum_id'] ?? 0 ),
+					'date_from'  => (string) ( $filters['date_from'] ?? '' ),
+					'date_to'    => (string) ( $filters['date_to'] ?? '' ),
+					'match_mode' => (string) ( $filters['match_mode'] ?? 'any' ),
+					'in'         => (string) ( $filters['in'] ?? 'all' ),
 				)
 			);
 

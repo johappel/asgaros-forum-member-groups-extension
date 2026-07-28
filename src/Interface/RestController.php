@@ -324,6 +324,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 								'default'           => '',
 								'sanitize_callback' => 'sanitize_text_field',
 							),
+							'mode' => array(
+								'type'              => 'string',
+								'default'           => 'any',
+								'sanitize_callback' => 'sanitize_key',
+								'validate_callback' => static fn( $v ) => in_array( $v, array( 'any', 'all' ), true ),
+							),
+							'in' => array(
+								'type'              => 'string',
+								'default'           => 'all',
+								'sanitize_callback' => 'sanitize_key',
+								'validate_callback' => static fn( $v ) => in_array( $v, array( 'all', 'title' ), true ),
+							),
 							'page' => array(
 								'type'              => 'integer',
 								'default'           => 1,
@@ -793,6 +805,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 						'forum_id'    => (int) $request['forum'],
 						'date_from'   => (string) $request['date_from'],
 						'date_to'     => (string) $request['date_to'],
+						'match_mode'  => (string) $request['mode'],
+						'in'          => (string) $request['in'],
 					),
 				)
 			);

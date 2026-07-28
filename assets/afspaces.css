@@ -2060,13 +2060,27 @@ flex: 1 1 100%;
 font-size: 1.05rem;
 }
 
-/* Semantik-Zeile */
+/* Semantik-Zeile: das Element selbst ist Flex (aus .afspaces-field), daher
+   KEIN flex-Kurzform-Wert (das Formular ist kein Flex-Container). */
 .afspaces-search-modal-form .afspaces-field-checkbox {
-flex: 1 1 100%;
+width: 100%;
 flex-direction: row;
 align-items: center;
 gap: 0.4rem;
 margin: 0.85rem 0 0;
+}
+/* Checkbox und Beschriftung sauber ausrichten (Seite + Overlay). */
+.afspaces-field-checkbox > label {
+display: inline-flex;
+align-items: center;
+gap: 0.4rem;
+font-weight: 400;
+margin: 0;
+cursor: pointer;
+}
+.afspaces-field-checkbox > label > input[type="checkbox"] {
+margin: 0;
+flex: 0 0 auto;
 }
 
 /* Filter-Aufklapper als dezente Karte */

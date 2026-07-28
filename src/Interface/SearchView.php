@@ -67,6 +67,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		public const PARAM_TO = 'afspaces_to';
 
 		/**
+		 * Query-Parameter für den Wortmodus (any|all).
+		 */
+		public const PARAM_MODE = 'afspaces_mode';
+
+		/**
+		 * Query-Parameter für den Suchbereich innerhalb der Foren (all|title).
+		 */
+		public const PARAM_IN = 'afspaces_in';
+
+		/**
 		 * Suchdienst.
 		 *
 		 * @var HybridSearchService
@@ -118,14 +128,20 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 			$author = isset( $_GET[ self::PARAM_AUTHOR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_AUTHOR ] ) ) : '';
 			$from   = isset( $_GET[ self::PARAM_FROM ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_FROM ] ) ) : '';
 			$to     = isset( $_GET[ self::PARAM_TO ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_TO ] ) ) : '';
+			$mode   = isset( $_GET[ self::PARAM_MODE ] ) ? sanitize_key( wp_unslash( $_GET[ self::PARAM_MODE ] ) ) : 'any';
+			$in     = isset( $_GET[ self::PARAM_IN ] ) ? sanitize_key( wp_unslash( $_GET[ self::PARAM_IN ] ) ) : 'all';
+			$mode   = in_array( $mode, array( 'any', 'all' ), true ) ? $mode : 'any';
+			$in     = in_array( $in, array( 'all', 'title' ), true ) ? $in : 'all';
 
 			$filters = array(
 				'forum_id'    => $ag_id,
 				'author_name' => $author,
 				'date_from'   => $from,
 				'date_to'     => $to,
+				'match_mode'  => $mode,
+				'in'          => $in,
 			);
-			$filters_active = ( $ag_id > 0 || '' !== $author || '' !== $from || '' !== $to );
+			$filters_active = ( $ag_id > 0 || '' !== $author || '' !== $from || '' !== $to || 'any' !== $mode || 'all' !== $in );
 
 			$results = ( '' !== $query )
 				? $this->search->search(
@@ -190,6 +206,23 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 								</label>
 							</p>
 						<?php endif; ?>
+
+						<div class="afspaces-search-row afspaces-search-options-row">
+							<p class="afspaces-field">
+								<label for="afspaces-search-mode"><?php echo esc_html__( 'Wortmodus', 'afspaces' ); ?></label>
+								<select id="afspaces-search-mode" name="<?php echo esc_attr( self::PARAM_MODE ); ?>">
+									<option value="any" <?php selected( 'any', $mode ); ?>><?php echo esc_html__( 'Eines der Wörter', 'afspaces' ); ?></option>
+									<option value="all" <?php selected( 'all', $mode ); ?>><?php echo esc_html__( 'Alle Wörter', 'afspaces' ); ?></option>
+								</select>
+							</p>
+							<p class="afspaces-field">
+								<label for="afspaces-search-in"><?php echo esc_html__( 'Suchen in', 'afspaces' ); ?></label>
+								<select id="afspaces-search-in" name="<?php echo esc_attr( self::PARAM_IN ); ?>">
+									<option value="all" <?php selected( 'all', $in ); ?>><?php echo esc_html__( 'Titel & Beitragstext', 'afspaces' ); ?></option>
+									<option value="title" <?php selected( 'title', $in ); ?>><?php echo esc_html__( 'Nur Thementitel', 'afspaces' ); ?></option>
+								</select>
+							</p>
+						</div>
 
 						<details class="afspaces-search-filters"<?php echo $filters_active ? ' open' : ''; ?>>
 							<summary><?php echo esc_html__( 'Filter (Arbeitsgruppe, Autor:in, Zeitraum)', 'afspaces' ); ?></summary>
@@ -383,6 +416,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 						self::PARAM_AUTHOR   => (string) ( $filters['author_name'] ?? '' ),
 						self::PARAM_FROM     => (string) ( $filters['date_from'] ?? '' ),
 						self::PARAM_TO       => (string) ( $filters['date_to'] ?? '' ),
+						self::PARAM_MODE     => 'all' === ( $filters['match_mode'] ?? '' ) ? 'all' : '',
+						self::PARAM_IN       => 'title' === ( $filters['in'] ?? '' ) ? 'title' : '',
 						self::PARAM_PAGE     => $page,
 					)
 				);

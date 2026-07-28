@@ -223,10 +223,12 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 			}
 
 			return array(
-				'author_id' => $author_id,
-				'forum_id'  => (int) ( $filters['forum_id'] ?? 0 ),
-				'date_from' => (string) ( $filters['date_from'] ?? '' ),
-				'date_to'   => (string) ( $filters['date_to'] ?? '' ),
+				'author_id'  => $author_id,
+				'forum_id'   => (int) ( $filters['forum_id'] ?? 0 ),
+				'date_from'  => (string) ( $filters['date_from'] ?? '' ),
+				'date_to'    => (string) ( $filters['date_to'] ?? '' ),
+				'match_mode' => ( 'all' === ( $filters['match_mode'] ?? '' ) ) ? 'all' : 'any',
+				'in'         => ( 'title' === ( $filters['in'] ?? '' ) ) ? 'title' : 'all',
 			);
 		}
 

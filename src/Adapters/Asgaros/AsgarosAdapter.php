@@ -419,6 +419,12 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$date_from = isset( $args['date_from'] ) ? $this->normalize_date( (string) $args['date_from'], false ) : '';
 			$date_to   = isset( $args['date_to'] ) ? $this->normalize_date( (string) $args['date_to'], true ) : '';
 
+			// Suchqualität (MVP 3): Modus (alle/eines der Wörter) und Suchbereich (Titel/alles).
+			$mode      = ( isset( $args['match_mode'] ) && \AFSpaces\Search\FulltextQuery::MODE_ALL === $args['match_mode'] )
+				? \AFSpaces\Search\FulltextQuery::MODE_ALL
+				: \AFSpaces\Search\FulltextQuery::MODE_ANY;
+			$title_only = ( isset( $args['in'] ) && 'title' === $args['in'] );
+
 			$db     = $forum->db;
 			$posts  = $forum->tables->posts;
 			$topics = $forum->tables->topics;
@@ -427,28 +433,69 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			// Kategorie-IDs sind bereits zu int normalisiert und daher sicher.
 			$cats_csv = implode( ',', array_map( 'intval', $category_ids ) );
 
-			// Boolean-Modus mit Präfixsuche, analog zur Asgaros-Bestandssuche.
-			$match_term = $keywords . '*';
+			// Text- und Titelzweig als (SQL, args) aufbauen – entweder per FULLTEXT
+			// (Standard) oder per LIKE-Ersatzsuche für sehr kurze Suchbegriffe.
+			$use_like = \AFSpaces\Search\FulltextQuery::needs_like_fallback( $keywords );
+			$branches = array();
+			$hits_args = array();
 
-			// Vereinigt Treffer aus Beitragstexten (post-genau) und Thementiteln
-			// (dem Eröffnungsbeitrag des Themas zugeordnet). Titeltreffer werden
-			// stärker gewichtet.
+			if ( $use_like ) {
+				$terms = \AFSpaces\Search\FulltextQuery::like_terms( $keywords );
+				if ( empty( $terms ) ) {
+					return $empty;
+				}
+				$glue = ( \AFSpaces\Search\FulltextQuery::MODE_ALL === $mode ) ? ' AND ' : ' OR ';
+
+				if ( ! $title_only ) {
+					$conds = array();
+					foreach ( $terms as $term ) {
+						$conds[]     = 'p.text LIKE %s';
+						$hits_args[] = '%' . $db->esc_like( $term ) . '%';
+					}
+					$branches[] = "SELECT p.id AS post_id, 1 AS score FROM {$posts} p "
+						. "INNER JOIN {$topics} t ON p.parent_id = t.id "
+						. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+						. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) AND (" . implode( $glue, $conds ) . ')';
+				}
+
+				$conds = array();
+				foreach ( $terms as $term ) {
+					$conds[]     = 't.name LIKE %s';
+					$hits_args[] = '%' . $db->esc_like( $term ) . '%';
+				}
+				$branches[] = "SELECT (SELECT MIN(p2.id) FROM {$posts} p2 WHERE p2.parent_id = t.id) AS post_id, 2 AS score "
+					. "FROM {$topics} t INNER JOIN {$forums} f ON t.parent_id = f.id "
+					. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) AND (" . implode( $glue, $conds ) . ')';
+			} else {
+				$boolean = \AFSpaces\Search\FulltextQuery::build( $keywords, $mode );
+				if ( '' === $boolean ) {
+					return $empty;
+				}
+
+				if ( ! $title_only ) {
+					$branches[]  = "SELECT p.id AS post_id, MATCH(p.text) AGAINST (%s IN BOOLEAN MODE) AS score "
+						. "FROM {$posts} p "
+						. "INNER JOIN {$topics} t ON p.parent_id = t.id "
+						. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+						. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) "
+						. "AND MATCH(p.text) AGAINST (%s IN BOOLEAN MODE)";
+					$hits_args[] = $boolean;
+					$hits_args[] = $boolean;
+				}
+
+				$branches[]  = "SELECT (SELECT MIN(p2.id) FROM {$posts} p2 WHERE p2.parent_id = t.id) AS post_id, "
+					. "MATCH(t.name) AGAINST (%s IN BOOLEAN MODE) * 2 AS score "
+					. "FROM {$topics} t INNER JOIN {$forums} f ON t.parent_id = f.id "
+					. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) "
+					. "AND MATCH(t.name) AGAINST (%s IN BOOLEAN MODE)";
+				$hits_args[] = $boolean;
+				$hits_args[] = $boolean;
+			}
+
 			$hits_sql =
-				"SELECT hits.post_id AS post_id, MAX(hits.score) AS score FROM ("
-				. "SELECT p.id AS post_id, MATCH(p.text) AGAINST (%s IN BOOLEAN MODE) AS score "
-				. "FROM {$posts} p "
-				. "INNER JOIN {$topics} t ON p.parent_id = t.id "
-				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
-				. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) "
-				. "AND MATCH(p.text) AGAINST (%s IN BOOLEAN MODE) "
-				. "UNION ALL "
-				. "SELECT (SELECT MIN(p2.id) FROM {$posts} p2 WHERE p2.parent_id = t.id) AS post_id, "
-				. "MATCH(t.name) AGAINST (%s IN BOOLEAN MODE) * 2 AS score "
-				. "FROM {$topics} t "
-				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
-				. "WHERE t.approved = 1 AND f.parent_id IN ({$cats_csv}) "
-				. "AND MATCH(t.name) AGAINST (%s IN BOOLEAN MODE)"
-				. ") AS hits WHERE hits.post_id IS NOT NULL GROUP BY hits.post_id";
+				'SELECT hits.post_id AS post_id, MAX(hits.score) AS score FROM ('
+				. implode( ' UNION ALL ', $branches )
+				. ') AS hits WHERE hits.post_id IS NOT NULL GROUP BY hits.post_id';
 
 			// Filter-WHERE für die äußere Ebene (gilt einheitlich für Text- und Titeltreffer).
 			$filter_where = '';
@@ -470,8 +517,6 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				$filter_args[] = $date_to;
 			}
 
-			$keyword_args = array( $match_term, $match_term, $match_term, $match_term );
-
 			$outer_from =
 				"FROM ({$hits_sql}) AS hits "
 				. "INNER JOIN {$posts} p ON p.id = hits.post_id "
@@ -482,7 +527,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			// Gesamtzahl der eindeutigen, gefilterten Beitragstreffer.
 			$count_sql = "SELECT COUNT(*) {$outer_from}";
 			$total     = (int) $db->get_var(
-				$db->prepare( $count_sql, ...array_merge( $keyword_args, $filter_args ) )
+				$db->prepare( $count_sql, ...array_merge( $hits_args, $filter_args ) )
 			);
 
 			if ( 0 === $total ) {
@@ -503,7 +548,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$rows = $db->get_results(
 				$db->prepare(
 					$page_sql,
-					...array_merge( $keyword_args, $filter_args, array( $offset, $per_page ) )
+					...array_merge( $hits_args, $filter_args, array( $offset, $per_page ) )
 				),
 				ARRAY_A
 			);

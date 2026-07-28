@@ -95,6 +95,18 @@
 			form.appendChild(semP);
 		}
 
+		// Wortmodus + Suchbereich (MVP 3).
+		var optRow = el('div', { 'class': 'afspaces-search-row afspaces-search-options-row' });
+		optRow.appendChild(selectField('afspaces-modal-mode', t('wordMode', 'Wortmodus'), 'mode', [
+			['any', t('wordAny', 'Eines der Wörter')],
+			['all', t('wordAll', 'Alle Wörter')]
+		]));
+		optRow.appendChild(selectField('afspaces-modal-in', t('searchIn', 'Suchen in'), 'in', [
+			['all', t('inAll', 'Titel & Text')],
+			['title', t('inTitle', 'Nur Titel')]
+		]));
+		form.appendChild(optRow);
+
 		// Filter (details/summary).
 		var details = el('details', { 'class': 'afspaces-search-filters' });
 		details.appendChild(el('summary', null, t('filters', 'Filter')));
@@ -196,6 +208,8 @@
 		params.set('forum', fieldValue('forum') || '0');
 		params.set('date_from', fieldValue('date_from'));
 		params.set('date_to', fieldValue('date_to'));
+		params.set('mode', fieldValue('mode') || 'any');
+		params.set('in', fieldValue('in') || 'all');
 		params.set('page', String(currentPage));
 		params.set('per_page', '10');
 

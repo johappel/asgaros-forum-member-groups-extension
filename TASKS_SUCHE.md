@@ -112,12 +112,12 @@ Das Modul übernimmt die Suchansicht vollständig, während Asgaros weiterhin f�
 
 ### MVP 3: bessere Suchqualität
 
-* [ ] Wortgruppen in Anführungszeichen unterstützen.
-* [ ] mehrere Suchbegriffe sinnvoll kombinieren.
-* [ ] Umlaute und deutsche Wortformen testen.
-* [ ] reine Titelsuche optional anbieten.
-* [ ] „alle Wörter“ versus „eines der Wörter“ ermöglichen.
-* [ ] sehr kurze Suchwörter verständlich behandeln.
+* [x] Wortgruppen in Anführungszeichen unterstützen.
+* [x] mehrere Suchbegriffe sinnvoll kombinieren.
+* [x] Umlaute und deutsche Wortformen testen.
+* [x] reine Titelsuche optional anbieten.
+* [x] „alle Wörter“ versus „eines der Wörter“ ermöglichen.
+* [x] sehr kurze Suchwörter verständlich behandeln.
 * [x] gegebenenfalls Relevanzgewichtung:
 
   * Titel stärker,
@@ -170,6 +170,17 @@ Phrasensuche auf Query-Ebene, sehr kurze Suchwörter.
 
 Offen: „alle/eines der Wörter“, echte Phrasensuche auf Query-Ebene, sehr kurze Suchwörter,
 Rate-Limiting des öffentlichen Such-Endpunkts.
+
+### Phase 6 (Suchqualität MVP 3) — umgesetzt
+
+- **Boolean-Query-Builder** (`FulltextQuery`, unit-getestet): Wortgruppen in Anführungszeichen,
+  Kombination mehrerer Begriffe, Modus „alle Wörter“ (AND) vs. „eines der Wörter“ (OR),
+  Präfixsuche je Wort; Boolean-Operatoren aus Nutzereingaben werden entschärft.
+- **Nur-Titel-Suche** (`in=title`) sowie **LIKE-Ersatzsuche** für sehr kurze Suchbegriffe
+  (< 3 Zeichen, unterhalb `innodb_ft_min_token_size`).
+- Bedienelemente „Wortmodus“ und „Suchen in“ in Suchseite und Overlay; Umlaute live geprüft.
+- Offen: echtes Stemming deutscher Wortformen (MySQL-FULLTEXT stemmt nicht),
+  Rate-Limiting des öffentlichen Endpunkts.
 
 ## Wichtige Sonderfälle
 
