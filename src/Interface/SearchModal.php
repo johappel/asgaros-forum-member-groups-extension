@@ -43,6 +43,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchModal' ) ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
 			add_action( 'wp_footer', array( $this, 'render_modal' ) );
 			add_shortcode( 'afspaces_search_button', array( $this, 'render_button' ) );
+			add_shortcode( 'afspaces_search_link', array( $this, 'render_link' ) );
 		}
 
 		/**
@@ -148,6 +149,25 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchModal' ) ) {
 
 			return sprintf(
 				'<button type="button" class="afspaces-button afspaces-search-trigger" data-afspaces-search-open><span class="afspaces-search-trigger__icon" aria-hidden="true">🔍</span> %s</button>',
+				esc_html( $label )
+			);
+		}
+
+		/**
+		 * Rendert einen Textlink, der das Overlay öffnet (Shortcode `[afspaces_search_link]`).
+		 *
+		 * Für Menüs kann alternativ ein individueller Link mit dem Ziel
+		 * `#afspaces-search` angelegt werden; das Skript fängt solche Links ab.
+		 *
+		 * @param array<string,mixed>|string $atts Attribute.
+		 * @return string
+		 */
+		public function render_link( $atts = array() ): string {
+			$atts  = shortcode_atts( array( 'label' => __( 'Suche', 'afspaces' ) ), is_array( $atts ) ? $atts : array(), 'afspaces_search_link' );
+			$label = (string) $atts['label'];
+
+			return sprintf(
+				'<a href="#afspaces-search" class="afspaces-search-link" data-afspaces-search-open>%s</a>',
 				esc_html( $label )
 			);
 		}

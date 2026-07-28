@@ -272,10 +272,11 @@
 		li.appendChild(h3);
 
 		var meta = el('p', { 'class': 'afspaces-search-result-meta' });
+		var sourceLabel = hit.source === 'wp' ? t('sourceWp', 'Beitrag') : t('sourceForum', 'Forum');
 		var badgeClass = 'afspaces-tag afspaces-source-' + (hit.source === 'wp' ? 'wp' : 'forum');
-		meta.appendChild(el('span', { 'class': badgeClass }, hit.source === 'wp' ? t('sourceWp', 'Beitrag') : t('sourceForum', 'Forum')));
-		if (hit.context) {
-			meta.appendChild(el('span', { 'class': 'afspaces-tag' }, hit.context));
+		meta.appendChild(el('span', { 'class': badgeClass }, sourceLabel));
+		if (hit.context && String(hit.context).toLowerCase() !== String(sourceLabel).toLowerCase()) {
+			meta.appendChild(el('span', { 'class': 'afspaces-tag afspaces-tag-context' }, hit.context));
 		}
 		if (hit.author) {
 			meta.appendChild(el('span', { 'class': 'afspaces-search-result-author' }, hit.author));
@@ -415,7 +416,7 @@
 		if (!node || !node.closest) {
 			return null;
 		}
-		return node.closest('[data-afspaces-search-open]');
+		return node.closest('[data-afspaces-search-open], a[href$="#afspaces-search"]');
 	}
 
 	function attachGlobal() {

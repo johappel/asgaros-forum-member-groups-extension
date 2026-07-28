@@ -2029,3 +2029,106 @@ border-radius: 0;
 width: 100%;
 }
 }
+
+/* ===== Suche v2: Spinner-Fix, Filter-/Modal-Feinschliff ===== */
+/* Bugfix: .afspaces-spinner setzt display:inline-block und ueberschrieb [hidden]. */
+.afspaces-spinner[hidden] {
+display: none !important;
+}
+
+/* Modal-Formular: klarere Struktur */
+.afspaces-search-overlay__dialog {
+padding: 1.25rem 1.5rem 1.75rem;
+}
+.afspaces-search-modal-form .afspaces-search-row {
+gap: 0.75rem 1rem;
+align-items: end;
+}
+.afspaces-search-modal-form .afspaces-field label,
+#af-wrapper .afspaces-search-form .afspaces-field > label {
+font-size: 0.85rem;
+font-weight: 600;
+color: #3a4a58;
+}
+.afspaces-search-modal-form .afspaces-field {
+flex: 1 1 160px;
+}
+.afspaces-search-modal-form .afspaces-field-grow {
+flex: 1 1 100%;
+}
+.afspaces-search-modal-form input[type="search"] {
+font-size: 1.05rem;
+}
+
+/* Semantik-Zeile */
+.afspaces-search-modal-form .afspaces-field-checkbox {
+flex: 1 1 100%;
+flex-direction: row;
+align-items: center;
+gap: 0.4rem;
+margin: 0.85rem 0 0;
+}
+
+/* Filter-Aufklapper als dezente Karte */
+.afspaces-search-filters {
+margin-top: 0.9rem;
+border: 1px solid #e1e8ed;
+border-radius: 10px;
+background: #f7f9fb;
+padding: 0.35rem 0.75rem;
+}
+.afspaces-search-filters > summary {
+list-style: none;
+cursor: pointer;
+font-weight: 600;
+color: #2d5d7f;
+padding: 0.45rem 0;
+display: flex;
+align-items: center;
+gap: 0.4rem;
+}
+.afspaces-search-filters > summary::-webkit-details-marker {
+display: none;
+}
+.afspaces-search-filters > summary::before {
+content: "▸";
+transition: transform 0.15s ease;
+display: inline-block;
+}
+.afspaces-search-filters[open] > summary::before {
+transform: rotate(90deg);
+}
+/* Filterfelder als responsives Raster */
+.afspaces-search-filter-row {
+display: grid !important;
+grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 0.75rem 1rem;
+padding: 0.35rem 0 0.75rem;
+align-items: end;
+}
+.afspaces-search-filter-row .afspaces-field {
+margin: 0;
+min-width: 0;
+}
+.afspaces-search-filter-row .afspaces-field input,
+.afspaces-search-filter-row .afspaces-field select {
+width: 100%;
+box-sizing: border-box;
+}
+
+/* Kontext-Badge dezent vom Quellen-Badge unterscheiden */
+.afspaces-tag.afspaces-tag-context {
+background: #eef2f5;
+color: #3a4a58;
+border: 1px solid #d9e0e6;
+}
+
+/* Ergebnis-Meta luftiger */
+.afspaces-search-modal-results .afspaces-search-result-meta,
+#af-wrapper .afspaces-search-result-meta {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+gap: 0.4rem;
+font-size: 0.9rem;
+}

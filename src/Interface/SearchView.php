@@ -298,8 +298,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 				</h3>
 				<p class="afspaces-search-result-meta">
 					<span class="afspaces-tag afspaces-source-<?php echo esc_attr( $hit->source ); ?>"><?php echo esc_html( $this->source_label( $hit->source ) ); ?></span>
-					<?php if ( '' !== $hit->context_label ) : ?>
-						<span class="afspaces-tag"><?php echo esc_html( $hit->context_label ); ?></span>
+					<?php if ( '' !== $hit->context_label && 0 !== strcasecmp( $hit->context_label, $this->source_label( $hit->source ) ) ) : ?>
+						<span class="afspaces-tag afspaces-tag-context"><?php echo esc_html( $hit->context_label ); ?></span>
 					<?php endif; ?>
 					<span class="afspaces-search-result-author"><?php echo esc_html( $hit->author_name ); ?></span>
 					<?php if ( '' !== $hit->date ) : ?>

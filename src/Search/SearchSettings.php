@@ -34,6 +34,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 				'index_private'       => false,
 				'index_wp'            => true,
 				'wp_post_types'       => array( 'post', 'page' ),
+				'wp_all_public_types' => false,
 				'semantic_weight'     => 1.0,
 				'keyword_weight'      => 1.0,
 				'semantic_min_score'  => 0.30,
@@ -93,9 +94,44 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 		 * @return string[]
 		 */
 		public static function wp_post_types(): array {
-			$o     = self::all();
+			$o = self::all();
+
+			if ( ! empty( $o['wp_all_public_types'] ) ) {
+				return self::public_post_types();
+			}
+
 			$types = isset( $o['wp_post_types'] ) ? (array) $o['wp_post_types'] : array();
 			$types = array_values( array_filter( array_map( 'strval', $types ) ) );
+			return empty( $types ) ? array( 'post', 'page' ) : $types;
+		}
+
+		/**
+		 * Sind alle öffentlichen Beitragstypen aktiviert?
+		 *
+		 * @return bool
+		 */
+		public static function wp_all_public_types(): bool {
+			$o = self::all();
+			return ! empty( $o['wp_all_public_types'] );
+		}
+
+		/**
+		 * Liste aller öffentlichen, durchsuchbaren Beitragstypen (ohne Anhänge).
+		 *
+		 * @return string[]
+		 */
+		public static function public_post_types(): array {
+			if ( ! function_exists( 'get_post_types' ) ) {
+				return array( 'post', 'page' );
+			}
+			$types = get_post_types(
+				array(
+					'public'              => true,
+					'exclude_from_search' => false,
+				),
+				'names'
+			);
+			$types = array_values( array_diff( (array) $types, array( 'attachment' ) ) );
 			return empty( $types ) ? array( 'post', 'page' ) : $types;
 		}
 
@@ -206,6 +242,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 			if ( empty( $out['wp_post_types'] ) ) {
 				$out['wp_post_types'] = array( 'post', 'page' );
 			}
+			$out['wp_all_public_types'] = ! empty( $input['wp_all_public_types'] );
 
 			$out['semantic_weight'] = isset( $input['semantic_weight'] ) ? max( 0.0, (float) $input['semantic_weight'] ) : 1.0;
 			$out['keyword_weight']  = isset( $input['keyword_weight'] ) ? max( 0.0, (float) $input['keyword_weight'] ) : 1.0;

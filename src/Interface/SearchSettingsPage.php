@@ -104,6 +104,32 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 		}
 
 		/**
+		 * Liefert die auswählbaren öffentlichen Beitragstypen (slug => Label).
+		 *
+		 * @return array<string,string>
+		 */
+		private function available_post_types(): array {
+			if ( ! function_exists( 'get_post_types' ) ) {
+				return array( 'post' => __( 'Beiträge', 'afspaces' ), 'page' => __( 'Seiten', 'afspaces' ) );
+			}
+			$objects = get_post_types(
+				array(
+					'public'              => true,
+					'exclude_from_search' => false,
+				),
+				'objects'
+			);
+			$result = array();
+			foreach ( $objects as $slug => $obj ) {
+				if ( 'attachment' === $slug ) {
+					continue;
+				}
+				$result[ (string) $slug ] = isset( $obj->labels->name ) ? (string) $obj->labels->name : (string) $slug;
+			}
+			return $result;
+		}
+
+		/**
 		 * Rendert die Einstellungsseite.
 		 *
 		 * @return void
@@ -177,6 +203,28 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 									<input type="checkbox" name="<?php echo esc_attr( SearchSettings::OPTION_KEY ); ?>[index_wp]" value="1" <?php checked( ! empty( $o['index_wp'] ) ); ?> />
 									<?php echo esc_html__( 'Beiträge und Seiten in die Suche einbeziehen', 'afspaces' ); ?>
 								</label>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php echo esc_html__( 'Durchsuchte Inhaltstypen', 'afspaces' ); ?></th>
+							<td>
+								<label>
+									<input type="checkbox" id="afspaces-all-types" name="<?php echo esc_attr( SearchSettings::OPTION_KEY ); ?>[wp_all_public_types]" value="1" <?php checked( ! empty( $o['wp_all_public_types'] ) ); ?> />
+									<?php echo esc_html__( 'Alle öffentlichen Beitragstypen einbeziehen', 'afspaces' ); ?>
+								</label>
+								<fieldset style="margin-top:0.75rem;">
+									<legend class="screen-reader-text"><?php echo esc_html__( 'Einzelne Beitragstypen', 'afspaces' ); ?></legend>
+									<?php
+									$selected_types = (array) ( $o['wp_post_types'] ?? array( 'post', 'page' ) );
+									foreach ( $this->available_post_types() as $slug => $label ) :
+										?>
+										<label style="display:inline-block; margin-right:1rem;">
+											<input type="checkbox" name="<?php echo esc_attr( SearchSettings::OPTION_KEY ); ?>[wp_post_types][]" value="<?php echo esc_attr( $slug ); ?>" <?php checked( in_array( $slug, $selected_types, true ) ); ?> />
+											<?php echo esc_html( $label ); ?> <code><?php echo esc_html( $slug ); ?></code>
+										</label>
+									<?php endforeach; ?>
+									<p class="description"><?php echo esc_html__( 'Diese Auswahl greift, wenn „Alle öffentlichen Beitragstypen“ deaktiviert ist. Nach Änderungen bitte neu indexieren.', 'afspaces' ); ?></p>
+								</fieldset>
 							</td>
 						</tr>
 						<tr>
