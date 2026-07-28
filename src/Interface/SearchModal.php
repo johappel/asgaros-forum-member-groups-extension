@@ -52,6 +52,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchModal' ) ) {
 		 * @return void
 		 */
 		public function enqueue(): void {
+			// Stylesheet site-weit sicherstellen: Das Overlay ist überall verfügbar,
+			// die Frontend-Styles werden sonst aber nur auf Plugin-Seiten geladen.
+			wp_enqueue_style(
+				'afspaces-frontend',
+				AFSPACES_URL . 'assets/afspaces.css',
+				array(),
+				AFSPACES_VERSION
+			);
+			AppearanceSettingsPage::enqueue_inline_style();
+
 			wp_register_script(
 				'afspaces-search-modal',
 				AFSPACES_URL . 'assets/afspaces-search.js',
@@ -173,7 +183,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchModal' ) ) {
 			$label = (string) $atts['label'];
 
 			return sprintf(
-				'<a href="#afspaces-search" class="afspaces-search-link" data-afspaces-search-open>%s</a>',
+				'<span class="search-icon fas fa-search"></span> <a href="#afspaces-search" class="afspaces-search-link" data-afspaces-search-open>%s</a>',
 				esc_html( $label )
 			);
 		}
