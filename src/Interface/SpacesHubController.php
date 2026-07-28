@@ -215,7 +215,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return $discover_view->render();
 
 				case SpacesUrls::VIEW_SEARCH:
-					$search_view = new SearchView( $this->forum_search );
+					$search_view = new SearchView( $this->forum_search, $this->asgaros );
 					return $search_view->render();
 
 				case SpacesUrls::VIEW_CREATE:

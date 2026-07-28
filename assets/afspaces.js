@@ -104,8 +104,14 @@
 			url.searchParams.set(key, value);
 		});
 
+		document.body.classList.add('afspaces-is-searching');
+
 		return refreshFromUrl(url.toString()).then(function () {
 			history.replaceState({}, '', url.toString());
+			document.body.classList.remove('afspaces-is-searching');
+		}).catch(function (err) {
+			document.body.classList.remove('afspaces-is-searching');
+			throw err;
 		});
 	}
 

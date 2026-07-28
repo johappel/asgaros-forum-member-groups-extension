@@ -104,9 +104,9 @@ Das Modul übernimmt die Suchansicht vollständig, während Asgaros weiterhin f�
 
 * [x] Forum beziehungsweise Arbeitsgruppe anzeigen.
 * [x] Treffer nach Relevanz oder Datum sortierbar machen.
-* [ ] Filter nach Arbeitsgruppe anbieten.
-* [ ] Filter nach Autor:in anbieten.
-* [ ] Filter nach Zeitraum anbieten.
+* [x] Filter nach Arbeitsgruppe anbieten.
+* [x] Filter nach Autor:in anbieten.
+* [x] Filter nach Zeitraum anbieten.
 * [x] Suchbegriff in Seitentitel und Suchfeld erhalten.
 * [x] Suchpagination unabhängig von der Themenpagination umsetzen.
 
@@ -154,6 +154,22 @@ REST `GET /afspaces/v1/search`, Hub-View `search`, Shortcode `[afspaces_search]`
 
 Offen: Filter (Autor/Zeitraum/Arbeitsgruppe), „alle/eines der Wörter“, echte
 Phrasensuche auf Query-Ebene, sehr kurze Suchwörter.
+
+### Phase 5 (UX-Ausbau) — umgesetzt
+
+- **Ortsunabhängiges Such-Overlay** (`SearchModal`, `assets/afspaces-search.js`): site-weit
+  verfügbarer, barrierearmer Dialog (Fokusfalle, Escape, `aria-modal`) mit Live-Suche über die
+  REST-Route, Spinner, Bereich/Sortierung/Semantik und Filtern. Trigger: Shortcode
+  `[afspaces_search_button]`, das Asgaros-Forensuchfeld (per JS statt Redirect) und – optional
+  per Einstellung `replace_wp_search` – normale WordPress-Suchformulare.
+- **Progressive Enhancement:** Ohne JavaScript bleiben die Suchseite und die 302-Weiterleitung
+  der Asgaros-Suche als Fallback erhalten.
+- **Filter (MVP 2):** Arbeitsgruppe (Forum), Autor:in (Freitext → Server-Auflösung) und Zeitraum,
+  in Suchseite und Overlay; bei aktiven Filtern bleibt die Suche rein keyword-basiert.
+- **Ladeanzeige:** Spinner im Overlay, Fortschrittsbalken bei der AJAX-Suchseite.
+
+Offen: „alle/eines der Wörter“, echte Phrasensuche auf Query-Ebene, sehr kurze Suchwörter,
+Rate-Limiting des öffentlichen Such-Endpunkts.
 
 ## Wichtige Sonderfälle
 

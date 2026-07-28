@@ -37,6 +37,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 				'semantic_weight'     => 1.0,
 				'keyword_weight'      => 1.0,
 				'semantic_min_score'  => 0.30,
+				'replace_wp_search'   => false,
 			);
 		}
 
@@ -132,6 +133,16 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 		}
 
 		/**
+		 * Soll das Such-Overlay auch die normale WordPress-Suche ersetzen?
+		 *
+		 * @return bool
+		 */
+		public static function replace_wp_search(): bool {
+			$o = self::all();
+			return ! empty( $o['replace_wp_search'] );
+		}
+
+		/**
 		 * API-Endpunkt.
 		 *
 		 * @return string
@@ -199,6 +210,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\SearchSettings' ) ) {
 			$out['semantic_weight'] = isset( $input['semantic_weight'] ) ? max( 0.0, (float) $input['semantic_weight'] ) : 1.0;
 			$out['keyword_weight']  = isset( $input['keyword_weight'] ) ? max( 0.0, (float) $input['keyword_weight'] ) : 1.0;
 			$out['semantic_min_score'] = isset( $input['semantic_min_score'] ) ? min( 1.0, max( 0.0, (float) $input['semantic_min_score'] ) ) : 0.30;
+			$out['replace_wp_search']  = ! empty( $input['replace_wp_search'] );
 
 			return $out;
 		}

@@ -413,6 +413,12 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$sort     = ( isset( $args['sort'] ) && 'date' === $args['sort'] ) ? 'date' : 'relevance';
 			$offset   = ( $page - 1 ) * $per_page;
 
+			// Optionale Filter (MVP 2): Autor, Forum/Arbeitsgruppe, Zeitraum.
+			$author_id = isset( $args['author_id'] ) ? max( 0, (int) $args['author_id'] ) : 0;
+			$forum_id  = isset( $args['forum_id'] ) ? max( 0, (int) $args['forum_id'] ) : 0;
+			$date_from = isset( $args['date_from'] ) ? $this->normalize_date( (string) $args['date_from'], false ) : '';
+			$date_to   = isset( $args['date_to'] ) ? $this->normalize_date( (string) $args['date_to'], true ) : '';
+
 			$db     = $forum->db;
 			$posts  = $forum->tables->posts;
 			$topics = $forum->tables->topics;
@@ -444,10 +450,39 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				. "AND MATCH(t.name) AGAINST (%s IN BOOLEAN MODE)"
 				. ") AS hits WHERE hits.post_id IS NOT NULL GROUP BY hits.post_id";
 
-			// Gesamtzahl der eindeutigen Beitragstreffer.
-			$count_sql   = "SELECT COUNT(*) FROM ({$hits_sql}) AS counted";
-			$total       = (int) $db->get_var(
-				$db->prepare( $count_sql, $match_term, $match_term, $match_term, $match_term )
+			// Filter-WHERE für die äußere Ebene (gilt einheitlich für Text- und Titeltreffer).
+			$filter_where = '';
+			$filter_args  = array();
+			if ( $author_id > 0 ) {
+				$filter_where .= ' AND p.author_id = %d';
+				$filter_args[] = $author_id;
+			}
+			if ( $forum_id > 0 ) {
+				$filter_where .= ' AND p.forum_id = %d';
+				$filter_args[] = $forum_id;
+			}
+			if ( '' !== $date_from ) {
+				$filter_where .= ' AND p.date >= %s';
+				$filter_args[] = $date_from;
+			}
+			if ( '' !== $date_to ) {
+				$filter_where .= ' AND p.date <= %s';
+				$filter_args[] = $date_to;
+			}
+
+			$keyword_args = array( $match_term, $match_term, $match_term, $match_term );
+
+			$outer_from =
+				"FROM ({$hits_sql}) AS hits "
+				. "INNER JOIN {$posts} p ON p.id = hits.post_id "
+				. "INNER JOIN {$topics} t ON p.parent_id = t.id "
+				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+				. "WHERE 1 = 1{$filter_where}";
+
+			// Gesamtzahl der eindeutigen, gefilterten Beitragstreffer.
+			$count_sql = "SELECT COUNT(*) {$outer_from}";
+			$total     = (int) $db->get_var(
+				$db->prepare( $count_sql, ...array_merge( $keyword_args, $filter_args ) )
 			);
 
 			if ( 0 === $total ) {
@@ -462,21 +497,13 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				"SELECT p.id AS post_id, p.parent_id AS topic_id, p.forum_id AS forum_id, "
 				. "p.author_id AS author_id, p.text AS post_text, p.date AS post_date, "
 				. "t.name AS topic_name, f.name AS forum_name, hits.score AS score "
-				. "FROM ({$hits_sql}) AS hits "
-				. "INNER JOIN {$posts} p ON p.id = hits.post_id "
-				. "INNER JOIN {$topics} t ON p.parent_id = t.id "
-				. "INNER JOIN {$forums} f ON t.parent_id = f.id "
+				. "{$outer_from} "
 				. "ORDER BY {$order_by} LIMIT %d, %d";
 
 			$rows = $db->get_results(
 				$db->prepare(
 					$page_sql,
-					$match_term,
-					$match_term,
-					$match_term,
-					$match_term,
-					$offset,
-					$per_page
+					...array_merge( $keyword_args, $filter_args, array( $offset, $per_page ) )
 				),
 				ARRAY_A
 			);
@@ -534,6 +561,59 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				return array();
 			}
 			return $this->accessible_category_ids( $forum );
+		}
+
+		/**
+		 * Normalisiert ein Datum (Y-m-d) zu einem MySQL-Zeitstempel.
+		 *
+		 * @param string $raw Rohwert.
+		 * @param bool   $end true für Tagesende (23:59:59), sonst Tagesbeginn.
+		 * @return string Leerstring bei ungültiger Eingabe.
+		 */
+		private function normalize_date( string $raw, bool $end ): string {
+			$raw = trim( $raw );
+			if ( '' === $raw || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $raw ) ) {
+				return '';
+			}
+			return $raw . ( $end ? ' 23:59:59' : ' 00:00:00' );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function list_accessible_forums(): array {
+			$forum = $this->forum();
+			if ( null === $forum ) {
+				return array();
+			}
+
+			$category_ids = $this->accessible_category_ids( $forum );
+			if ( empty( $category_ids ) ) {
+				return array();
+			}
+
+			$cats_csv = implode( ',', array_map( 'intval', $category_ids ) );
+			$rows     = $forum->db->get_results(
+				"SELECT id, name FROM {$forum->tables->forums} WHERE parent_id IN ({$cats_csv}) ORDER BY name ASC",
+				ARRAY_A
+			);
+
+			if ( empty( $rows ) ) {
+				return array();
+			}
+
+			$result = array();
+			foreach ( $rows as $row ) {
+				$id = (int) ( $row['id'] ?? 0 );
+				if ( $id > 0 ) {
+					$result[] = array(
+						'id'   => $id,
+						'name' => (string) ( $row['name'] ?? '' ),
+					);
+				}
+			}
+
+			return $result;
 		}
 
 		/**

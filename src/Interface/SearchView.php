@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Interface;
 
+use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Application\HybridSearchService;
 use AFSpaces\Search\SearchHit;
 use AFSpaces\Search\SearchSettings;
@@ -46,11 +47,38 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		public const PARAM_SEMANTIC = 'afspaces_semantic';
 
 		/**
+		 * Query-Parameter für den Arbeitsgruppen-Filter (Forum-ID).
+		 */
+		public const PARAM_GROUP = 'afspaces_ag';
+
+		/**
+		 * Query-Parameter für den Autor-Filter (Name).
+		 */
+		public const PARAM_AUTHOR = 'afspaces_author';
+
+		/**
+		 * Query-Parameter für den Zeitraum-Beginn.
+		 */
+		public const PARAM_FROM = 'afspaces_from';
+
+		/**
+		 * Query-Parameter für das Zeitraum-Ende.
+		 */
+		public const PARAM_TO = 'afspaces_to';
+
+		/**
 		 * Suchdienst.
 		 *
 		 * @var HybridSearchService
 		 */
 		private HybridSearchService $search;
+
+		/**
+		 * Asgaros-Adapter (für die Arbeitsgruppen-Liste).
+		 *
+		 * @var AsgarosAdapterInterface
+		 */
+		private AsgarosAdapterInterface $asgaros;
 
 		/**
 		 * Treffer pro Seite.
@@ -62,10 +90,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		/**
 		 * Konstruktor.
 		 *
-		 * @param HybridSearchService $search Suchdienst.
+		 * @param HybridSearchService     $search  Suchdienst.
+		 * @param AsgarosAdapterInterface $asgaros Asgaros-Adapter.
 		 */
-		public function __construct( HybridSearchService $search ) {
-			$this->search = $search;
+		public function __construct( HybridSearchService $search, AsgarosAdapterInterface $asgaros ) {
+			$this->search  = $search;
+			$this->asgaros = $asgaros;
 		}
 
 		/**
@@ -84,6 +114,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 			$semantic_available = SearchSettings::is_semantic_enabled();
 			$semantic           = $semantic_available && ! empty( $_GET[ self::PARAM_SEMANTIC ] );
 
+			$ag_id  = isset( $_GET[ self::PARAM_GROUP ] ) ? max( 0, (int) $_GET[ self::PARAM_GROUP ] ) : 0;
+			$author = isset( $_GET[ self::PARAM_AUTHOR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_AUTHOR ] ) ) : '';
+			$from   = isset( $_GET[ self::PARAM_FROM ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_FROM ] ) ) : '';
+			$to     = isset( $_GET[ self::PARAM_TO ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_TO ] ) ) : '';
+
+			$filters = array(
+				'forum_id'    => $ag_id,
+				'author_name' => $author,
+				'date_from'   => $from,
+				'date_to'     => $to,
+			);
+			$filters_active = ( $ag_id > 0 || '' !== $author || '' !== $from || '' !== $to );
+
 			$results = ( '' !== $query )
 				? $this->search->search(
 					$query,
@@ -93,9 +136,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 						'semantic' => $semantic,
 						'page'     => $page,
 						'per_page' => $this->per_page,
+						'filters'  => $filters,
 					)
 				)
 				: null;
+
+			$forums = $this->asgaros->list_accessible_forums();
 
 			ob_start();
 			?>
@@ -108,27 +154,33 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 							<input type="hidden" name="<?php echo esc_attr( SpacesUrls::VIEW_PARAM ); ?>" value="<?php echo esc_attr( SpacesUrls::VIEW_SEARCH ); ?>" />
 						<?php endif; ?>
 
-						<p class="afspaces-field">
-							<label for="afspaces-search-input"><?php echo esc_html__( 'Suchbegriff', 'afspaces' ); ?></label>
-							<input type="search" id="afspaces-search-input" name="<?php echo esc_attr( self::PARAM_QUERY ); ?>" value="<?php echo esc_attr( $query ); ?>" autocomplete="off" />
-						</p>
+						<div class="afspaces-search-row">
+							<p class="afspaces-field afspaces-field-grow">
+								<label for="afspaces-search-input"><?php echo esc_html__( 'Suchbegriff', 'afspaces' ); ?></label>
+								<input type="search" id="afspaces-search-input" name="<?php echo esc_attr( self::PARAM_QUERY ); ?>" value="<?php echo esc_attr( $query ); ?>" autocomplete="off" />
+							</p>
 
-						<p class="afspaces-field">
-							<label for="afspaces-search-scope"><?php echo esc_html__( 'Bereich', 'afspaces' ); ?></label>
-							<select id="afspaces-search-scope" name="<?php echo esc_attr( self::PARAM_SCOPE ); ?>">
-								<option value="all" <?php selected( HybridSearchService::SCOPE_ALL, $scope ); ?>><?php echo esc_html__( 'Alles', 'afspaces' ); ?></option>
-								<option value="forum" <?php selected( HybridSearchService::SCOPE_FORUM, $scope ); ?>><?php echo esc_html__( 'Foren', 'afspaces' ); ?></option>
-								<option value="wp" <?php selected( HybridSearchService::SCOPE_WP, $scope ); ?>><?php echo esc_html__( 'Beiträge & Seiten', 'afspaces' ); ?></option>
-							</select>
-						</p>
+							<p class="afspaces-field">
+								<label for="afspaces-search-scope"><?php echo esc_html__( 'Bereich', 'afspaces' ); ?></label>
+								<select id="afspaces-search-scope" name="<?php echo esc_attr( self::PARAM_SCOPE ); ?>">
+									<option value="all" <?php selected( HybridSearchService::SCOPE_ALL, $scope ); ?>><?php echo esc_html__( 'Alles', 'afspaces' ); ?></option>
+									<option value="forum" <?php selected( HybridSearchService::SCOPE_FORUM, $scope ); ?>><?php echo esc_html__( 'Foren', 'afspaces' ); ?></option>
+									<option value="wp" <?php selected( HybridSearchService::SCOPE_WP, $scope ); ?>><?php echo esc_html__( 'Beiträge & Seiten', 'afspaces' ); ?></option>
+								</select>
+							</p>
 
-						<p class="afspaces-field">
-							<label for="afspaces-search-sort"><?php echo esc_html__( 'Sortierung', 'afspaces' ); ?></label>
-							<select id="afspaces-search-sort" name="<?php echo esc_attr( self::PARAM_SORT ); ?>">
-								<option value="relevance" <?php selected( 'relevance', $sort ); ?>><?php echo esc_html__( 'Relevanz', 'afspaces' ); ?></option>
-								<option value="date" <?php selected( 'date', $sort ); ?>><?php echo esc_html__( 'Neueste zuerst', 'afspaces' ); ?></option>
-							</select>
-						</p>
+							<p class="afspaces-field">
+								<label for="afspaces-search-sort"><?php echo esc_html__( 'Sortierung', 'afspaces' ); ?></label>
+								<select id="afspaces-search-sort" name="<?php echo esc_attr( self::PARAM_SORT ); ?>">
+									<option value="relevance" <?php selected( 'relevance', $sort ); ?>><?php echo esc_html__( 'Relevanz', 'afspaces' ); ?></option>
+									<option value="date" <?php selected( 'date', $sort ); ?>><?php echo esc_html__( 'Neueste zuerst', 'afspaces' ); ?></option>
+								</select>
+							</p>
+
+							<p class="afspaces-field afspaces-field-submit">
+								<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Suchen', 'afspaces' ); ?></button>
+							</p>
+						</div>
 
 						<?php if ( $semantic_available ) : ?>
 							<p class="afspaces-field afspaces-field-checkbox">
@@ -139,11 +191,36 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 							</p>
 						<?php endif; ?>
 
-						<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Suchen', 'afspaces' ); ?></button>
+						<details class="afspaces-search-filters"<?php echo $filters_active ? ' open' : ''; ?>>
+							<summary><?php echo esc_html__( 'Filter (Arbeitsgruppe, Autor:in, Zeitraum)', 'afspaces' ); ?></summary>
+							<div class="afspaces-search-row afspaces-search-filter-row">
+								<p class="afspaces-field">
+									<label for="afspaces-filter-ag"><?php echo esc_html__( 'Arbeitsgruppe', 'afspaces' ); ?></label>
+									<select id="afspaces-filter-ag" name="<?php echo esc_attr( self::PARAM_GROUP ); ?>">
+										<option value="0"><?php echo esc_html__( 'Alle Arbeitsgruppen', 'afspaces' ); ?></option>
+										<?php foreach ( $forums as $forum ) : ?>
+											<option value="<?php echo esc_attr( (string) $forum['id'] ); ?>" <?php selected( $ag_id, (int) $forum['id'] ); ?>><?php echo esc_html( (string) $forum['name'] ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</p>
+								<p class="afspaces-field">
+									<label for="afspaces-filter-author"><?php echo esc_html__( 'Autor:in', 'afspaces' ); ?></label>
+									<input type="text" id="afspaces-filter-author" name="<?php echo esc_attr( self::PARAM_AUTHOR ); ?>" value="<?php echo esc_attr( $author ); ?>" autocomplete="off" />
+								</p>
+								<p class="afspaces-field">
+									<label for="afspaces-filter-from"><?php echo esc_html__( 'Von', 'afspaces' ); ?></label>
+									<input type="date" id="afspaces-filter-from" name="<?php echo esc_attr( self::PARAM_FROM ); ?>" value="<?php echo esc_attr( $from ); ?>" />
+								</p>
+								<p class="afspaces-field">
+									<label for="afspaces-filter-to"><?php echo esc_html__( 'Bis', 'afspaces' ); ?></label>
+									<input type="date" id="afspaces-filter-to" name="<?php echo esc_attr( self::PARAM_TO ); ?>" value="<?php echo esc_attr( $to ); ?>" />
+								</p>
+							</div>
+						</details>
 					</form>
 				</div>
 
-				<?php echo $this->render_results( $results, $query, $sort, $scope, $semantic ); ?>
+				<?php echo $this->render_results( $results, $query, $sort, $scope, $semantic, $filters ); ?>
 			</section>
 			<?php
 			return (string) ob_get_clean();
@@ -157,9 +234,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		 * @param string                   $sort     Sortierung.
 		 * @param string                   $scope    Suchbereich.
 		 * @param bool                     $semantic Semantik aktiv?
+		 * @param array<string,mixed>      $filters  Aktive Filter.
 		 * @return string
 		 */
-		private function render_results( ?array $results, string $query, string $sort, string $scope, bool $semantic ): string {
+		private function render_results( ?array $results, string $query, string $sort, string $scope, bool $semantic, array $filters = array() ): string {
 			if ( null === $results ) {
 				return '';
 			}
@@ -199,7 +277,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 					}
 					?>
 				</ol>
-				<?php echo $this->render_pagination( $results, $query, $sort, $scope, $semantic ); ?>
+				<?php echo $this->render_pagination( $results, $query, $sort, $scope, $semantic, $filters ); ?>
 			<?php endif; ?>
 			<?php
 			return (string) ob_get_clean();
@@ -283,16 +361,17 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 		 * @param string              $sort     Sortierung.
 		 * @param string              $scope    Suchbereich.
 		 * @param bool                $semantic Semantik aktiv?
+		 * @param array<string,mixed> $filters  Aktive Filter.
 		 * @return string
 		 */
-		private function render_pagination( array $results, string $query, string $sort, string $scope, bool $semantic ): string {
+		private function render_pagination( array $results, string $query, string $sort, string $scope, bool $semantic, array $filters = array() ): string {
 			$total_pages = (int) ( $results['total_pages'] ?? 0 );
 			$current     = (int) ( $results['page'] ?? 1 );
 			if ( $total_pages < 2 ) {
 				return '';
 			}
 
-			$link = function ( int $page ) use ( $query, $sort, $scope, $semantic ): string {
+			$link = function ( int $page ) use ( $query, $sort, $scope, $semantic, $filters ): string {
 				return SpacesUrls::hub_url(
 					SpacesUrls::VIEW_SEARCH,
 					array(
@@ -300,6 +379,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 						self::PARAM_SORT     => $sort,
 						self::PARAM_SCOPE    => $scope,
 						self::PARAM_SEMANTIC => $semantic ? '1' : '',
+						self::PARAM_GROUP    => (int) ( $filters['forum_id'] ?? 0 ) > 0 ? (string) $filters['forum_id'] : '',
+						self::PARAM_AUTHOR   => (string) ( $filters['author_name'] ?? '' ),
+						self::PARAM_FROM     => (string) ( $filters['date_from'] ?? '' ),
+						self::PARAM_TO       => (string) ( $filters['date_to'] ?? '' ),
 						self::PARAM_PAGE     => $page,
 					)
 				);

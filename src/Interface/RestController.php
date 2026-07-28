@@ -275,7 +275,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 					array(
 						'methods'             => WP_REST_Server::READABLE,
 						'callback'            => array( $this, 'search_forum' ),
-						'permission_callback' => array( $this, 'can_respond_to_invitation' ),
+						'permission_callback' => '__return_true',
 						'args'                => array(
 							'q' => array(
 								'type'              => 'string',
@@ -298,6 +298,31 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 							'semantic' => array(
 								'type'              => 'boolean',
 								'default'           => false,
+							),
+							'author' => array(
+								'type'              => 'integer',
+								'default'           => 0,
+								'sanitize_callback' => 'absint',
+							),
+							'author_name' => array(
+								'type'              => 'string',
+								'default'           => '',
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+							'forum' => array(
+								'type'              => 'integer',
+								'default'           => 0,
+								'sanitize_callback' => 'absint',
+							),
+							'date_from' => array(
+								'type'              => 'string',
+								'default'           => '',
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+							'date_to' => array(
+								'type'              => 'string',
+								'default'           => '',
+								'sanitize_callback' => 'sanitize_text_field',
 							),
 							'page' => array(
 								'type'              => 'integer',
@@ -751,14 +776,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			$page     = (int) $request['page'];
 			$per_page = (int) $request['per_page'];
 
+			// Semantische Suche (kostet API-Aufrufe) nur für angemeldete Nutzer.
+			$semantic = (bool) $request['semantic'] && is_user_logged_in();
+
 			$result = $this->forum_search->search(
 				$query,
 				array(
 					'scope'    => (string) $request['scope'],
 					'sort'     => $sort,
-					'semantic' => (bool) $request['semantic'],
+					'semantic' => $semantic,
 					'page'     => $page,
 					'per_page' => $per_page,
+					'filters'  => array(
+						'author_id'   => (int) $request['author'],
+						'author_name' => (string) $request['author_name'],
+						'forum_id'    => (int) $request['forum'],
+						'date_from'   => (string) $request['date_from'],
+						'date_to'     => (string) $request['date_to'],
+					),
 				)
 			);
 

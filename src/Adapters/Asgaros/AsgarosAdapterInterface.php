@@ -128,6 +128,13 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function list_accessible_category_ids(): array;
 
 		/**
+		 * Listet die für den aktuellen Benutzer zugänglichen Foren (Arbeitsgruppen).
+		 *
+		 * @return array<int,array{id:int,name:string}>
+		 */
+		public function list_accessible_forums(): array;
+
+		/**
 		 * Zählt alle Forenbeiträge (für die Indexierung).
 		 *
 		 * @return int

@@ -48,13 +48,14 @@ if ( ! class_exists( 'AFSpaces\\Application\\ForumSearchService' ) ) {
 		/**
 		 * Führt eine Forensuche aus.
 		 *
-		 * @param string $keywords Suchbegriff.
-		 * @param string $sort     Sortierung ('relevance'|'date').
-		 * @param int    $page     Seite (1-basiert).
-		 * @param int    $per_page Treffer pro Seite.
+		 * @param string              $keywords Suchbegriff.
+		 * @param string              $sort     Sortierung ('relevance'|'date').
+		 * @param int                 $page     Seite (1-basiert).
+		 * @param int                 $per_page Treffer pro Seite.
+		 * @param array<string,mixed> $filters  Optionale Filter: author_id, forum_id, date_from, date_to.
 		 * @return array{hits: SearchHit[], total: int, page: int, per_page: int, total_pages: int, query: string}
 		 */
-		public function search( string $keywords, string $sort = 'relevance', int $page = 1, int $per_page = 10 ): array {
+		public function search( string $keywords, string $sort = 'relevance', int $page = 1, int $per_page = 10, array $filters = array() ): array {
 			$keywords = trim( $keywords );
 			$sort     = in_array( $sort, self::SORTS, true ) ? $sort : 'relevance';
 			$page     = max( 1, $page );
@@ -76,9 +77,13 @@ if ( ! class_exists( 'AFSpaces\\Application\\ForumSearchService' ) ) {
 			$response = $this->asgaros->search_posts(
 				$keywords,
 				array(
-					'sort'     => $sort,
-					'page'     => $page,
-					'per_page' => $per_page,
+					'sort'      => $sort,
+					'page'      => $page,
+					'per_page'  => $per_page,
+					'author_id' => (int) ( $filters['author_id'] ?? 0 ),
+					'forum_id'  => (int) ( $filters['forum_id'] ?? 0 ),
+					'date_from' => (string) ( $filters['date_from'] ?? '' ),
+					'date_to'   => (string) ( $filters['date_to'] ?? '' ),
 				)
 			);
 

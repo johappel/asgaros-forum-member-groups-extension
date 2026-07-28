@@ -189,6 +189,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><?php echo esc_html__( 'WordPress-Suche ersetzen', 'afspaces' ); ?></th>
+							<td>
+								<label>
+									<input type="checkbox" name="<?php echo esc_attr( SearchSettings::OPTION_KEY ); ?>[replace_wp_search]" value="1" <?php checked( ! empty( $o['replace_wp_search'] ) ); ?> />
+									<?php echo esc_html__( 'Normale WordPress-Suchformulare öffnen das AFSpaces-Such-Overlay', 'afspaces' ); ?>
+								</label>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="afspaces-sem-weight"><?php echo esc_html__( 'Gewichtung semantisch', 'afspaces' ); ?></label></th>
 							<td><input type="number" step="0.1" min="0" id="afspaces-sem-weight" name="<?php echo esc_attr( SearchSettings::OPTION_KEY ); ?>[semantic_weight]" value="<?php echo esc_attr( (string) $o['semantic_weight'] ); ?>" /></td>
 						</tr>

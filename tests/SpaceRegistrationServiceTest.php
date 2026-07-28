@@ -111,6 +111,10 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 		return array();
 	}
 
+	public function list_accessible_forums(): array {
+		return array();
+	}
+
 	public function count_all_posts(): int {
 		return 0;
 	}

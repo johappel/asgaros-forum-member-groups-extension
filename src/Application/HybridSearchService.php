@@ -68,6 +68,19 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 			$page     = max( 1, (int) ( $opts['page'] ?? 1 ) );
 			$per_page = max( 1, min( 50, (int) ( $opts['per_page'] ?? 10 ) ) );
 			$semantic = ! empty( $opts['semantic'] ) && SearchSettings::is_semantic_enabled();
+			$filters  = isset( $opts['filters'] ) && is_array( $opts['filters'] ) ? $this->normalize_filters( $opts['filters'] ) : array();
+
+			// Ein AG-Filter (Forum) bezieht sich nur auf Foreninhalte; WP-Beiträge
+			// gehören zu keiner Arbeitsgruppe und werden dann ausgeschlossen.
+			if ( (int) ( $filters['forum_id'] ?? 0 ) > 0 ) {
+				$scope = self::SCOPE_FORUM;
+			}
+
+			// Strikte Filter (Autor/AG/Zeitraum) kann die Vektorsuche nicht abbilden;
+			// bei aktiven Filtern bleibt die Suche daher rein keyword-basiert.
+			if ( $this->has_active_filters( $filters ) ) {
+				$semantic = false;
+			}
 
 			$empty = array(
 				'hits'          => array(),
@@ -86,10 +99,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 
 			// Einzelquelle ohne Semantik: echte SQL-Paginierung nutzen.
 			if ( ! $semantic && self::SCOPE_FORUM === $scope ) {
-				return $this->wrap( $this->forum->search( $query, $sort, $page, $per_page ), $scope, false );
+				return $this->wrap( $this->forum->search( $query, $sort, $page, $per_page, $filters ), $scope, false );
 			}
 			if ( ! $semantic && self::SCOPE_WP === $scope ) {
-				$wp = $this->wp->search( $query, $sort, $page, $per_page );
+				$wp = $this->wp->search( $query, $sort, $page, $per_page, $filters );
 				return array(
 					'hits'          => $wp['hits'],
 					'total'         => (int) $wp['total'],
@@ -110,7 +123,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 			$semantic_weight = SearchSettings::semantic_weight();
 
 			if ( self::SCOPE_WP !== $scope ) {
-				$forum_result = $this->forum->search( $query, $sort, 1, self::WINDOW );
+				$forum_result = $this->forum->search( $query, $sort, 1, self::WINDOW, $filters );
 				$keys         = array();
 				foreach ( $forum_result['hits'] as $hit ) {
 					$hit_map[ $hit->key ] = $hit;
@@ -120,7 +133,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 			}
 
 			if ( self::SCOPE_FORUM !== $scope ) {
-				$wp_result = $this->wp->search( $query, $sort, 1, self::WINDOW );
+				$wp_result = $this->wp->search( $query, $sort, 1, self::WINDOW, $filters );
 				$keys      = array();
 				foreach ( $wp_result['hits'] as $hit ) {
 					$hit_map[ $hit->key ] = $hit;
@@ -168,6 +181,52 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 				'query'         => $query,
 				'scope'         => $scope,
 				'semantic_used' => $semantic,
+			);
+		}
+
+		/**
+		 * Prüft, ob ein strikter Filter (Autor/AG/Zeitraum) gesetzt ist.
+		 *
+		 * @param array<string,mixed> $filters Filter.
+		 * @return bool
+		 */
+		private function has_active_filters( array $filters ): bool {
+			return (int) ( $filters['author_id'] ?? 0 ) > 0
+				|| (int) ( $filters['forum_id'] ?? 0 ) > 0
+				|| '' !== (string) ( $filters['date_from'] ?? '' )
+				|| '' !== (string) ( $filters['date_to'] ?? '' );
+		}
+
+		/**
+		 * Normalisiert die Filter (löst insbesondere einen Autor-Namen zu einer ID auf).
+		 *
+		 * @param array<string,mixed> $filters Rohfilter.
+		 * @return array<string,mixed>
+		 */
+		private function normalize_filters( array $filters ): array {
+			$author_id   = (int) ( $filters['author_id'] ?? 0 );
+			$author_name = trim( (string) ( $filters['author_name'] ?? '' ) );
+
+			if ( $author_id < 1 && '' !== $author_name && class_exists( '\\WP_User_Query' ) ) {
+				$query = new \WP_User_Query(
+					array(
+						'search'         => '*' . $author_name . '*',
+						'search_columns' => array( 'display_name', 'user_login', 'user_nicename' ),
+						'number'         => 1,
+						'fields'         => array( 'ID' ),
+					)
+				);
+				$results = $query->get_results();
+				if ( ! empty( $results ) ) {
+					$author_id = (int) ( is_object( $results[0] ) ? $results[0]->ID : $results[0] );
+				}
+			}
+
+			return array(
+				'author_id' => $author_id,
+				'forum_id'  => (int) ( $filters['forum_id'] ?? 0 ),
+				'date_from' => (string) ( $filters['date_from'] ?? '' ),
+				'date_to'   => (string) ( $filters['date_to'] ?? '' ),
 			);
 		}
 

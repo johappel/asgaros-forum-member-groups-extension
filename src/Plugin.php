@@ -35,6 +35,7 @@ use AFSpaces\Interface\MembersView;
 use AFSpaces\Interface\MyInvitationsView;
 use AFSpaces\Interface\ProfileView;
 use AFSpaces\Interface\RestController;
+use AFSpaces\Interface\SearchModal;
 use AFSpaces\Interface\SearchSettingsPage;
 use AFSpaces\Interface\SearchView;
 use AFSpaces\Interface\SpacesHubController;
@@ -127,6 +128,10 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_settings = new SearchSettingsPage( $search_indexer, $search_index );
 			$search_settings->init();
 
+			// Ortsunabhängiges Such-Overlay (Dialog) mit Live-Suche.
+			$search_modal = new SearchModal( $asgaros );
+			$search_modal->init();
+
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
 			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search );
 			$hub->init();
@@ -168,8 +173,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			add_shortcode(
 				'afspaces_search',
-				static function () use ( $hybrid_search ): string {
-					$view = new SearchView( $hybrid_search );
+				static function () use ( $hybrid_search, $asgaros ): string {
+					$view = new SearchView( $hybrid_search, $asgaros );
 					return $view->render();
 				}
 			);

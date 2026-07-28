@@ -42,13 +42,14 @@ if ( ! class_exists( 'AFSpaces\\Search\\WpPostSearch' ) ) {
 		/**
 		 * Führt eine Beitragssuche aus.
 		 *
-		 * @param string $keywords Suchbegriff.
-		 * @param string $sort     'relevance'|'date'.
-		 * @param int    $page     Seite (1-basiert).
-		 * @param int    $per_page Treffer pro Seite.
+		 * @param string              $keywords Suchbegriff.
+		 * @param string              $sort     'relevance'|'date'.
+		 * @param int                 $page     Seite (1-basiert).
+		 * @param int                 $per_page Treffer pro Seite.
+		 * @param array<string,mixed> $filters  Optionale Filter: author_id, date_from, date_to.
 		 * @return array{hits: SearchHit[], total: int}
 		 */
-		public function search( string $keywords, string $sort = 'relevance', int $page = 1, int $per_page = 10 ): array {
+		public function search( string $keywords, string $sort = 'relevance', int $page = 1, int $per_page = 10, array $filters = array() ): array {
 			$keywords = trim( $keywords );
 			if ( '' === $keywords || ! class_exists( '\\WP_Query' ) ) {
 				return array( 'hits' => array(), 'total' => 0 );
@@ -69,6 +70,24 @@ if ( ! class_exists( 'AFSpaces\\Search\\WpPostSearch' ) ) {
 				$args['order']   = 'DESC';
 			} else {
 				$args['orderby'] = 'relevance';
+			}
+
+			$author_id = (int) ( $filters['author_id'] ?? 0 );
+			if ( $author_id > 0 ) {
+				$args['author'] = $author_id;
+			}
+
+			$date_from = $this->normalize_date( (string) ( $filters['date_from'] ?? '' ) );
+			$date_to   = $this->normalize_date( (string) ( $filters['date_to'] ?? '' ) );
+			if ( '' !== $date_from || '' !== $date_to ) {
+				$range = array( 'inclusive' => true );
+				if ( '' !== $date_from ) {
+					$range['after'] = $date_from . ' 00:00:00';
+				}
+				if ( '' !== $date_to ) {
+					$range['before'] = $date_to . ' 23:59:59';
+				}
+				$args['date_query'] = array( $range );
 			}
 
 			/**
@@ -103,6 +122,17 @@ if ( ! class_exists( 'AFSpaces\\Search\\WpPostSearch' ) ) {
 				'hits'  => $hits,
 				'total' => $total,
 			);
+		}
+
+		/**
+		 * Normalisiert ein Datum auf `Y-m-d` (oder Leerstring bei ungültiger Eingabe).
+		 *
+		 * @param string $raw Rohwert.
+		 * @return string
+		 */
+		private function normalize_date( string $raw ): string {
+			$raw = trim( $raw );
+			return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $raw ) ? $raw : '';
 		}
 
 		/**
