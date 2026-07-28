@@ -319,13 +319,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				'active' => in_array( $view, array( SpacesUrls::VIEW_DISCOVER, SpacesUrls::VIEW_GROUP ), true ),
 			);
 
-			$tabs[] = array(
-				'view'   => SpacesUrls::VIEW_SEARCH,
-				'label'  => __( 'Suche', 'afspaces' ),
-				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_SEARCH ),
-				'active' => SpacesUrls::VIEW_SEARCH === $view,
-			);
-
 			if ( $this->can_create_spaces( $actor ) ) {
 				$tabs[] = array(
 					'view'   => SpacesUrls::VIEW_CREATE,
@@ -357,21 +350,17 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				);
 			}
 
-			$search_url = SpacesUrls::hub_url( SpacesUrls::VIEW_SEARCH );
-			$search_url = (string) apply_filters( 'afspaces_forum_search_url', $search_url );
-
-			$search_hidden = ( SpacesUrls::hub_page_id() > 0 )
-				? sprintf( '<input type="hidden" name="%1$s" value="%2$s" />', esc_attr( SpacesUrls::VIEW_PARAM ), esc_attr( SpacesUrls::VIEW_SEARCH ) )
-				: '';
+// Such-Button öffnet jetzt das Modal mit Forum-Scope statt direkter Seite.
+		$search_button = sprintf(
+			'<button type="button" class="afspaces-header-search-btn" data-afspaces-search-open data-afspaces-search-scope="forum" aria-label="%s"><span class="search-icon fas fa-search" aria-hidden="true"></span></button>',
+			esc_attr__( 'Forum durchsuchen', 'afspaces' )
+		);
 
 			return sprintf(
-				'<div id="forum-header" class="afspaces-forum-header"><nav id="forum-navigation" class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav><div id="forum-search" class="afspaces-forum-search"><span class="search-icon fas fa-search" aria-hidden="true"></span><form method="get" action="%3$s" role="search"><label class="screen-reader-text" for="afspaces-header-search">%4$s</label>%5$s<input id="afspaces-header-search" name="%6$s" type="search" placeholder="%4$s" value="" /></form></div><div class="clear"></div></div>',
+				'<div id="forum-header" class="afspaces-forum-header"><nav id="forum-navigation" class="afspaces-hub-nav" aria-label="%1$s"><ul>%2$s</ul></nav><div id="forum-search" class="afspaces-forum-search">%3$s</div><div class="clear"></div></div>',
 				esc_attr__( 'Arbeitsgruppenverwaltung', 'afspaces' ),
 				$items,
-				esc_url( $search_url ),
-				esc_attr__( 'Forum durchsuchen', 'afspaces' ),
-				$search_hidden,
-				esc_attr( SearchView::PARAM_QUERY )
+				$search_button
 			);
 		}
 

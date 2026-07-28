@@ -1089,25 +1089,32 @@ a.afspaces-link.is-active {
 	line-height: 1;
 }
 
-#af-wrapper.afspaces-wrapper #forum-search form {
+#af-wrapper.afspaces-wrapper #forum-search .afspaces-header-search-btn {
 	flex: 1 1 auto;
-	margin: 0;
-}
-
-#af-wrapper.afspaces-wrapper #forum-search input[type="search"] {
 	width: 100%;
-	height: auto;
+	height: 100%;
 	padding: 0;
 	margin: 0;
 	border: 0;
 	background: transparent;
-	box-shadow: none;
-	font-family: Quicksand, sans-serif;
-	font-size: 13px;
-	font-weight: 500;
 	color: #444;
-	outline: none;
-	min-width: 0;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font: inherit;
+	font-size: 20px;
+	line-height: 1;
+}
+
+#af-wrapper.afspaces-wrapper #forum-search .afspaces-header-search-btn:hover {
+	opacity: 0.8;
+}
+
+#af-wrapper.afspaces-wrapper #forum-search .afspaces-header-search-btn:focus {
+	outline: 2px solid #2d5d7f;
+	outline-offset: -2px;
+	border-radius: 4px;
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-breadcrumb,

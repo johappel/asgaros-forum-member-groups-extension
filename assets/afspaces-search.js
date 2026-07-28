@@ -180,6 +180,18 @@
 		return node.value || '';
 	}
 
+	function fieldSet(name, value) {
+		var node = overlay.querySelector('[name="' + name + '"]');
+		if (!node) {
+			return;
+		}
+		if (node.type === 'checkbox') {
+			node.checked = !!value;
+		} else {
+			node.value = value || '';
+		}
+	}
+
 	function scheduleSearch(delay) {
 		if (debounceTimer) {
 			window.clearTimeout(debounceTimer);
@@ -395,7 +407,7 @@
 		}
 	}
 
-	function open(prefill) {
+	function open(prefill, scope) {
 		if (!overlay) {
 			return;
 		}
@@ -404,6 +416,9 @@
 		document.body.classList.add('afspaces-search-open');
 		if (prefill && input) {
 			input.value = prefill;
+		}
+		if (scope) {
+			fieldSet('scope', scope);
 		}
 		window.setTimeout(function () {
 			if (input) {
@@ -444,7 +459,8 @@
 			var trigger = isSearchTrigger(e.target);
 			if (trigger) {
 				e.preventDefault();
-				open('');
+				var scope = trigger.getAttribute('data-afspaces-search-scope');
+				open('', scope);
 			}
 		});
 
@@ -474,7 +490,8 @@
 			var field = form.querySelector('input[name="keywords"], input[type="search"], input[name="s"]');
 			var value = field ? field.value : '';
 			e.preventDefault();
-			open(value);
+			var scope = isForumSearch ? 'forum' : null;
+			open(value, scope);
 		}, true);
 	}
 
