@@ -407,6 +407,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$target_space_id = isset( $_POST['target_space_id'] ) ? (int) $_POST['target_space_id'] : 0;
 					$this->space_moderation->move_topic( $space_id, $actor, $topic_id, $target_space_id );
 					$this->set_message( 'success', __( 'Das Thema wurde verschoben.', 'afspaces' ) );
+				} elseif ( 'moderate_move_post' === $action ) {
+					$post_id         = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
+					$target_topic_id = isset( $_POST['target_topic_id'] ) ? (int) $_POST['target_topic_id'] : 0;
+					$this->space_moderation->move_post( $space_id, $actor, $post_id, $target_topic_id );
+					$this->set_message( 'success', __( 'Der Beitrag wurde in ein anderes Thema verschoben.', 'afspaces' ) );
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
@@ -451,7 +456,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				exit;
 			}
 
-			if ( in_array( $action, array( 'moderate_close_topic', 'moderate_reopen_topic', 'moderate_delete_topic', 'moderate_delete_post', 'moderate_move_topic' ), true ) ) {
+			if ( in_array( $action, array( 'moderate_close_topic', 'moderate_reopen_topic', 'moderate_delete_topic', 'moderate_delete_post', 'moderate_move_topic', 'moderate_move_post' ), true ) ) {
 				// Wurde die Aktion aus dem Forum ausgelöst, kehren wir dorthin zurück.
 				$default = SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id ) );
 				$return  = isset( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : '';

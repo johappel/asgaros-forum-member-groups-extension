@@ -152,7 +152,8 @@
 			moderate_reopen_topic: true,
 			moderate_delete_topic: true,
 			moderate_delete_post: true,
-			moderate_move_topic: true
+			moderate_move_topic: true,
+			moderate_move_post: true
 		};
 
 		if (nonAjaxActions[actionInput.value]) {
@@ -358,4 +359,14 @@
 	}
 
 	document.querySelectorAll('form[data-afspaces-wizard]').forEach(enhanceWizard);
+
+	// Verschiebt die Moderationsaktionen in das vorhandene Beitragsmenü.
+	document.querySelectorAll('[data-afspaces-post-mod]').forEach(function (node) {
+		var wrapper = node.closest('.post-wrapper') || node.closest('[class*="post"]');
+		var menu = wrapper ? wrapper.querySelector('.forum-post-menu') : null;
+		if (menu) {
+			menu.appendChild(node);
+			menu.classList.add('afspaces-has-mod');
+		}
+	});
 })();

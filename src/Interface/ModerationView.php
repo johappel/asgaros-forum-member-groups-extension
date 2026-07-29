@@ -176,8 +176,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 				return $this->notice( $e->getMessage() );
 			}
 
-			$posts = $result['posts'] ?? array();
-			$back  = SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id ) );
+			$posts        = $result['posts'] ?? array();
+			$post_targets = $this->moderation->list_post_move_targets( $space_id, $actor, $topic_id );
+			$back         = SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id ) );
 
 			ob_start();
 			?>
@@ -199,15 +200,33 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 									<?php endif; ?>
 								</p>
 								<div class="afspaces-moderation-post-text"><?php echo wp_kses_post( (string) ( $post['text'] ?? '' ) ); ?></div>
-								<form method="post">
-									<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-									<input type="hidden" name="afspaces_action" value="moderate_delete_post" />
-									<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
-									<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) (int) $post['id'] ); ?>" />
-									<input type="hidden" name="redirect_to" value="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id, 'mod_topic' => $topic_id ) ) ); ?>" />
-									<?php $confirm = ! empty( $post['is_first'] ) ? __( 'Der Eröffnungsbeitrag wird gelöscht – dadurch wird das gesamte Thema entfernt. Fortfahren?', 'afspaces' ) : __( 'Diesen Beitrag wirklich löschen?', 'afspaces' ); ?>
-									<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr( $confirm ); ?>"><?php echo esc_html__( 'Beitrag löschen', 'afspaces' ); ?></button>
-								</form>
+								<div class="afspaces-moderation-actions">
+									<form method="post">
+										<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+										<input type="hidden" name="afspaces_action" value="moderate_delete_post" />
+										<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+										<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) (int) $post['id'] ); ?>" />
+										<input type="hidden" name="redirect_to" value="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id, 'mod_topic' => $topic_id ) ) ); ?>" />
+										<?php $confirm = ! empty( $post['is_first'] ) ? __( 'Der Eröffnungsbeitrag wird gelöscht – dadurch wird das gesamte Thema entfernt. Fortfahren?', 'afspaces' ) : __( 'Diesen Beitrag wirklich löschen?', 'afspaces' ); ?>
+										<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr( $confirm ); ?>"><?php echo esc_html__( 'Beitrag löschen', 'afspaces' ); ?></button>
+									</form>
+									<?php if ( empty( $post['is_first'] ) && ! empty( $post_targets ) ) : ?>
+										<form method="post" class="afspaces-moderation-move">
+											<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+											<input type="hidden" name="afspaces_action" value="moderate_move_post" />
+											<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+											<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) (int) $post['id'] ); ?>" />
+											<input type="hidden" name="redirect_to" value="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id, 'mod_topic' => $topic_id ) ) ); ?>" />
+											<label class="screen-reader-text" for="afspaces-movepost-<?php echo esc_attr( (string) (int) $post['id'] ); ?>"><?php echo esc_html__( 'In Thema verschieben', 'afspaces' ); ?></label>
+											<select id="afspaces-movepost-<?php echo esc_attr( (string) (int) $post['id'] ); ?>" name="target_topic_id">
+												<?php foreach ( $post_targets as $target ) : ?>
+													<option value="<?php echo esc_attr( (string) $target['topic_id'] ); ?>"><?php echo esc_html( (string) $target['name'] ); ?></option>
+												<?php endforeach; ?>
+											</select>
+											<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Verschieben', 'afspaces' ); ?></button>
+										</form>
+									<?php endif; ?>
+								</div>
 							</li>
 						<?php endforeach; ?>
 					</ul>

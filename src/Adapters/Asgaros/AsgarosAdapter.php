@@ -1245,5 +1245,28 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				'total' => $total,
 			);
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function move_post( int $post_id, int $target_topic_id, int $target_forum_id ): void {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum || $post_id < 1 || $target_topic_id < 1 || $target_forum_id < 1 ) {
+				return;
+			}
+
+			$forum->db->update(
+				$forum->tables->posts,
+				array(
+					'parent_id' => $target_topic_id,
+					'forum_id'  => $target_forum_id,
+				),
+				array( 'id' => $post_id ),
+				array( '%d', '%d' ),
+				array( '%d' )
+			);
+		}
 	}
 }

@@ -179,6 +179,72 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		}
 
 		/**
+		 * Verschiebt einen einzelnen Beitrag in ein anderes Thema (im eigenen
+		 * oder einem ebenfalls verwalteten Forum).
+		 *
+		 * @param int $space_id        Quell-Space-ID.
+		 * @param int $actor_user_id   Akteur.
+		 * @param int $post_id         Beitrags-ID.
+		 * @param int $target_topic_id Ziel-Themen-ID.
+		 * @return void
+		 * @throws DomainException Bei fehlender Berechtigung, Eröffnungsbeitrag oder fremdem Ziel.
+		 */
+		public function move_post( int $space_id, int $actor_user_id, int $post_id, int $target_topic_id ): void {
+			$space    = $this->require_moderatable_space( $space_id, $actor_user_id );
+			$location = $this->asgaros->get_post_location( $post_id );
+			if ( null === $location || (int) $location['forum_id'] !== $space->forum_id ) {
+				throw new DomainException( __( 'Dieser Beitrag gehört nicht zu deinem Forum.', 'afspaces' ) );
+			}
+			if ( ! empty( $location['is_first'] ) ) {
+				throw new DomainException( __( 'Der Eröffnungsbeitrag kann nicht in ein anderes Thema verschoben werden.', 'afspaces' ) );
+			}
+			if ( $target_topic_id < 1 || $target_topic_id === (int) $location['topic_id'] ) {
+				throw new DomainException( __( 'Bitte wähle ein anderes Zielthema.', 'afspaces' ) );
+			}
+
+			$target_forum = $this->asgaros->get_topic_forum( $target_topic_id );
+			if ( $target_forum < 1 ) {
+				throw new DomainException( __( 'Das Zielthema wurde nicht gefunden.', 'afspaces' ) );
+			}
+
+			$target_space = $this->spaces->get_space_by_forum( $target_forum );
+			if ( ! $target_space || ! $this->policy->can_moderate( (int) $target_space->id, $actor_user_id ) ) {
+				throw new DomainException( __( 'Du darfst nicht in dieses Zielthema verschieben.', 'afspaces' ) );
+			}
+
+			$this->asgaros->move_post( $post_id, $target_topic_id, $target_forum );
+			$this->audit->log( $space_id, $actor_user_id, $post_id, 'post_moved', 'post' );
+		}
+
+		/**
+		 * Listet mögliche Zielthemen für das Verschieben eines Beitrags
+		 * (weitere Themen desselben Forums).
+		 *
+		 * @param int $space_id         Space-ID.
+		 * @param int $actor_user_id    Akteur.
+		 * @param int $exclude_topic_id Auszuschließendes (aktuelles) Thema.
+		 * @return array<int,array{topic_id:int, name:string}>
+		 */
+		public function list_post_move_targets( int $space_id, int $actor_user_id, int $exclude_topic_id ): array {
+			$space  = $this->require_moderatable_space( $space_id, $actor_user_id );
+			$result = $this->asgaros->list_forum_topics( $space->forum_id, array( 'per_page' => 100 ) );
+
+			$targets = array();
+			foreach ( ( $result['topics'] ?? array() ) as $topic ) {
+				$topic_id = (int) ( $topic['id'] ?? 0 );
+				if ( $topic_id < 1 || $topic_id === $exclude_topic_id ) {
+					continue;
+				}
+				$targets[] = array(
+					'topic_id' => $topic_id,
+					'name'     => (string) ( $topic['name'] ?? ( 'Thema #' . $topic_id ) ),
+				);
+			}
+
+			return $targets;
+		}
+
+		/**
 		 * Listet die Foren, in die der Akteur Themen verschieben darf (seine verwalteten Räume).
 		 *
 		 * @param int $actor_user_id Akteur.

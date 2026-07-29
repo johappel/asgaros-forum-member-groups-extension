@@ -317,5 +317,15 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return array{posts: array<int,array<string,mixed>>, total: int}
 		 */
 		public function list_topic_posts( int $topic_id, array $args = [] ): array;
+
+		/**
+		 * Verschiebt einen einzelnen Beitrag in ein anderes Thema.
+		 *
+		 * @param int $post_id         Beitrags-ID.
+		 * @param int $target_topic_id Ziel-Themen-ID.
+		 * @param int $target_forum_id Forum-ID des Zielthemas.
+		 * @return void
+		 */
+		public function move_post( int $post_id, int $target_topic_id, int $target_forum_id ): void;
 	}
 }

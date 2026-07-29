@@ -33,6 +33,15 @@ final class StubModerationRepository extends SpaceRepository {
 		return $this->spaces[ $space_id ] ?? null;
 	}
 
+	public function get_space_by_forum( int $forum_id ): ?Space {
+		foreach ( $this->spaces as $space ) {
+			if ( $space->forum_id === $forum_id ) {
+				return $space;
+			}
+		}
+		return null;
+	}
+
 	public function is_manager( int $space_id, int $user_id ): bool {
 		return in_array( $user_id, $this->managers[ $space_id ] ?? array(), true );
 	}
@@ -110,6 +119,10 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 
 	public function list_topic_posts( int $topic_id, array $args = [] ): array {
 		return array( 'posts' => array(), 'total' => 0 );
+	}
+
+	public function move_post( int $post_id, int $target_topic_id, int $target_forum_id ): void {
+		$this->calls[] = 'move_post:' . $post_id . '->' . $target_topic_id . '@' . $target_forum_id;
 	}
 }
 
@@ -203,5 +216,31 @@ final class SpaceModerationServiceTest extends TestCase {
 	public function test_cannot_move_into_same_space(): void {
 		$this->expectException( DomainException::class );
 		$this->service->move_topic( 10, 7, 99, 10 );
+	}
+
+	public function test_move_post_to_topic_in_managed_forum(): void {
+		// Beitrag 50 liegt in Thema 3 / Forum 500 (Space 10). Ziel: Thema 99 (auch Forum 500).
+		$this->adapter->post_location[50] = array( 'topic_id' => 3, 'forum_id' => 500, 'is_first' => false );
+		$this->service->move_post( 10, 7, 50, 99 );
+		$this->assertContains( 'move_post:50->99@500', $this->adapter->calls );
+	}
+
+	public function test_cannot_move_first_post(): void {
+		$this->adapter->post_location[50] = array( 'topic_id' => 3, 'forum_id' => 500, 'is_first' => true );
+		$this->expectException( DomainException::class );
+		$this->service->move_post( 10, 7, 50, 99 );
+	}
+
+	public function test_cannot_move_post_from_foreign_forum(): void {
+		$this->adapter->post_location[50] = array( 'topic_id' => 3, 'forum_id' => 999, 'is_first' => false );
+		$this->expectException( DomainException::class );
+		$this->service->move_post( 10, 7, 50, 99 );
+	}
+
+	public function test_cannot_move_post_to_unmanaged_target_topic(): void {
+		// Zielthema 77 liegt in Forum 999, das keinem verwalteten Space gehört.
+		$this->adapter->post_location[50] = array( 'topic_id' => 3, 'forum_id' => 500, 'is_first' => false );
+		$this->expectException( DomainException::class );
+		$this->service->move_post( 10, 7, 50, 77 );
 	}
 }

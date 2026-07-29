@@ -184,6 +184,9 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 	public function list_topic_posts( int $topic_id, array $args = [] ): array {
 		return array( 'posts' => array(), 'total' => 0 );
 	}
+
+	public function move_post( int $post_id, int $target_topic_id, int $target_forum_id ): void {
+	}
 }
 
 final class SpaceRegistrationServiceTest extends TestCase {
