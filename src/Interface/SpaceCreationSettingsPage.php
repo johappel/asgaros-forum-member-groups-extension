@@ -151,7 +151,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 											<?php echo esc_html( translate_user_role( (string) ( $role['name'] ?? $slug ) ) ); ?>
 										</label>
 									<?php endforeach; ?>
-									<p class="description"><?php echo esc_html__( 'Ohne Auswahl dürfen alle Personen mit der Gründungs-Berechtigung gründen.', 'afspaces' ); ?></p>
+									<p class="description"><?php echo esc_html__( 'Ohne Auswahl dürfen alle angemeldeten Personen gründen (sobald die Funktion aktiviert ist). Mit Auswahl dürfen nur die gewählten Rollen gründen.', 'afspaces' ); ?></p>
 								</fieldset>
 							</td>
 						</tr>

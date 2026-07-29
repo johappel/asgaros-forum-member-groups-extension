@@ -45,9 +45,10 @@ final class SpaceCreationPolicyTest extends TestCase {
 		$this->policy->assert_can_create( $this->settings( array( 'enabled' => false ) ), false, true, array( 'author' ) );
 	}
 
-	public function test_missing_capability_blocks_creation(): void {
-		$this->expectException( DomainException::class );
-		$this->policy->assert_can_create( $this->settings(), false, false, array( 'author' ) );
+	public function test_enabled_without_roles_allows_any_logged_in_user(): void {
+		// Aktiv + keine Rolleneinschränkung => alle angemeldeten Personen dürfen gründen.
+		$this->policy->assert_can_create( $this->settings( array( 'allowed_roles' => array() ) ), false, false, array( 'author' ) );
+		$this->assertTrue( true );
 	}
 
 	public function test_admin_bypasses_all_checks(): void {
@@ -59,10 +60,20 @@ final class SpaceCreationPolicyTest extends TestCase {
 
 	public function test_role_restriction(): void {
 		$settings = $this->settings( array( 'allowed_roles' => array( 'editor' ) ) );
-		$this->policy->assert_can_create( $settings, false, true, array( 'editor' ) );
 
+		// Freigeschaltete Rolle darf auch ohne explizite Capability gründen.
+		$this->policy->assert_can_create( $settings, false, false, array( 'editor' ) );
+
+		// Weder passende Rolle noch Capability -> blockiert.
 		$this->expectException( DomainException::class );
+		$this->policy->assert_can_create( $settings, false, false, array( 'author' ) );
+	}
+
+	public function test_capability_grants_even_with_role_restriction(): void {
+		// Bei eingeschränkten Rollen berechtigt auch die Gründungs-Capability.
+		$settings = $this->settings( array( 'allowed_roles' => array( 'editor' ) ) );
 		$this->policy->assert_can_create( $settings, false, true, array( 'author' ) );
+		$this->assertTrue( true );
 	}
 
 	public function test_quota_enforced(): void {

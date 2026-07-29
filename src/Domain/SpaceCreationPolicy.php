@@ -48,15 +48,16 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpaceCreationPolicy' ) ) {
 				throw new DomainException( __( 'Die Selbstgründung von Arbeitsgruppen ist derzeit deaktiviert.', 'afspaces' ) );
 			}
 
-			if ( ! $has_create_cap ) {
-				throw new DomainException( __( 'Dir fehlt die Berechtigung, eine Arbeitsgruppe zu gründen.', 'afspaces' ) );
+			// Ist die Funktion aktiv und wurde KEINE Rolle eingeschränkt, dürfen
+			// alle angemeldeten Personen gründen. Sind Rollen konfiguriert, ist
+			// berechtigt, wer eine dieser Rollen ODER die Gründungs-Capability hat.
+			if ( empty( $settings->allowed_roles ) ) {
+				return;
 			}
 
-			if ( ! empty( $settings->allowed_roles ) ) {
-				$intersection = array_intersect( $settings->allowed_roles, $actor_roles );
-				if ( empty( $intersection ) ) {
-					throw new DomainException( __( 'Deine Benutzerrolle ist für die Gründung von Arbeitsgruppen nicht freigeschaltet.', 'afspaces' ) );
-				}
+			$by_role = ! empty( array_intersect( $settings->allowed_roles, $actor_roles ) );
+			if ( ! $by_role && ! $has_create_cap ) {
+				throw new DomainException( __( 'Deine Benutzerrolle ist für die Gründung von Arbeitsgruppen nicht freigeschaltet.', 'afspaces' ) );
 			}
 		}
 

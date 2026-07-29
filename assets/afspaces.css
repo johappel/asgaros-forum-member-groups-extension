@@ -2379,3 +2379,17 @@ margin-top: 0.5rem;
 .afspaces-approval-actions textarea {
 min-width: 260px;
 }
+
+/* MVP 4: Unternavigation des Bereichs "Meine Arbeitsgruppen". */
+.afspaces-dashboard-subnav {
+margin: 0 0 1rem;
+}
+
+.afspaces-dashboard-subnav ul {
+display: flex;
+flex-wrap: wrap;
+gap: 0.5rem;
+list-style: none;
+margin: 0;
+padding: 0;
+}

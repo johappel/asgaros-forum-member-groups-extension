@@ -161,6 +161,7 @@ final class SpaceCreationServiceTest extends TestCase {
 				'enabled'              => true,
 				'require_approval'     => true,
 				'max_spaces_per_user'  => 3,
+				'allowed_roles'        => array( 'editor' ),
 				'allowed_visibilities' => array( 'private', 'public' ),
 				'rate_limit_seconds'   => 0,
 			),

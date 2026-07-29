@@ -957,8 +957,20 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			$space_id = (int) $request['space_id'];
 			$space    = $this->spaces->get_space( $space_id );
 
-			$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
-			if ( empty( $group_ids ) ) {
+			if ( ! $space ) {
+				return new WP_Error(
+					'afspaces_rest_space_not_found',
+					__( 'Arbeitsgruppe nicht gefunden.', 'afspaces' ),
+					array( 'status' => 404 )
+				);
+			}
+
+			$group_id = $space->primary_group_id > 0 ? (int) $space->primary_group_id : 0;
+			if ( $group_id < 1 ) {
+				$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
+				$group_id  = empty( $group_ids ) ? 0 : (int) $group_ids[0];
+			}
+			if ( $group_id < 1 ) {
 				return new WP_Error(
 					'afspaces_rest_no_group',
 					__( 'Keine Zugriffsgruppe konfiguriert.', 'afspaces' ),
@@ -967,7 +979,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			}
 
 			$result = $this->asgaros->list_group_members(
-				(int) $group_ids[0],
+				$group_id,
 				array(
 					'page'     => (int) $request['page'],
 					'per_page' => (int) $request['per_page'],

@@ -80,11 +80,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 				return $this->notice( __( 'Du bist nicht berechtigt, diese Arbeitsgruppe zu verwalten.', 'afspaces' ) );
 			}
 
-			$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
-			if ( empty( $group_ids ) ) {
+			$group_id = $space->primary_group_id > 0 ? (int) $space->primary_group_id : 0;
+			if ( $group_id < 1 ) {
+				$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
+				$group_id  = empty( $group_ids ) ? 0 : (int) $group_ids[0];
+			}
+			if ( $group_id < 1 ) {
 				return $this->notice( __( 'Für dieses Forum ist keine Zugriffsgruppe konfiguriert.', 'afspaces' ) );
 			}
-			$group_id = (int) $group_ids[0];
 
 			$page    = isset( $_GET['afp_page'] ) ? max( 1, (int) $_GET['afp_page'] ) : 1;
 			$search  = isset( $_GET['afp_search'] ) ? sanitize_text_field( wp_unslash( $_GET['afp_search'] ) ) : '';

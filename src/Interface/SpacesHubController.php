@@ -307,7 +307,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				'view'   => SpacesUrls::VIEW_DASHBOARD,
 				'label'  => WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ),
 				'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ),
-				'active' => SpacesUrls::VIEW_DASHBOARD === $view || $room_context_active,
+				'active' => in_array( $view, array( SpacesUrls::VIEW_DASHBOARD, SpacesUrls::VIEW_CREATE ), true ) || $room_context_active,
 			);
 
 			$tabs[] = array(
@@ -331,15 +331,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				'active' => in_array( $view, array( SpacesUrls::VIEW_DISCOVER, SpacesUrls::VIEW_GROUP ), true ),
 			);
 
-			if ( $this->can_create_spaces( $actor ) ) {
-				$tabs[] = array(
-					'view'   => SpacesUrls::VIEW_CREATE,
-					'label'  => __( 'Arbeitsgruppe gründen', 'afspaces' ),
-					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ),
-					'active' => SpacesUrls::VIEW_CREATE === $view,
-				);
-			}
-
+			// „Freigaben" ist eine administrative Aufgabe und erscheint daher nur
+			// für berechtigte Personen (Administratoren/Moderatoren) im Topmenü.
+			// „Arbeitsgruppe gründen" ist hingegen ein Aktionsbutton im Dashboard.
 			if ( $this->can_moderate_spaces( $actor ) ) {
 				$tabs[] = array(
 					'view'   => SpacesUrls::VIEW_APPROVALS,
@@ -586,19 +580,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				return true;
 			}
 			return $this->spaces->is_manager( $space_id, $actor );
-		}
-
-		/**
-		 * Prüft, ob die (optionale) Raumgründung für den Benutzer verfügbar ist.
-		 *
-		 * @param int $actor Benutzer-ID.
-		 * @return bool
-		 */
-		private function can_create_spaces( int $actor ): bool {
-			if ( 0 === $actor ) {
-				return false;
-			}
-			return $this->space_creation->can_user_create( $actor );
 		}
 
 		/**

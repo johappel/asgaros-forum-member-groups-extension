@@ -560,7 +560,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			<section class="afspaces-dashboard" aria-labelledby="afspaces-dashboard-heading">
 				<h2 id="afspaces-dashboard-heading"><?php echo esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE ) ); ?>"><?php echo esc_html__( 'Mein Arbeitsgruppenprofil öffnen', 'afspaces' ); ?></a></p>
+				<?php if ( $this->space_creation->can_user_create( $actor ) ) : ?>
+					<p class="afspaces-dashboard-actions">
+						<a class="afspaces-button" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ) ); ?>">
+							<?php echo esc_html__( 'Arbeitsgruppe gründen', 'afspaces' ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
 
 				<?php if ( empty( $manageable ) && empty( $member_spaces ) ) : ?>
 					<p><?php echo esc_html__( 'Dir sind noch keine Arbeitsgruppen zugeordnet.', 'afspaces' ); ?></p>
