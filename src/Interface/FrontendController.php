@@ -15,6 +15,8 @@ use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\SpaceCreationService;
+use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
@@ -63,6 +65,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private SpaceRegistrationService $space_registration;
 
 		/**
+		 * @var SpaceCreationService
+		 */
+		private SpaceCreationService $space_creation;
+
+		/**
+		 * @var SpaceLifecycleService
+		 */
+		private SpaceLifecycleService $space_lifecycle;
+
+		/**
 		 * @var string
 		 */
 		private string $nonce_action = 'afspaces_member_action';
@@ -83,7 +95,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
 				WorkingGroupService $working_groups,
-			SpaceRegistrationService $space_registration
+			SpaceRegistrationService $space_registration,
+			SpaceCreationService $space_creation,
+			SpaceLifecycleService $space_lifecycle
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -93,6 +107,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$this->invite_links = $invite_links;
 						$this->working_groups = $working_groups;
 			$this->space_registration = $space_registration;
+			$this->space_creation = $space_creation;
+			$this->space_lifecycle = $space_lifecycle;
 		}
 
 		/**
@@ -306,11 +322,72 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				} elseif ( 'save_working_group_meta' === $action ) {
 					$this->working_groups->save_metadata( $space_id, $actor, wp_unslash( $_POST ) );
 					$this->set_message( 'success', __( 'Die Arbeitsgruppen-Details wurden gespeichert.', 'afspaces' ) );
+				} elseif ( 'create_space' === $action ) {
+					$input = array(
+						'name'        => isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '',
+						'description' => isset( $_POST['description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['description'] ) ) : '',
+						'visibility'  => isset( $_POST['visibility'] ) ? sanitize_key( wp_unslash( $_POST['visibility'] ) ) : '',
+					);
+					$this->remember_create_input( $input, ! empty( $_POST['accept_responsibility'] ) );
+
+					if ( empty( $_POST['accept_responsibility'] ) ) {
+						throw new DomainException( __( 'Bitte bestätige, dass du die Verantwortung für die Arbeitsgruppe übernimmst.', 'afspaces' ) );
+					}
+
+					$created_space = $this->space_creation->create( $actor, $input );
+					$this->forget_create_input();
+					$this->set_message(
+						'success',
+						$created_space->status === \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING
+							? __( 'Deine Arbeitsgruppe wurde erstellt und wartet auf Freigabe.', 'afspaces' )
+							: __( 'Deine Arbeitsgruppe wurde erstellt.', 'afspaces' )
+					);
+					wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $created_space->id ) ) );
+					exit;
+				} elseif ( 'rename_space' === $action ) {
+					$name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+					$this->space_lifecycle->rename( $space_id, $actor, $name );
+					$this->set_message( 'success', __( 'Der Name der Arbeitsgruppe wurde geändert.', 'afspaces' ) );
+				} elseif ( 'change_space_visibility' === $action ) {
+					$visibility = isset( $_POST['visibility'] ) ? sanitize_key( wp_unslash( $_POST['visibility'] ) ) : '';
+					$this->space_lifecycle->change_visibility( $space_id, $actor, $visibility );
+					$this->set_message( 'success', __( 'Die Sichtbarkeit der Arbeitsgruppe wurde geändert.', 'afspaces' ) );
+				} elseif ( 'transfer_space_owner' === $action ) {
+					$new_owner = isset( $_POST['new_owner_id'] ) ? (int) $_POST['new_owner_id'] : 0;
+					$this->space_lifecycle->transfer_owner( $space_id, $actor, $new_owner );
+					$this->set_message( 'success', __( 'Die Verantwortung wurde übertragen.', 'afspaces' ) );
+				} elseif ( 'archive_space' === $action ) {
+					$this->space_lifecycle->archive( $space_id, $actor );
+					$this->set_message( 'success', __( 'Die Arbeitsgruppe wurde archiviert.', 'afspaces' ) );
+				} elseif ( 'reactivate_space' === $action ) {
+					$this->space_lifecycle->reactivate( $space_id, $actor );
+					$this->set_message( 'success', __( 'Die Arbeitsgruppe wurde reaktiviert.', 'afspaces' ) );
+				} elseif ( 'delete_space' === $action ) {
+					$this->space_lifecycle->delete( $space_id, $actor );
+					$this->set_message( 'success', __( 'Die Arbeitsgruppe wurde gelöscht.', 'afspaces' ) );
+					wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) );
+					exit;
+				} elseif ( 'approve_space' === $action ) {
+					$this->space_lifecycle->approve( $space_id, $actor );
+					$this->set_message( 'success', __( 'Die Arbeitsgruppe wurde freigegeben.', 'afspaces' ) );
+					wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ) );
+					exit;
+				} elseif ( 'reject_space' === $action ) {
+					$reason = isset( $_POST['rejection_reason'] ) ? sanitize_textarea_field( wp_unslash( $_POST['rejection_reason'] ) ) : '';
+					$this->space_lifecycle->reject( $space_id, $actor, $reason );
+					$this->set_message( 'success', __( 'Die Arbeitsgruppe wurde abgelehnt.', 'afspaces' ) );
+					wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ) );
+					exit;
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
 				if ( $is_ajax ) {
 					wp_send_json_error( array( 'message' => $e->getMessage() ), 400 );
+				}
+
+				if ( 'create_space' === $action ) {
+					wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ) );
+					exit;
 				}
 			}
 
@@ -336,6 +413,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			}
 
 			if ( 'save_working_group_meta' === $action ) {
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
+				exit;
+			}
+
+			if ( in_array( $action, array( 'rename_space', 'change_space_visibility', 'transfer_space_owner', 'archive_space', 'reactivate_space' ), true ) ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
 				exit;
 			}
@@ -411,6 +493,33 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			}
 
 			$_SESSION['afspaces_created_invite_link'] = $url;
+		}
+
+		/**
+		 * Merkt sich Gründungs-Eingaben für die Wiederanzeige nach einem Fehler.
+		 *
+		 * @param array<string,mixed> $input       Eingaben (name, description, visibility).
+		 * @param bool                $accepted    Verantwortung bestätigt.
+		 * @return void
+		 */
+		private function remember_create_input( array $input, bool $accepted ): void {
+			if ( ! session_id() && ! headers_sent() ) {
+				session_start();
+			}
+			$input['accept_responsibility'] = $accepted;
+			$_SESSION['afspaces_create_input'] = $input;
+		}
+
+		/**
+		 * Verwirft gemerkte Gründungs-Eingaben.
+		 *
+		 * @return void
+		 */
+		private function forget_create_input(): void {
+			if ( ! session_id() && ! headers_sent() ) {
+				session_start();
+			}
+			unset( $_SESSION['afspaces_create_input'] );
 		}
 
 		/**

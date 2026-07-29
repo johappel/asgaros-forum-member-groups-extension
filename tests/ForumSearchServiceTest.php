@@ -94,6 +94,36 @@ final class FakeSearchAdapter implements AsgarosAdapterInterface {
 	public function is_search_request(): bool {
 		return false;
 	}
+
+	public function create_forum_category( array $data ): int {
+		return 0;
+	}
+
+	public function create_forum( array $data ): int {
+		return 0;
+	}
+
+	public function create_group( array $data ): int {
+		return 0;
+	}
+
+	public function assign_group_to_forum( int $forum_id, int $group_id ): void {
+	}
+
+	public function set_forum_visibility( int $forum_id, array $data ): void {
+	}
+
+	public function update_forum( int $forum_id, array $data ): void {
+	}
+
+	public function delete_forum( int $forum_id ): void {
+	}
+
+	public function delete_forum_category( int $category_id ): void {
+	}
+
+	public function delete_group( int $group_id ): void {
+	}
 }
 
 final class ForumSearchServiceTest extends TestCase {

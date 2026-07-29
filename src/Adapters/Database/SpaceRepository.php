@@ -60,6 +60,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 				owner_user_id bigint(20) unsigned NOT NULL,
 				visibility varchar(20) NOT NULL DEFAULT 'private',
 				status varchar(20) NOT NULL DEFAULT 'active',
+				rejection_reason text NOT NULL,
 				created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 				updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 				PRIMARY KEY (id),
@@ -118,10 +119,11 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 					'owner_user_id'    => $space->owner_user_id,
 					'visibility'       => $space->visibility,
 					'status'           => $space->status,
+					'rejection_reason' => $space->rejection_reason,
 					'created_at'       => $now,
 					'updated_at'       => $now,
 				),
-				array( '%d', '%d', '%d', '%s', '%s', '%s', '%s' )
+				array( '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s' )
 			);
 			return (int) $this->db->insert_id;
 		}
@@ -325,6 +327,128 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 				array( '%d', '%s' ),
 				array( '%d' )
 			);
+		}
+
+		/**
+		 * Setzt den Status eines Spaces.
+		 *
+		 * @param int    $space_id Space-ID.
+		 * @param string $status   Neuer Status.
+		 * @return void
+		 */
+		public function update_status( int $space_id, string $status ): void {
+			$this->db->update(
+				$this->spaces_table,
+				array(
+					'status'     => $status,
+					'updated_at' => current_time( 'mysql' ),
+				),
+				array( 'id' => $space_id ),
+				array( '%s', '%s' ),
+				array( '%d' )
+			);
+		}
+
+		/**
+		 * Setzt die Sichtbarkeit eines Spaces.
+		 *
+		 * @param int    $space_id   Space-ID.
+		 * @param string $visibility Neue Sichtbarkeit.
+		 * @return void
+		 */
+		public function update_visibility( int $space_id, string $visibility ): void {
+			$this->db->update(
+				$this->spaces_table,
+				array(
+					'visibility' => $visibility,
+					'updated_at' => current_time( 'mysql' ),
+				),
+				array( 'id' => $space_id ),
+				array( '%s', '%s' ),
+				array( '%d' )
+			);
+		}
+
+		/**
+		 * Speichert die Ablehnungsbegründung eines Spaces.
+		 *
+		 * @param int    $space_id Space-ID.
+		 * @param string $reason   Begründung.
+		 * @return void
+		 */
+		public function set_rejection_reason( int $space_id, string $reason ): void {
+			$this->db->update(
+				$this->spaces_table,
+				array( 'rejection_reason' => $reason ),
+				array( 'id' => $space_id ),
+				array( '%s' ),
+				array( '%d' )
+			);
+		}
+
+		/**
+		 * Löscht einen Space-Datensatz inklusive Manager-Zuordnungen.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @return void
+		 */
+		public function delete_space( int $space_id ): void {
+			$this->db->delete( $this->managers_table, array( 'space_id' => $space_id ), array( '%d' ) );
+			$this->db->delete( $this->spaces_table, array( 'id' => $space_id ), array( '%d' ) );
+		}
+
+		/**
+		 * Listet Spaces nach Status.
+		 *
+		 * @param string $status Status.
+		 * @return Space[]
+		 */
+		public function list_spaces_by_status( string $status ): array {
+			$rows = $this->db->get_results(
+				$this->db->prepare( "SELECT * FROM {$this->spaces_table} WHERE status = %s ORDER BY created_at ASC, id ASC;", $status ),
+				ARRAY_A
+			);
+			if ( empty( $rows ) ) {
+				return array();
+			}
+			return array_map( static fn( $r ) => new Space( $r ), $rows );
+		}
+
+		/**
+		 * Zählt die noch bestehenden (nicht abgelehnten/gelöschten) Räume eines Eigentümers.
+		 *
+		 * Diese Zählung dient dem Raumlimit und wird atomar mit einer einzigen
+		 * Abfrage ermittelt, damit parallele Requests das Limit nicht umgehen.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int
+		 */
+		public function count_owner_live_spaces( int $user_id ): int {
+			return (int) $this->db->get_var(
+				$this->db->prepare(
+					"SELECT COUNT(*) FROM {$this->spaces_table} WHERE owner_user_id = %d AND status IN (%s, %s, %s);",
+					$user_id,
+					'pending',
+					'active',
+					'archived'
+				)
+			);
+		}
+
+		/**
+		 * Gibt den Zeitstempel der jüngsten Raumgründung eines Benutzers zurück.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return string|null MySQL-Datetime oder null.
+		 */
+		public function latest_created_at_for_owner( int $user_id ): ?string {
+			$value = $this->db->get_var(
+				$this->db->prepare(
+					"SELECT MAX(created_at) FROM {$this->spaces_table} WHERE owner_user_id = %d;",
+					$user_id
+				)
+			);
+			return ( null === $value || '' === (string) $value ) ? null : (string) $value;
 		}
 
 		/**

@@ -161,5 +161,87 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return bool
 		 */
 		public function is_search_request(): bool;
+
+		/**
+		 * Erstellt eine dedizierte Asgaros-Forenkategorie für einen privaten Raum.
+		 *
+		 * @param array<string,mixed> $data Optionen: name, access (loggedin|everyone|moderator).
+		 * @return int Term-ID der neuen Kategorie.
+		 * @throws \AFSpaces\Core\DomainException Wenn die Erstellung fehlschlägt.
+		 */
+		public function create_forum_category( array $data ): int;
+
+		/**
+		 * Erstellt ein Asgaros-Forum in einer Kategorie.
+		 *
+		 * @param array<string,mixed> $data Optionen: category_id, name, description, icon.
+		 * @return int Forum-ID.
+		 * @throws \AFSpaces\Core\DomainException Wenn die Erstellung fehlschlägt.
+		 */
+		public function create_forum( array $data ): int;
+
+		/**
+		 * Erstellt eine Asgaros-Benutzergruppe.
+		 *
+		 * @param array<string,mixed> $data Optionen: name, color, icon.
+		 * @return int Gruppen-Term-ID.
+		 * @throws \AFSpaces\Core\DomainException Wenn die Erstellung fehlschlägt.
+		 */
+		public function create_group( array $data ): int;
+
+		/**
+		 * Ordnet einem Forum (über dessen Kategorie) eine Benutzergruppe zugriffssteuernd zu.
+		 *
+		 * @param int $forum_id Forum-ID.
+		 * @param int $group_id Gruppen-ID.
+		 * @return void
+		 * @throws \AFSpaces\Core\DomainException Wenn die Zuordnung fehlschlägt.
+		 */
+		public function assign_group_to_forum( int $forum_id, int $group_id ): void;
+
+		/**
+		 * Setzt die Sichtbarkeit/Zugriffssteuerung eines Forums über dessen Kategorie.
+		 *
+		 * @param int                 $forum_id Forum-ID.
+		 * @param array<string,mixed> $data     Optionen: access (everyone|loggedin|moderator),
+		 *                                       restrict (bool), group_id (int).
+		 * @return void
+		 * @throws \AFSpaces\Core\DomainException Wenn die Änderung fehlschlägt.
+		 */
+		public function set_forum_visibility( int $forum_id, array $data ): void;
+
+		/**
+		 * Aktualisiert Stammdaten eines Forums (z. B. Name, Beschreibung).
+		 *
+		 * @param int                 $forum_id Forum-ID.
+		 * @param array<string,mixed> $data     Zu aktualisierende Felder: name, description.
+		 * @return void
+		 * @throws \AFSpaces\Core\DomainException Wenn die Aktualisierung fehlschlägt.
+		 */
+		public function update_forum( int $forum_id, array $data ): void;
+
+		/**
+		 * Löscht ein Asgaros-Forum (für Rollback und endgültige Löschung).
+		 *
+		 * @param int $forum_id Forum-ID.
+		 * @return void
+		 */
+		public function delete_forum( int $forum_id ): void;
+
+		/**
+		 * Löscht eine Asgaros-Forenkategorie.
+		 *
+		 * @param int $category_id Kategorie-Term-ID.
+		 * @return void
+		 */
+		public function delete_forum_category( int $category_id ): void;
+
+		/**
+		 * Löscht eine Asgaros-Benutzergruppe.
+		 *
+		 * @param int $group_id Gruppen-Term-ID.
+		 * @return void
+		 */
+		public function delete_group( int $group_id ): void;
 	}
 }

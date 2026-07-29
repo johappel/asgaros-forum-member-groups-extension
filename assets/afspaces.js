@@ -138,7 +138,16 @@
 			accept_invitation: true,
 			decline_invitation: true,
 			use_invite_link: true,
-			request_invite_link_registration: true
+			request_invite_link_registration: true,
+			create_space: true,
+			rename_space: true,
+			change_space_visibility: true,
+			transfer_space_owner: true,
+			archive_space: true,
+			reactivate_space: true,
+			delete_space: true,
+			approve_space: true,
+			reject_space: true
 		};
 
 		if (nonAjaxActions[actionInput.value]) {
@@ -224,4 +233,98 @@
 			form.submit();
 		});
 	});
+
+	// Bestätigung für destruktive Aktionen (data-afspaces-confirm).
+	document.addEventListener('click', function (event) {
+		var button = event.target.closest('[data-afspaces-confirm]');
+		if (!button) {
+			return;
+		}
+
+		var message = button.getAttribute('data-afspaces-confirm');
+		if (message && !window.confirm(message)) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+	});
+
+	// Optionaler mehrstufiger Raumassistent (Progressive Enhancement).
+	// Ohne JavaScript bleibt das Formular ein zugängliches Ein-Seiten-Formular.
+	function enhanceWizard(form) {
+		var steps = Array.prototype.slice.call(form.querySelectorAll('[data-afspaces-step]'));
+		if (steps.length < 2) {
+			return;
+		}
+
+		var current = 0;
+
+		function render() {
+			steps.forEach(function (step, index) {
+				step.hidden = index !== current;
+			});
+			if (prevBtn) {
+				prevBtn.hidden = current === 0;
+			}
+			if (nextBtn) {
+				nextBtn.hidden = current === steps.length - 1;
+			}
+			if (submitBtn) {
+				submitBtn.hidden = current !== steps.length - 1;
+			}
+			var legend = steps[current].querySelector('legend');
+			if (legend) {
+				legend.setAttribute('tabindex', '-1');
+				legend.focus();
+			}
+		}
+
+		function stepValid() {
+			var fields = steps[current].querySelectorAll('input, textarea, select');
+			for (var i = 0; i < fields.length; i++) {
+				if (!fields[i].checkValidity()) {
+					fields[i].reportValidity();
+					return false;
+				}
+			}
+			return true;
+		}
+
+		var nav = document.createElement('p');
+		nav.className = 'afspaces-wizard-nav';
+
+		var prevBtn = document.createElement('button');
+		prevBtn.type = 'button';
+		prevBtn.className = 'afspaces-button afspaces-button-secondary';
+		prevBtn.textContent = form.getAttribute('data-afspaces-prev-label') || 'Zurück';
+		prevBtn.addEventListener('click', function () {
+			if (current > 0) {
+				current--;
+				render();
+			}
+		});
+
+		var nextBtn = document.createElement('button');
+		nextBtn.type = 'button';
+		nextBtn.className = 'afspaces-button';
+		nextBtn.textContent = form.getAttribute('data-afspaces-next-label') || 'Weiter';
+		nextBtn.addEventListener('click', function () {
+			if (stepValid() && current < steps.length - 1) {
+				current++;
+				render();
+			}
+		});
+
+		nav.appendChild(prevBtn);
+		nav.appendChild(nextBtn);
+
+		var actions = form.querySelector('.afspaces-form-actions');
+		var submitBtn = actions ? actions.querySelector('button[type="submit"]') : null;
+		if (actions) {
+			actions.parentNode.insertBefore(nav, actions);
+		}
+
+		render();
+	}
+
+	document.querySelectorAll('form[data-afspaces-wizard]').forEach(enhanceWizard);
 })();

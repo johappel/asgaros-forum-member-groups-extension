@@ -90,3 +90,57 @@ Die Asgaros-Bestandssuche wird durch die AFSpaces-Suche ersetzt: `SpacesHubContr
 
 
 
+
+## Interne Asgaros-APIs für MVP 4 (Selbstgründung, geprüft gegen 3.4.0)
+
+Die Raumgründung nutzt folgende interne Asgaros-Funktionen (Quellcode geprüft in
+`asgaros-forum/includes/forum-content.php` und `forum-usergroups.php`):
+
+- `AsgarosForum::content->insert_forum($category_id, $name, $description, $parent_forum, $icon, $order, $status='normal')`
+  → liefert die neue `forum_id`.
+- Forenkategorie = WP-Term der Taxonomie `asgarosforum-category` (Literal, ungefiltert).
+  Zugriffslevel über Term-Meta `category_access` (`everyone` | `loggedin` | `moderator`),
+  Sortierung über Term-Meta `order`.
+- `AsgarosForumUserGroups::insertUserGroup($parent_category_id, $name, $color, $visibility, $auto_add, $icon)`
+  legt eine Benutzergruppe (Term der Taxonomie `asgarosforum-usergroup`) an. Der Rückgabewert
+  enthält NICHT die Term-ID; diese wird über `get_term_by('name', …, $taxonomy)` ermittelt.
+  Der Taxonomiename wird über den Filter `asgarosforum_filter_user_groups_taxonomy_name`
+  aufgelöst (nicht über die private Eigenschaft `$taxonomyName`).
+- `AsgarosForumUserGroups::insertUserGroupsOfForumCategory($category_id, $ids)`
+  bzw. `getUserGroupsIDsOfForumCategory($category_id)` verwalten die zugriffssteuernde
+  Zuordnung (Term-Meta `usergroups` der Kategorie).
+- Löschung: `wp_delete_term($group_id, $usergroup_taxonomy)`,
+  `wp_delete_term($category_id, 'asgarosforum-category')` und direktes Löschen der
+  Forum-Zeile aus `tables->forums`.
+
+### Zugriffsmodell und Isolationsentscheidung
+
+Asgaros steuert den Zugriff auf **Kategorie-Ebene** (`canUserAccessForumCategory`: bei
+nichtleeren `usergroups` ist nur die Schnittmenge der Benutzergruppen zugriffsberechtigt;
+Administratoren umgehen die Prüfung). Ein einzelnes Forum kann NICHT unabhängig von seiner
+Kategorie zugriffsbeschränkt werden.
+
+**Entscheidung:** Jeder selbstgegründete Raum erhält daher eine **eigene, dedizierte
+Forenkategorie** samt eigener Benutzergruppe und genau einem Forum. Nur so ist die in
+`SECURITY_PRIVACY.md` geforderte Isolation privater Räume gewährleistet. Die administrativ
+konfigurierbare Sichtbarkeit steuert das Zugriffslevel der dedizierten Kategorie:
+
+- `private`  → `category_access=loggedin` + Gruppe als Zugriffssperre (nur Mitglieder).
+- `protected`→ `category_access=loggedin`, Gruppe nur zur Mitgliederverwaltung (alle Angemeldeten lesen).
+- `public`   → `category_access=everyone`.
+
+Räume mit Freigabepflicht (`pending`) werden bis zur Freigabe **immer** über die Gruppe
+beschränkt, unabhängig von der Zielsichtbarkeit, damit vor der Freigabe kein ungewollter
+öffentlicher Zugriff entsteht.
+
+### Transaktion und Rollback
+
+Kategorie, Gruppe und Forum werden nacheinander angelegt; bei einem Teilfehler entfernt der
+`SpaceCreationService` die bereits erstellten Artefakte in umgekehrter Reihenfolge
+(Forum → Gruppe → Kategorie) und löscht den Space-Datensatz. Live gegen Asgaros 3.4.0
+verifiziert (Anlegen, Zugriffsbeschränkung, Löschung inkl. Bereinigung).
+
+### Schema-Migration
+
+Die Spaces-Tabelle erhielt die Spalte `rejection_reason`. Bestehende Installationen ziehen sie
+über `SpaceRepository::install()` in `Plugin::maybe_upgrade()` nach (Plugin-Version `0.2.0`).

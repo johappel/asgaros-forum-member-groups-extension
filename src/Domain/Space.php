@@ -22,6 +22,7 @@ if ( ! class_exists( 'AFSpaces\\Domain\\Space' ) ) {
 		public int $owner_user_id;
 		public string $visibility;
 		public string $status;
+		public string $rejection_reason;
 		public string $created_at;
 		public string $updated_at;
 
@@ -35,6 +36,7 @@ if ( ! class_exists( 'AFSpaces\\Domain\\Space' ) ) {
 			$this->owner_user_id    = (int) ( $data['owner_user_id'] ?? 0 );
 			$this->visibility       = (string) ( $data['visibility'] ?? 'private' );
 			$this->status           = (string) ( $data['status'] ?? 'active' );
+			$this->rejection_reason = (string) ( $data['rejection_reason'] ?? '' );
 			$this->created_at       = (string) ( $data['created_at'] ?? '' );
 			$this->updated_at       = (string) ( $data['updated_at'] ?? '' );
 		}
@@ -52,6 +54,7 @@ if ( ! class_exists( 'AFSpaces\\Domain\\Space' ) ) {
 				'owner_user_id'    => $this->owner_user_id,
 				'visibility'       => $this->visibility,
 				'status'           => $this->status,
+				'rejection_reason' => $this->rejection_reason,
 				'created_at'       => $this->created_at,
 				'updated_at'       => $this->updated_at,
 			);

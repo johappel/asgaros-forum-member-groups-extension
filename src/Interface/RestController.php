@@ -16,6 +16,8 @@ use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Application\HybridSearchService;
+use AFSpaces\Application\SpaceCreationService;
+use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
@@ -72,6 +74,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		private HybridSearchService $forum_search;
 
 		/**
+		 * @var SpaceCreationService
+		 */
+		private SpaceCreationService $space_creation;
+
+		/**
+		 * @var SpaceLifecycleService
+		 */
+		private SpaceLifecycleService $space_lifecycle;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param SpaceRepository         $spaces  Space-Repository.
@@ -87,7 +99,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
 			WorkingGroupService $working_groups,
-			HybridSearchService $forum_search
+			HybridSearchService $forum_search,
+			SpaceCreationService $space_creation,
+			SpaceLifecycleService $space_lifecycle
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -97,6 +111,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			$this->invite_links = $invite_links;
 			$this->working_groups = $working_groups;
 			$this->forum_search = $forum_search;
+			$this->space_creation = $space_creation;
+			$this->space_lifecycle = $space_lifecycle;
 		}
 
 		/**
@@ -106,6 +122,95 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 		 */
 		public function register_routes(): void {
 			$namespace = 'afspaces/v1';
+
+			register_rest_route(
+				$namespace,
+				'/spaces',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'create_space' ),
+						'permission_callback' => array( $this, 'can_create_space' ),
+						'args'                => array(
+							'name'        => array(
+								'type'              => 'string',
+								'required'          => true,
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+							'description' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_textarea_field',
+							),
+							'visibility'  => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_key',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)',
+				array(
+					array(
+						'methods'             => WP_REST_Server::EDITABLE,
+						'callback'            => array( $this, 'update_space' ),
+						'permission_callback' => array( $this, 'can_manage' ),
+						'args'                => array(
+							'name'       => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_text_field',
+							),
+							'visibility' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_key',
+							),
+							'status'     => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_key',
+							),
+						),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/approve',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'approve_space' ),
+						'permission_callback' => array( $this, 'can_moderate_space' ),
+					),
+				)
+			);
+
+			register_rest_route(
+				$namespace,
+				'/spaces/(?P<space_id>\d+)/reject',
+				array(
+					array(
+						'methods'             => WP_REST_Server::CREATABLE,
+						'callback'            => array( $this, 'reject_space' ),
+						'permission_callback' => array( $this, 'can_moderate_space' ),
+						'args'                => array(
+							'rejection_reason' => array(
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => 'sanitize_textarea_field',
+							),
+						),
+					),
+				)
+			);
 
 			register_rest_route(
 				$namespace,
@@ -672,6 +777,174 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			}
 
 			return true;
+		}
+
+		/**
+		 * Permission-Callback für die Raumgründung.
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return bool|WP_Error
+		 */
+		public function can_create_space( WP_REST_Request $request ) {
+			if ( ! is_user_logged_in() ) {
+				return new WP_Error(
+					'afspaces_rest_unauthorized',
+					__( 'Anmeldung erforderlich.', 'afspaces' ),
+					array( 'status' => rest_authorization_required_code() )
+				);
+			}
+
+			if ( ! $this->space_creation->can_user_create( get_current_user_id() ) ) {
+				return new WP_Error(
+					'afspaces_rest_forbidden',
+					__( 'Dir fehlt die Berechtigung, eine Arbeitsgruppe zu gründen.', 'afspaces' ),
+					array( 'status' => rest_authorization_required_code() )
+				);
+			}
+
+			return true;
+		}
+
+		/**
+		 * Permission-Callback für Freigabeentscheidungen.
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return bool|WP_Error
+		 */
+		public function can_moderate_space( WP_REST_Request $request ) {
+			if ( ! is_user_logged_in() ) {
+				return new WP_Error(
+					'afspaces_rest_unauthorized',
+					__( 'Anmeldung erforderlich.', 'afspaces' ),
+					array( 'status' => rest_authorization_required_code() )
+				);
+			}
+
+			$actor = get_current_user_id();
+			if ( ! user_can( $actor, Capabilities::MANAGE_ALL_SPACES ) && ! user_can( $actor, Capabilities::MODERATE_SPACE ) ) {
+				return new WP_Error(
+					'afspaces_rest_forbidden',
+					__( 'Dir fehlt die Berechtigung zur Freigabe.', 'afspaces' ),
+					array( 'status' => rest_authorization_required_code() )
+				);
+			}
+
+			return true;
+		}
+
+		/**
+		 * POST /spaces
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function create_space( WP_REST_Request $request ) {
+			$actor = get_current_user_id();
+
+			try {
+				$space = $this->space_creation->create(
+					$actor,
+					array(
+						'name'        => (string) $request['name'],
+						'description' => (string) $request['description'],
+						'visibility'  => (string) $request['visibility'],
+					)
+				);
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_space_create_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response(
+				array(
+					'id'         => $space->id,
+					'forum_id'   => $space->forum_id,
+					'status'     => $space->status,
+					'visibility' => $space->visibility,
+				),
+				201
+			);
+		}
+
+		/**
+		 * PATCH /spaces/{id}
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function update_space( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$actor    = get_current_user_id();
+
+			try {
+				if ( null !== $request['name'] && '' !== (string) $request['name'] ) {
+					$this->space_lifecycle->rename( $space_id, $actor, (string) $request['name'] );
+				}
+				if ( null !== $request['visibility'] && '' !== (string) $request['visibility'] ) {
+					$this->space_lifecycle->change_visibility( $space_id, $actor, (string) $request['visibility'] );
+				}
+				if ( null !== $request['status'] && '' !== (string) $request['status'] ) {
+					$status = (string) $request['status'];
+					if ( 'archived' === $status ) {
+						$this->space_lifecycle->archive( $space_id, $actor );
+					} elseif ( 'active' === $status ) {
+						$this->space_lifecycle->reactivate( $space_id, $actor );
+					} elseif ( 'deleted' === $status ) {
+						$this->space_lifecycle->delete( $space_id, $actor );
+					} else {
+						return new WP_Error( 'afspaces_rest_invalid_status', __( 'Unbekannter Zielstatus.', 'afspaces' ), array( 'status' => 400 ) );
+					}
+				}
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_space_update_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			$space = $this->spaces->get_space( $space_id );
+
+			return new WP_REST_Response(
+				array(
+					'id'         => $space_id,
+					'status'     => $space ? $space->status : '',
+					'visibility' => $space ? $space->visibility : '',
+				),
+				200
+			);
+		}
+
+		/**
+		 * POST /spaces/{id}/approve
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function approve_space( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+
+			try {
+				$this->space_lifecycle->approve( $space_id, get_current_user_id() );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_space_approve_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'id' => $space_id, 'status' => 'active' ), 200 );
+		}
+
+		/**
+		 * POST /spaces/{id}/reject
+		 *
+		 * @param WP_REST_Request $request Request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public function reject_space( WP_REST_Request $request ) {
+			$space_id = (int) $request['space_id'];
+			$reason   = (string) $request['rejection_reason'];
+
+			try {
+				$this->space_lifecycle->reject( $space_id, get_current_user_id(), $reason );
+			} catch ( DomainException $e ) {
+				return new WP_Error( 'afspaces_rest_space_reject_failed', $e->getMessage(), array( 'status' => 400 ) );
+			}
+
+			return new WP_REST_Response( array( 'id' => $space_id, 'status' => 'rejected' ), 200 );
 		}
 
 		/**

@@ -734,5 +734,248 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			}
 			return 'search' === $forum->current_view;
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function create_forum_category( array $data ): int {
+			$this->assert_writable();
+
+			$name   = trim( (string) ( $data['name'] ?? '' ) );
+			$access = (string) ( $data['access'] ?? 'loggedin' );
+			if ( '' === $name ) {
+				throw new DomainException( __( 'Für die Kategorie wird ein Name benötigt.', 'afspaces' ) );
+			}
+			if ( ! in_array( $access, array( 'everyone', 'loggedin', 'moderator' ), true ) ) {
+				$access = 'loggedin';
+			}
+
+			$term = wp_insert_term( $name, 'asgarosforum-category' );
+			if ( is_wp_error( $term ) ) {
+				throw new DomainException(
+					sprintf(
+						/* translators: %s: Fehlermeldung */
+						__( 'Die Forenkategorie konnte nicht angelegt werden: %s', 'afspaces' ),
+						$term->get_error_message()
+					)
+				);
+			}
+
+			$category_id = (int) $term['term_id'];
+			update_term_meta( $category_id, 'category_access', $access );
+
+			// Sortierung ans Ende stellen, damit Asgaros die Kategorie korrekt einordnet.
+			$order = isset( $data['order'] ) ? (int) $data['order'] : ( time() % 100000 );
+			update_term_meta( $category_id, 'order', $order );
+
+			return $category_id;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function create_forum( array $data ): int {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum || ! isset( $forum->content ) || ! method_exists( $forum->content, 'insert_forum' ) ) {
+				throw new DomainException( __( 'Die Asgaros-Foren-API steht nicht zur Verfügung.', 'afspaces' ) );
+			}
+
+			$category_id = (int) ( $data['category_id'] ?? 0 );
+			$name        = trim( (string) ( $data['name'] ?? '' ) );
+			$description = (string) ( $data['description'] ?? '' );
+			$icon        = (string) ( $data['icon'] ?? 'fas fa-comments' );
+			$order       = isset( $data['order'] ) ? (int) $data['order'] : 1;
+
+			if ( $category_id < 1 || '' === $name ) {
+				throw new DomainException( __( 'Für das Forum werden Kategorie und Name benötigt.', 'afspaces' ) );
+			}
+
+			$forum_id = (int) $forum->content->insert_forum( $category_id, $name, $description, 0, $icon, $order );
+			if ( $forum_id < 1 ) {
+				throw new DomainException( __( 'Das Forum konnte nicht angelegt werden.', 'afspaces' ) );
+			}
+
+			return $forum_id;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function create_group( array $data ): int {
+			$this->assert_writable();
+
+			$name  = trim( (string) ( $data['name'] ?? '' ) );
+			$color = (string) ( $data['color'] ?? '#2d5d7f' );
+			$icon  = (string) ( $data['icon'] ?? '' );
+			if ( '' === $name ) {
+				throw new DomainException( __( 'Für die Benutzergruppe wird ein Name benötigt.', 'afspaces' ) );
+			}
+
+			// parent 0 = Gruppe ohne übergeordnete Usergroup-Kategorie.
+			$result = \AsgarosForumUserGroups::insertUserGroup( 0, $name, $color, 'normal', 'no', $icon );
+			if ( is_wp_error( $result ) ) {
+				throw new DomainException(
+					sprintf(
+						/* translators: %s: Fehlermeldung */
+						__( 'Die Benutzergruppe konnte nicht angelegt werden: %s', 'afspaces' ),
+						$result->get_error_message()
+					)
+				);
+			}
+
+			// insertUserGroup gibt bei Erfolg das Ergebnis der letzten Meta-Operation
+			// zurück; die Gruppen-ID ermitteln wir zuverlässig über den Namen.
+			$taxonomy = apply_filters( 'asgarosforum_filter_user_groups_taxonomy_name', 'asgarosforum-usergroup' );
+			$term     = get_term_by( 'name', $name, $taxonomy );
+			if ( ! $term instanceof \WP_Term ) {
+				throw new DomainException( __( 'Die neue Benutzergruppe konnte nicht ermittelt werden.', 'afspaces' ) );
+			}
+
+			return (int) $term->term_id;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function assign_group_to_forum( int $forum_id, int $group_id ): void {
+			$this->assert_writable();
+
+			$forum_row = $this->get_forum( $forum_id );
+			if ( null === $forum_row ) {
+				throw new DomainException( __( 'Das Forum für die Gruppenzuordnung wurde nicht gefunden.', 'afspaces' ) );
+			}
+
+			$category_id = (int) ( $forum_row['category_id'] ?? 0 );
+			if ( $category_id < 1 ) {
+				throw new DomainException( __( 'Dem Forum ist keine Kategorie zugeordnet.', 'afspaces' ) );
+			}
+
+			$existing = \AsgarosForumUserGroups::getUserGroupsIDsOfForumCategory( $category_id );
+			$existing = is_array( $existing ) ? array_map( 'intval', $existing ) : array();
+			if ( ! in_array( $group_id, $existing, true ) ) {
+				$existing[] = $group_id;
+			}
+
+			\AsgarosForumUserGroups::insertUserGroupsOfForumCategory( $category_id, array_values( array_unique( $existing ) ) );
+
+			// Kategorie zugriffsbeschränkt halten, damit sie für Normalnutzer nicht offen ist.
+			$access = get_term_meta( $category_id, 'category_access', true );
+			if ( '' === (string) $access ) {
+				update_term_meta( $category_id, 'category_access', 'loggedin' );
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function set_forum_visibility( int $forum_id, array $data ): void {
+			$this->assert_writable();
+
+			$forum_row = $this->get_forum( $forum_id );
+			if ( null === $forum_row ) {
+				throw new DomainException( __( 'Das Forum wurde nicht gefunden.', 'afspaces' ) );
+			}
+
+			$category_id = (int) ( $forum_row['category_id'] ?? 0 );
+			if ( $category_id < 1 ) {
+				throw new DomainException( __( 'Dem Forum ist keine Kategorie zugeordnet.', 'afspaces' ) );
+			}
+
+			$access = (string) ( $data['access'] ?? 'loggedin' );
+			if ( ! in_array( $access, array( 'everyone', 'loggedin', 'moderator' ), true ) ) {
+				$access = 'loggedin';
+			}
+			update_term_meta( $category_id, 'category_access', $access );
+
+			$restrict = ! empty( $data['restrict'] );
+			$group_id = (int) ( $data['group_id'] ?? 0 );
+
+			$existing = \AsgarosForumUserGroups::getUserGroupsIDsOfForumCategory( $category_id );
+			$existing = is_array( $existing ) ? array_map( 'intval', $existing ) : array();
+
+			if ( $restrict && $group_id > 0 ) {
+				if ( ! in_array( $group_id, $existing, true ) ) {
+					$existing[] = $group_id;
+				}
+			} elseif ( $group_id > 0 ) {
+				$existing = array_values( array_diff( $existing, array( $group_id ) ) );
+			} elseif ( ! $restrict ) {
+				$existing = array();
+			}
+
+			\AsgarosForumUserGroups::insertUserGroupsOfForumCategory( $category_id, array_values( array_unique( $existing ) ) );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function update_forum( int $forum_id, array $data ): void {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum ) {
+				throw new DomainException( __( 'Asgaros steht nicht zur Verfügung.', 'afspaces' ) );
+			}
+
+			$fields  = array();
+			$formats = array();
+			if ( array_key_exists( 'name', $data ) ) {
+				$fields['name'] = (string) $data['name'];
+				$formats[]      = '%s';
+			}
+			if ( array_key_exists( 'description', $data ) ) {
+				$fields['description'] = (string) $data['description'];
+				$formats[]             = '%s';
+			}
+			if ( array_key_exists( 'forum_status', $data ) ) {
+				$fields['forum_status'] = (string) $data['forum_status'];
+				$formats[]              = '%s';
+			}
+
+			if ( empty( $fields ) ) {
+				return;
+			}
+
+			$forum->db->update(
+				$forum->tables->forums,
+				$fields,
+				array( 'id' => $forum_id ),
+				$formats,
+				array( '%d' )
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function delete_forum( int $forum_id ): void {
+			$forum = $this->forum();
+			if ( null === $forum || $forum_id < 1 ) {
+				return;
+			}
+			$forum->db->delete( $forum->tables->forums, array( 'id' => $forum_id ), array( '%d' ) );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function delete_forum_category( int $category_id ): void {
+			if ( $category_id < 1 ) {
+				return;
+			}
+			wp_delete_term( $category_id, 'asgarosforum-category' );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function delete_group( int $group_id ): void {
+			if ( $group_id < 1 || ! class_exists( '\\AsgarosForumUserGroups' ) ) {
+				return;
+			}
+			\AsgarosForumUserGroups::deleteUserGroup( $group_id );
+		}
 	}
 }

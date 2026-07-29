@@ -2284,3 +2284,98 @@ body.afspaces-search-open {
 	gap: 0.4rem;
 	font-size: 0.9rem;
 }
+/* MVP 4: Raumgründung, Assistent und Verwaltung. */
+.afspaces-create-wizard .afspaces-create-intro {
+font-weight: 600;
+}
+
+.afspaces-wizard-step {
+border: 1px solid var(--theme-palette-color-5, #e1e8ed);
+border-radius: 10px;
+padding: 1rem 1.25rem;
+margin: 0 0 1rem;
+}
+
+.afspaces-wizard-step legend {
+font-weight: 700;
+padding: 0 0.5rem;
+}
+
+.afspaces-wizard-nav {
+display: flex;
+gap: 0.75rem;
+margin: 0 0 1rem;
+}
+
+.afspaces-radio-option {
+display: flex;
+flex-direction: column;
+gap: 0.15rem;
+margin: 0 0 0.75rem;
+}
+
+.afspaces-radio-option .description,
+.afspaces-danger-hint {
+color: #666;
+font-size: 0.9em;
+}
+
+.afspaces-form-error-summary {
+border: 2px solid #b32d2e;
+background: #fbeaea;
+border-radius: 8px;
+padding: 0.75rem 1rem;
+margin: 0 0 1rem;
+}
+
+.afspaces-button-danger {
+background-color: #b32d2e !important;
+color: #fff !important;
+}
+
+.afspaces-button-secondary {
+background-color: #7f98ac !important;
+color: #fff !important;
+}
+
+.afspaces-space-management form {
+margin: 0 0 1rem;
+}
+
+.afspaces-management-lifecycle {
+display: flex;
+flex-wrap: wrap;
+gap: 0.75rem;
+align-items: flex-start;
+margin-top: 0.5rem;
+}
+
+.afspaces-delete-space {
+border-top: 1px solid #e1e8ed;
+padding-top: 0.75rem;
+width: 100%;
+}
+
+.afspaces-approvals-list {
+list-style: none;
+margin: 0;
+padding: 0;
+display: grid;
+gap: 1rem;
+}
+
+.afspaces-approval-item {
+padding: 1rem 1.25rem;
+}
+
+.afspaces-approval-actions {
+display: flex;
+flex-wrap: wrap;
+gap: 1rem;
+align-items: flex-end;
+margin-top: 0.5rem;
+}
+
+.afspaces-approval-actions textarea {
+min-width: 260px;
+}

@@ -8,54 +8,54 @@ Berechtigte WordPress-Benutzer können innerhalb administrativ festgelegter Gren
 
 ### M4.1 Globale Richtlinien
 
-- [ ] Funktion zentral aktivierbar machen.
-- [ ] erlaubte WordPress-Rollen oder Capabilities festlegen.
-- [ ] maximale aktive Räume pro Benutzer festlegen.
-- [ ] Zielkategorie für neue Asgaros-Foren festlegen.
-- [ ] erlaubte Sichtbarkeitsmodi festlegen.
-- [ ] Freigabepflicht aktivierbar machen.
-- [ ] Namens-, Größen- und Inhaltsgrenzen definieren.
+- [x] Funktion zentral aktivierbar machen.
+- [x] erlaubte WordPress-Rollen oder Capabilities festlegen.
+- [x] maximale aktive Räume pro Benutzer festlegen.
+- [ ] Zielkategorie für neue Asgaros-Foren festlegen. *(Ersetzt durch dedizierte Kategorie je Raum, siehe COMPATIBILITY.md — Isolationspflicht.)*
+- [x] erlaubte Sichtbarkeitsmodi festlegen.
+- [x] Freigabepflicht aktivierbar machen.
+- [x] Namens-, Größen- und Inhaltsgrenzen definieren.
 
 ### M4.2 Raumassistent
 
 Mehrstufig, aber mit einer zugänglichen Ein-Seiten-Alternative:
 
-- [ ] Name und Beschreibung.
-- [ ] Sichtbarkeit.
+- [x] Name und Beschreibung.
+- [x] Sichtbarkeit.
 - [ ] optionale Startmitglieder oder Einladungen.
-- [ ] Zusammenfassung vor Erstellung.
-- [ ] verständliche Erklärung der Verantwortlichkeit.
-- [ ] Abbruch ohne Teilobjekte.
+- [x] Zusammenfassung vor Erstellung.
+- [x] verständliche Erklärung der Verantwortlichkeit.
+- [x] Abbruch ohne Teilobjekte.
 
 ### M4.3 Erstellung
 
-- [ ] Asgaros-Benutzergruppe erstellen.
-- [ ] Asgaros-Forum in konfigurierter Kategorie erstellen.
-- [ ] Gruppe dem Forum zuordnen.
-- [ ] Space-Datensatz erstellen.
-- [ ] Ersteller als Owner und Mitglied zuordnen.
-- [ ] alle Schritte transaktionsähnlich mit Rollback behandeln.
-- [ ] Teilfehler erkennen und bereinigen.
+- [x] Asgaros-Benutzergruppe erstellen.
+- [x] Asgaros-Forum in konfigurierter Kategorie erstellen.
+- [x] Gruppe dem Forum zuordnen.
+- [x] Space-Datensatz erstellen.
+- [x] Ersteller als Owner und Mitglied zuordnen.
+- [x] alle Schritte transaktionsähnlich mit Rollback behandeln.
+- [x] Teilfehler erkennen und bereinigen.
 
 ### M4.4 Freigabeprozess
 
 Falls aktiviert:
 
-- [ ] Space zunächst als `pending` speichern.
+- [x] Space zunächst als `pending` speichern.
 - [ ] Administratoren benachrichtigen.
-- [ ] Freigeben oder ablehnen.
-- [ ] bei Ablehnung Begründung anzeigen.
-- [ ] vor Freigabe keinen ungewollten öffentlichen Zugriff erlauben.
+- [x] Freigeben oder ablehnen.
+- [x] bei Ablehnung Begründung anzeigen.
+- [x] vor Freigabe keinen ungewollten öffentlichen Zugriff erlauben.
 
 ### M4.5 Raumverwaltung
 
-- [ ] Name und Beschreibung innerhalb der Policy ändern.
-- [ ] weitere Manager bestimmen.
-- [ ] Owner-Übertragung mit Bestätigung.
-- [ ] Sichtbarkeit nur innerhalb erlaubter Modi ändern.
-- [ ] Raum archivieren.
-- [ ] Raum reaktivieren, wenn zulässig.
-- [ ] Raum löschen mit klarer Warnung und definierter Aufbewahrung.
+- [x] Name und Beschreibung innerhalb der Policy ändern.
+- [x] weitere Manager bestimmen.
+- [x] Owner-Übertragung mit Bestätigung.
+- [x] Sichtbarkeit nur innerhalb erlaubter Modi ändern.
+- [x] Raum archivieren.
+- [x] Raum reaktivieren, wenn zulässig.
+- [x] Raum löschen mit klarer Warnung und definierter Aufbewahrung.
 
 ### M4.6 Lebenszyklus
 
@@ -69,20 +69,20 @@ Status mindestens:
 
 Aufgaben:
 
-- [ ] Übergänge zentral validieren.
+- [x] Übergänge zentral validieren.
 - [ ] inaktive Räume optional markieren.
-- [ ] automatische Löschung niemals ohne Vorwarnung.
-- [ ] Verhalten von Themen und Beiträgen bei Archivierung definieren.
-- [ ] Datenexport vor endgültiger Löschung ermöglichen oder dokumentieren.
+- [x] automatische Löschung niemals ohne Vorwarnung.
+- [x] Verhalten von Themen und Beiträgen bei Archivierung definieren.
+- [x] Datenexport vor endgültiger Löschung ermöglichen oder dokumentieren.
 
 ### M4.7 Quoten und Missbrauchsschutz
 
-- [ ] Raumlimit atomar prüfen.
-- [ ] Erstellungsfrequenz drosseln.
-- [ ] reservierte oder missbräuchliche Namen verhindern.
-- [ ] Administrator kann Erstellung sperren.
-- [ ] Administrator kann Owner ersetzen.
-- [ ] Meldemöglichkeit oder administrativer Eskalationsweg dokumentieren.
+- [x] Raumlimit atomar prüfen.
+- [x] Erstellungsfrequenz drosseln.
+- [x] reservierte oder missbräuchliche Namen verhindern.
+- [x] Administrator kann Erstellung sperren.
+- [x] Administrator kann Owner ersetzen.
+- [x] Meldemöglichkeit oder administrativer Eskalationsweg dokumentieren.
 
 ### M4.8 Vorlagen
 
@@ -97,28 +97,28 @@ Optional nach funktionierendem Kern:
 
 ### Unit
 
-- [ ] Raumlimit und Capability-Policy.
-- [ ] erlaubte Statusübergänge.
+- [x] Raumlimit und Capability-Policy.
+- [x] erlaubte Statusübergänge.
 - [ ] Owner-Übertragung.
-- [ ] Schutz des letzten Owners.
-- [ ] Sichtbarkeitspolicy.
+- [x] Schutz des letzten Owners.
+- [x] Sichtbarkeitspolicy.
 
 ### Integration
 
-- [ ] Erstellung erzeugt Forum, Gruppe, Zuordnung und Space.
-- [ ] Fehler bei jedem Einzelschritt löst Rollback oder Cleanup aus.
-- [ ] Ersteller wird Owner und Mitglied.
-- [ ] Archivierung verändert Zugriff wie spezifiziert.
-- [ ] Löschung behandelt Asgaros-Inhalte entsprechend dokumentierter Policy.
-- [ ] Freigabeprozess verhindert vorzeitigen Zugriff.
+- [x] Erstellung erzeugt Forum, Gruppe, Zuordnung und Space. *(Live gegen Asgaros 3.4.0 verifiziert.)*
+- [x] Fehler bei jedem Einzelschritt löst Rollback oder Cleanup aus. *(Unit: SpaceCreationServiceTest.)*
+- [x] Ersteller wird Owner und Mitglied.
+- [x] Archivierung verändert Zugriff wie spezifiziert.
+- [x] Löschung behandelt Asgaros-Inhalte entsprechend dokumentierter Policy.
+- [x] Freigabeprozess verhindert vorzeitigen Zugriff.
 
 ### REST/Sicherheit
 
-- [ ] Benutzer ohne Capability kann keinen Raum erstellen.
-- [ ] Raumlimit kann nicht durch parallele Requests umgangen werden.
-- [ ] Zielkategorie kann nicht manipuliert werden.
-- [ ] unerlaubte Sichtbarkeit wird abgewiesen.
-- [ ] fremde Räume können nicht geändert oder gelöscht werden.
+- [x] Benutzer ohne Capability kann keinen Raum erstellen.
+- [x] Raumlimit kann nicht durch parallele Requests umgangen werden.
+- [x] Zielkategorie kann nicht manipuliert werden. *(Kein clientseitiger Kategorie-Parameter; Struktur wird serverseitig erzeugt.)*
+- [x] unerlaubte Sichtbarkeit wird abgewiesen.
+- [x] fremde Räume können nicht geändert oder gelöscht werden.
 
 ### End-to-End
 
@@ -132,11 +132,11 @@ Optional nach funktionierendem Kern:
 
 ### Accessibility
 
-- [ ] Assistent besitzt verständliche Überschriftenstruktur.
-- [ ] Schrittstatus wird nicht nur visuell vermittelt.
-- [ ] Validierungsfehler werden zusammengefasst und den Feldern zugeordnet.
-- [ ] Ein-Seiten- oder No-JS-Alternative funktioniert.
-- [ ] destruktive Aktionen verlangen verständliche Bestätigung.
+- [x] Assistent besitzt verständliche Überschriftenstruktur.
+- [x] Schrittstatus wird nicht nur visuell vermittelt.
+- [x] Validierungsfehler werden zusammengefasst und den Feldern zugeordnet.
+- [x] Ein-Seiten- oder No-JS-Alternative funktioniert.
+- [x] destruktive Aktionen verlangen verständliche Bestätigung.
 
 ## Akzeptanzkriterien
 

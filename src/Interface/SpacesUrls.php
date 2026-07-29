@@ -46,6 +46,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 		public const VIEW_PROFILE        = 'profile';
 		public const VIEW_SETTINGS       = 'working-group-settings';
 		public const VIEW_CREATE         = 'create';
+		public const VIEW_APPROVALS      = 'approvals';
 		public const VIEW_SEARCH         = 'search';
 
 		/**
@@ -80,6 +81,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 				self::VIEW_PROFILE,
 				self::VIEW_SETTINGS,
 				self::VIEW_CREATE,
+				self::VIEW_APPROVALS,
 				self::VIEW_SEARCH,
 			);
 		}

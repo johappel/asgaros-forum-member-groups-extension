@@ -3,7 +3,7 @@
  * Plugin Name: Asgaros Forum Spaces
  * Plugin URI:  https://example.com/afspaces
  * Description: Barrierearme Frontend-Verwaltung für Mitglieder, Einladungen und private Forenräume in Asgaros Forum.
- * Version:     0.1.0
+ * Version:     0.2.0
  * Author:      AFSpaces
  * Author URI:  https://example.com
  * License:     GPL-2.0-or-later
@@ -31,7 +31,7 @@ if ( ! defined( 'AFSPACES_URL' ) ) {
 	define( 'AFSPACES_URL', plugin_dir_url( __FILE__ ) );
 }
 if ( ! defined( 'AFSPACES_VERSION' ) ) {
-	define( 'AFSPACES_VERSION', '0.1.0' );
+	define( 'AFSPACES_VERSION', '0.2.0' );
 }
 if ( ! defined( 'AFSPACES_DB_VERSION' ) ) {
 	define( 'AFSPACES_DB_VERSION', 1 );

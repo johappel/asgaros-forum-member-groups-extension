@@ -23,6 +23,8 @@ use AFSpaces\Application\ForumSearchService;
 use AFSpaces\Application\HybridSearchService;
 use AFSpaces\Application\SearchIndexer;
 use AFSpaces\Application\SpaceRegistrationService;
+use AFSpaces\Application\SpaceCreationService;
+use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
@@ -39,6 +41,7 @@ use AFSpaces\Interface\SearchModal;
 use AFSpaces\Interface\SearchSettingsPage;
 use AFSpaces\Interface\SearchView;
 use AFSpaces\Interface\SpacesHubController;
+use AFSpaces\Interface\SpaceCreationSettingsPage;
 use AFSpaces\Interface\WorkingGroupSettingsView;
 use AFSpaces\Interface\WorkingGroupView;
 
@@ -111,6 +114,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$invite_links = new \AFSpaces\Application\InviteLinkService( $spaces, $link_repo, $asgaros, $policy, $audit, $join_requests );
 			$working_groups = new WorkingGroupService( $spaces, $space_meta, $asgaros, $policy, $audit );
 			$space_registration = new SpaceRegistrationService( $spaces, $asgaros );
+			$space_creation = new SpaceCreationService( $spaces, $asgaros, $space_meta, $audit );
+			$space_lifecycle = new SpaceLifecycleService( $spaces, $asgaros, $space_meta, $audit );
 			$forum_search = new ForumSearchService( $asgaros );
 			$search_index = new SearchIndexRepository();
 			$wp_search = new \AFSpaces\Search\WpPostSearch( \AFSpaces\Search\SearchSettings::wp_post_types() );
@@ -119,11 +124,14 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_indexer = new SearchIndexer( $asgaros, $search_index );
 			$search_indexer->init();
 
-			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration );
+			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle );
 			$frontend->init();
 
 			$appearance = new AppearanceSettingsPage();
 			$appearance->init();
+
+			$creation_settings = new SpaceCreationSettingsPage();
+			$creation_settings->init();
 
 			$search_settings = new SearchSettingsPage( $search_indexer, $search_index );
 			$search_settings->init();
@@ -133,7 +141,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_modal->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
-			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search );
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle );
 			$hub->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
@@ -198,7 +206,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			);
 
 			// REST-API registrieren.
-			$rest = new RestController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search );
+			$rest = new RestController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle );
 			add_action( 'rest_api_init', array( $rest, 'register_routes' ) );
 
 			add_filter( 'wp_privacy_personal_data_exporters', static function ( array $exporters ) use ( $inv_repo ): array {
@@ -274,6 +282,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			\AFSpaces\Core\Activator::ensure_hub_page();
 
 			// Neue Strukturen für bestehende Installationen nachziehen.
+			$spaces = new SpaceRepository();
+			$spaces->install();
 			$search_index = new SearchIndexRepository();
 			$search_index->install();
 			SearchIndexer::schedule();

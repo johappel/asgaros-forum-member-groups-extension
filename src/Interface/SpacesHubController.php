@@ -17,6 +17,8 @@ use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Application\HybridSearchService;
+use AFSpaces\Application\SpaceCreationService;
+use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Core\Capabilities;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
@@ -36,6 +38,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private InviteLinkService $invite_links;
 		private WorkingGroupService $working_groups;
 		private HybridSearchService $forum_search;
+		private SpaceCreationService $space_creation;
+		private SpaceLifecycleService $space_lifecycle;
 
 		/**
 		 * Konstruktor.
@@ -49,7 +53,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			JoinRequestService $join_requests,
 			InviteLinkService $invite_links,
 			WorkingGroupService $working_groups,
-			HybridSearchService $forum_search
+			HybridSearchService $forum_search,
+			SpaceCreationService $space_creation,
+			SpaceLifecycleService $space_lifecycle
 		) {
 			$this->frontend     = $frontend;
 			$this->spaces       = $spaces;
@@ -60,6 +66,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->invite_links = $invite_links;
 			$this->working_groups = $working_groups;
 			$this->forum_search = $forum_search;
+			$this->space_creation = $space_creation;
+			$this->space_lifecycle = $space_lifecycle;
 		}
 
 		/**
@@ -219,7 +227,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return $search_view->render();
 
 				case SpacesUrls::VIEW_CREATE:
-					return $this->render_create_placeholder();
+					$create_view = new CreateSpaceView( $this->space_creation );
+					return $create_view->render();
+
+				case SpacesUrls::VIEW_APPROVALS:
+					return $this->render_approvals();
 
 				case SpacesUrls::VIEW_DASHBOARD:
 				default:
@@ -325,6 +337,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					'label'  => __( 'Arbeitsgruppe gründen', 'afspaces' ),
 					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ),
 					'active' => SpacesUrls::VIEW_CREATE === $view,
+				);
+			}
+
+			if ( $this->can_moderate_spaces( $actor ) ) {
+				$tabs[] = array(
+					'view'   => SpacesUrls::VIEW_APPROVALS,
+					'label'  => __( 'Freigaben', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ),
+					'active' => SpacesUrls::VIEW_APPROVALS === $view,
 				);
 			}
 
@@ -446,30 +467,76 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		}
 
 		/**
-		 * Platzhalter für die spätere Raumgründung (MVP 4).
+		 * Rendert die Freigabeliste anhängiger Arbeitsgruppen (M4.4).
 		 *
 		 * @return string
 		 */
-		private function render_create_placeholder(): string {
+		private function render_approvals(): string {
 			$actor = get_current_user_id();
-			if ( ! $this->can_create_spaces( $actor ) ) {
+			if ( ! $this->can_moderate_spaces( $actor ) ) {
 				return sprintf(
 					'<p class="afspaces-notice" role="status">%s</p>',
-					esc_html__( 'Die Arbeitsgruppengründung ist derzeit nicht verfügbar.', 'afspaces' )
+					esc_html__( 'Du darfst keine Arbeitsgruppen freigeben.', 'afspaces' )
 				);
+			}
+
+			try {
+				$pending = $this->space_lifecycle->list_pending( $actor );
+			} catch ( \AFSpaces\Core\DomainException $e ) {
+				return sprintf( '<p class="afspaces-notice" role="alert">%s</p>', esc_html( $e->getMessage() ) );
 			}
 
 			ob_start();
 			?>
-			<section class="afspaces-create" aria-labelledby="afspaces-create-heading">
-				<h2 id="afspaces-create-heading"><?php echo esc_html__( 'Arbeitsgruppe gründen', 'afspaces' ); ?></h2>
-				<p><?php echo esc_html__( 'Diese Funktion wird mit der nächsten Ausbaustufe verfügbar sein.', 'afspaces' ); ?></p>
-				<?php
-				/**
-				 * Erweiterungspunkt für den MVP-4-Raumassistenten.
-				 */
-				do_action( 'afspaces_render_space_creation' );
-				?>
+			<section class="afspaces-approvals" aria-labelledby="afspaces-approvals-heading">
+				<h2 id="afspaces-approvals-heading"><?php echo esc_html__( 'Arbeitsgruppen freigeben', 'afspaces' ); ?></h2>
+				<?php if ( empty( $pending ) ) : ?>
+					<p role="status"><?php echo esc_html__( 'Derzeit warten keine Arbeitsgruppen auf Freigabe.', 'afspaces' ); ?></p>
+				<?php else : ?>
+					<ul class="afspaces-approvals-list">
+						<?php foreach ( $pending as $space ) : ?>
+							<?php
+							$forum      = $this->asgaros->get_forum( $space->forum_id );
+							$forum_name = trim( (string) ( $forum['name'] ?? '' ) );
+							if ( '' === $forum_name ) {
+								$forum_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space->id );
+							}
+							$owner = get_userdata( $space->owner_user_id );
+							?>
+							<li class="afspaces-approval-item content-container">
+								<h3><?php echo esc_html( $forum_name ); ?></h3>
+								<p class="description">
+									<?php
+									echo esc_html(
+										sprintf(
+											/* translators: 1: Name, 2: Sichtbarkeit */
+											__( 'Angefragt von %1$s · Sichtbarkeit: %2$s', 'afspaces' ),
+											$owner ? $owner->display_name : (string) $space->owner_user_id,
+											CreateSpaceView::visibility_label( $space->visibility )
+										)
+									);
+									?>
+								</p>
+								<div class="afspaces-approval-actions">
+									<form method="post">
+										<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+										<input type="hidden" name="afspaces_action" value="approve_space" />
+										<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+										<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Freigeben', 'afspaces' ); ?></button>
+									</form>
+									<form method="post" class="afspaces-reject-form">
+										<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+										<input type="hidden" name="afspaces_action" value="reject_space" />
+										<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+										<label for="afspaces-reject-<?php echo esc_attr( (string) $space->id ); ?>"><?php echo esc_html__( 'Begründung der Ablehnung', 'afspaces' ); ?></label>
+										<textarea id="afspaces-reject-<?php echo esc_attr( (string) $space->id ); ?>" name="rejection_reason" rows="2"></textarea>
+										<button type="submit" class="afspaces-button afspaces-button-danger"><?php echo esc_html__( 'Ablehnen', 'afspaces' ); ?></button>
+									</form>
+								</div>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
 			</section>
 			<?php
 			return (string) ob_get_clean();
@@ -502,6 +569,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER );
 				case SpacesUrls::VIEW_CREATE:
 					return __( 'Arbeitsgruppe gründen', 'afspaces' );
+				case SpacesUrls::VIEW_APPROVALS:
+					return __( 'Freigaben', 'afspaces' );
 				default:
 					return WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL );
 			}
@@ -529,9 +598,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			if ( 0 === $actor ) {
 				return false;
 			}
-			$enabled = (bool) get_option( 'afspaces_enable_space_creation', false );
-			$enabled = (bool) apply_filters( 'afspaces_enable_space_creation', $enabled, $actor );
-			return $enabled && user_can( $actor, Capabilities::CREATE_SPACE );
+			return $this->space_creation->can_user_create( $actor );
+		}
+
+		/**
+		 * Prüft, ob der Benutzer Arbeitsgruppen freigeben darf.
+		 *
+		 * @param int $actor Benutzer-ID.
+		 * @return bool
+		 */
+		private function can_moderate_spaces( int $actor ): bool {
+			if ( 0 === $actor ) {
+				return false;
+			}
+			return user_can( $actor, Capabilities::MANAGE_ALL_SPACES )
+				|| user_can( $actor, Capabilities::MODERATE_SPACE );
 		}
 	}
 }

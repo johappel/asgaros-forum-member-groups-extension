@@ -105,3 +105,110 @@ if ( ! function_exists( 'wp_salt' ) ) {
 		return 'afspaces-test-salt-' . $scheme;
 	}
 }
+
+// Options-Store-Stubs für Tests, die WordPress-Optionen benötigen.
+if ( ! function_exists( 'get_option' ) ) {
+	/**
+	 * @param string $name
+	 * @param mixed  $default
+	 * @return mixed
+	 */
+	function get_option( string $name, $default = false ) {
+		global $afspaces_test_options;
+		if ( ! is_array( $afspaces_test_options ) ) {
+			$afspaces_test_options = array();
+		}
+		return array_key_exists( $name, $afspaces_test_options ) ? $afspaces_test_options[ $name ] : $default;
+	}
+}
+
+if ( ! function_exists( 'update_option' ) ) {
+	/**
+	 * @param string $name
+	 * @param mixed  $value
+	 * @return bool
+	 */
+	function update_option( string $name, $value ): bool {
+		global $afspaces_test_options;
+		if ( ! is_array( $afspaces_test_options ) ) {
+			$afspaces_test_options = array();
+		}
+		$afspaces_test_options[ $name ] = $value;
+		return true;
+	}
+}
+
+if ( ! function_exists( 'get_userdata' ) ) {
+	/**
+	 * @param int $user_id
+	 * @return object|false
+	 */
+	function get_userdata( int $user_id ) {
+		global $afspaces_test_users;
+		if ( is_array( $afspaces_test_users ) && array_key_exists( $user_id, $afspaces_test_users ) ) {
+			return $afspaces_test_users[ $user_id ];
+		}
+		if ( $user_id < 1 ) {
+			return false;
+		}
+		$user = new \stdClass();
+		$user->ID = $user_id;
+		$user->roles = array();
+		$user->display_name = 'User ' . $user_id;
+		return $user;
+	}
+}
+
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	/**
+	 * @param string $value
+	 * @return string
+	 */
+	function sanitize_textarea_field( string $value ): string {
+		return trim( $value );
+	}
+}
+
+if ( ! function_exists( 'absint' ) ) {
+	/**
+	 * @param mixed $value
+	 * @return int
+	 */
+	function absint( $value ): int {
+		return abs( (int) $value );
+	}
+}
+
+if ( ! function_exists( 'get_term_meta' ) ) {
+	/**
+	 * @param int    $term_id
+	 * @param string $key
+	 * @param bool   $single
+	 * @return mixed
+	 */
+	function get_term_meta( int $term_id, string $key = '', bool $single = false ) {
+		global $afspaces_test_term_meta;
+		if ( ! is_array( $afspaces_test_term_meta ) ) {
+			$afspaces_test_term_meta = array();
+		}
+		$value = $afspaces_test_term_meta[ $term_id ][ $key ] ?? '';
+		return $single ? $value : ( '' === $value ? array() : array( $value ) );
+	}
+}
+
+if ( ! function_exists( 'update_term_meta' ) ) {
+	/**
+	 * @param int    $term_id
+	 * @param string $key
+	 * @param mixed  $value
+	 * @return bool
+	 */
+	function update_term_meta( int $term_id, string $key, $value ): bool {
+		global $afspaces_test_term_meta;
+		if ( ! is_array( $afspaces_test_term_meta ) ) {
+			$afspaces_test_term_meta = array();
+		}
+		$afspaces_test_term_meta[ $term_id ][ $key ] = $value;
+		return true;
+	}
+}

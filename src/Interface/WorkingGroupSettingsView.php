@@ -13,6 +13,8 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
+use AFSpaces\Core\SpaceCreationSettings;
+use AFSpaces\Domain\SpaceLifecycle;
 use AFSpaces\Domain\WorkingGroupMeta;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
@@ -138,10 +140,142 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten Mitglieder, Einladungen und Beitrittsanfragen innerhalb von AFSpaces.', 'afspaces' ); ?></p>
 					<p><?php echo esc_html__( 'Forenmoderation in Asgaros, etwa das Moderieren von Beiträgen und Themen, bleibt davon getrennt und wird nicht automatisch aus dieser Rolle vergeben.', 'afspaces' ); ?></p>
 				</section>
+
+				<?php echo $this->render_management( $space, $actor, $forum_name, $responsibles ); ?>
 			</section>
 			<?php
 
 			return (string) ob_get_clean();
+		}
+
+		/**
+		 * Rendert die Lebenszyklus- und Verwaltungssteuerung eines Raums (MVP 4).
+		 *
+		 * @param \AFSpaces\Domain\Space          $space        Space.
+		 * @param int                             $actor        Akteur.
+		 * @param string                          $forum_name   Anzeigename.
+		 * @param array<int,array<string,mixed>>  $responsibles Verantwortliche.
+		 * @return string
+		 */
+		private function render_management( $space, int $actor, string $forum_name, array $responsibles ): string {
+			$is_admin = user_can( $actor, Capabilities::MANAGE_ALL_SPACES );
+			$is_owner = $is_admin || ( $space->owner_user_id === $actor );
+			$settings = SpaceCreationSettings::load();
+
+			ob_start();
+			?>
+			<section class="afspaces-section-card content-container afspaces-space-management" aria-labelledby="afspaces-space-management-heading">
+				<div id="afspaces-space-management-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Arbeitsgruppe verwalten', 'afspaces' ); ?></div>
+
+				<p class="description">
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %s: Status */
+							__( 'Aktueller Status: %s', 'afspaces' ),
+							self::status_label( $space->status )
+						)
+					);
+					?>
+				</p>
+
+				<?php if ( SpaceLifecycle::STATUS_REJECTED === $space->status && '' !== $space->rejection_reason ) : ?>
+					<p class="afspaces-message afspaces-message-error" role="alert">
+						<?php echo esc_html( sprintf( __( 'Ablehnungsgrund: %s', 'afspaces' ), $space->rejection_reason ) ); ?>
+					</p>
+				<?php endif; ?>
+
+				<form method="post" class="afspaces-form-grid">
+					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+					<input type="hidden" name="afspaces_action" value="rename_space" />
+					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+					<label for="afspaces-rename"><?php echo esc_html__( 'Name der Arbeitsgruppe', 'afspaces' ); ?></label>
+					<input type="text" id="afspaces-rename" name="name" value="<?php echo esc_attr( $forum_name ); ?>" maxlength="<?php echo esc_attr( (string) $settings->name_max_length ); ?>" />
+					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Namen speichern', 'afspaces' ); ?></button>
+				</form>
+
+				<form method="post" class="afspaces-form-grid">
+					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+					<input type="hidden" name="afspaces_action" value="change_space_visibility" />
+					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+					<label for="afspaces-visibility"><?php echo esc_html__( 'Sichtbarkeit', 'afspaces' ); ?></label>
+					<select id="afspaces-visibility" name="visibility">
+						<?php foreach ( $settings->allowed_visibilities as $visibility ) : ?>
+							<option value="<?php echo esc_attr( $visibility ); ?>" <?php selected( $space->visibility, $visibility ); ?>><?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Sichtbarkeit speichern', 'afspaces' ); ?></button>
+				</form>
+
+				<?php if ( $is_owner && count( $responsibles ) > 0 ) : ?>
+					<form method="post" class="afspaces-form-grid">
+						<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+						<input type="hidden" name="afspaces_action" value="transfer_space_owner" />
+						<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+						<label for="afspaces-transfer-owner"><?php echo esc_html__( 'Verantwortung übertragen an', 'afspaces' ); ?></label>
+						<select id="afspaces-transfer-owner" name="new_owner_id">
+							<?php foreach ( $responsibles as $responsible ) : ?>
+								<?php if ( (int) $responsible['user_id'] !== $space->owner_user_id ) : ?>
+									<option value="<?php echo esc_attr( (string) $responsible['user_id'] ); ?>"><?php echo esc_html( $responsible['display_name'] ); ?></option>
+								<?php endif; ?>
+							<?php endforeach; ?>
+						</select>
+						<button type="submit" class="afspaces-button" data-afspaces-confirm="<?php echo esc_attr__( 'Möchtest du die Verantwortung wirklich übertragen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Verantwortung übertragen', 'afspaces' ); ?></button>
+					</form>
+				<?php endif; ?>
+
+				<div class="afspaces-management-lifecycle">
+					<?php if ( SpaceLifecycle::STATUS_ACTIVE === $space->status ) : ?>
+						<form method="post">
+							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+							<input type="hidden" name="afspaces_action" value="archive_space" />
+							<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+							<button type="submit" class="afspaces-button" data-afspaces-confirm="<?php echo esc_attr__( 'Arbeitsgruppe wirklich archivieren?', 'afspaces' ); ?>"><?php echo esc_html__( 'Archivieren', 'afspaces' ); ?></button>
+						</form>
+					<?php elseif ( SpaceLifecycle::STATUS_ARCHIVED === $space->status ) : ?>
+						<form method="post">
+							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+							<input type="hidden" name="afspaces_action" value="reactivate_space" />
+							<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+							<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Reaktivieren', 'afspaces' ); ?></button>
+						</form>
+					<?php endif; ?>
+
+					<?php if ( $is_owner && SpaceLifecycle::STATUS_DELETED !== $space->status ) : ?>
+						<form method="post" class="afspaces-delete-space">
+							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+							<input type="hidden" name="afspaces_action" value="delete_space" />
+							<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+							<p class="description afspaces-danger-hint"><?php echo esc_html__( 'Das Löschen entfernt den Forenbereich der Arbeitsgruppe endgültig. Diese Aktion kann nicht rückgängig gemacht werden.', 'afspaces' ); ?></p>
+							<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr__( 'Diese Arbeitsgruppe wirklich unwiderruflich löschen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Arbeitsgruppe löschen', 'afspaces' ); ?></button>
+						</form>
+					<?php endif; ?>
+				</div>
+			</section>
+			<?php
+			return (string) ob_get_clean();
+		}
+
+		/**
+		 * Menschlich lesbare Statusbezeichnung.
+		 *
+		 * @param string $status Status.
+		 * @return string
+		 */
+		private static function status_label( string $status ): string {
+			switch ( $status ) {
+				case SpaceLifecycle::STATUS_PENDING:
+					return __( 'Wartet auf Freigabe', 'afspaces' );
+				case SpaceLifecycle::STATUS_ARCHIVED:
+					return __( 'Archiviert', 'afspaces' );
+				case SpaceLifecycle::STATUS_REJECTED:
+					return __( 'Abgelehnt', 'afspaces' );
+				case SpaceLifecycle::STATUS_DELETED:
+					return __( 'Gelöscht', 'afspaces' );
+				case SpaceLifecycle::STATUS_ACTIVE:
+				default:
+					return __( 'Aktiv', 'afspaces' );
+			}
 		}
 
 		private function notice( string $text ): string {
