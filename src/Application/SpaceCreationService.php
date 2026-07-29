@@ -83,6 +83,27 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceCreationService' ) ) {
 		}
 
 		/**
+		 * Gibt die für einen Nutzer wählbaren Sichtbarkeiten zurück.
+		 *
+		 * @param int $actor_user_id Benutzer-ID.
+		 * @return string[]
+		 */
+		public function allowed_visibilities_for( int $actor_user_id ): array {
+			return $this->get_settings()->visibilities_for( $this->is_privileged( $actor_user_id ) );
+		}
+
+		/**
+		 * Prüft, ob ein Nutzer privilegiert (Moderator/Administrator) ist.
+		 *
+		 * @param int $actor_user_id Benutzer-ID.
+		 * @return bool
+		 */
+		private function is_privileged( int $actor_user_id ): bool {
+			return user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
+				|| user_can( $actor_user_id, Capabilities::MODERATE_SPACE );
+		}
+
+		/**
 		 * Gründet einen neuen Raum.
 		 *
 		 * Alle Asgaros-Artefakte (Kategorie, Gruppe, Forum) werden bei einem
@@ -123,7 +144,11 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceCreationService' ) ) {
 
 			$name        = $this->policy->validate_name( $settings, (string) ( $input['name'] ?? '' ) );
 			$description = $this->policy->validate_description( $settings, (string) ( $input['description'] ?? '' ) );
-			$visibility  = $this->policy->validate_visibility( $settings, (string) ( $input['visibility'] ?? SpaceCreationSettings::VISIBILITY_PRIVATE ) );
+			$visibility  = $this->policy->validate_visibility(
+				$settings,
+				(string) ( $input['visibility'] ?? SpaceCreationSettings::VISIBILITY_PRIVATE ),
+				$settings->visibilities_for( $this->is_privileged( $actor_user_id ) )
+			);
 
 			// 2. Asgaros-Struktur transaktionsähnlich anlegen.
 			$category_id = 0;
@@ -174,6 +199,12 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceCreationService' ) ) {
 
 				// Gründer als Gruppenmitglied eintragen.
 				$this->asgaros->add_user_to_group( $actor_user_id, $group_id );
+
+				// Bis zur Freigabe bleibt das Forum geschlossen (keine Beiträge,
+				// keine Einladungen), damit vor der Freigabe nichts passiert.
+				if ( SpaceLifecycle::STATUS_PENDING === $status ) {
+					$this->asgaros->update_forum( $forum_id, array( 'forum_status' => 'closed' ) );
+				}
 
 				// 3. Space-Datensatz erstellen.
 				$space_id = $this->spaces->create_space(

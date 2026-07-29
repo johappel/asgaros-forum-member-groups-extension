@@ -2393,3 +2393,30 @@ list-style: none;
 margin: 0;
 padding: 0;
 }
+
+/* MVP 4: Freigabeliste (Approvals) aufgeraeumt. */
+.afspaces-approval-item h3 {
+margin-top: 0;
+}
+
+.afspaces-approval-actions {
+align-items: flex-start;
+}
+
+.afspaces-reject-form {
+display: flex;
+flex-direction: column;
+gap: 0.35rem;
+max-width: 420px;
+}
+
+.afspaces-reject-form label {
+font-weight: 600;
+}
+
+.afspaces-reject-form textarea {
+width: 100%;
+min-height: 3.5rem;
+max-height: 8rem;
+box-sizing: border-box;
+}

@@ -75,6 +75,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\InvitationService' ) ) {
 				throw new DomainException( __( 'Der Raum existiert nicht.', 'afspaces' ) );
 			}
 
+			if ( \AFSpaces\Domain\SpaceLifecycle::STATUS_ACTIVE !== $space->status ) {
+				throw new DomainException( __( 'Diese Arbeitsgruppe ist noch nicht freigegeben oder nicht aktiv. Einladungen sind erst nach der Freigabe möglich.', 'afspaces' ) );
+			}
+
 			if ( ! $this->policy->can_invite_member( $space_id, $actor_user_id, $invitee_user_id ) ) {
 				throw new DomainException( __( 'Du bist nicht berechtigt, für diesen Raum einzuladen.', 'afspaces' ) );
 			}

@@ -65,6 +65,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 				<h2 id="afspaces-working-group-settings-heading"><?php echo esc_html( sprintf( __( 'Arbeitsgruppen-Details - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier pflegst du Beschreibung, Sichtbarkeit und Kontaktinformationen dieser Arbeitsgruppe.', 'afspaces' ); ?></p>
+				<p class="description"><?php echo esc_html__( '„Sichtbarkeit in Übersichten" steuert nur, ob die Arbeitsgruppe unter „Entdecken" auffindbar ist – nicht, wer das Forum lesen darf. Den Zugriff auf die Forumsinhalte legst du weiter unten über „Arbeitsgruppe verwalten → Sichtbarkeit" (privat, geschützt, öffentlich) fest.', 'afspaces' ); ?></p>
 
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-working-group-contact-heading">
 					<div id="afspaces-working-group-contact-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Arbeitsgruppenverantwortliche', 'afspaces' ); ?></div>
@@ -121,6 +122,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 						<input type="checkbox" id="afspaces-join-requests-enabled" name="join_requests_enabled" value="1" <?php checked( $meta->join_requests_enabled ); ?> />
 						<span><?php echo esc_html__( 'Beitrittsanfragen grundsätzlich erlauben', 'afspaces' ); ?></span>
 					</label>
+					<p class="description"><?php echo esc_html__( 'Wirkt nur zusammen mit der Beitrittslogik „Beitritt per Anfrage". Ist die Beitrittslogik „Nur per Einladung" oder „Geschlossen", hat dieses Häkchen keine Wirkung.', 'afspaces' ); ?></p>
 
 					<?php if ( ! empty( $topics ) ) : ?>
 						<label for="afspaces-topics"><?php echo esc_html__( 'Themen', 'afspaces' ); ?></label>

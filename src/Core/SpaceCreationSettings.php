@@ -36,6 +36,9 @@ if ( ! class_exists( 'AFSpaces\\Core\\SpaceCreationSettings' ) ) {
 		/** @var string[] */
 		public array $allowed_visibilities;
 
+		/** @var string[] */
+		public array $regular_visibilities;
+
 		public bool $require_approval;
 
 		public int $name_min_length;
@@ -61,6 +64,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\SpaceCreationSettings' ) ) {
 			$this->allowed_roles          = self::string_list( $data['allowed_roles'] ?? $defaults['allowed_roles'] );
 			$this->max_spaces_per_user    = max( 0, (int) ( $data['max_spaces_per_user'] ?? $defaults['max_spaces_per_user'] ) );
 			$this->allowed_visibilities   = self::filter_visibilities( $data['allowed_visibilities'] ?? $defaults['allowed_visibilities'] );
+			$this->regular_visibilities   = self::filter_visibilities( $data['regular_visibilities'] ?? $defaults['regular_visibilities'] );
 			$this->require_approval       = (bool) ( $data['require_approval'] ?? $defaults['require_approval'] );
 			$this->name_min_length        = max( 1, (int) ( $data['name_min_length'] ?? $defaults['name_min_length'] ) );
 			$this->name_max_length        = max( $this->name_min_length, (int) ( $data['name_max_length'] ?? $defaults['name_max_length'] ) );
@@ -71,6 +75,15 @@ if ( ! class_exists( 'AFSpaces\\Core\\SpaceCreationSettings' ) ) {
 
 			if ( empty( $this->allowed_visibilities ) ) {
 				$this->allowed_visibilities = array( self::VISIBILITY_PRIVATE );
+			}
+
+			// Sichtbarkeiten normaler Nutzer dürfen nie über die global erlaubten hinausgehen.
+			$this->regular_visibilities = array_values( array_intersect( $this->regular_visibilities, $this->allowed_visibilities ) );
+			if ( empty( $this->regular_visibilities ) ) {
+				$this->regular_visibilities = array( self::VISIBILITY_PRIVATE );
+				if ( ! in_array( self::VISIBILITY_PRIVATE, $this->allowed_visibilities, true ) ) {
+					$this->regular_visibilities = array( $this->allowed_visibilities[0] );
+				}
 			}
 		}
 
@@ -85,6 +98,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\SpaceCreationSettings' ) ) {
 				'allowed_roles'          => array(),
 				'max_spaces_per_user'    => 3,
 				'allowed_visibilities'   => array( self::VISIBILITY_PRIVATE ),
+				'regular_visibilities'   => array( self::VISIBILITY_PRIVATE ),
 				'require_approval'       => true,
 				'name_min_length'        => 3,
 				'name_max_length'        => 60,
@@ -134,6 +148,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\SpaceCreationSettings' ) ) {
 				'allowed_roles'          => $this->allowed_roles,
 				'max_spaces_per_user'    => $this->max_spaces_per_user,
 				'allowed_visibilities'   => $this->allowed_visibilities,
+				'regular_visibilities'   => $this->regular_visibilities,
 				'require_approval'       => $this->require_approval,
 				'name_min_length'        => $this->name_min_length,
 				'name_max_length'        => $this->name_max_length,
@@ -152,6 +167,20 @@ if ( ! class_exists( 'AFSpaces\\Core\\SpaceCreationSettings' ) ) {
 		 */
 		public function is_visibility_allowed( string $visibility ): bool {
 			return in_array( $visibility, $this->allowed_visibilities, true );
+		}
+
+		/**
+		 * Gibt die für einen Nutzer erlaubten Sichtbarkeiten zurück.
+		 *
+		 * Privilegierte Nutzer (Moderatoren/Administratoren) dürfen alle global
+		 * erlaubten Sichtbarkeiten wählen; normale Nutzer sind auf die
+		 * konfigurierte Teilmenge beschränkt (z. B. nur „privat").
+		 *
+		 * @param bool $privileged Nutzer ist Moderator/Administrator.
+		 * @return string[]
+		 */
+		public function visibilities_for( bool $privileged ): array {
+			return $privileged ? $this->allowed_visibilities : $this->regular_visibilities;
 		}
 
 		/**

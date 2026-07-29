@@ -45,7 +45,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\CreateSpaceView' ) ) {
 			}
 
 			$settings     = $this->creation->get_settings();
-			$visibilities = $settings->allowed_visibilities;
+			$visibilities = $this->creation->allowed_visibilities_for( $actor );
 			$old          = $this->old_input();
 
 			ob_start();

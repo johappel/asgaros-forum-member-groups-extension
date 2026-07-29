@@ -263,13 +263,13 @@
 				step.hidden = index !== current;
 			});
 			if (prevBtn) {
-				prevBtn.hidden = current === 0;
+				prevBtn.style.display = current === 0 ? 'none' : '';
 			}
 			if (nextBtn) {
-				nextBtn.hidden = current === steps.length - 1;
+				nextBtn.style.display = current === steps.length - 1 ? 'none' : '';
 			}
 			if (submitBtn) {
-				submitBtn.hidden = current !== steps.length - 1;
+				submitBtn.style.display = current === steps.length - 1 ? '' : 'none';
 			}
 			var legend = steps[current].querySelector('legend');
 			if (legend) {

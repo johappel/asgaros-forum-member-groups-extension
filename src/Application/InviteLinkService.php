@@ -66,6 +66,9 @@ if ( ! class_exists( 'AFSpaces\\Application\\InviteLinkService' ) ) {
 		 */
 		public function create_link( int $space_id, int $actor_user_id, array $args = array() ): array {
 			$space = $this->require_space( $space_id );
+			if ( \AFSpaces\Domain\SpaceLifecycle::STATUS_ACTIVE !== $space->status ) {
+				throw new DomainException( __( 'Diese Arbeitsgruppe ist noch nicht freigegeben oder nicht aktiv. Einladungslinks sind erst nach der Freigabe möglich.', 'afspaces' ) );
+			}
 			$this->assert_can_manage_links( $space_id, $actor_user_id );
 
 			$approval_mode = $this->normalize_approval_mode( (string) ( $args['approval_mode'] ?? InviteLink::MODE_AUTO_JOIN ) );

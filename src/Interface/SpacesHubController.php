@@ -335,9 +335,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			// für berechtigte Personen (Administratoren/Moderatoren) im Topmenü.
 			// „Arbeitsgruppe gründen" ist hingegen ein Aktionsbutton im Dashboard.
 			if ( $this->can_moderate_spaces( $actor ) ) {
+				$pending_count = count( $this->spaces->list_spaces_by_status( \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING ) );
+				$approvals_label = __( 'Freigaben', 'afspaces' );
+				if ( $pending_count > 0 ) {
+					$approvals_label .= ' (' . $pending_count . ')';
+				}
 				$tabs[] = array(
 					'view'   => SpacesUrls::VIEW_APPROVALS,
-					'label'  => __( 'Freigaben', 'afspaces' ),
+					'label'  => $approvals_label,
 					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ),
 					'active' => SpacesUrls::VIEW_APPROVALS === $view,
 				);

@@ -80,6 +80,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 				$visibilities = array( SpaceCreationSettings::VISIBILITY_PRIVATE );
 			}
 
+			$regular_visibilities = array();
+			if ( isset( $input['regular_visibilities'] ) && is_array( $input['regular_visibilities'] ) ) {
+				foreach ( $input['regular_visibilities'] as $visibility ) {
+					$visibility = sanitize_key( (string) $visibility );
+					if ( in_array( $visibility, SpaceCreationSettings::all_visibilities(), true ) ) {
+						$regular_visibilities[] = $visibility;
+					}
+				}
+			}
+
 			$roles = array();
 			if ( isset( $input['allowed_roles'] ) && is_array( $input['allowed_roles'] ) ) {
 				foreach ( $input['allowed_roles'] as $role ) {
@@ -96,6 +106,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 					'allowed_roles'          => $roles,
 					'max_spaces_per_user'    => isset( $input['max_spaces_per_user'] ) ? (int) $input['max_spaces_per_user'] : 3,
 					'allowed_visibilities'   => $visibilities,
+					'regular_visibilities'   => $regular_visibilities,
 					'require_approval'       => ! empty( $input['require_approval'] ),
 					'name_min_length'        => isset( $input['name_min_length'] ) ? (int) $input['name_min_length'] : 3,
 					'name_max_length'        => isset( $input['name_max_length'] ) ? (int) $input['name_max_length'] : 60,
@@ -173,6 +184,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 											<?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?>
 										</label>
 									<?php endforeach; ?>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php echo esc_html__( 'Sichtbarkeiten für normale Nutzer', 'afspaces' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php echo esc_html__( 'Sichtbarkeiten für normale Nutzer', 'afspaces' ); ?></legend>
+									<?php foreach ( SpaceCreationSettings::all_visibilities() as $visibility ) : ?>
+										<label style="display:block;">
+											<input type="checkbox" name="<?php echo esc_attr( SpaceCreationSettings::OPTION ); ?>[regular_visibilities][]" value="<?php echo esc_attr( $visibility ); ?>" <?php checked( in_array( $visibility, $settings->regular_visibilities, true ) ); ?> />
+											<?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?>
+										</label>
+									<?php endforeach; ?>
+									<p class="description"><?php echo esc_html__( 'Diese Auswahl gilt für Nutzer ohne Moderations-/Administratorrechte. So kannst du z. B. festlegen, dass normale Nutzer nur private Arbeitsgruppen gründen dürfen. Moderatoren und Administratoren dürfen alle oben erlaubten Sichtbarkeiten wählen.', 'afspaces' ); ?></p>
 								</fieldset>
 							</td>
 						</tr>

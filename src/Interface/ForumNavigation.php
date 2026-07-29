@@ -110,6 +110,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			$pending_join_request_space_id = $this->pending_join_request_space_id( $user_id );
 			$can_create    = $this->can_create_spaces( $user_id );
 			$can_discover  = is_user_logged_in();
+			$can_moderate  = user_can( $user_id, Capabilities::MANAGE_ALL_SPACES ) || user_can( $user_id, Capabilities::MODERATE_SPACE );
+			$pending_approvals = $can_moderate ? count( $this->spaces->list_spaces_by_status( \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING ) ) : 0;
 
 			// Panel nur anzeigen, wenn es für den Benutzer relevant ist.
 			if ( 0 === $managed_count && 0 === $pending_count && ! $can_create && ! $can_discover ) {
@@ -154,6 +156,29 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 							$managed_count
 						)
 					)
+				);
+			} else {
+				printf(
+					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
+					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) ),
+					esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ) )
+				);
+			}
+
+			if ( $can_moderate ) {
+				$approvals_label = $pending_approvals > 0
+					? sprintf(
+						/* translators: %d: Anzahl ausstehender Freigaben */
+						_n( 'Freigaben (%d)', 'Freigaben (%d)', $pending_approvals, 'afspaces' ),
+						$pending_approvals
+					)
+					: __( 'Freigaben', 'afspaces' );
+
+				printf(
+					'<li><a class="afspaces-button%1$s" href="%2$s">%3$s</a></li>',
+					$pending_approvals > 0 ? '' : ' afspaces-button-secondary',
+					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ) ),
+					esc_html( $approvals_label )
 				);
 			}
 

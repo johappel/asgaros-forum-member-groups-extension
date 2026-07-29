@@ -183,14 +183,16 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpaceCreationPolicy' ) ) {
 		/**
 		 * Validiert die gewünschte Sichtbarkeit.
 		 *
-		 * @param SpaceCreationSettings $settings   Richtlinien.
-		 * @param string                $visibility Sichtbarkeitswert.
+		 * @param SpaceCreationSettings $settings         Richtlinien.
+		 * @param string                $visibility       Sichtbarkeitswert.
+		 * @param string[]|null         $allowed_override Optionale, nutzerspezifische Positivliste.
 		 * @return string Erlaubte Sichtbarkeit.
 		 * @throws DomainException Wenn die Sichtbarkeit nicht erlaubt ist.
 		 */
-		public function validate_visibility( SpaceCreationSettings $settings, string $visibility ): string {
+		public function validate_visibility( SpaceCreationSettings $settings, string $visibility, ?array $allowed_override = null ): string {
 			$visibility = trim( $visibility );
-			if ( ! $settings->is_visibility_allowed( $visibility ) ) {
+			$allowed    = null !== $allowed_override ? $allowed_override : $settings->allowed_visibilities;
+			if ( ! in_array( $visibility, $allowed, true ) ) {
 				throw new DomainException( __( 'Die gewählte Sichtbarkeit ist nicht erlaubt.', 'afspaces' ) );
 			}
 

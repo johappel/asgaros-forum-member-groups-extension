@@ -78,6 +78,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\MemberService' ) ) {
 				throw new DomainException( __( 'Der Raum existiert nicht.', 'afspaces' ) );
 			}
 
+			if ( \AFSpaces\Domain\SpaceLifecycle::STATUS_ACTIVE !== $space->status ) {
+				throw new DomainException( __( 'Diese Arbeitsgruppe ist noch nicht freigegeben oder nicht aktiv. Mitglieder können erst nach der Freigabe hinzugefügt werden.', 'afspaces' ) );
+			}
+
 			if ( $target_user_id < 1 || ! get_user_by( 'id', $target_user_id ) ) {
 				throw new DomainException( __( 'Der Zielbenutzer existiert nicht.', 'afspaces' ) );
 			}

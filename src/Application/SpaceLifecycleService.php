@@ -78,7 +78,9 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceLifecycleService' ) ) {
 		public function change_visibility( int $space_id, int $actor_user_id, string $visibility ): void {
 			$space      = $this->require_managed_space( $space_id, $actor_user_id );
 			$settings   = SpaceCreationSettings::load();
-			$visibility = $this->policy->validate_visibility( $settings, $visibility );
+			$privileged = user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
+				|| user_can( $actor_user_id, Capabilities::MODERATE_SPACE );
+			$visibility = $this->policy->validate_visibility( $settings, $visibility, $settings->visibilities_for( $privileged ) );
 
 			$this->apply_visibility( $space, $visibility );
 			$this->spaces->update_visibility( $space_id, $visibility );
@@ -212,6 +214,8 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceLifecycleService' ) ) {
 
 			// Bei Freigabe die tatsächliche Sichtbarkeit anwenden (Sperre ggf. lösen).
 			$this->apply_visibility( $space, $space->visibility );
+			// Forum wieder öffnen (bei der Gründung war es bis zur Freigabe geschlossen).
+			$this->asgaros->update_forum( $space->forum_id, array( 'forum_status' => 'normal' ) );
 			$this->spaces->update_status( $space_id, SpaceLifecycle::STATUS_ACTIVE );
 			$this->audit->log( $space_id, $actor_user_id, $space->owner_user_id, 'space_approved', 'space' );
 		}
