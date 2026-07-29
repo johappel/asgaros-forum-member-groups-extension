@@ -60,7 +60,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 		 * @return void
 		 */
 		public function render_controls( $author_id, $post_id ): void {
-			unset( $author_id );
+		$author_id = (int) $author_id;
 
 			$post_id = (int) $post_id;
 			$user_id = get_current_user_id();
@@ -106,7 +106,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 				$this->render_delete_topic_item( $space_id, $topic_id, $forum_url );
 				$this->render_move_topic_item( $space_id, $topic_id, (array) $context['forum_targets'], $forum_url );
 			} else {
+			// Nur render_delete_post_item, wenn der aktuelle Nutzer NICHT der Autor ist.
+			// Falls der Autor sein eigenes Posting löschen möchte, bietet Asgaros seinen Button.
+			if ( $user_id !== (int) $author_id ) {
 				$this->render_delete_post_item( $space_id, $post_id, $topic_url );
+			}
 				$this->render_move_post_item( $space_id, $post_id, (array) $context['topic_targets'], $topic_url );
 			}
 
@@ -152,14 +156,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 		 */
 		private function render_delete_post_item( int $space_id, int $post_id, string $return_to ): void {
 			?>
-			<form method="post" class="afspaces-mod-form">
-				<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-				<input type="hidden" name="afspaces_action" value="moderate_delete_post" />
-				<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
-				<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) $post_id ); ?>" />
-				<input type="hidden" name="redirect_to" value="<?php echo esc_url( $return_to ); ?>" />
-				<button type="submit" class="afspaces-mod-item" data-afspaces-confirm="<?php echo esc_attr__( 'Diesen Beitrag wirklich löschen?', 'afspaces' ); ?>"><span class="menu-icon fas fa-trash-alt" aria-hidden="true"></span><?php echo esc_html__( 'Beitrag löschen', 'afspaces' ); ?></button>
-			</form>
+			<details class="afspaces-mod-move">
+				<summary class="afspaces-mod-item"><span class="menu-icon fas fa-trash-alt" aria-hidden="true"></span><?php echo esc_html__( 'Beitrag löschen', 'afspaces' ); ?></summary>
+				<form method="post" class="afspaces-mod-move-form">
+					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+					<input type="hidden" name="afspaces_action" value="moderate_delete_post" />
+					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+					<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) $post_id ); ?>" />
+					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $return_to ); ?>" />
+					<p class="afspaces-mod-confirm"><?php echo esc_html__( 'Diesen Beitrag wirklich löschen?', 'afspaces' ); ?></p>
+					<button type="submit" class="afspaces-button afspaces-button-danger"><?php echo esc_html__( 'Bestätigen', 'afspaces' ); ?></button>
+				</form>
+			</details>
 			<?php
 		}
 
@@ -171,14 +179,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 		 */
 		private function render_delete_topic_item( int $space_id, int $topic_id, string $return_to ): void {
 			?>
-			<form method="post" class="afspaces-mod-form">
-				<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-				<input type="hidden" name="afspaces_action" value="moderate_delete_topic" />
-				<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
-				<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
-				<input type="hidden" name="redirect_to" value="<?php echo esc_url( $return_to ); ?>" />
-				<button type="submit" class="afspaces-mod-item" data-afspaces-confirm="<?php echo esc_attr__( 'Dieses Thema mit allen Beiträgen wirklich löschen?', 'afspaces' ); ?>"><span class="menu-icon fas fa-trash-alt" aria-hidden="true"></span><?php echo esc_html__( 'Thema löschen', 'afspaces' ); ?></button>
-			</form>
+			<details class="afspaces-mod-move">
+				<summary class="afspaces-mod-item"><span class="menu-icon fas fa-trash-alt" aria-hidden="true"></span><?php echo esc_html__( 'Thema löschen', 'afspaces' ); ?></summary>
+				<form method="post" class="afspaces-mod-move-form">
+					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+					<input type="hidden" name="afspaces_action" value="moderate_delete_topic" />
+					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+					<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
+					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $return_to ); ?>" />
+					<p class="afspaces-mod-confirm"><?php echo esc_html__( 'Dieses Thema mit allen Beiträgen löschen?', 'afspaces' ); ?></p>
+					<button type="submit" class="afspaces-button afspaces-button-danger"><?php echo esc_html__( 'Bestätigen', 'afspaces' ); ?></button>
+				</form>
+			</details>
 			<?php
 		}
 

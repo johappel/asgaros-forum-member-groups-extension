@@ -2592,3 +2592,8 @@ flex-direction: column;
 gap: 0.4rem;
 min-width: 220px;
 }
+.afspaces-mod-confirm {
+	margin: 0 0 0.4rem;
+	font-size: 0.9em;
+	color: #555;
+}
