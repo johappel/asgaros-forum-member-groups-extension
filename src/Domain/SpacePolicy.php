@@ -59,6 +59,21 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpacePolicy' ) ) {
 		}
 
 		/**
+		 * Darf der Akteur Inhalte (Themen/Beiträge) im Forum dieses Space moderieren?
+		 *
+		 * Die Moderation ist strikt auf den eigenen Space begrenzt: Nur
+		 * Raumverantwortliche (Owner/Manager) oder globale Verwalter dürfen
+		 * moderieren – es werden KEINE globalen Asgaros-Moderatorrechte vergeben.
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Benutzer-ID des Akteurs.
+		 * @return bool
+		 */
+		public function can_moderate( int $space_id, int $actor_user_id ): bool {
+			return $this->can_manage( $space_id, $actor_user_id );
+		}
+
+		/**
 		 * Darf der Akteur eine persönliche Einladung erstellen?
 		 *
 		 * @param int $space_id Space-ID.

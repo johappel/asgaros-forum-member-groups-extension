@@ -977,5 +977,183 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			}
 			\AsgarosForumUserGroups::deleteUserGroup( $group_id );
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function list_forum_topics( int $forum_id, array $args = [] ): array {
+			$empty = array(
+				'topics' => array(),
+				'total'  => 0,
+			);
+
+			$forum = $this->forum();
+			if ( null === $forum || $forum_id < 1 ) {
+				return $empty;
+			}
+
+			$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
+			$per_page = isset( $args['per_page'] ) ? max( 1, min( 100, (int) $args['per_page'] ) ) : 20;
+			$offset   = ( $page - 1 ) * $per_page;
+
+			$db     = $forum->db;
+			$topics = $forum->tables->topics;
+			$posts  = $forum->tables->posts;
+
+			$total = (int) $db->get_var(
+				$db->prepare( "SELECT COUNT(*) FROM {$topics} WHERE parent_id = %d;", $forum_id )
+			);
+			if ( 0 === $total ) {
+				return $empty;
+			}
+
+			$rows = $db->get_results(
+				$db->prepare(
+					"SELECT t.id AS id, t.name AS name, t.closed AS closed, t.sticky AS sticky, "
+					. "t.author_id AS author_id, t.approved AS approved, "
+					. "(SELECT COUNT(*) FROM {$posts} p WHERE p.parent_id = t.id) AS post_count, "
+					. "(SELECT MAX(p.date) FROM {$posts} p WHERE p.parent_id = t.id) AS last_date "
+					. "FROM {$topics} t WHERE t.parent_id = %d "
+					. "ORDER BY t.sticky DESC, last_date DESC, t.id DESC LIMIT %d, %d;",
+					$forum_id,
+					$offset,
+					$per_page
+				),
+				ARRAY_A
+			);
+
+			$topics_out = array();
+			foreach ( (array) $rows as $row ) {
+				$author_id = (int) ( $row['author_id'] ?? 0 );
+				$author    = $author_id > 0 ? get_userdata( $author_id ) : false;
+				$topics_out[] = array(
+					'id'          => (int) ( $row['id'] ?? 0 ),
+					'name'        => (string) ( $row['name'] ?? '' ),
+					'closed'      => 1 === (int) ( $row['closed'] ?? 0 ),
+					'sticky'      => (int) ( $row['sticky'] ?? 0 ) > 0,
+					'approved'    => 1 === (int) ( $row['approved'] ?? 1 ),
+					'author_id'   => $author_id,
+					'author_name' => $author ? $author->display_name : '',
+					'post_count'  => (int) ( $row['post_count'] ?? 0 ),
+					'last_date'   => (string) ( $row['last_date'] ?? '' ),
+				);
+			}
+
+			return array(
+				'topics' => $topics_out,
+				'total'  => $total,
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get_topic_forum( int $topic_id ): int {
+			$forum = $this->forum();
+			if ( null === $forum || $topic_id < 1 ) {
+				return 0;
+			}
+			return (int) $forum->db->get_var(
+				$forum->db->prepare( "SELECT parent_id FROM {$forum->tables->topics} WHERE id = %d;", $topic_id )
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function set_topic_closed( int $topic_id, bool $closed ): void {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum || $topic_id < 1 ) {
+				return;
+			}
+
+			$forum->db->update(
+				$forum->tables->topics,
+				array( 'closed' => $closed ? 1 : 0 ),
+				array( 'id' => $topic_id ),
+				array( '%d' ),
+				array( '%d' )
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function delete_forum_topic( int $topic_id ): void {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum || $topic_id < 1 || ! method_exists( $forum, 'delete_topic' ) ) {
+				return;
+			}
+
+			// admin_action = true: kein Redirect; permission_check = false: die
+			// raum-begrenzte Berechtigung wurde bereits im Service geprüft.
+			$forum->delete_topic( $topic_id, true, false );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get_post_location( int $post_id ): ?array {
+			$forum = $this->forum();
+			if ( null === $forum || $post_id < 1 ) {
+				return null;
+			}
+
+			$row = $forum->db->get_row(
+				$forum->db->prepare(
+					"SELECT id, parent_id AS topic_id, forum_id FROM {$forum->tables->posts} WHERE id = %d;",
+					$post_id
+				),
+				ARRAY_A
+			);
+			if ( empty( $row ) ) {
+				return null;
+			}
+
+			$topic_id = (int) ( $row['topic_id'] ?? 0 );
+			$first_id = (int) $forum->db->get_var(
+				$forum->db->prepare( "SELECT MIN(id) FROM {$forum->tables->posts} WHERE parent_id = %d;", $topic_id )
+			);
+
+			return array(
+				'topic_id' => $topic_id,
+				'forum_id' => (int) ( $row['forum_id'] ?? 0 ),
+				'is_first' => $post_id === $first_id,
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function delete_forum_post( int $post_id ): void {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum || $post_id < 1 || ! method_exists( $forum, 'remove_post' ) ) {
+				return;
+			}
+
+			$location = $this->get_post_location( $post_id );
+
+			// Wird der Eröffnungsbeitrag oder der letzte verbleibende Beitrag
+			// gelöscht, wird stattdessen das gesamte Thema entfernt, damit keine
+			// leeren Themen zurückbleiben.
+			if ( null !== $location ) {
+				$topic_id   = (int) $location['topic_id'];
+				$post_count = (int) $forum->db->get_var(
+					$forum->db->prepare( "SELECT COUNT(*) FROM {$forum->tables->posts} WHERE parent_id = %d;", $topic_id )
+				);
+				if ( ! empty( $location['is_first'] ) || $post_count <= 1 ) {
+					$this->delete_forum_topic( $topic_id );
+					return;
+				}
+			}
+
+			$forum->remove_post( $post_id, false );
+		}
 	}
 }

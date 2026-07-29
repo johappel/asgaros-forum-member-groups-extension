@@ -2450,3 +2450,33 @@ margin-top: 0.75rem;
 .afspaces-forum-row .afspaces-space-actions {
 justify-content: flex-end;
 }
+
+/* MVP 4: Raum-begrenzte Moderation. */
+.afspaces-moderation-table {
+width: 100%;
+border-collapse: collapse;
+margin: 0.5rem 0 1rem;
+}
+
+.afspaces-moderation-table th,
+.afspaces-moderation-table td {
+text-align: left;
+padding: 0.5rem 0.6rem;
+border-bottom: 1px solid #e1e8ed;
+vertical-align: middle;
+}
+
+.afspaces-moderation-table thead th {
+font-weight: 700;
+border-bottom: 2px solid #cdd7df;
+}
+
+.afspaces-moderation-actions {
+display: flex;
+flex-wrap: wrap;
+gap: 0.4rem;
+}
+
+.afspaces-moderation-actions form {
+margin: 0;
+}

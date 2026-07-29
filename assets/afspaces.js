@@ -147,7 +147,11 @@
 			reactivate_space: true,
 			delete_space: true,
 			approve_space: true,
-			reject_space: true
+			reject_space: true,
+			moderate_close_topic: true,
+			moderate_reopen_topic: true,
+			moderate_delete_topic: true,
+			moderate_delete_post: true
 		};
 
 		if (nonAjaxActions[actionInput.value]) {

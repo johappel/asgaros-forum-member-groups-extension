@@ -144,7 +144,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-working-group-scope-heading">
 					<div id="afspaces-working-group-scope-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Verantwortung und Moderation', 'afspaces' ); ?></div>
 					<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten Mitglieder, Einladungen und Beitrittsanfragen innerhalb von AFSpaces.', 'afspaces' ); ?></p>
-					<p><?php echo esc_html__( 'Forenmoderation in Asgaros, etwa das Moderieren von Beiträgen und Themen, bleibt davon getrennt und wird nicht automatisch aus dieser Rolle vergeben.', 'afspaces' ); ?></p>
+					<p><?php echo esc_html__( 'Als Verantwortliche moderierst du außerdem die Themen deines eigenen Forums (Themen schließen, wieder öffnen oder löschen) über den Reiter „Moderation". Diese Rechte gelten ausschließlich für dein Forum und geben keine Moderationsrechte in anderen Foren.', 'afspaces' ); ?></p>
 				</section>
 
 				<?php echo $this->render_management( $space, $actor, $forum_name, $responsibles ); ?>

@@ -17,6 +17,7 @@ use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
+use AFSpaces\Application\SpaceModerationService;
 use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
@@ -75,6 +76,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private SpaceLifecycleService $space_lifecycle;
 
 		/**
+		 * @var SpaceModerationService
+		 */
+		private SpaceModerationService $space_moderation;
+
+		/**
 		 * @var string
 		 */
 		private string $nonce_action = 'afspaces_member_action';
@@ -97,7 +103,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				WorkingGroupService $working_groups,
 			SpaceRegistrationService $space_registration,
 			SpaceCreationService $space_creation,
-			SpaceLifecycleService $space_lifecycle
+			SpaceLifecycleService $space_lifecycle,
+			SpaceModerationService $space_moderation
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -109,6 +116,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$this->space_registration = $space_registration;
 			$this->space_creation = $space_creation;
 			$this->space_lifecycle = $space_lifecycle;
+			$this->space_moderation = $space_moderation;
 		}
 
 		/**
@@ -378,6 +386,22 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$this->set_message( 'success', __( 'Die Arbeitsgruppe wurde abgelehnt.', 'afspaces' ) );
 					wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ) );
 					exit;
+				} elseif ( 'moderate_close_topic' === $action ) {
+					$topic_id = isset( $_POST['topic_id'] ) ? (int) $_POST['topic_id'] : 0;
+					$this->space_moderation->close_topic( $space_id, $actor, $topic_id );
+					$this->set_message( 'success', __( 'Das Thema wurde geschlossen.', 'afspaces' ) );
+				} elseif ( 'moderate_reopen_topic' === $action ) {
+					$topic_id = isset( $_POST['topic_id'] ) ? (int) $_POST['topic_id'] : 0;
+					$this->space_moderation->reopen_topic( $space_id, $actor, $topic_id );
+					$this->set_message( 'success', __( 'Das Thema wurde wieder geöffnet.', 'afspaces' ) );
+				} elseif ( 'moderate_delete_topic' === $action ) {
+					$topic_id = isset( $_POST['topic_id'] ) ? (int) $_POST['topic_id'] : 0;
+					$this->space_moderation->delete_topic( $space_id, $actor, $topic_id );
+					$this->set_message( 'success', __( 'Das Thema wurde gelöscht.', 'afspaces' ) );
+				} elseif ( 'moderate_delete_post' === $action ) {
+					$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
+					$this->space_moderation->delete_post( $space_id, $actor, $post_id );
+					$this->set_message( 'success', __( 'Der Beitrag wurde gelöscht.', 'afspaces' ) );
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
@@ -419,6 +443,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			if ( in_array( $action, array( 'rename_space', 'change_space_visibility', 'transfer_space_owner', 'archive_space', 'reactivate_space' ), true ) ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
+				exit;
+			}
+
+			if ( in_array( $action, array( 'moderate_close_topic', 'moderate_reopen_topic', 'moderate_delete_topic', 'moderate_delete_post' ), true ) ) {
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id ) ) );
 				exit;
 			}
 

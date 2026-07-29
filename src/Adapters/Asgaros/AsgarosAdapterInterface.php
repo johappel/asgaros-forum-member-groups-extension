@@ -243,5 +243,58 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return void
 		 */
 		public function delete_group( int $group_id ): void;
+
+		/**
+		 * Listet die Themen eines Forums (für die raum-begrenzte Moderation).
+		 *
+		 * @param int                 $forum_id Forum-ID.
+		 * @param array<string,mixed> $args     Optionen: page, per_page.
+		 * @return array{topics: array<int,array<string,mixed>>, total: int}
+		 */
+		public function list_forum_topics( int $forum_id, array $args = [] ): array;
+
+		/**
+		 * Gibt die Forum-ID (parent) eines Themas zurück (0, falls unbekannt).
+		 *
+		 * Dient der Eigentümerprüfung, damit nur Themen des eigenen Forums
+		 * moderiert werden können.
+		 *
+		 * @param int $topic_id Themen-ID.
+		 * @return int
+		 */
+		public function get_topic_forum( int $topic_id ): int;
+
+		/**
+		 * Öffnet oder schließt ein Thema.
+		 *
+		 * @param int  $topic_id Themen-ID.
+		 * @param bool $closed   true = schließen, false = öffnen.
+		 * @return void
+		 */
+		public function set_topic_closed( int $topic_id, bool $closed ): void;
+
+		/**
+		 * Löscht ein Thema inklusive aller Beiträge (nutzt die Asgaros-Kernlogik).
+		 *
+		 * @param int $topic_id Themen-ID.
+		 * @return void
+		 */
+		public function delete_forum_topic( int $topic_id ): void;
+
+		/**
+		 * Gibt Themen- und Forum-ID eines Beitrags zurück (für die Eigentümerprüfung).
+		 *
+		 * @param int $post_id Beitrags-ID.
+		 * @return array{topic_id:int, forum_id:int, is_first:bool}|null
+		 */
+		public function get_post_location( int $post_id ): ?array;
+
+		/**
+		 * Löscht einen einzelnen Beitrag (nutzt die Asgaros-Kernlogik).
+		 *
+		 * @param int $post_id Beitrags-ID.
+		 * @return void
+		 */
+		public function delete_forum_post( int $post_id ): void;
 	}
 }

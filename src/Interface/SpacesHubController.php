@@ -19,6 +19,7 @@ use AFSpaces\Application\MemberService;
 use AFSpaces\Application\HybridSearchService;
 use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
+use AFSpaces\Application\SpaceModerationService;
 use AFSpaces\Core\Capabilities;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
@@ -40,6 +41,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private HybridSearchService $forum_search;
 		private SpaceCreationService $space_creation;
 		private SpaceLifecycleService $space_lifecycle;
+		private SpaceModerationService $space_moderation;
 
 		/**
 		 * Konstruktor.
@@ -55,7 +57,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			WorkingGroupService $working_groups,
 			HybridSearchService $forum_search,
 			SpaceCreationService $space_creation,
-			SpaceLifecycleService $space_lifecycle
+			SpaceLifecycleService $space_lifecycle,
+			SpaceModerationService $space_moderation
 		) {
 			$this->frontend     = $frontend;
 			$this->spaces       = $spaces;
@@ -68,6 +71,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->forum_search = $forum_search;
 			$this->space_creation = $space_creation;
 			$this->space_lifecycle = $space_lifecycle;
+			$this->space_moderation = $space_moderation;
 		}
 
 		/**
@@ -214,6 +218,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					$settings_view = new WorkingGroupSettingsView( $this->spaces, $this->asgaros, $this->working_groups );
 					return $settings_view->render( $space_id );
 
+				case SpacesUrls::VIEW_MODERATION:
+					$moderation_view = new ModerationView( $this->spaces, $this->asgaros, $this->space_moderation );
+					return $moderation_view->render( $space_id );
+
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros );
 					return $mine_view->render();
@@ -290,7 +298,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			$room_context_active = $space_id > 0
 				&& $this->can_manage_space( $space_id, $actor )
-				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS, SpacesUrls::VIEW_SETTINGS ), true );
+				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS, SpacesUrls::VIEW_SETTINGS, SpacesUrls::VIEW_MODERATION ), true );
 
 			$tabs = array();
 
@@ -433,6 +441,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $space_id ) ),
 					'active' => SpacesUrls::VIEW_JOIN_REQUESTS === $view,
 				),
+				array(
+					'view'   => SpacesUrls::VIEW_MODERATION,
+					'label'  => __( 'Moderation', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_MODERATION === $view,
+				),
 			);
 
 			/**
@@ -570,6 +584,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return __( 'Arbeitsgruppe gründen', 'afspaces' );
 				case SpacesUrls::VIEW_APPROVALS:
 					return __( 'Freigaben', 'afspaces' );
+				case SpacesUrls::VIEW_MODERATION:
+					return __( 'Moderation', 'afspaces' );
 				default:
 					return WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL );
 			}

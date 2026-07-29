@@ -25,6 +25,7 @@ use AFSpaces\Application\SearchIndexer;
 use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
+use AFSpaces\Application\SpaceModerationService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
@@ -116,6 +117,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$space_registration = new SpaceRegistrationService( $spaces, $asgaros );
 			$space_creation = new SpaceCreationService( $spaces, $asgaros, $space_meta, $audit );
 			$space_lifecycle = new SpaceLifecycleService( $spaces, $asgaros, $space_meta, $audit );
+			$space_moderation = new SpaceModerationService( $spaces, $asgaros, $policy, $audit );
 			$forum_search = new ForumSearchService( $asgaros );
 			$search_index = new SearchIndexRepository();
 			$wp_search = new \AFSpaces\Search\WpPostSearch( \AFSpaces\Search\SearchSettings::wp_post_types() );
@@ -124,7 +126,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_indexer = new SearchIndexer( $asgaros, $search_index );
 			$search_indexer->init();
 
-			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle );
+			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle, $space_moderation );
 			$frontend->init();
 
 			$appearance = new AppearanceSettingsPage();
@@ -141,7 +143,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_modal->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
-			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle );
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle, $space_moderation );
 			$hub->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
