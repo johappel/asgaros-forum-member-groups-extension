@@ -75,10 +75,20 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 			$members = is_array( $members_result['members'] ?? null ) ? $members_result['members'] : array();
 			$member_count = (int) ( $members_result['total'] ?? count( $members ) );
 
+			$forum_slug = sanitize_title( (string) ( $forum['slug'] ?? '' ) );
+			$forum_url  = '' !== $forum_slug ? home_url( '/forum/forum/' . $forum_slug . '/' ) : home_url( '/forum/' );
+			$forum_url  = (string) apply_filters( 'afspaces_space_forum_url', $forum_url, $space, $forum, $actor );
+
 			ob_start();
 			?>
 			<section class="afspaces-working-group-view" aria-labelledby="afspaces-working-group-view-heading">
 				<h2 id="afspaces-working-group-view-heading"><?php echo esc_html( (string) $forum['name'] ); ?></h2>
+				<?php if ( $is_manager ) : ?>
+					<div class="afspaces-detail-toggle" role="group" aria-label="<?php echo esc_attr__( 'Zwischen Ansicht und Bearbeiten wechseln', 'afspaces' ); ?>">
+						<a class="afspaces-button is-active" aria-current="page" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Ansicht', 'afspaces' ); ?></a>
+						<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Bearbeiten', 'afspaces' ); ?></a>
+					</div>
+				<?php endif; ?>
 				<?php echo $this->render_message(); ?>
 				<div class="afspaces-working-group-card" style="--afspaces-accent: <?php echo esc_attr( $meta->accent_color ); ?>;">
 					<div class="afspaces-working-group-card-header">
@@ -153,13 +163,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 							<p class="afspaces-inline-hint"><?php echo esc_html( $this->availability_hint( $is_manager, $is_member, $request, $invitation, $meta ) ); ?></p>
 						<?php endif; ?>
 
+						<?php if ( $is_member || $is_manager ) : ?>
+							<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>"><?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?></a>
+						<?php endif; ?>
+
 						<?php if ( $is_manager ) : ?>
 							<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Details bearbeiten', 'afspaces' ); ?></a>
 							<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?></a>
 						<?php endif; ?>
 					</div>
-
-					<p class="description"><?php echo esc_html__( 'Arbeitsgruppenverantwortung betrifft Mitgliedschaften, Einladungen und Beitrittsanfragen. Die Moderation von Forenbeiträgen bleibt in Asgaros getrennt.', 'afspaces' ); ?></p>
 				</div>
 			</section>
 			<?php

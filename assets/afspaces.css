@@ -2420,3 +2420,33 @@ min-height: 3.5rem;
 max-height: 8rem;
 box-sizing: border-box;
 }
+
+/* MVP 4: Ansicht/Bearbeiten-Umschalter + Dashboard-Aktionen. */
+.afspaces-detail-toggle {
+display: inline-flex;
+gap: 0.25rem;
+margin: 0 0 1rem;
+padding: 0.25rem;
+background: #eef2f5;
+border-radius: 8px;
+}
+
+.afspaces-detail-toggle .afspaces-button {
+margin: 0;
+}
+
+.afspaces-detail-toggle .afspaces-button.is-active {
+pointer-events: none;
+}
+
+.afspaces-space-actions {
+display: flex;
+flex-wrap: wrap;
+gap: 0.5rem;
+align-items: center;
+margin-top: 0.75rem;
+}
+
+.afspaces-forum-row .afspaces-space-actions {
+justify-content: flex-end;
+}

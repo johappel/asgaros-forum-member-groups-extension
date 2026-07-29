@@ -182,6 +182,32 @@
 			})
 			.then(function (payload) {
 				var info = payload && payload.data ? payload.data : {};
+
+				// Nach Mitglieder-Aktionen die Personensuche zurücksetzen, damit die
+				// aktualisierte Mitgliederliste nicht durch eine alte Suche verdeckt wird.
+				var memberActions = {
+					add_member: true,
+					remove_member: true,
+					assign_manager: true,
+					revoke_manager: true
+				};
+
+				if (memberActions[actionInput.value]) {
+					var cleanUrl = new URL(window.location.href);
+					cleanUrl.searchParams.delete('afp_search');
+					cleanUrl.searchParams.delete('afp_page');
+					var cleanHref = cleanUrl.toString();
+
+					return refreshFromUrl(cleanHref)
+						.then(function () {
+							history.replaceState({}, '', cleanHref);
+							announce(info.message || '', info.type || 'success');
+						})
+						.catch(function () {
+							announce(info.message || '', info.type || 'success');
+						});
+				}
+
 				return refreshHubDom()
 					.then(function () {
 						announce(info.message || '', info.type || 'success');

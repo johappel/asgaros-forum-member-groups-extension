@@ -578,11 +578,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							<?php
 							$forum = $this->asgaros->get_forum( $space->forum_id );
 							// $forum is guaranteed to be non-empty due to filtering in render_dashboard().
-							$group_ids = $this->asgaros->get_forum_group_ids( $space->forum_id );
 							$member_count = 0;
 							$meta = $this->working_groups->get_metadata( $space->id );
-							if ( ! empty( $group_ids ) ) {
-								$members = $this->asgaros->list_group_members( (int) $group_ids[0], array( 'per_page' => 1 ) );
+							$count_group_id = $space->primary_group_id > 0
+								? (int) $space->primary_group_id
+								: (int) ( $this->asgaros->get_forum_group_ids( $space->forum_id )[0] ?? 0 );
+							if ( $count_group_id > 0 ) {
+								$members = $this->asgaros->list_group_members( $count_group_id, array( 'per_page' => 1 ) );
 								$member_count = (int) ( $members['total'] ?? 0 );
 							}
 							$manage_url = SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space->id ) );

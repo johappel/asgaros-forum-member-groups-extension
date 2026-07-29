@@ -63,6 +63,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 			?>
 			<section class="afspaces-working-group-settings" aria-labelledby="afspaces-working-group-settings-heading">
 				<h2 id="afspaces-working-group-settings-heading"><?php echo esc_html( sprintf( __( 'Arbeitsgruppen-Details - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<div class="afspaces-detail-toggle" role="group" aria-label="<?php echo esc_attr__( 'Zwischen Ansicht und Bearbeiten wechseln', 'afspaces' ); ?>">
+					<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Ansicht', 'afspaces' ); ?></a>
+					<a class="afspaces-button is-active" aria-current="page" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Bearbeiten', 'afspaces' ); ?></a>
+				</div>
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier pflegst du Beschreibung, Sichtbarkeit und Kontaktinformationen dieser Arbeitsgruppe.', 'afspaces' ); ?></p>
 				<p class="description"><?php echo esc_html__( '„Sichtbarkeit in Übersichten" steuert nur, ob die Arbeitsgruppe unter „Entdecken" auffindbar ist – nicht, wer das Forum lesen darf. Den Zugriff auf die Forumsinhalte legst du weiter unten über „Arbeitsgruppe verwalten → Sichtbarkeit" (privat, geschützt, öffentlich) fest.', 'afspaces' ); ?></p>
