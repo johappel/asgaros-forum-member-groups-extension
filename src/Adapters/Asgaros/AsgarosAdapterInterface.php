@@ -296,5 +296,26 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return void
 		 */
 		public function delete_forum_post( int $post_id ): void;
+
+		/**
+		 * Verschiebt ein Thema in ein anderes Forum.
+		 *
+		 * Aktualisiert die Forum-Zuordnung des Themas und aller zugehörigen
+		 * Beiträge (entspricht der Asgaros-Kernlogik `moveTopic`).
+		 *
+		 * @param int $topic_id        Themen-ID.
+		 * @param int $target_forum_id Ziel-Forum-ID.
+		 * @return void
+		 */
+		public function move_topic( int $topic_id, int $target_forum_id ): void;
+
+		/**
+		 * Lädt die Beiträge eines Themas (für die Moderation auf Beitragsebene).
+		 *
+		 * @param int                 $topic_id Themen-ID.
+		 * @param array<string,mixed> $args     Optionen: page, per_page.
+		 * @return array{posts: array<int,array<string,mixed>>, total: int}
+		 */
+		public function list_topic_posts( int $topic_id, array $args = [] ): array;
 	}
 }

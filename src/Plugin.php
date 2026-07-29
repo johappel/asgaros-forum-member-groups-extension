@@ -32,6 +32,7 @@ use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
 use AFSpaces\Interface\AppearanceSettingsPage;
 use AFSpaces\Interface\ForumNavigation;
+use AFSpaces\Interface\ForumModerationControls;
 use AFSpaces\Interface\FrontendController;
 use AFSpaces\Interface\InvitationsView;
 use AFSpaces\Interface\MembersView;
@@ -149,6 +150,10 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			// Integration in die Asgaros-Forum-Navigation.
 			$navigation = new ForumNavigation( $spaces, $inv_repo, $join_repo, $asgaros, $space_meta );
 			$navigation->init();
+
+			// Raum-begrenzte Moderationsaktionen direkt im Forum.
+			$forum_moderation = new ForumModerationControls( $spaces, $asgaros, $space_moderation );
+			$forum_moderation->init();
 
 			// Mitgliederansicht in denselben Shortcode integrieren.
 			add_shortcode(

@@ -2480,3 +2480,52 @@ gap: 0.4rem;
 .afspaces-moderation-actions form {
 margin: 0;
 }
+
+/* MVP 4: Moderationsknoepfe direkt im Forum + Beitragsebene. */
+.afspaces-forum-moderation {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+gap: 0.5rem;
+margin: 0.5rem 0 0.25rem;
+padding-top: 0.5rem;
+border-top: 1px dashed #d5dde3;
+}
+
+.afspaces-forum-moderation-label {
+font-size: 0.85em;
+color: #777;
+font-weight: 600;
+}
+
+.afspaces-forum-moderation-form {
+display: inline-flex;
+align-items: center;
+gap: 0.3rem;
+margin: 0;
+}
+
+.afspaces-forum-moderation .afspaces-button {
+font-size: 0.85em;
+padding: 0.25rem 0.6rem;
+}
+
+.afspaces-moderation-posts {
+list-style: none;
+margin: 0;
+padding: 0;
+display: grid;
+gap: 0.75rem;
+}
+
+.afspaces-moderation-post {
+padding: 0.75rem 1rem;
+}
+
+.afspaces-moderation-post-meta {
+margin: 0 0 0.4rem;
+}
+
+.afspaces-moderation-post-text {
+margin: 0 0 0.6rem;
+}

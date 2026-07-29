@@ -103,6 +103,14 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 	public function delete_forum_post( int $post_id ): void {
 		$this->calls[] = 'delete_post:' . $post_id;
 	}
+
+	public function move_topic( int $topic_id, int $target_forum_id ): void {
+		$this->calls[] = 'move_topic:' . $topic_id . '->' . $target_forum_id;
+	}
+
+	public function list_topic_posts( int $topic_id, array $args = [] ): array {
+		return array( 'posts' => array(), 'total' => 0 );
+	}
 }
 
 final class SpaceModerationServiceTest extends TestCase {
@@ -116,7 +124,11 @@ final class SpaceModerationServiceTest extends TestCase {
 
 		$this->repo = new StubModerationRepository();
 		$this->repo->spaces[10] = new Space( array( 'id' => 10, 'forum_id' => 500, 'primary_group_id' => 1, 'owner_user_id' => 7, 'status' => 'active' ) );
+		$this->repo->spaces[20] = new Space( array( 'id' => 20, 'forum_id' => 600, 'primary_group_id' => 2, 'owner_user_id' => 7, 'status' => 'active' ) );
+		$this->repo->spaces[30] = new Space( array( 'id' => 30, 'forum_id' => 700, 'primary_group_id' => 3, 'owner_user_id' => 8, 'status' => 'active' ) );
 		$this->repo->managers[10] = array( 7 );
+		$this->repo->managers[20] = array( 7 );
+		$this->repo->managers[30] = array( 8 );
 
 		$this->adapter = new StubModerationAdapter();
 		$this->adapter->topic_forum = array(
@@ -169,5 +181,27 @@ final class SpaceModerationServiceTest extends TestCase {
 	public function test_list_topics_requires_permission(): void {
 		$this->expectException( DomainException::class );
 		$this->service->list_topics( 10, 42 );
+	}
+
+	public function test_move_topic_to_managed_target(): void {
+		$this->service->move_topic( 10, 7, 99, 20 );
+		$this->assertContains( 'move_topic:99->600', $this->adapter->calls );
+	}
+
+	public function test_cannot_move_to_unmanaged_target(): void {
+		$this->expectException( DomainException::class );
+		// Space 30 wird von Nutzer 7 nicht verwaltet.
+		$this->service->move_topic( 10, 7, 99, 30 );
+	}
+
+	public function test_cannot_move_foreign_topic(): void {
+		$this->expectException( DomainException::class );
+		// Topic 77 gehört nicht zu Space 10.
+		$this->service->move_topic( 10, 7, 77, 20 );
+	}
+
+	public function test_cannot_move_into_same_space(): void {
+		$this->expectException( DomainException::class );
+		$this->service->move_topic( 10, 7, 99, 10 );
 	}
 }

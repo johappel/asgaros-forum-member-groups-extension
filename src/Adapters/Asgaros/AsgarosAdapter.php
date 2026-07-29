@@ -1155,5 +1155,95 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 
 			$forum->remove_post( $post_id, false );
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function move_topic( int $topic_id, int $target_forum_id ): void {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum || $topic_id < 1 || $target_forum_id < 1 ) {
+				return;
+			}
+
+			$forum->db->update(
+				$forum->tables->topics,
+				array( 'parent_id' => $target_forum_id ),
+				array( 'id' => $topic_id ),
+				array( '%d' ),
+				array( '%d' )
+			);
+			$forum->db->update(
+				$forum->tables->posts,
+				array( 'forum_id' => $target_forum_id ),
+				array( 'parent_id' => $topic_id ),
+				array( '%d' ),
+				array( '%d' )
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function list_topic_posts( int $topic_id, array $args = [] ): array {
+			$empty = array(
+				'posts' => array(),
+				'total' => 0,
+			);
+
+			$forum = $this->forum();
+			if ( null === $forum || $topic_id < 1 ) {
+				return $empty;
+			}
+
+			$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
+			$per_page = isset( $args['per_page'] ) ? max( 1, min( 100, (int) $args['per_page'] ) ) : 20;
+			$offset   = ( $page - 1 ) * $per_page;
+
+			$db    = $forum->db;
+			$posts = $forum->tables->posts;
+
+			$total = (int) $db->get_var(
+				$db->prepare( "SELECT COUNT(*) FROM {$posts} WHERE parent_id = %d;", $topic_id )
+			);
+			if ( 0 === $total ) {
+				return $empty;
+			}
+
+			$rows = $db->get_results(
+				$db->prepare(
+					"SELECT id, text, author_id, date FROM {$posts} WHERE parent_id = %d ORDER BY id ASC LIMIT %d, %d;",
+					$topic_id,
+					$offset,
+					$per_page
+				),
+				ARRAY_A
+			);
+
+			$first_id = (int) $db->get_var(
+				$db->prepare( "SELECT MIN(id) FROM {$posts} WHERE parent_id = %d;", $topic_id )
+			);
+
+			$out = array();
+			foreach ( (array) $rows as $row ) {
+				$post_id   = (int) ( $row['id'] ?? 0 );
+				$author_id = (int) ( $row['author_id'] ?? 0 );
+				$author    = $author_id > 0 ? get_userdata( $author_id ) : false;
+				$out[]     = array(
+					'id'          => $post_id,
+					'text'        => (string) ( $row['text'] ?? '' ),
+					'author_id'   => $author_id,
+					'author_name' => $author ? $author->display_name : '',
+					'date'        => (string) ( $row['date'] ?? '' ),
+					'is_first'    => $post_id === $first_id,
+				);
+			}
+
+			return array(
+				'posts' => $out,
+				'total' => $total,
+			);
+		}
 	}
 }

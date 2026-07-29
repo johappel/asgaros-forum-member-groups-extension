@@ -151,7 +151,8 @@
 			moderate_close_topic: true,
 			moderate_reopen_topic: true,
 			moderate_delete_topic: true,
-			moderate_delete_post: true
+			moderate_delete_post: true,
+			moderate_move_topic: true
 		};
 
 		if (nonAjaxActions[actionInput.value]) {

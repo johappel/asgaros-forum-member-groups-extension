@@ -149,6 +149,8 @@ final class StubCreationAdapter implements AsgarosAdapterInterface {
 	public function delete_forum_topic( int $topic_id ): void {}
 	public function get_post_location( int $post_id ): ?array { return null; }
 	public function delete_forum_post( int $post_id ): void {}
+	public function move_topic( int $topic_id, int $target_forum_id ): void {}
+	public function list_topic_posts( int $topic_id, array $args = [] ): array { return array( 'posts' => array(), 'total' => 0 ); }
 }
 
 final class SpaceCreationServiceTest extends TestCase {

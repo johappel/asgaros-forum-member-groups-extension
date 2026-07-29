@@ -308,6 +308,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				AFSPACES_VERSION
 			);
 			AppearanceSettingsPage::enqueue_inline_style();
+
+			// JavaScript für Bestätigungsdialoge der Moderationsaktionen im Forum.
+			wp_enqueue_script(
+				'afspaces-frontend',
+				AFSPACES_URL . 'assets/afspaces.js',
+				array(),
+				AFSPACES_VERSION,
+				true
+			);
 		}
 
 		/**

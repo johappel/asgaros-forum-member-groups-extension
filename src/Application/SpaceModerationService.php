@@ -12,6 +12,7 @@ namespace AFSpaces\Application;
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\AuditRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
 use AFSpaces\Domain\Space;
 use AFSpaces\Domain\SpacePolicy;
@@ -134,6 +135,86 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 			}
 			$this->asgaros->delete_forum_post( $post_id );
 			$this->audit->log( $space_id, $actor_user_id, $post_id, 'post_deleted', 'post' );
+		}
+
+		/**
+		 * Listet die Beiträge eines Themas des eigenen Forums (Beitragsebene).
+		 *
+		 * @param int                 $space_id      Space-ID.
+		 * @param int                 $actor_user_id Akteur.
+		 * @param int                 $topic_id      Themen-ID.
+		 * @param array<string,mixed> $args          Optionen: page, per_page.
+		 * @return array{posts: array<int,array<string,mixed>>, total: int}
+		 * @throws DomainException Bei fehlender Berechtigung oder fremdem Thema.
+		 */
+		public function list_posts( int $space_id, int $actor_user_id, int $topic_id, array $args = array() ): array {
+			$space = $this->require_moderatable_space( $space_id, $actor_user_id );
+			$this->assert_topic_in_space( $topic_id, $space );
+			return $this->asgaros->list_topic_posts( $topic_id, $args );
+		}
+
+		/**
+		 * Verschiebt ein Thema in ein anderes Forum, das der Akteur ebenfalls verwaltet.
+		 *
+		 * @param int $space_id        Quell-Space-ID.
+		 * @param int $actor_user_id   Akteur.
+		 * @param int $topic_id        Themen-ID.
+		 * @param int $target_space_id Ziel-Space-ID.
+		 * @return void
+		 * @throws DomainException Bei fehlender Berechtigung, fremdem Thema oder unzulässigem Ziel.
+		 */
+		public function move_topic( int $space_id, int $actor_user_id, int $topic_id, int $target_space_id ): void {
+			$space = $this->require_moderatable_space( $space_id, $actor_user_id );
+			$this->assert_topic_in_space( $topic_id, $space );
+
+			if ( $target_space_id === $space_id ) {
+				throw new DomainException( __( 'Bitte wähle ein anderes Zielforum.', 'afspaces' ) );
+			}
+
+			// Auch das Zielforum muss der Akteur moderieren dürfen.
+			$target = $this->require_moderatable_space( $target_space_id, $actor_user_id );
+
+			$this->asgaros->move_topic( $topic_id, $target->forum_id );
+			$this->audit->log( $space_id, $actor_user_id, $topic_id, 'topic_moved', 'topic' );
+		}
+
+		/**
+		 * Listet die Foren, in die der Akteur Themen verschieben darf (seine verwalteten Räume).
+		 *
+		 * @param int $actor_user_id Akteur.
+		 * @param int $exclude_space_id Optional auszuschließende Space-ID.
+		 * @return array<int,array{space_id:int, forum_id:int, name:string}>
+		 */
+		public function list_move_targets( int $actor_user_id, int $exclude_space_id = 0 ): array {
+			if ( user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES ) ) {
+				$spaces = $this->spaces->list_spaces();
+			} else {
+				$spaces = array();
+				foreach ( $this->spaces->list_manager_space_ids( $actor_user_id ) as $sid ) {
+					$s = $this->spaces->get_space( $sid );
+					if ( $s ) {
+						$spaces[] = $s;
+					}
+				}
+			}
+
+			$targets = array();
+			foreach ( $spaces as $s ) {
+				if ( $s->id === $exclude_space_id || 'active' !== $s->status ) {
+					continue;
+				}
+				$forum = $this->asgaros->get_forum( $s->forum_id );
+				if ( empty( $forum ) ) {
+					continue;
+				}
+				$targets[] = array(
+					'space_id' => $s->id,
+					'forum_id' => $s->forum_id,
+					'name'     => (string) ( $forum['name'] ?? ( 'Forum #' . $s->forum_id ) ),
+				);
+			}
+
+			return $targets;
 		}
 
 		/**
