@@ -589,6 +589,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							$invite_url = SpacesUrls::hub_url( SpacesUrls::VIEW_INVITATIONS, array( 'space_id' => $space->id ) );
 														$group_url = SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space->id ) );
 														$settings_url = SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space->id ) );
+														$forum_url = (string) apply_filters( 'afspaces_space_forum_url', $this->space_forum_url( $forum ), $space, $forum, $actor );
 							?>
 							<li class="afspaces-space-item content-container afspaces-content-container">
 								<div class="content-element forum afspaces-forum-row">
@@ -601,14 +602,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 									</div>
 									<div class="forum-poster">
 										<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Arbeitsgruppenaktionen', 'afspaces' ); ?>">
-											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $group_url ); ?>">
-												<?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?>
+											<a class="afspaces-button" href="<?php echo esc_url( $settings_url ); ?>">
+												<?php echo esc_html__( 'Details bearbeiten', 'afspaces' ); ?>
 											</a>
-											<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>">
+											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $manage_url ); ?>">
 												<?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?>
 											</a>
-											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $invite_url ); ?>">
-												<?php echo esc_html__( 'Einladungen und Invite-Links', 'afspaces' ); ?>
+											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $forum_url ); ?>">
+												<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
 											</a>
 										</div>
 									</div>
@@ -641,10 +642,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 										</div>
 										<div class="forum-poster">
 											<div class="afspaces-space-actions" role="group" aria-label="<?php echo esc_attr__( 'Arbeitsgruppenaktionen', 'afspaces' ); ?>">
-												<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $group_url ); ?>">
-													<?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?>
-												</a>
-
 												<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>">
 													<?php echo esc_html__( 'Forum öffnen', 'afspaces' ); ?>
 												</a>

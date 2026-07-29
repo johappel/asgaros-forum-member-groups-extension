@@ -9,8 +9,10 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Interface;
 
+use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
+use AFSpaces\Adapters\Database\SpaceMetaRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Core\Capabilities;
 
@@ -29,14 +31,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		private SpaceRepository $spaces;
 		private InvitationRepository $invitations;
 		private JoinRequestRepository $join_requests;
+		private AsgarosAdapterInterface $asgaros;
+		private SpaceMetaRepository $meta;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations, JoinRequestRepository $join_requests ) {
+		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations, JoinRequestRepository $join_requests, AsgarosAdapterInterface $asgaros, SpaceMetaRepository $meta ) {
 			$this->spaces        = $spaces;
 			$this->invitations   = $invitations;
 			$this->join_requests = $join_requests;
+			$this->asgaros       = $asgaros;
+			$this->meta          = $meta;
 		}
 
 		/**
@@ -48,6 +54,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			add_filter( 'asgarosforum_filter_header_menu', array( $this, 'add_menu_entry' ) );
 			// Rendert innerhalb von #af-wrapper direkt unterhalb der Forum-Navigation.
 			add_action( 'asgarosforum_content_header', array( $this, 'render_overview_panel' ) );
+			// Färbt die Forenkategorien in den Farben der Arbeitsgruppen (auch für Gäste).
+			add_action( 'asgarosforum_content_top', array( $this, 'render_category_colors' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		}
 
@@ -67,20 +75,28 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				return $menu_entries;
 			}
 
-			$pending_requests = $this->pending_join_request_count( $user_id );
+			// Chip: Summe der Dinge, die meine Aufmerksamkeit brauchen
+			// (offene Einladungen an mich, offene Beitrittsanfragen in meinen
+			// verwalteten Gruppen, offene Freigaben für Moderatoren).
+			$can_moderate     = user_can( $user_id, Capabilities::MANAGE_ALL_SPACES ) || user_can( $user_id, Capabilities::MODERATE_SPACE );
+			$pending_approvals = $can_moderate ? count( $this->spaces->list_spaces_by_status( \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING ) ) : 0;
+			$badge = $this->pending_count( $user_id )
+				+ $this->pending_join_request_count( $user_id )
+				+ $pending_approvals;
+
 			$menu_label = esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::PLURAL ) );
-			if ( $pending_requests > 0 ) {
+			if ( $badge > 0 ) {
 				$menu_label = sprintf(
-					/* translators: %d: Anzahl offener Beitrittsanfragen */
+					/* translators: %d: Anzahl offener Vorgänge */
 					esc_html__( 'Arbeitsgruppen (%d)', 'afspaces' ),
-					$pending_requests
+					$badge
 				);
 			}
 
 			$menu_entries['afspaces'] = array(
 				'menu_class'        => 'afspaces-link',
 				'menu_link_text'    => $menu_label,
-			'menu_url'          => '#',
+			'menu_url'          => SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ),
 			'menu_login_status' => 1,
 			'menu_new_tab'      => false,
 		);
@@ -94,37 +110,54 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		 * @return void
 		 */
 		public function render_overview_panel(): void {
-			// Nur auf der Forum-Übersicht anzeigen, nicht in Themen/Beiträgen.
-			if ( ! $this->is_forum_overview() ) {
-				return;
-			}
-
 			$user_id = get_current_user_id();
 			if ( 0 === $user_id ) {
 				return;
 			}
 
+			$is_admin      = user_can( $user_id, Capabilities::MANAGE_ALL_SPACES );
 			$managed_count = $this->managed_space_count( $user_id );
 			$pending_count = $this->pending_count( $user_id );
 			$pending_join_request_count = $this->pending_join_request_count( $user_id );
 			$pending_join_request_space_id = $this->pending_join_request_space_id( $user_id );
 			$can_create    = $this->can_create_spaces( $user_id );
 			$can_discover  = is_user_logged_in();
-			$can_moderate  = user_can( $user_id, Capabilities::MANAGE_ALL_SPACES ) || user_can( $user_id, Capabilities::MODERATE_SPACE );
+			$can_moderate  = $is_admin || user_can( $user_id, Capabilities::MODERATE_SPACE );
 			$pending_approvals = $can_moderate ? count( $this->spaces->list_spaces_by_status( \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING ) ) : 0;
-
-			// Panel nur anzeigen, wenn es für den Benutzer relevant ist.
-			if ( 0 === $managed_count && 0 === $pending_count && ! $can_create && ! $can_discover ) {
-				return;
-			}
 
 			echo '<section class="afspaces-forum-panel" id="afspaces-forum-panel" style="display: none;" aria-labelledby="afspaces-forum-panel-heading">';
 			printf(
 				'<h2 id="afspaces-forum-panel-heading" class="afspaces-forum-panel-heading">%s</h2>',
-				esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ) )
+				esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::PLURAL ) )
 			);
 			echo '<ul class="afspaces-forum-panel-links">';
 
+			// 1. Für alle sichtbar: Zugang zu den eigenen Arbeitsgruppen.
+			printf(
+				'<li><a class="afspaces-button" href="%1$s">%2$s</a></li>',
+				esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) ),
+				esc_html( $is_admin ? __( 'Arbeitsgruppen verwalten', 'afspaces' ) : WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ) )
+			);
+
+			// 2. Wer noch keine Arbeitsgruppe verwaltet und gründen darf, sieht den Gründen-Button.
+			if ( $can_create && 0 === $managed_count ) {
+				printf(
+					'<li><a class="afspaces-button" href="%1$s">%2$s</a></li>',
+					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ) ),
+					esc_html__( 'Arbeitsgruppe gründen', 'afspaces' )
+				);
+			}
+
+			// 3. Entdecken – für alle angemeldeten Personen.
+			if ( $can_discover ) {
+				printf(
+					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
+					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ) ),
+					esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER ) )
+				);
+			}
+
+			// 4. Einladungen nur, wenn es welche gibt.
 			if ( $pending_count > 0 ) {
 				printf(
 					'<li><a class="afspaces-button" href="%1$s">%2$s</a></li>',
@@ -137,58 +170,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 						)
 					)
 				);
-			} else {
-				printf(
-					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
-					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MY_INVITATIONS ) ),
-					esc_html__( 'Meine Einladungen', 'afspaces' )
-				);
 			}
 
-			if ( $managed_count > 0 ) {
-				printf(
-					'<li><a class="afspaces-button" href="%1$s">%2$s</a></li>',
-					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) ),
-					esc_html(
-						sprintf(
-								/* translators: %d: Anzahl verwalteter Arbeitsgruppen */
-								_n( 'Verwaltete Arbeitsgruppe (%d)', 'Verwaltete Arbeitsgruppen (%d)', $managed_count, 'afspaces' ),
-							$managed_count
-						)
-					)
-				);
-			} else {
-				printf(
-					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
-					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD ) ),
-					esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL ) )
-				);
-			}
+			// --- Administrative Aktionen (nur für Verantwortliche/Moderatoren) ganz unten. ---
 
-			if ( $can_moderate ) {
-				$approvals_label = $pending_approvals > 0
-					? sprintf(
-						/* translators: %d: Anzahl ausstehender Freigaben */
-						_n( 'Freigaben (%d)', 'Freigaben (%d)', $pending_approvals, 'afspaces' ),
-						$pending_approvals
-					)
-					: __( 'Freigaben', 'afspaces' );
-
-				printf(
-					'<li><a class="afspaces-button%1$s" href="%2$s">%3$s</a></li>',
-					$pending_approvals > 0 ? '' : ' afspaces-button-secondary',
-					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ) ),
-					esc_html( $approvals_label )
-				);
-			}
-
+			// 5. Offene Beitrittsanfragen für verwaltete Arbeitsgruppen.
 			if ( $pending_join_request_count > 0 ) {
 				$requests_url = $pending_join_request_space_id > 0
 					? SpacesUrls::hub_url( SpacesUrls::VIEW_JOIN_REQUESTS, array( 'space_id' => $pending_join_request_space_id ) )
 					: SpacesUrls::hub_url( SpacesUrls::VIEW_DASHBOARD );
 
 				printf(
-					'<li><a class="afspaces-button" href="%1$s">%2$s</a></li>',
+					'<li><a class="afspaces-button afspaces-button-danger" href="%1$s">%2$s</a></li>',
 					esc_url( $requests_url ),
 					esc_html(
 						sprintf(
@@ -200,19 +193,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				);
 			}
 
-			if ( $can_create ) {
-				printf(
-					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
-					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_CREATE ) ),
-					esc_html__( 'Arbeitsgruppe gründen', 'afspaces' )
-				);
-			}
+			// 6. Freigaben – nur für Moderatoren/Administratoren.
+			if ( $can_moderate ) {
+				$approvals_label = $pending_approvals > 0
+					? sprintf(
+						/* translators: %d: Anzahl ausstehender Freigaben */
+						_n( 'Freigaben (%d)', 'Freigaben (%d)', $pending_approvals, 'afspaces' ),
+						$pending_approvals
+					)
+					: __( 'Freigaben', 'afspaces' );
 
-			if ( $can_discover ) {
 				printf(
-					'<li><a class="afspaces-button afspaces-button-secondary" href="%1$s">%2$s</a></li>',
-					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_DISCOVER ) ),
-					esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER ) )
+					'<li><a class="afspaces-button%1$s" href="%2$s">%3$s</a></li>',
+					$pending_approvals > 0 ? ' afspaces-button-danger' : ' afspaces-button-secondary',
+					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ) ),
+					esc_html( $approvals_label )
 				);
 			}
 
@@ -223,8 +218,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		?>
 		<script type="module">
 			document.addEventListener( 'DOMContentLoaded', function() {
-				const menuLink = document.querySelector( 'a.afspaces-link[href="#"]' );
+				const menuLink = document.querySelector( 'a.afspaces-link' );
 				const panel = document.getElementById( 'afspaces-forum-panel' );
+				// Ohne Panel (z. B. andere Kontexte) navigiert der Link regulär zur Hub-Seite.
 				if ( ! menuLink || ! panel ) return;
 
 				menuLink.addEventListener( 'click', function( e ) {
@@ -232,14 +228,66 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 					const isVisible = panel.style.display !== 'none';
 					panel.style.display = isVisible ? 'none' : 'block';
 					menuLink.classList.toggle( 'is-active', ! isVisible );
+					if ( ! isVisible ) {
+						panel.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+					}
 				} );
 			} );
 		</script>
 		<?php
 	}
 
-	/**
-	 * Bindet die Frontend-Stile auf Forumseiten ein.
+		/**
+		 * Färbt die Forenkategorien in den Farben der zugehörigen Arbeitsgruppen.
+		 *
+		 * @return void
+		 */
+		public function render_category_colors(): void {
+			$spaces = $this->spaces->list_spaces();
+			$active = array_filter( $spaces, static fn( $s ): bool => 'active' === $s->status );
+			if ( empty( $active ) ) {
+				return;
+			}
+
+			$ids   = array_map( static fn( $s ): int => (int) $s->id, $active );
+			$metas = $this->meta->list_for_spaces( $ids );
+
+			$by_category = array();
+			foreach ( $active as $space ) {
+				$forum = $this->asgaros->get_forum( $space->forum_id );
+				if ( empty( $forum ) ) {
+					continue;
+				}
+				$category_id = (int) ( $forum['category_id'] ?? 0 );
+				if ( $category_id < 1 ) {
+					continue;
+				}
+				$meta   = $metas[ $space->id ] ?? null;
+				$accent = $meta ? sanitize_hex_color( $meta->accent_color ) : '';
+				if ( ! $accent ) {
+					continue;
+				}
+				$by_category[ $category_id ] = $accent;
+			}
+
+			if ( empty( $by_category ) ) {
+				return;
+			}
+
+			$css = '';
+			foreach ( $by_category as $category_id => $accent ) {
+				$css .= sprintf(
+					'#forum-category-%1$d{background-color:%2$s !important;border-color:%2$s !important;}',
+					$category_id,
+					$accent
+				);
+			}
+
+			echo '<style id="afspaces-category-colors">' . $css . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS aus sanitize_hex_color + Integer.
+		}
+
+		/**
+		 * Bindet die Frontend-Stile auf Forumseiten ein.
 		 *
 		 * @return void
 		 */
@@ -286,19 +334,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			}
 
 			return $this->can_create_spaces( $user_id );
-		}
-
-		/**
-		 * Prüft, ob gerade die Forum-Übersicht (nicht ein Thema/Beitrag) angezeigt wird.
-		 *
-		 * @return bool
-		 */
-		private function is_forum_overview(): bool {
-			global $asgarosforum;
-			if ( ! is_object( $asgarosforum ) || ! isset( $asgarosforum->current_view ) ) {
-				return false;
-			}
-			return 'overview' === $asgarosforum->current_view;
 		}
 
 		/**
