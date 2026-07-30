@@ -1,0 +1,88 @@
+# Design- & Layout-Entscheidungen
+
+Bewusste Gestaltungsentscheidungen und wo sie im Code liegen. Ziel: Asgaros-nahe Optik, vollständige Konfigurierbarkeit, Barrierefreiheit vor Effekt.
+
+## Leitprinzipien
+
+- Asgaros-nahe Standardoptik, damit sich AFSpaces wie Teil des Forums anfühlt.
+- Serverseitiges Rendering als Basis; JavaScript nur als Verbesserung (Progressive Enhancement).
+- Kein JavaScript-Framework; Vanilla-JS in `assets/afspaces.js` und `assets/afspaces-search.js`.
+- Bedeutung nie allein über Farbe; immer zusätzlich Text, Icon-plus-Label oder Status.
+- Touch-Ziele und Fokus sichtbar; Zoom bis 200 Prozent ohne Funktionsverlust.
+
+## Konfigurierbares Erscheinungsbild
+
+Zentraler Ort: `src/Interface/AppearanceSettingsPage.php`, Option `afspaces_appearance_options`. Styles werden via `wp_add_inline_style` an das Handle `afspaces-frontend` gehängt und site-weit über `SearchModal` geladen.
+
+Standardwerte (Preset „Asgaros-Nah"):
+
+| Schlüssel | Default |
+| --- | --- |
+| `base_font_family` / `heading_font_family` | `Quicksand, sans-serif` |
+| `base_font_size` | `20` |
+| `heading_color` | `#f6a81d` |
+| `text_color` | `#444444` |
+| `link_color` | `#2d5d7f` |
+| `breadcrumb_text_color` | `#888888` |
+| `wrapper_background` | `#fafbfc` |
+| `wrapper_border_color` | `#e1e8ed` |
+| `wrapper_border_radius` | `30` |
+| `nav_background` | `#2d5d7f` |
+| `nav_text_color` | `#ffffff` |
+| `nav_active_background` | `#ffffff` |
+| `nav_active_text_color` | `#1d2f43` |
+| `pager_background` | `#f2f2f2` |
+| `pager_text_color` | `#888888` |
+| `button_primary_bg` | `#2d5d7f` |
+| `button_secondary_bg` | `#7f98ac` |
+| `button_text_color` | `#ffffff` |
+
+Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich`, plus Reset. Kontrastreich existiert bewusst als Barrierefreiheits-Option.
+
+## Arbeitsgruppen-Akzentfarbe und Icon
+
+Pro Arbeitsgruppe in `afspaces_space_meta`:
+
+- `accent_color` (Default `#2d5d7f`) — via `sanitize_hex_color` gefiltert. Wird u. a. für Forenkategorie-Farben in `ForumNavigation::render_category_colors` genutzt.
+- `icon` (Default `users`) — auf FontAwesome gemappt in `WorkingGroupService::icon_class`:
+
+| Schlüssel | Klasse | Label |
+| --- | --- | --- |
+| `users` | `fas fa-users` | Menschen |
+| `comments` | `fas fa-comments` | — |
+| `book` | `fas fa-book` | — |
+| `briefcase` | `fas fa-briefcase` | — |
+| `lightbulb` | `fas fa-lightbulb` | — |
+
+Farbe und Icon sind immer nur Ergänzung; Name und Status stehen zusätzlich als Text (keine reine Farb-/Symbolbedeutung).
+
+## Hub-Layout
+
+- Eine Hub-Seite (`[afspaces]`) mit Router (`SpacesHubController`), Brotkrümel und zweistufiger Navigation.
+- Top-Navigation: hubweite Ansichten. Space-Kontext-Navigation nur beim Verwalten einer konkreten Arbeitsgruppe (Details/Mitglieder/Einladungen/Beitrittsanfragen/Moderation).
+- Wrapper-ID `#af-wrapper`; CSS in `assets/afspaces.css`. Einige Regeln sind bewusst unscoped, damit sie auch im site-weiten Such-Overlay greifen.
+
+## Such-Overlay
+
+- `src/Interface/SearchModal.php` + `assets/afspaces-search.js`.
+- Barrierearmer Dialog: `aria-modal`, Fokusfalle, Escape schließt, Rückgabe des Fokus.
+- Spinner respektiert `[hidden]` (CSS-Regel `.afspaces-spinner[hidden]{display:none!important}`), weil eigene `display`-Regeln sonst `[hidden]` überschreiben.
+- Trigger: Shortcodes, Asgaros-Suchformular (per JS statt Redirect), optional WP-Suchformulare.
+- Ohne JavaScript bleibt die serverseitige Suchseite plus 302-Weiterleitung erhalten.
+
+## Barrierefreiheit als Akzeptanzkriterium
+
+Verbindliche Regeln in [ACCESSIBILITY.md](../../ACCESSIBILITY.md). Für Layoutarbeit besonders relevant:
+
+- Drag-and-drop nur zusätzlich, nie als einzige Bedienung.
+- Listen als semantische Liste oder Tabelle.
+- Statusmeldungen über Live-Regionen (`aria-live`), z. B. Trefferzahl der Suche.
+- Bestätigungen nicht nur als Toast; destruktive Aktionen mit expliziter Bestätigung (`data-afspaces-confirm`).
+- Keine unbeschrifteten Icon-Buttons.
+
+## Layout ändern
+
+1. Globale Optik über `AppearanceSettingsPage`/Option erweitern, nicht über verstreute Inline-Styles.
+2. Neue CSS-Regeln in `assets/afspaces.css`; bei Overlay-Relevanz unscoped und `[hidden]`-Regeln nachziehen.
+3. Farbe/Icon nie als alleinigen Bedeutungsträger einsetzen.
+4. Fokus, Tastaturpfad und `aria`-Attribute für jede neue interaktive Komponente prüfen.

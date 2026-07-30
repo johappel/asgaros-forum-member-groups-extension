@@ -1,23 +1,30 @@
-# Asgaros Forum Spaces — Spezifikationspaket
+# Asgaros Forum Spaces
 
-Dieses Paket beschreibt ein eigenständiges WordPress-Plugin für eine verständliche Frontend-Verwaltung von Asgaros-Forenräumen.
+AFSpaces ist ein eigenständiges WordPress-Plugin für eine verständliche, sichere und frontend-first Verwaltung von Arbeitsgruppen auf Basis von Asgaros Forum.
 
-## Dokumente
+## Entwickler-Einstieg
 
-- `GOAL.md` — Produktziel und UX-Leitbild
-- `AGENTS.md` — verbindliche Anleitung für Coding-Agenten
-- `TASKS_MVP_1.md` — Frontend-Mitgliederverwaltung
-- `TASKS_MVP_2.md` — persönliche Einladungen
-- `TASKS_MVP_3.md` — sichere Einladungslinks
-- `TASKS_MVP_31.md` — Beitrittsanfragen für bestehende Räume
-- `TASKS_MVP_32.md` — Arbeitsgruppenmodell für efabiNet
-- `TASKS_MVP_4.md` — private Räume selbst gründen
-- `ARCHITECTURE.md` — technische Schichten und Abhängigkeiten
-- `SECURITY_PRIVACY.md` — Sicherheit und Datenschutz
-- `ACCESSIBILITY.md` — Barrierefreiheitsanforderungen
-- `TESTING.md` — Teststrategie und CI
-- `COMPATIBILITY.md` — Asgaros-Versionen und interne Schnittstellen
+Die kanonische Entwicklerdokumentation liegt in docs/:
 
-## Empfohlener Start
+- [docs/INDEX.md](docs/INDEX.md) — Einstieg und Dokumentenstruktur
+- [docs/UEBERBLICK.md](docs/UEBERBLICK.md) — Produktbild und aktueller Funktionsstand
+- [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md) — Schichten, Persistenz und Request-Flows
+- [docs/FEATURE-STATUS.md](docs/FEATURE-STATUS.md) — konsolidierter Umsetzungsstand aller MVPs
+- [docs/SUCHE.md](docs/SUCHE.md) — Sucharchitektur und Suchbetrieb
+- [docs/ERWEITERN-UND-QUALITAET.md](docs/ERWEITERN-UND-QUALITAET.md) — Änderungswege, Tests und Leitplanken
 
-MVP 1 zunächst gegen eine fest definierte Asgaros-Version implementieren. Vor dem ersten Schreibzugriff müssen die internen Gruppen- und Foren-APIs geprüft und im Adapter gekapselt werden.
+## Verbindliche Spezifikationen
+
+Die Root-Dokumente bleiben die normativen Leitplanken für Produkt, Sicherheit und Kompatibilität:
+
+- GOAL.md
+- AGENTS.md
+- ARCHITECTURE.md
+- SECURITY_PRIVACY.md
+- ACCESSIBILITY.md
+- TESTING.md
+- COMPATIBILITY.md
+
+## Historie
+
+Frühere Task-Tracker und Spezial-READMEs wurden in archive/ zusammengeführt, damit der Root nicht mehr zugleich Planungs- und Zieldokumentation mischt. Die Archivübersicht liegt in archive/INDEX.md.

@@ -6,18 +6,21 @@ Erstelle ein eigenständiges WordPress-Plugin, das Asgaros Forum um eine barrier
 
 Arbeite inkrementell entlang dieser Dokumente:
 
-1. `GOAL.md`
-2. `TASKS_MVP_1.md`
-3. `TASKS_MVP_2.md`
-4. `TASKS_MVP_3.md`
-5. `TASKS_MVP_31.md`
-6. `TASKS_MVP_32.md`
-7. `TASKS_MVP_4.md`
-8. `ARCHITECTURE.md`
-9. `SECURITY_PRIVACY.md`
-10. `ACCESSIBILITY.md`
-11. `TESTING.md`
-12. `COMPATIBILITY.md`
+1. `docs/INDEX.md`
+2. `GOAL.md`
+3. `docs/UEBERBLICK.md`
+4. `ARCHITECTURE.md`
+5. `docs/ARCHITEKTUR.md`
+6. `docs/FEATURE-STATUS.md`
+7. `SECURITY_PRIVACY.md`
+8. `ACCESSIBILITY.md`
+9. `TESTING.md`
+10. `COMPATIBILITY.md`
+11. `docs/SUCHE.md` für alle Änderungen an der Suchplattform
+12. `docs/ERWEITERN-UND-QUALITAET.md`
+13. `docs/referenz/INDEX.md` als vollständige Nachschlage-Referenz (REST, Hooks, Frontend-Actions, Adapter, Settings, Bereiche)
+
+Historische Task-Tracker liegen in `archive/` und dienen nur noch als Referenz für Detailhistorie und ursprüngliche Akzeptanzkriterien.
 
 Eine spätere MVP-Stufe darf die Architektur der früheren Stufen vorbereiten, aber keine unfertigen Funktionen sichtbar aktivieren.
 
@@ -262,9 +265,49 @@ Nach jeder Einheit:
 2. Sicherheits- und Accessibility-Auswirkungen prüfen,
 3. Task-Checkboxen aktualisieren,
 4. technische Entscheidung dokumentieren,
-5. keine spätere MVP-Funktion ungefragt vorziehen.
+5. die betroffene Referenz in `docs/referenz/` selbstständig nachziehen (siehe Abschnitt 14),
+6. keine spätere MVP-Funktion ungefragt vorziehen.
 
 ## 13. Verbotene Abkürzungen
+
+- direkte Änderungen an Asgaros-Dateien,
+- Berechtigungsprüfung nur im Browser,
+- Klartext-Einladungstokens,
+- Laden aller WordPress-Benutzer ohne Pagination,
+- E-Mail-Versand ohne Drosselung,
+- Drag-and-drop ohne Alternative,
+- globale Moderatorrechte als Ersatz für Space-spezifische Verwaltung,
+- automatische Raumgründung ohne Limits und Policy-Prüfung,
+- stille Fehler ohne verständliche Rückmeldung,
+- Code ändern und die zugehörige Referenz in `docs/referenz/` unaktualisiert lassen.
+
+## 14. Pflege der Referenzdokumentation (verbindlich)
+
+Die Referenz unter `docs/referenz/` ist normativ und muss bei jeder Codeänderung im selben Arbeitsschritt gepflegt werden. Sie ist symbol- und dateibasiert (nicht zeilennummernbasiert), damit sie bei Refactorings stabil bleibt.
+
+Zuordnung Änderung → zu pflegende Referenzdatei:
+
+| Änderung im Code | Pflicht-Update |
+| --- | --- |
+| REST-Route/Parameter/Permission (`RestController`) | `docs/referenz/REST-API.md` |
+| POST-Aktion (`FrontendController::handle_actions`) | `docs/referenz/FRONTEND-ACTIONS.md` |
+| neuer/geänderter Hook oder Filter (`afspaces_*`, Asgaros, WP) | `docs/referenz/HOOKS.md` |
+| Adapter-Interface/Implementierung/Stubs | `docs/referenz/ADAPTER.md` und `COMPATIBILITY.md` |
+| Optionsseite/Optionsfeld | `docs/referenz/SETTINGS-PAGES.md` |
+| Domänenzustand oder -übergang | `docs/referenz/DOMAINMODELLE.md` |
+| Tabellenschema/Feld/Migration | `docs/referenz/DATENBANK.md` |
+| Farbe/Icon/Layout/Barrierefreiheit | `docs/referenz/DESIGN-UND-LAYOUT.md` |
+| neues Feature oder MVP-Fortschritt | `docs/FEATURE-STATUS.md` |
+| Klassen-/Request-Architektur | `docs/ARCHITEKTUR.md` |
+| Suchlogik/Suchparameter | `docs/SUCHE.md` und `docs/referenz/BEREICH-suche.md` |
+
+Regeln:
+
+- Referenzangaben mit dem echten Code belegen (Klasse::Methode, Konstante, Optionsschlüssel), keine erfundenen Signaturen.
+- Bei jeder neuen Adaptermethode alle Test-Stubs und `COMPATIBILITY.md` mitziehen.
+- Bei neuen personenbezogenen Daten Privacy-Export/-Eraser und `DATENBANK.md` prüfen.
+- Wenn eine Referenzseite fehlt, neue Seite unter `docs/referenz/` anlegen und in `docs/referenz/INDEX.md` verlinken.
+- Eine Einheit gilt erst als abgeschlossen, wenn Code, Tests und betroffene Referenzen konsistent sind.
 
 - direkte Änderungen an Asgaros-Dateien,
 - Berechtigungsprüfung nur im Browser,
