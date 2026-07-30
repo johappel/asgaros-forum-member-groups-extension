@@ -33,3 +33,5 @@ tests/tmp_*.php
 Thumbs.db
 *.swp
 *~
+
+TASKS.md
