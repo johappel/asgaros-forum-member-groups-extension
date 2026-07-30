@@ -6,7 +6,7 @@ AFSpaces ist ein eigenständiges WordPress-Plugin für eine verständliche, sich
 
 ### Voraussetzungen
 
-- **WordPress:** eine aktuell unterstützte Version
+- **WordPress:** > = 7.0 (getestet mit 7.0.2)
 - **PHP:** >= 8.1
 - **Asgaros Forum:** >= 3.0.0 (empfohlen und mit 3.4.0 getestet)
 - **Datenbank:** MySQL/MariaDB mit Standard-WordPress-Tabellen
@@ -24,6 +24,20 @@ AFSpaces ist ein eigenständiges WordPress-Plugin für eine verständliche, sich
 Unter **Einstellungen → AFSpaces Look & Feel** werden Farben, Schriften und Abstände des Frontends angepasst. Voreingestellte Presets (Asgaros, Neutral, Kontrast) wechseln das gesamte Farbschema mit einem Klick.
 
 Unter **Einstellungen → AFSpaces Raumgründung** legt der Administrator fest, ob Mitglieder selbst Räume gründen dürfen, welche Sichtbarkeiten erlaubt sind und ob neu gegründete Räume freigegeben werden müssen.
+
+### Deaktivierung und Deinstallation
+
+**Deaktivierung** blockiert weder WordPress noch Asgaros Forum. Es werden nur der geplante Reindex-Cron-Job und die Rewrite-Rules entfernt. Die Hub-Seite und alle AFSpaces-Daten bleiben erhalten; das Forum funktioniert ganz normal weiter.
+
+**Deinstallation** löscht alle AFSpaces-Daten unwiderruflich:
+- alle eigenen Tabellen (`wp_afspaces_*`),
+- die Hub-Seite,
+- die Plugin-Optionen sowie
+- die angelegten Capabilities.
+
+**Asgaros-Daten** (Foren, Gruppen, Kategorien, Beiträge, Benutzergruppen) bleiben unangetastet.
+
+> **Empfehlung:** Sichere vor der Deinstallation die eigenen AFSpaces-Tabellen oder exportiere relevante Daten (z. B. Räume, Einladungen, Audit-Log), falls sie später benötigt werden. Nach der Deinstallation sind sie nicht mehr wiederherstellbar.
 
 ## Hauptfunktionen
 
