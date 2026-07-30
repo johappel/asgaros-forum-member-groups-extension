@@ -4,6 +4,7 @@ Nachschlagewerk für Entwickler. Jede Seite ist auf schnelles Finden ausgelegt: 
 
 ## Globale Referenzen
 
+- [FEATURE-TEST-MAPPING.md](FEATURE-TEST-MAPPING.md) — Feature → Quellklasse → Testdatei, schnell beim Ändern finden.
 - [REST-API.md](REST-API.md) — alle Endpunkte unter `/wp-json/afspaces/v1`, Permission-Callbacks, Parameter, Service.
 - [FRONTEND-ACTIONS.md](FRONTEND-ACTIONS.md) — alle serverseitigen POST-Aktionen (`afspaces_action`), Nonce, Parameter, Service, Redirect.
 - [HOOKS.md](HOOKS.md) — konsumierte WordPress- und Asgaros-Hooks sowie eigene AFSpaces-Filter/Actions.
