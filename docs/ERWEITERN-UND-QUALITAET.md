@@ -1,5 +1,25 @@
 # Erweitern und Qualität sichern
 
+## Entwickler-Schnellstart
+
+Der kanonische Einstieg benötigt keine lokale WordPress- oder LocalWP-Installation:
+
+```bash
+composer install
+composer test
+vendor/bin/phpunit -c phpunit.xml.dist
+vendor/bin/phpunit -c phpunit-integration.xml.dist
+```
+
+Die Integrationstests benötigen zusätzlich eine vorbereitete WordPress-/Asgaros-Testumgebung. Wenn diese nicht vorhanden ist, den Unit-Testlauf als technische Prüfung ausführen und die Integrationstests als nicht verfügbar dokumentieren.
+
+Ein optionaler Windows-/LocalWP-Aufruf kann je nach lokaler PHP-Installation so aussehen:
+
+```powershell
+$php = "C:\path\to\php.exe"
+& $php -c "tests/php-cli.ini" vendor/bin/phpunit -c phpunit.xml.dist
+```
+
 ## Referenz zuerst
 
 Für konkrete Signaturen, Routen, Hooks, Optionsschlüssel und Bereichsübersichten die Nachschlage-Referenz nutzen: [referenz/INDEX.md](referenz/INDEX.md). Diese Seite beschreibt das Vorgehen, die Referenz liefert die Details.
@@ -61,23 +81,16 @@ Für neue Features oder Anpassungen sollte die Arbeit in AFSpaces fast immer ent
 
 ### Unit-Tests
 
-Composer stellt derzeit mindestens einen Basis-Testlauf bereit:
+Composer stellt mindestens einen Basis-Testlauf bereit:
 
 ```powershell
 composer test
 ```
 
-In der Praxis wurde lokal häufig direkt PHPUnit mit der projektspezifischen PHP-Konfiguration verwendet:
-
-```powershell
-$php = "C:\Users\Joachim\AppData\Roaming\Local\lightning-services\php-8.2.23+0\bin\win64\php.exe"
-& $php -c "tests/php-cli.ini" vendor/bin/phpunit -c phpunit.xml.dist
-```
-
 ### Integrationstests gegen die lokale WordPress-Instanz
 
 ```powershell
-$php = "C:\Users\Joachim\AppData\Roaming\Local\lightning-services\php-8.2.23+0\bin\win64\php.exe"
+$php = "C:\path\to\php.exe"
 & $php -c "tests/php-cli.ini" tests/setup-integration-data.php
 & $php -c "tests/php-cli.ini" vendor/bin/phpunit -c phpunit-integration.xml.dist
 ```

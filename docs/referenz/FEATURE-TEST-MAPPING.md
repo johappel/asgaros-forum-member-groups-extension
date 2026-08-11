@@ -80,12 +80,15 @@ Schnellübersicht: Welche  Testdateien gehören zu welchem Feature?
 | --- | --- | --- |
 | Standardwerte, Topic-ID-Normalisierung | `Domain/WorkingGroupMeta.php` | `tests/WorkingGroupMetaTest.php` |
 
-## 10. Integration: REST-Sicherheit & End-to-End-Flows
+## 11. Integration: REST-Sicherheit & End-to-End-Flows
 
 | Feature | Quellklassen | Test |
 | --- | --- | --- |
 | REST-Authentifizierung, Autorisierung, Datenschutz | `Application/*Service.php` (alle) | `tests/Integration/RestSecurityTest.php` |
 | Metadaten-Save → Beitrittsanfrage-Benachrichtigung | `Application/WorkingGroupService.php`, `Application/JoinRequestService.php`, `Adapters/Database/SpaceMetaRepository.php` | `tests/Integration/WorkingGroupMetaFlowTest.php` |
+| Hub-Seite, verwaltetes Seiten-Meta und Wiederherstellung | `Core/Activator.php`, `Interface/SpacesUrls.php` | `tests/Integration/HubLifecycleTest.php` |
+| Deinstallationsschutz und Opt-in-Cleanup | `Core/Uninstaller.php`, `Interface/InstallationSettingsPage.php` | `tests/Integration/UninstallPolicyTest.php`, `tests/InstallationSettingsTest.php` |
+| Privacy-Export und Eraser für Beitrittsanfragen | `Plugin.php`, `Adapters/Database/JoinRequestRepository.php` | `tests/Integration/JoinRequestPrivacyTest.php` |
 
 ## Testarten im Überblick
 
@@ -97,17 +100,9 @@ Schnellübersicht: Welche  Testdateien gehören zu welchem Feature?
 | Service-Tests | `tests/SpaceCreationServiceTest.php`, `tests/SpaceModerationServiceTest.php`, `tests/SpaceRegistrationServiceTest.php`, `tests/ForumSearchServiceTest.php` | Service-Logik mit gemockten Abhängigkeiten |
 | Integrations-Tests | `tests/Integration/*FlowTest.php`, `tests/Integration/RestSecurityTest.php` | Full-Flows mit Test-DB und echten Repositories |
 
-## Abdeckung
+## Bestands-Hinweis zur Abdeckung
 
-| Schicht | Quellklassen | Test-Dateien |
-| --- | --- | --- |
-| Domain | 8 | 9 |
-| Application | 10 | 4 |
-| Search | 4 | 4 |
-| Adapter | 1 | 1 |
-| Interface | 2 | 2 |
-| Integration | 8 (übergreifend) | 7 |
-| **Gesamt** | **23** | **27** |
+Die Projektstruktur und Testdateien können sich weiterentwickeln; deshalb enthält diese Referenz bewusst keine statischen Gesamtzahlen.
 
 ### Nicht direkt unit-getestet
 

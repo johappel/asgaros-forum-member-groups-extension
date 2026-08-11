@@ -2,6 +2,17 @@
 
 Diese Dokumentation ist der kanonische Einstieg für Entwickler und Agents, die AFSpaces anpassen, erweitern oder warten sollen. Sie fasst die verstreuten Umsetzungsstände aus den bisherigen Task-Dateien, Spezial-READMEs und Spezifikationen zusammen.
 
+## 5-Minuten-Onboarding
+
+1. Repository klonen und in den Projektordner wechseln.
+2. Abhängigkeiten installieren: `composer install`.
+3. Unit-Tests ausführen: `composer test` oder `vendor/bin/phpunit -c phpunit.xml.dist`.
+4. Produktbild und Schichten in [ÜBERBLICK.md](ÜBERBLICK.md) und [ARCHITEKTUR.md](ARCHITEKTUR.md) lesen.
+5. Vor einer Änderung die passende Seite unter [referenz/INDEX.md](referenz/INDEX.md) auswählen, zum Beispiel REST, Hooks, Adapter oder Datenbank.
+6. Code, Test und betroffene Referenzdokumentation im selben Arbeitsschritt aktualisieren.
+
+Integrationstests brauchen eine vorbereitete WordPress-/Asgaros-Testumgebung; lokale Pfade sind kein Bestandteil dieses kanonischen Einstiegs.
+
 ## Schnellstart
 
 1. Lies zuerst diese Datei.

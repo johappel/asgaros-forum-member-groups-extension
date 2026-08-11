@@ -43,7 +43,18 @@ Nachschlagewerk für Entwickler. Jede Seite ist auf schnelles Finden ausgelegt: 
 | `Capabilities::CREATE_INVITE_LINKS` | `afspaces_create_invite_links` |
 | `Capabilities::MODERATE_SPACE` | `afspaces_moderate_space` |
 
-Nur Administratoren erhalten diese Caps bei Aktivierung (`Capabilities::register`).
+Nur die WordPress-Rolle `administrator` erhält diese Caps bei Aktivierung (`Capabilities::register`). Owner und Manager eines einzelnen Spaces erhalten dadurch keine globalen WordPress-Capabilities. Ihre objektbezogenen Rechte werden über `SpaceRepository::is_manager()` und die zentrale `SpacePolicy` geprüft. `MANAGE_ALL_SPACES` ist die globale Administration; `MODERATE_SPACE` erlaubt die globale Freigabe-/Moderationsberechtigung, nicht automatisch die Verwaltung jedes Space-Objekts.
+
+### Capability- und Rollenmodell
+
+| Ebene | Quelle | Bedeutung |
+| --- | --- | --- |
+| Globale Administration | WordPress-Capability `afspaces_manage_all_spaces` | darf alle Spaces verwalten; wird bei Aktivierung nur Administratoren gegeben |
+| Globale Fachberechtigungen | WordPress-Capabilities `afspaces_create_space`, `afspaces_manage_own_space`, `afspaces_invite_members`, `afspaces_remove_members`, `afspaces_create_invite_links`, `afspaces_moderate_space` | steuern globale bzw. policyabhängige Fähigkeiten; sie werden ebenfalls nur Administratoren registriert |
+| Space-Rolle | `SpaceRepository::is_manager()` / `SpaceManager` mit `owner` oder `manager` | objektbezogene Verwaltung des zugeordneten Spaces, unabhängig von einer WordPress-Rolle |
+| Policy | `SpacePolicy` und Application Services | kombiniert Akteur, Space, Aktion und Schutzregeln, etwa letzten Owner und Selbstentfernung |
+
+`can_manage` im REST-Controller akzeptiert globale Administration oder eine Space-Manager-Zuordnung. `can_search` prüft dagegen ausdrücklich die globalen Capabilities `MANAGE_ALL_SPACES` oder `MANAGE_OWN_SPACE`; eine bloße Manager-Zuordnung ersetzt diese Prüfung nicht. `can_moderate_space` prüft `MANAGE_ALL_SPACES` oder `MODERATE_SPACE` und ist keine Space-Owner-Rolle.
 
 ### Datenbanktabellen (Präfix `wp_`)
 

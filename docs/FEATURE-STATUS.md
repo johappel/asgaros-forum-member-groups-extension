@@ -2,6 +2,16 @@
 
 Dieses Dokument konsolidiert die Arbeit aus den bisherigen TASKS-Dateien und beschreibt den tatsächlichen Umsetzungsstand als Entwicklerreferenz.
 
+## Developer Reference Hardening (Issue #6)
+
+Status: umgesetzt.
+
+- REST-Referenz gegen `RestController::register_routes()` synchronisiert, einschließlich Token-, Invite-Link-, Resend- und Widerrufsrouten.
+- Capability-Modell, objektbezogene Owner-/Manager-Rollen und globale Administration widerspruchsfrei dokumentiert.
+- Adapter-Array-Shapes, Hook-Parameter und Defaults sowie das physische Datenbankschema aus dem aktuellen Code ergänzt.
+- Feature-Test-Mapping von statischen Gesamtzahlen bereinigt und Production-Readiness-/Integrationstests verknüpft.
+- Kanonischer Quickstart und ein 5-Minuten-Onboarding ohne persönliche lokale Pfade ergänzt.
+
 ## Production Readiness (Issue #4)
 
 Status: umgesetzt.

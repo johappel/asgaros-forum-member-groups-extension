@@ -66,8 +66,8 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * Listet die Mitglieder einer Benutzergruppe paginiert.
 		 *
 		 * @param int   $group_id Gruppen-ID.
-		 * @param array $args     Optionen: page, per_page, search.
-		 * @return array<int,array<string,mixed>>
+		 * @param array{page?:int,per_page?:int,search?:string} $args Optionen.
+		 * @return array{members:array<int,array{user_id:int,display_name:string,user_login:string}>,total:int,page:int,per_page:int}|array{}
 		 */
 		public function list_group_members( int $group_id, array $args = [] ): array;
 
@@ -110,9 +110,8 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * freigegebene Themen werden ausgeschlossen.
 		 *
 		 * @param string              $keywords Suchbegriff(e).
-		 * @param array<string,mixed> $args     Optionen: sort ('relevance'|'date'),
-		 *                                       page (int), per_page (int).
-		 * @return array{results: array<int,array<string,mixed>>, total: int}
+		 * @param array{sort?:'relevance'|'date',page?:int,per_page?:int,author_id?:int,forum_id?:int,date_from?:string,date_to?:string,match_mode?:'any'|'all',in?:'all'|'title'} $args Optionen.
+		 * @return array{results:array<int,array{post_id:int,topic_id:int,forum_id:int,author_id:int,post_text:string,post_date:string,topic_name:string,forum_name:string,score:float,url:string}>,total:int}
 		 */
 		public function search_posts( string $keywords, array $args = [] ): array;
 
@@ -173,7 +172,7 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		/**
 		 * Erstellt eine dedizierte Asgaros-Forenkategorie für einen privaten Raum.
 		 *
-		 * @param array<string,mixed> $data Optionen: name, access (loggedin|everyone|moderator).
+		 * @param array{name:string,access?:'loggedin'|'everyone'|'moderator',order?:int} $data Optionen.
 		 * @return int Term-ID der neuen Kategorie.
 		 * @throws \AFSpaces\Core\DomainException Wenn die Erstellung fehlschlägt.
 		 */
@@ -182,7 +181,7 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		/**
 		 * Erstellt ein Asgaros-Forum in einer Kategorie.
 		 *
-		 * @param array<string,mixed> $data Optionen: category_id, name, description, icon.
+		 * @param array{category_id:int,name:string,description?:string,icon?:string,order?:int} $data Optionen.
 		 * @return int Forum-ID.
 		 * @throws \AFSpaces\Core\DomainException Wenn die Erstellung fehlschlägt.
 		 */
@@ -191,7 +190,7 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		/**
 		 * Erstellt eine Asgaros-Benutzergruppe.
 		 *
-		 * @param array<string,mixed> $data Optionen: name, color, icon.
+		 * @param array{name:string,color?:string,icon?:string} $data Optionen.
 		 * @return int Gruppen-Term-ID.
 		 * @throws \AFSpaces\Core\DomainException Wenn die Erstellung fehlschlägt.
 		 */
@@ -211,8 +210,7 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * Setzt die Sichtbarkeit/Zugriffssteuerung eines Forums über dessen Kategorie.
 		 *
 		 * @param int                 $forum_id Forum-ID.
-		 * @param array<string,mixed> $data     Optionen: access (everyone|loggedin|moderator),
-		 *                                       restrict (bool), group_id (int).
+		 * @param array{access?:'everyone'|'loggedin'|'moderator',restrict?:bool,group_id?:int} $data Optionen.
 		 * @return void
 		 * @throws \AFSpaces\Core\DomainException Wenn die Änderung fehlschlägt.
 		 */
@@ -222,7 +220,7 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * Aktualisiert Stammdaten eines Forums (z. B. Name, Beschreibung).
 		 *
 		 * @param int                 $forum_id Forum-ID.
-		 * @param array<string,mixed> $data     Zu aktualisierende Felder: name, description.
+		 * @param array{name?:string,description?:string,forum_status?:string} $data Zu aktualisierende Felder.
 		 * @return void
 		 * @throws \AFSpaces\Core\DomainException Wenn die Aktualisierung fehlschlägt.
 		 */

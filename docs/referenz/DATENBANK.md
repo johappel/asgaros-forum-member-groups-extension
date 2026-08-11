@@ -1,152 +1,143 @@
 # Datenbank-Referenz
 
-Kernfelder je Tabelle. Schema aus den `install()`-Methoden unter `src/Adapters/Database/`. Präfix `wp_` beispielhaft. Anlage über `Activator::activate`, Nachziehen über `Plugin::maybe_upgrade`.
+Diese Seite beschreibt das physische Schema aus den `install()`-Methoden unter `src/Adapters/Database/`. Der Tabellenpräfix ist beispielhaft `wp_`; tatsächlich wird immer `$wpdb->prefix` verwendet. Die Tabellen werden bei `Activator::activate()` mit `dbDelta()` angelegt.
 
-## `afspaces_spaces`
+Es gibt bewusst keine SQL-Fremdschlüssel zu WordPress-, Asgaros- oder AFSpaces-Tabellen. Konsistenz und Cleanup liegen in Repositories, Services und `Uninstaller`; Asgaros-Daten werden bei der Deinstallation nicht gelöscht.
 
-`SpaceRepository::install`. Verknüpft einen verwalteten Kontext mit einem Asgaros-Forum.
+## `afspaces_spaces` — `SpaceRepository::install()`
 
-| Feld | Typ | Bedeutung |
-| --- | --- | --- |
-| `id` | int PK | interne Space-ID (nicht die Asgaros-forum_id) |
-| `forum_id` | int | Asgaros-Forum (UNIQUE via `unique_forum_id`) |
-| `primary_group_id` | int | primäre Zugriffsgruppe |
-| `owner_user_id` | bigint | Owner |
-| `visibility` | varchar(20) | `private` \| `protected` \| `public` |
-| `status` | varchar(20) | `pending` \| `active` \| `archived` \| `rejected` \| `deleted` |
-| `rejection_reason` | text | Begründung bei Ablehnung (Migration ab 0.2.0) |
-| `created_at`, `updated_at` | datetime | Zeitstempel |
-
-## `afspaces_space_managers`
-
-`SpaceRepository::install`. Owner-/Managerzuordnung.
-
-| Feld | Typ | Bedeutung |
-| --- | --- | --- |
-| `space_id` | int | Teil des PK |
-| `user_id` | bigint | Teil des PK |
-| `role` | varchar(20) | `owner` \| `manager` |
-
-## `afspaces_space_meta`
-
-`SpaceMetaRepository::install`. Arbeitsgruppen-Metadaten (PK = `space_id`).
-
-| Feld | Typ | Default | Bedeutung |
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
 | --- | --- | --- | --- |
-| `space_id` | int PK | — | Space |
-| `description` | text | — | Beschreibung |
-| `accent_color` | varchar(7) | `#2d5d7f` | Akzentfarbe (Hex) |
-| `icon` | varchar(40) | `users` | Icon-Schlüssel |
-| `contact_text` | text | — | Kontakt/Ansprechperson |
-| `directory_visibility` | varchar(20) | `listed` | `listed` \| `members` \| `hidden` |
-| `join_policy` | varchar(20) | `request` | `request` \| `invite_only` \| `closed` |
-| `join_requests_enabled` | tinyint | `1` | nur mit `join_policy=request` wirksam |
-| `topic_ids` | longtext | — | zugeordnete ACF-Themen (serialisiert) |
-| `updated_at` | datetime | — | Zeitstempel |
+| `id` | `int unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `forum_id` | `int unsigned` | NOT NULL | `KEY forum_id`; zusätzlich `UNIQUE KEY unique_forum_id` durch `ensure_forum_unique_index()` |
+| `primary_group_id` | `int unsigned` | NOT NULL | — |
+| `owner_user_id` | `bigint(20) unsigned` | NOT NULL | `KEY owner_user_id` |
+| `visibility` | `varchar(20)` | NOT NULL, Default `private` | — |
+| `status` | `varchar(20)` | NOT NULL, Default `active` | — |
+| `rejection_reason` | `text` | NOT NULL | — |
+| `created_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
+| `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
-## `afspaces_invitations`
+`forum_id` ist die Asgaros-ID; `id` ist die interne Space-ID. Vor dem Unique-Index bereinigt `normalize_duplicate_forums()` vorhandene Dubletten.
 
-`InvitationRepository::install`.
+## `afspaces_space_managers` — `SpaceRepository::install()`
 
-| Feld | Typ | Bedeutung |
-| --- | --- | --- |
-| `id` | bigint PK | — |
-| `space_id` | int | Space |
-| `inviter_user_id` | bigint | Einladende Person |
-| `invitee_user_id` | bigint | Eingeladene Person |
-| `message` | text | optionale Nachricht |
-| `status` | varchar(20) | `pending` \| `accepted` \| `declined` \| `revoked` \| `expired` |
-| `expires_at` | datetime | Ablauf |
-| `accepted_at`, `declined_at`, `revoked_at` | datetime NULL | Übergangszeitpunkte |
-| `last_sent_at` | datetime NULL | letzter Versand |
-| `send_count` | int | Anzahl Versände (Drossel) |
-| `created_at`, `updated_at` | datetime | Zeitstempel |
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `space_id` | `int unsigned` | NOT NULL | Bestandteil PRIMARY KEY (`space_id`, `user_id`) |
+| `user_id` | `bigint(20) unsigned` | NOT NULL | Bestandteil PRIMARY KEY; zusätzlich `KEY user_id` |
+| `role` | `varchar(20)` | NOT NULL, Default `manager` | — |
 
-## `afspaces_invite_links`
+Fachliche Rollenwerte sind `owner` und `manager`; dies ist keine WordPress-Rolle.
 
-`InviteLinkRepository::install`.
+## `afspaces_space_meta` — `SpaceMetaRepository::install()`
 
-| Feld | Typ | Bedeutung |
-| --- | --- | --- |
-| `id` | bigint PK | — |
-| `space_id` | int | Space |
-| `creator_user_id` | bigint | Ersteller |
-| `token_hash` | char(64) | Hash (UNIQUE) — kein Klartext-Token |
-| `status` | varchar(20) | gespeichert nur `active` \| `revoked` |
-| `approval_mode` | varchar(30) | `auto_join` \| `approval_required` \| `existing_users_only` |
-| `max_uses` | int | `0` = unbegrenzt |
-| `use_count` | int | bisherige Nutzungen |
-| `allow_registration` | tinyint | Registrierung erlaubt |
-| `expires_at` | datetime | Ablauf (leitet `expired` ab) |
-| `revoked_at` | datetime NULL | Widerrufszeitpunkt |
-| `created_at`, `updated_at` | datetime | Zeitstempel |
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `space_id` | `int unsigned` | NOT NULL | PRIMARY KEY |
+| `description` | `text` | NOT NULL | — |
+| `accent_color` | `varchar(7)` | NOT NULL, Default `#2d5d7f` | — |
+| `icon` | `varchar(40)` | NOT NULL, Default `users` | — |
+| `contact_text` | `text` | NOT NULL | — |
+| `directory_visibility` | `varchar(20)` | NOT NULL, Default `listed` | `KEY directory_visibility` |
+| `join_policy` | `varchar(20)` | NOT NULL, Default `request` | `KEY join_policy` |
+| `join_requests_enabled` | `tinyint(1)` | NOT NULL, Default `1` | — |
+| `topic_ids` | `longtext` | NOT NULL | serialisierte Topic-ID-Liste |
+| `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
-Effektiver Status (`expired`/`exhausted`) wird zur Laufzeit über `InviteLink::effective_status()` berechnet.
+## `afspaces_invitations` — `InvitationRepository::install()`
 
-## `afspaces_join_requests`
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `id` | `bigint(20) unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `space_id` | `int unsigned` | NOT NULL | `KEY space_id` |
+| `inviter_user_id` | `bigint(20) unsigned` | NOT NULL | — |
+| `invitee_user_id` | `bigint(20) unsigned` | NOT NULL | `KEY invitee_user_id` |
+| `message` | `text` | NOT NULL | — |
+| `status` | `varchar(20)` | NOT NULL, Default `pending` | `KEY status` |
+| `expires_at` | `datetime` | NOT NULL | `KEY expires_at` |
+| `accepted_at` | `datetime` | NULL | — |
+| `declined_at` | `datetime` | NULL | — |
+| `revoked_at` | `datetime` | NULL | — |
+| `last_sent_at` | `datetime` | NULL | — |
+| `send_count` | `int unsigned` | NOT NULL, Default `0` | — |
+| `created_at` / `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
-`JoinRequestRepository::install`.
+## `afspaces_invite_links` — `InviteLinkRepository::install()`
 
-| Feld | Typ | Bedeutung |
-| --- | --- | --- |
-| `id` | bigint PK | — |
-| `space_id` | int | Space |
-| `requester_user_id` | bigint | anfragende Person |
-| `request_message` | text | Begründung |
-| `status` | varchar(20) | `pending` \| `approved` \| `rejected` |
-| `decider_user_id` | bigint | entscheidende Person |
-| `decision_message` | text | Entscheidungsnachricht |
-| `approved_at`, `rejected_at` | datetime NULL | Übergangszeitpunkte |
-| `created_at`, `updated_at` | datetime | Zeitstempel |
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `id` | `bigint(20) unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `space_id` | `int unsigned` | NOT NULL | `KEY space_id` |
+| `creator_user_id` | `bigint(20) unsigned` | NOT NULL | — |
+| `token_hash` | `char(64)` | NOT NULL | UNIQUE KEY `token_hash` |
+| `status` | `varchar(20)` | NOT NULL, Default `active` | `KEY status` |
+| `approval_mode` | `varchar(30)` | NOT NULL, Default `auto_join` | — |
+| `max_uses` | `int unsigned` | NOT NULL, Default `1` | — |
+| `use_count` | `int unsigned` | NOT NULL, Default `0` | — |
+| `allow_registration` | `tinyint(1)` | NOT NULL, Default `0` | — |
+| `expires_at` | `datetime` | NOT NULL | `KEY expires_at` |
+| `revoked_at` | `datetime` | NULL | — |
+| `created_at` / `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
-## `afspaces_audit`
+Gespeichert wird nur der 64-stellige Hash. `expired` und `exhausted` sind abgeleitete Laufzeitstatuswerte von `InviteLink::effective_status()`, keine gespeicherten `status`-Werte.
 
-`AuditRepository::install`. Sparsames Änderungsprotokoll.
+## `afspaces_join_requests` — `JoinRequestRepository::install()`
 
-| Feld | Typ | Bedeutung |
-| --- | --- | --- |
-| `id` | bigint PK | — |
-| `space_id` | int | Space |
-| `actor_user_id` | bigint | Akteur |
-| `target_user_id` | bigint | Zielperson (0 wenn nicht personenbezogen) |
-| `action` | varchar(40) | z. B. `space_archived`, `invite_link_created` |
-| `object_type` | varchar(40) | z. B. `member`, `space`, `invite_link` |
-| `created_at` | datetime | Zeitstempel |
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `id` | `bigint(20) unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `space_id` | `int unsigned` | NOT NULL | `KEY space_id` |
+| `requester_user_id` | `bigint(20) unsigned` | NOT NULL | `KEY requester_user_id` |
+| `request_message` | `text` | NOT NULL | — |
+| `status` | `varchar(20)` | NOT NULL, Default `pending` | `KEY status` |
+| `decider_user_id` | `bigint(20) unsigned` | NOT NULL, Default `0` | — |
+| `decision_message` | `text` | NOT NULL | — |
+| `approved_at` / `rejected_at` | `datetime` | NULL | — |
+| `created_at` / `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
-Keine Tokens oder sensiblen Inhalte im Audit. Personenbezogene Einladungsnachrichten werden über den Privacy-Eraser entfernt.
+## `afspaces_audit` — `AuditRepository::install()`
 
-## `afspaces_search_index`
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `id` | `bigint(20) unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `space_id` | `int unsigned` | NOT NULL | `KEY space_id` |
+| `actor_user_id` | `bigint(20) unsigned` | NOT NULL | — |
+| `target_user_id` | `bigint(20) unsigned` | NOT NULL, Default `0` | — |
+| `action` | `varchar(40)` | NOT NULL | — |
+| `object_type` | `varchar(40)` | NOT NULL, Default `member` | — |
+| `created_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | `KEY created_at` |
 
-`SearchIndexRepository::install`. Semantischer Index.
+Audit-Einträge enthalten keine Tokens oder Nachrichtentexte.
 
-| Feld | Typ | Bedeutung |
-| --- | --- | --- |
-| `id` | bigint PK | — |
-| `source_type` | varchar(10) | `forum` \| `wp` |
-| `source_id` | bigint | Quell-ID (UNIQUE mit `source_type`) |
-| `topic_id`, `category_id` | bigint | Kontext für Zugriffsfilter |
-| `is_private` | tinyint | private Arbeitsgruppe? |
-| `title`, `excerpt` | text/longtext | Anzeige-/Ähnlichkeitstext |
-| `context_label` | varchar(255) | Badge-Text |
-| `author_name` | varchar(255) | Autor |
-| `item_date` | datetime | Sortierung |
-| `content_hash` | char(40) | Skip unveränderter Inhalte |
-| `embedding` | longblob | float32-Vektor (`VectorMath::pack`) |
-| `dims` | int | Vektordimensionen |
-| `updated_at` | datetime | Zeitstempel |
+## `afspaces_search_index` — `SearchIndexRepository::install()`
 
-## Personenbezug & Löschung
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `id` | `bigint(20) unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `source_type` | `varchar(10)` | NOT NULL, Default `forum` | Teil von UNIQUE KEY `source`; zusätzlich `KEY source_type` |
+| `source_id` | `bigint(20) unsigned` | NOT NULL | Teil von UNIQUE KEY `source` (`source_type`, `source_id`) |
+| `topic_id` | `bigint(20) unsigned` | NOT NULL, Default `0` | — |
+| `category_id` | `bigint(20) unsigned` | NOT NULL, Default `0` | `KEY category_id` |
+| `is_private` | `tinyint(1)` | NOT NULL, Default `0` | — |
+| `title` | `text` | NULL | — |
+| `context_label` | `varchar(255)` | NOT NULL, Default leer | — |
+| `excerpt` | `longtext` | NULL | — |
+| `author_name` | `varchar(255)` | NOT NULL, Default leer | — |
+| `item_date` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
+| `content_hash` | `char(40)` | NOT NULL, Default leer | — |
+| `embedding` | `longblob` | NULL | — |
+| `dims` | `int unsigned` | NOT NULL, Default `0` | — |
+| `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
-| Tabelle | Personenbezug | Löschung |
-| --- | --- | --- |
-| `afspaces_invitations` | Einlader/Eingeladene, Nachricht | Privacy-Eraser entfernt Nachrichten (`InvitationRepository::erase_personal_messages_for_user`) |
-| `afspaces_join_requests` | Anfragende/Entscheidende, Nachrichten | Privacy-Exporter; Eraser leert Anfrage- und Entscheidungsnachrichten, behält Status, Zeitstempel und IDs |
-| `afspaces_audit` | Akteur/Ziel-IDs | Aufbewahrung sparsam, konfigurierbar |
-| `afspaces_search_index` | Autorname, Text | nur bei ausdrücklich aktiviertem vollständigem Cleanup entfernt |
+## Installation, Upgrade und Löschung
 
-## Schema ändern
+- `Activator::activate()` installiert alle acht Tabellen und registriert die Capabilities.
+- `Plugin::maybe_upgrade()` stellt die Hub-Seite wieder her, ruft `SpaceRepository::install()` und `SearchIndexRepository::install()` erneut auf und plant den Reindex. `dbDelta()` ist dabei der vorhandene Upgrade-Mechanismus.
+- `SpaceRepository::install()` ergänzt den eindeutigen `forum_id`-Index nach der Dublettenbereinigung.
+- `Uninstaller::uninstall()` löscht Tabellen nur bei ausdrücklichem Opt-in über `afspaces_cleanup_on_uninstall`; ohne Opt-in bleiben sie bestehen.
+- Es gibt keine Fremdschlüssel und keine automatische Löschung zugehöriger Asgaros-Foren, Gruppen, Kategorien oder Beiträge.
 
-1. Feld in der passenden `install()`-Methode ergänzen (`dbDelta`-kompatibel).
-2. Sicherstellen, dass `Plugin::maybe_upgrade` `install()` für Bestandsinstallationen aufruft.
-3. Neue personenbezogene Daten in Privacy-Exporter/-Eraser berücksichtigen.
-4. Uninstaller prüfen (`src/Core/Uninstaller.php`).
+## Personenbezug und Privacy
+
+Einladungen und Beitrittsanfragen enthalten Benutzer-IDs und Nachrichten. Die Privacy-Integration exportiert die relevanten Daten und leert persönliche Nachrichten beim Eraser, während Status- und Nachweisdaten erhalten bleiben. Der Suchindex kann Autorennamen und Inhalte enthalten und wird nur beim ausdrücklich aktivierten vollständigen Cleanup gelöscht.

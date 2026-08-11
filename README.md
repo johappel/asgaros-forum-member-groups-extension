@@ -17,7 +17,7 @@ AFSpaces ist ein eigenständiges WordPress-Plugin für eine verständliche, sich
 2. **Asgaros Forum vorher installieren und aktivieren**, sonst blockt die Anforderungsprüfung die Aktivierung.
 3. Plugin aktivieren. Falls eine ältere Asgaros-Version läuft, zeigt das Dashboard eine konkrete Fehlermeldung.
 4. AFSpaces erzeugt automatisch die zentrale WordPress-Seite **Arbeitsgruppen** mit `[afspaces]` und speichert sie als verwaltete Hub-Seite.
-5. Nach der Aktivierung die einmalige Einrichtungsmeldung prüfen. Administratoren haben volle Berechtigung; Manager/Owner einzelner Räume erhalten automatisch die passenden Capabilities.
+5. Nach der Aktivierung die einmalige Einrichtungsmeldung prüfen. Administratoren erhalten die AFSpaces-WordPress-Capabilities; Owner und Manager einzelner Räume werden zusätzlich objektbezogen über ihre Space-Zuordnung berechtigt.
 
 Eine manuelle Seite oder das Kopieren eines Shortcodes ist für die reguläre Einrichtung nicht nötig. `[afspaces]` bleibt für fortgeschrittene und Legacy-Szenarien verfügbar. Alte `afspaces-*`-Seiten werden aus Rückwärtskompatibilität auf die passenden Hub-Ansichten umgeleitet.
 
