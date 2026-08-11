@@ -342,12 +342,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			// „Freigaben" ist eine administrative Aufgabe und erscheint daher nur
 			// für berechtigte Personen (Administratoren/Moderatoren) im Topmenü.
 			// „Arbeitsgruppe gründen" ist hingegen ein Aktionsbutton im Dashboard.
-			if ( $this->can_moderate_spaces( $actor ) ) {
-				$pending_count = count( $this->spaces->list_spaces_by_status( \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING ) );
+			$pending_count = $this->space_lifecycle->count_pending_for_actor( $actor );
+			if ( $pending_count > 0 ) {
 				$approvals_label = __( 'Freigaben', 'afspaces' );
-				if ( $pending_count > 0 ) {
-					$approvals_label .= ' (' . $pending_count . ')';
-				}
+				$approvals_label .= ' (' . $pending_count . ')';
 				$tabs[] = array(
 					'view'   => SpacesUrls::VIEW_APPROVALS,
 					'label'  => $approvals_label,
@@ -486,7 +484,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		 */
 		private function render_approvals(): string {
 			$actor = get_current_user_id();
-			if ( ! $this->can_moderate_spaces( $actor ) ) {
+			if ( ! $this->space_lifecycle->can_moderate( $actor ) ) {
 				return sprintf(
 					'<p class="afspaces-notice" role="status">%s</p>',
 					esc_html__( 'Du darfst keine Arbeitsgruppen freigeben.', 'afspaces' )
@@ -603,18 +601,5 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			return $this->spaces->is_manager( $space_id, $actor );
 		}
 
-		/**
-		 * Prüft, ob der Benutzer Arbeitsgruppen freigeben darf.
-		 *
-		 * @param int $actor Benutzer-ID.
-		 * @return bool
-		 */
-		private function can_moderate_spaces( int $actor ): bool {
-			if ( 0 === $actor ) {
-				return false;
-			}
-			return user_can( $actor, Capabilities::MANAGE_ALL_SPACES )
-				|| user_can( $actor, Capabilities::MODERATE_SPACE );
-		}
 	}
 }

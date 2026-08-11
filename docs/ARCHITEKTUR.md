@@ -136,6 +136,10 @@ Bekannte Tabellennamen:
 1. ForumNavigation hängt Navigation und Panel in Asgaros ein.
 2. ForumModerationControls hängt kontextabhängige Aktionen in die Forenansicht.
 3. SearchModal öffnet die AFSpaces-Suche über Asgaros- und optional WordPress-Suchformulare.
+4. Freigabe-Navigation verwendet `SpaceLifecycleService::count_pending_for_actor()`;
+   die serverseitige Berechtigungsprüfung und eine statusbasierte `COUNT(*)`-
+   Abfrage verhindern unzuständige oder leere Freigabe-Buttons und laden keine
+   vollständigen Space-Listen für den Zähler.
 
 ## Hub-Architektur
 

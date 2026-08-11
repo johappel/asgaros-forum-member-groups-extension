@@ -42,6 +42,11 @@ Berechtigung (`SpaceCreationPolicy::assert_can_create`): aktiviert plus Capabili
 
 - View: `src/Interface/SpacesHubController.php` (View `approvals`)
 - Berechtigung: `MANAGE_ALL_SPACES` oder `MODERATE_SPACE`
+- Navigation: `SpaceLifecycleService::count_pending_for_actor()` prüft dieselbe
+  Berechtigung wie `list_pending()` und liefert nur bei mindestens einer offenen
+  Freigabe einen Tab bzw. Button mit Zähler. Die Zählung nutzt
+  `SpaceRepository::count_spaces_by_status()` und lädt für die Navigation keine
+  vollständigen Space-Datensätze.
 - REST: `POST /spaces/{id}/approve`, `POST /spaces/{id}/reject`
 - Spalte `rejection_reason` in `wp_afspaces_spaces` (Migration via `Plugin::maybe_upgrade`)
 

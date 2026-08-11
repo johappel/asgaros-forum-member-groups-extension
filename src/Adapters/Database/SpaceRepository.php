@@ -65,7 +65,8 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 				updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 				PRIMARY KEY (id),
 				KEY forum_id (forum_id),
-				KEY owner_user_id (owner_user_id)
+				KEY owner_user_id (owner_user_id),
+				KEY status (status)
 			) {$charset};";
 
 			$sql_managers = "CREATE TABLE {$this->managers_table} (
@@ -412,6 +413,21 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 				return array();
 			}
 			return array_map( static fn( $r ) => new Space( $r ), $rows );
+		}
+
+		/**
+		 * Zählt Spaces mit einem Status, ohne die vollständigen Datensätze zu laden.
+		 *
+		 * @param string $status Status.
+		 * @return int
+		 */
+		public function count_spaces_by_status( string $status ): int {
+			return (int) $this->db->get_var(
+				$this->db->prepare(
+					"SELECT COUNT(*) FROM {$this->spaces_table} WHERE status = %s;",
+					$status
+				)
+			);
 		}
 
 		/**

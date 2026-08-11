@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
 use AFSpaces\Adapters\Database\SpaceMetaRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Core\Capabilities;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
@@ -33,16 +34,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		private JoinRequestRepository $join_requests;
 		private AsgarosAdapterInterface $asgaros;
 		private SpaceMetaRepository $meta;
+		private SpaceLifecycleService $space_lifecycle;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations, JoinRequestRepository $join_requests, AsgarosAdapterInterface $asgaros, SpaceMetaRepository $meta ) {
+		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations, JoinRequestRepository $join_requests, AsgarosAdapterInterface $asgaros, SpaceMetaRepository $meta, SpaceLifecycleService $space_lifecycle ) {
 			$this->spaces        = $spaces;
 			$this->invitations   = $invitations;
 			$this->join_requests = $join_requests;
 			$this->asgaros       = $asgaros;
 			$this->meta          = $meta;
+			$this->space_lifecycle = $space_lifecycle;
 		}
 
 		/**
@@ -78,8 +81,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			// Chip: Summe der Dinge, die meine Aufmerksamkeit brauchen
 			// (offene Einladungen an mich, offene Beitrittsanfragen in meinen
 			// verwalteten Gruppen, offene Freigaben für Moderatoren).
-			$can_moderate     = user_can( $user_id, Capabilities::MANAGE_ALL_SPACES ) || user_can( $user_id, Capabilities::MODERATE_SPACE );
-			$pending_approvals = $can_moderate ? count( $this->spaces->list_spaces_by_status( \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING ) ) : 0;
+			$pending_approvals = $this->space_lifecycle->count_pending_for_actor( $user_id );
 			$badge = $this->pending_count( $user_id )
 				+ $this->pending_join_request_count( $user_id )
 				+ $pending_approvals;
@@ -122,8 +124,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			$pending_join_request_space_id = $this->pending_join_request_space_id( $user_id );
 			$can_create    = $this->can_create_spaces( $user_id );
 			$can_discover  = is_user_logged_in();
-			$can_moderate  = $is_admin || user_can( $user_id, Capabilities::MODERATE_SPACE );
-			$pending_approvals = $can_moderate ? count( $this->spaces->list_spaces_by_status( \AFSpaces\Domain\SpaceLifecycle::STATUS_PENDING ) ) : 0;
+			$pending_approvals = $this->space_lifecycle->count_pending_for_actor( $user_id );
 
 			echo '<section class="afspaces-forum-panel" id="afspaces-forum-panel" style="display: none;" aria-labelledby="afspaces-forum-panel-heading">';
 			printf(
@@ -193,19 +194,17 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 				);
 			}
 
-			// 6. Freigaben – nur für Moderatoren/Administratoren.
-			if ( $can_moderate ) {
-				$approvals_label = $pending_approvals > 0
-					? sprintf(
-						/* translators: %d: Anzahl ausstehender Freigaben */
-						_n( 'Freigaben (%d)', 'Freigaben (%d)', $pending_approvals, 'afspaces' ),
-						$pending_approvals
-					)
-					: __( 'Freigaben', 'afspaces' );
+			// 6. Freigaben – nur bei einer konkreten, zuständigen offenen Freigabe.
+			if ( $pending_approvals > 0 ) {
+				$approvals_label = sprintf(
+					/* translators: %d: Anzahl ausstehender Freigaben */
+					_n( 'Freigaben (%d)', 'Freigaben (%d)', $pending_approvals, 'afspaces' ),
+					$pending_approvals
+				);
 
 				printf(
 					'<li><a class="afspaces-button%1$s" href="%2$s">%3$s</a></li>',
-					$pending_approvals > 0 ? ' afspaces-button-danger' : ' afspaces-button-secondary',
+					' afspaces-button-danger',
 					esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_APPROVALS ) ),
 					esc_html( $approvals_label )
 				);

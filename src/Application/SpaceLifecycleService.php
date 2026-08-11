@@ -252,6 +252,24 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceLifecycleService' ) ) {
 		}
 
 		/**
+		 * Gibt die Zahl der für den Akteur sichtbaren offenen Freigaben zurück.
+		 *
+		 * Die Berechtigungsprüfung ist dieselbe wie bei `list_pending()`. Für
+		 * Navigations-Badges wird bei fehlender Berechtigung bewusst nur 0
+		 * zurückgegeben und kein Status nach außen verraten.
+		 *
+		 * @param int $actor_user_id Akteur.
+		 * @return int
+		 */
+		public function count_pending_for_actor( int $actor_user_id ): int {
+			if ( ! $this->can_moderate( $actor_user_id ) ) {
+				return 0;
+			}
+
+			return $this->spaces->count_spaces_by_status( SpaceLifecycle::STATUS_PENDING );
+		}
+
+		/**
 		 * Wendet eine Sichtbarkeit auf die Asgaros-Struktur eines Raums an.
 		 *
 		 * @param Space  $space      Space.
@@ -331,10 +349,21 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceLifecycleService' ) ) {
 		 * @throws DomainException Bei fehlender Berechtigung.
 		 */
 		private function assert_can_moderate( int $actor_user_id ): void {
-			if ( ! user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
-				&& ! user_can( $actor_user_id, Capabilities::MODERATE_SPACE ) ) {
+			if ( ! $this->can_moderate( $actor_user_id ) ) {
 				throw new DomainException( __( 'Dir fehlt die Berechtigung, Arbeitsgruppen freizugeben.', 'afspaces' ) );
 			}
+		}
+
+		/**
+		 * Prüft die globale Freigabeberechtigung.
+		 *
+		 * @param int $actor_user_id Akteur.
+		 * @return bool
+		 */
+		public function can_moderate( int $actor_user_id ): bool {
+			return $actor_user_id > 0
+				&& ( user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
+					|| user_can( $actor_user_id, Capabilities::MODERATE_SPACE ) );
 		}
 
 		/**

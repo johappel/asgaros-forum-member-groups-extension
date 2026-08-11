@@ -13,7 +13,7 @@ Es gibt bewusst keine SQL-Fremdschlüssel zu WordPress-, Asgaros- oder AFSpaces-
 | `primary_group_id` | `int unsigned` | NOT NULL | — |
 | `owner_user_id` | `bigint(20) unsigned` | NOT NULL | `KEY owner_user_id` |
 | `visibility` | `varchar(20)` | NOT NULL, Default `private` | — |
-| `status` | `varchar(20)` | NOT NULL, Default `active` | — |
+| `status` | `varchar(20)` | NOT NULL, Default `active` | `KEY status` |
 | `rejection_reason` | `text` | NOT NULL | — |
 | `created_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 | `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
