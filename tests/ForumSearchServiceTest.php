@@ -52,6 +52,10 @@ final class FakeSearchAdapter implements AsgarosAdapterInterface {
 		return array();
 	}
 
+	public function get_group_name( int $group_id ): ?string {
+		return null;
+	}
+
 	public function list_group_members( int $group_id, array $args = [] ): array {
 		return array();
 	}

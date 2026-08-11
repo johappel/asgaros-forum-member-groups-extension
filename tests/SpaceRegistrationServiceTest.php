@@ -67,6 +67,9 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 	/** @var array<int,int[]> */
 	public array $group_map = array();
 
+	/** @var array<int,string> */
+	public array $group_names = array();
+
 	public function is_available(): bool {
 		return true;
 	}
@@ -85,6 +88,10 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 
 	public function get_forum_group_ids( int $forum_id ): array {
 		return $this->group_map[ $forum_id ] ?? array();
+	}
+
+	public function get_group_name( int $group_id ): ?string {
+		return $this->group_names[ $group_id ] ?? null;
 	}
 
 	public function list_group_members( int $group_id, array $args = [] ): array {
@@ -207,6 +214,9 @@ final class SpaceRegistrationServiceTest extends TestCase {
 		$this->adapter->group_map = array(
 			7 => array( 23 ),
 		);
+		$this->adapter->group_names = array(
+			23 => 'NEKED',
+		);
 
 		global $afspaces_user_can_callback;
 		$afspaces_user_can_callback = static function ( int $user_id, string $capability ): bool {
@@ -229,6 +239,67 @@ final class SpaceRegistrationServiceTest extends TestCase {
 		$this->adapter->group_map = array();
 
 		$this->service->register_existing_forum( 7, 55 );
+	}
+
+	public function test_register_existing_forum_rejects_unresolved_group(): void {
+		$this->expectException( DomainException::class );
+		$this->adapter->group_names = array();
+
+		$this->service->register_existing_forum( 7, 55 );
+	}
+
+	public function test_list_registrable_forums_exposes_group_name_and_status(): void {
+		$list = $this->service->list_registrable_forums( 55 );
+
+		$this->assertSame( array( 'NEKED' ), $list[0]['group_names'] );
+		$this->assertSame( 23, $list[0]['primary_group_id'] );
+		$this->assertSame( 'NEKED', $list[0]['primary_group_name'] );
+		$this->assertSame( 'registrable', $list[0]['status'] );
+		$this->assertTrue( $list[0]['can_register'] );
+	}
+
+	public function test_list_registrable_forums_marks_missing_group_as_setup_required(): void {
+		$this->adapter->group_names = array();
+
+		$list = $this->service->list_registrable_forums( 55 );
+
+		$this->assertSame( 'setup_required', $list[0]['status'] );
+		$this->assertTrue( $list[0]['group_resolution_failed'] );
+		$this->assertFalse( $list[0]['can_register'] );
+	}
+
+	public function test_list_registrable_forums_sorts_by_actionable_status_then_name(): void {
+		$this->adapter->forums = array(
+			7  => array( 'id' => 7, 'name' => 'Zeta', 'category_id' => 3 ),
+			8  => array( 'id' => 8, 'name' => 'Alpha', 'category_id' => 3 ),
+			9  => array( 'id' => 9, 'name' => 'Beta', 'category_id' => 3 ),
+			10 => array( 'id' => 10, 'name' => 'Gamma', 'category_id' => 3 ),
+		);
+		$this->adapter->group_map = array(
+			7  => array( 23 ),
+			8  => array(),
+			9  => array( 24 ),
+			10 => array( 25 ),
+		);
+		$this->adapter->group_names = array(
+			23 => 'NEKED',
+			24 => 'Entwicklung',
+			25 => 'Marketing',
+		);
+		$this->repo->create_space(
+			new Space(
+				array(
+					'forum_id'         => 10,
+					'primary_group_id' => 25,
+					'owner_user_id'    => 55,
+				)
+			)
+		);
+
+		$list = $this->service->list_registrable_forums( 55 );
+
+		$this->assertSame( array( 'Beta', 'Zeta', 'Alpha', 'Gamma' ), array_column( $list, 'name' ) );
+		$this->assertSame( array( 'registrable', 'registrable', 'setup_required', 'registered' ), array_column( $list, 'status' ) );
 	}
 
 	public function test_list_registrable_forums_marks_existing_space(): void {

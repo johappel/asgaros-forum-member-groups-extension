@@ -700,50 +700,70 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				<?php endif; ?>
 
 				<?php if ( $this->can_register_spaces( $actor ) ) : ?>
-					<section class="afspaces-space-registration" aria-labelledby="afspaces-space-registration-heading">
+					<section class="afspaces-space-registration" aria-labelledby="afspaces-space-registration-heading" aria-describedby="afspaces-space-registration-intro">
 						<h3 id="afspaces-space-registration-heading"><?php echo esc_html__( 'Bestehendes Forum als Arbeitsgruppe registrieren', 'afspaces' ); ?></h3>
-						<p><?php echo esc_html__( 'Eine Arbeitsgruppe wird aus einem bestehenden Asgaros-Forum plus seiner zugeordneten Asgaros-Benutzergruppe gebildet.', 'afspaces' ); ?></p>
+						<p id="afspaces-space-registration-intro">
+							<?php echo esc_html__( 'Hier kannst du vorhandene Asgaros-Foren in AFSpaces übernehmen. Foren mit einer zugeordneten Zugriffsgruppe können direkt als Arbeitsgruppe registriert werden.', 'afspaces' ); ?>
+							<?php echo ' '; ?>
+							<?php echo esc_html__( 'Bereits registrierte Arbeitsgruppen kannst du direkt öffnen.', 'afspaces' ); ?>
+						</p>
 
 						<?php if ( empty( $registrable_forums ) ) : ?>
-							<p><?php echo esc_html__( 'Es wurden keine verwaltbaren Foren gefunden.', 'afspaces' ); ?></p>
+							<p class="afspaces-empty-state"><?php echo esc_html__( 'Es wurden noch keine Asgaros-Foren gefunden.', 'afspaces' ); ?></p>
 						<?php else : ?>
+							<?php if ( count( array_filter( $registrable_forums, static fn ( array $forum ): bool => ! empty( $forum['is_registered'] ) ) ) === count( $registrable_forums ) ) : ?>
+								<p class="afspaces-message afspaces-message-success" role="status"><?php echo esc_html__( 'Alle geeigneten Foren sind bereits als Arbeitsgruppen registriert.', 'afspaces' ); ?></p>
+							<?php endif; ?>
 							<table class="afspaces-member-table afspaces-space-registration-table">
 								<thead>
 									<tr>
-										<th><?php echo esc_html__( 'Forum', 'afspaces' ); ?></th>
-										<th><?php echo esc_html__( 'Zugriffsgruppe', 'afspaces' ); ?></th>
-										<th><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
-										<th><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
+										<th scope="col"><?php echo esc_html__( 'Forum', 'afspaces' ); ?></th>
+										<th scope="col"><?php echo esc_html__( 'Zugriff', 'afspaces' ); ?></th>
+										<th scope="col"><?php echo esc_html__( 'AFSpaces-Status', 'afspaces' ); ?></th>
+										<th scope="col"><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
 									</tr>
 								</thead>
 								<tbody>
 									<?php foreach ( $registrable_forums as $forum ) : ?>
+										<?php
+										$status        = (string) ( $forum['status'] ?? 'setup_required' );
+										$status_labels = array(
+											'registered'     => __( 'Registriert', 'afspaces' ),
+											'registrable'    => __( 'Kann registriert werden', 'afspaces' ),
+											'setup_required' => __( 'Einrichtung erforderlich', 'afspaces' ),
+										);
+										$status_label = $status_labels[ $status ] ?? $status_labels['setup_required'];
+										$status_class = in_array( $status, array( 'registered', 'registrable', 'setup_required' ), true ) ? $status : 'setup_required';
+										$group_names  = array_values( array_filter( array_map( 'strval', (array) ( $forum['group_names'] ?? array() ) ) ) );
+										?>
 										<tr>
-											<td><?php echo esc_html( $forum['name'] ); ?></td>
-											<td>
-												<?php if ( empty( $forum['group_ids'] ) ) : ?>
-													<?php echo esc_html__( 'Keine Gruppe an der Kategorie hinterlegt', 'afspaces' ); ?>
+											<td data-label="<?php echo esc_attr__( 'Forum', 'afspaces' ); ?>"><?php echo esc_html( (string) $forum['name'] ); ?></td>
+											<td data-label="<?php echo esc_attr__( 'Zugriff', 'afspaces' ); ?>">
+												<?php if ( ! empty( $group_names ) ) : ?>
+													<span><?php echo esc_html( implode( ', ', $group_names ) ); ?></span>
+													<?php if ( ! empty( $forum['group_resolution_failed'] ) ) : ?>
+														<small class="afspaces-registration-help"><?php echo esc_html__( 'Zugriffsgruppe nicht gefunden', 'afspaces' ); ?></small>
+													<?php endif; ?>
+												<?php elseif ( ! empty( $forum['group_ids'] ) ) : ?>
+													<span><?php echo esc_html__( 'Zugriffsgruppe nicht gefunden', 'afspaces' ); ?></span>
 												<?php else : ?>
-													<?php echo esc_html( implode( ', ', array_map( 'strval', $forum['group_ids'] ) ) ); ?>
+													<span><?php echo esc_html__( 'Keine Zugriffsgruppe', 'afspaces' ); ?></span>
+												<?php endif; ?>
+												<?php if ( 'setup_required' === $status ) : ?>
+													<small class="afspaces-registration-help"><?php echo esc_html__( 'Für AFSpaces muss der Forenkategorie eine Asgaros-Benutzergruppe zugeordnet sein.', 'afspaces' ); ?></small>
 												<?php endif; ?>
 											</td>
-											<td>
-												<?php if ( $forum['is_registered'] ) : ?>
-													<?php echo esc_html__( 'Bereits registriert', 'afspaces' ); ?>
-												<?php elseif ( ! $forum['can_register'] ) : ?>
-													<?php echo esc_html__( 'Nicht registrierbar', 'afspaces' ); ?>
-												<?php else : ?>
-													<?php echo esc_html__( 'Bereit', 'afspaces' ); ?>
-												<?php endif; ?>
+											<td data-label="<?php echo esc_attr__( 'AFSpaces-Status', 'afspaces' ); ?>">
+												<span class="afspaces-status afspaces-status-<?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span>
 											</td>
-											<td>
+											<td data-label="<?php echo esc_attr__( 'Aktion', 'afspaces' ); ?>">
 												<?php if ( $forum['is_registered'] ) : ?>
 													<?php
-													$manage_url = SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => (int) $forum['space_id'] ) );
+													$group_url = SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => (int) $forum['space_id'] ) );
 													?>
-													<a class="afspaces-button" href="<?php echo esc_url( $manage_url ); ?>"><?php echo esc_html__( 'Öffnen', 'afspaces' ); ?></a>
+													<a class="afspaces-button" href="<?php echo esc_url( $group_url ); ?>"><?php echo esc_html__( 'Arbeitsgruppe öffnen', 'afspaces' ); ?></a>
 												<?php elseif ( ! $forum['can_register'] ) : ?>
-													<span><?php echo esc_html__( 'Ordne zuerst in Asgaros eine Benutzergruppe zur Kategorie zu.', 'afspaces' ); ?></span>
+													<span class="afspaces-registration-help"><?php echo esc_html__( 'In Asgaros zuerst eine Zugriffsgruppe zuordnen.', 'afspaces' ); ?></span>
 												<?php else : ?>
 													<form method="post" class="afspaces-inline-form">
 														<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>

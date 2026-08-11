@@ -55,6 +55,14 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function get_forum_group_ids( int $forum_id ): array;
 
 		/**
+		 * Gibt den Namen einer Asgaros-Benutzergruppe zurück.
+		 *
+		 * @param int $group_id Gruppen-Term-ID.
+		 * @return string|null
+		 */
+		public function get_group_name( int $group_id ): ?string;
+
+		/**
 		 * Listet die Mitglieder einer Benutzergruppe paginiert.
 		 *
 		 * @param int   $group_id Gruppen-ID.

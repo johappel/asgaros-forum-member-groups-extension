@@ -80,6 +80,20 @@ Verbindliche Regeln in [ACCESSIBILITY.md](../../ACCESSIBILITY.md). Für Layoutar
 - Bestätigungen nicht nur als Toast; destruktive Aktionen mit expliziter Bestätigung (`data-afspaces-confirm`).
 - Keine unbeschrifteten Icon-Buttons.
 
+## Registrierung bestehender Foren
+
+Die Ansicht `FrontendController::render_dashboard()` führt Administrator:innen bei der
+Übernahme vorhandener Asgaros-Foren. Sie verwendet die Spalten `Forum`, `Zugriff`,
+`AFSpaces-Status` und `Aktion`. Die Statuswerte sind `Registriert`, `Kann registriert
+werden` und `Einrichtung erforderlich`; die Zugriffsspalte zeigt Gruppennamen, niemals
+Asgaros-Term-IDs. Die Reihenfolge ist nach Handlungspriorität und anschließend nach
+Forumname sortiert (`SpaceRegistrationService::list_registrable_forums()`).
+
+Auf schmalen Viewports werden die Tabellenzeilen über `data-label` als lesbare Blöcke
+dargestellt. Status-Badges verwenden zusätzlich immer ihren sichtbaren Text; Farbe ist
+nicht der alleinige Informationsträger. Die serverseitigen Formulare, Nonces und
+Berechtigungsprüfungen bleiben unverändert.
+
 ## Layout ändern
 
 1. Globale Optik über `AppearanceSettingsPage`/Option erweitern, nicht über verstreute Inline-Styles.

@@ -49,19 +49,73 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceRegistrationService' ) ) {
 					continue;
 				}
 
-				$existing = $this->spaces->get_space_by_forum( $forum_id );
-				$group_ids = $this->asgaros->get_forum_group_ids( $forum_id );
+				$existing  = $this->spaces->get_space_by_forum( $forum_id );
+				$group_ids = array_values(
+					array_unique(
+						array_filter(
+							array_map( 'intval', (array) $this->asgaros->get_forum_group_ids( $forum_id ) ),
+							static fn ( int $group_id ): bool => $group_id > 0
+						)
+					)
+				);
+				$primary_group_id = $existing && $existing->primary_group_id > 0
+					? (int) $existing->primary_group_id
+					: (int) ( $group_ids[0] ?? 0 );
+				$group_names = array();
+				foreach ( $group_ids as $group_id ) {
+					$group_name = $this->asgaros->get_group_name( $group_id );
+					if ( null !== $group_name ) {
+						$group_names[] = $group_name;
+					}
+				}
+				$all_group_names_resolved = count( $group_names ) === count( $group_ids );
+				$primary_group_name = $primary_group_id > 0
+					? $this->asgaros->get_group_name( $primary_group_id )
+					: null;
+				if ( null !== $primary_group_name && ! in_array( $primary_group_name, $group_names, true ) ) {
+					$group_names[] = $primary_group_name;
+				}
+				$has_resolved_access_group = null !== $primary_group_name && ( empty( $group_ids ) || $all_group_names_resolved );
+				$is_registered             = null !== $existing;
+				$status                    = $is_registered
+					? 'registered'
+					: ( $has_resolved_access_group ? 'registrable' : 'setup_required' );
 
 				$result[] = array(
-					'forum_id'        => $forum_id,
-					'name'            => (string) ( $forum['name'] ?? '' ),
-					'category_id'     => (int) ( $forum['category_id'] ?? 0 ),
-					'group_ids'       => $group_ids,
-					'is_registered'   => null !== $existing,
-					'space_id'        => $existing ? $existing->id : 0,
-					'can_register'    => null === $existing && ! empty( $group_ids ),
+					'forum_id'                  => $forum_id,
+					'name'                      => (string) ( $forum['name'] ?? '' ),
+					'category_id'               => (int) ( $forum['category_id'] ?? 0 ),
+					'group_ids'                 => $group_ids,
+					'group_names'               => array_values( array_unique( $group_names ) ),
+					'primary_group_id'          => $primary_group_id,
+					'primary_group_name'        => $primary_group_name,
+					'group_resolution_failed'   => ! empty( $group_ids ) && ! $all_group_names_resolved,
+					'is_registered'             => $is_registered,
+					'space_id'                  => $existing ? $existing->id : 0,
+					'can_register'              => ! $is_registered && $has_resolved_access_group,
+					'status'                    => $status,
+					'status_rank'               => array(
+						'registrable'    => 0,
+						'setup_required' => 1,
+						'registered'     => 2,
+					)[ $status ],
 				);
 			}
+
+			usort(
+				$result,
+				static function ( array $left, array $right ): int {
+					$rank_compare = (int) $left['status_rank'] <=> (int) $right['status_rank'];
+					if ( 0 !== $rank_compare ) {
+						return $rank_compare;
+					}
+
+					$name_compare = strnatcasecmp( (string) $left['name'], (string) $right['name'] );
+					return 0 !== $name_compare
+						? $name_compare
+						: ( (int) $left['forum_id'] <=> (int) $right['forum_id'] );
+				}
+			);
 
 			return $result;
 		}
@@ -85,9 +139,20 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceRegistrationService' ) ) {
 				throw new DomainException( __( 'Dieses Forum ist bereits als Raum registriert.', 'afspaces' ) );
 			}
 
-			$group_ids = $this->asgaros->get_forum_group_ids( $forum_id );
+			$group_ids = array_values(
+				array_filter(
+					array_map( 'intval', (array) $this->asgaros->get_forum_group_ids( $forum_id ) ),
+					static fn ( int $group_id ): bool => $group_id > 0
+				)
+			);
 			if ( empty( $group_ids ) ) {
 				throw new DomainException( __( 'Dieses Forum hat noch keine zugriffssteuernde Asgaros-Gruppe. Ordne zuerst der Kategorie eine Benutzergruppe zu.', 'afspaces' ) );
+			}
+
+			foreach ( $group_ids as $group_id ) {
+				if ( null === $this->asgaros->get_group_name( (int) $group_id ) ) {
+					throw new DomainException( __( 'Eine zugeordnete Asgaros-Benutzergruppe wurde nicht gefunden. Prüfe zuerst die Gruppenzuordnung.', 'afspaces' ) );
+				}
 			}
 
 			$category_id = (int) ( $forum['category_id'] ?? 0 );

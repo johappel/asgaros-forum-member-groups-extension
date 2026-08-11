@@ -72,6 +72,7 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 	public function list_manageable_forums( int $actor_user_id ): array { return array(); }
 	public function get_forum( int $forum_id ): ?array { return array( 'id' => $forum_id, 'name' => 'F' . $forum_id, 'category_id' => 1 ); }
 	public function get_forum_group_ids( int $forum_id ): array { return array(); }
+	public function get_group_name( int $group_id ): ?string { return null; }
 	public function list_group_members( int $group_id, array $args = [] ): array { return array(); }
 	public function add_user_to_group( int $user_id, int $group_id ): void {}
 	public function remove_user_from_group( int $user_id, int $group_id ): void {}

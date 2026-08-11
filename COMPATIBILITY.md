@@ -111,6 +111,10 @@ Die Raumgründung nutzt folgende interne Asgaros-Funktionen (Quellcode geprüft 
 - `AsgarosForumUserGroups::insertUserGroupsOfForumCategory($category_id, $ids)`
   bzw. `getUserGroupsIDsOfForumCategory($category_id)` verwalten die zugriffssteuernde
   Zuordnung (Term-Meta `usergroups` der Kategorie).
+- `get_term($group_id, $taxonomy)` liest den Namen einer Benutzergruppe für die
+  Verwaltungsansicht; der Taxonomiename wird über den Filter
+  `asgarosforum_filter_user_groups_taxonomy_name` aufgelöst. Fehlt der Term, degradieren
+  Adapter und Registrierungsansicht defensiv.
 - Löschung: `wp_delete_term($group_id, $usergroup_taxonomy)`,
   `wp_delete_term($category_id, 'asgarosforum-category')` und direktes Löschen der
   Forum-Zeile aus `tables->forums`.

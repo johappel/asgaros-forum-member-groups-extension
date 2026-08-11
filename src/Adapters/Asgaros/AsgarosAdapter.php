@@ -22,6 +22,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 	 * - Klasse `AsgarosForum` (Singleton-Instanz über globale Variable `$asgarosforum`).
 	 * - `AsgarosForumUserGroups::getUserGroupsIDsOfForumCategory( $category_id )`
 	 * - `AsgarosForumUserGroups::get_users_in_usergroup( $group_id )`
+	 * - `get_term( $group_id, $taxonomy )` für die Anzeige des Gruppennamens
 	 * - `AsgarosForumUserGroups::isUserInUserGroup( $user_id, $group_id )`
 	 * - `AsgarosForumUserGroups::insertUserGroupsOfUsers( $user_id, $group_ids )`
 	 * - `AsgarosForumUserGroups::deleteUserGroupsOfUser( $user_id )`
@@ -225,6 +226,24 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			}
 
 			return array_map( 'intval', (array) $ids );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get_group_name( int $group_id ): ?string {
+			if ( $group_id < 1 || ! function_exists( 'get_term' ) ) {
+				return null;
+			}
+
+			$taxonomy = apply_filters( 'asgarosforum_filter_user_groups_taxonomy_name', 'asgarosforum-usergroup' );
+			$term     = get_term( $group_id, $taxonomy );
+			if ( is_wp_error( $term ) || ! $term instanceof \WP_Term ) {
+				return null;
+			}
+
+			$name = trim( (string) $term->name );
+			return '' === $name ? null : $name;
 		}
 
 		/**

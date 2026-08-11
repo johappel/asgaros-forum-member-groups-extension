@@ -19,6 +19,7 @@ Regel aus [ARCHITECTURE.md](../../ARCHITECTURE.md): Domain und Application rufen
 | `list_manageable_forums(int $actor_user_id)` | `array` verwaltbare Foren |
 | `get_forum(int $forum_id)` | `?array` |
 | `get_forum_group_ids(int $forum_id)` | `int[]` |
+| `get_group_name(int $group_id)` | `?string` (defensiv `null`, wenn der Gruppen-Term fehlt) |
 | `list_group_members(int $group_id, array $args = [])` | `array` (paginiert: `page`, `per_page`, `search`) |
 | `is_user_in_group(int $user_id, int $group_id)` | `bool` |
 | `list_accessible_forums()` | `array{id,name}[]` |

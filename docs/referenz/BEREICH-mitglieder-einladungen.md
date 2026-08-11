@@ -21,6 +21,19 @@ Hinweise:
 - Hinzufügen/Entfernen sind idempotent; Audit über `AuditRepository`.
 - Letzter Owner ist gegen Selbstentfernung geschützt (`SpacePolicy`).
 
+## Bestehende Foren registrieren
+
+- Service: `src/Application/SpaceRegistrationService.php`
+- Ansicht: `FrontendController::render_dashboard()`
+- Gruppennamen: `AsgarosAdapter::get_group_name(int $group_id)`
+
+`list_registrable_forums()` liefert neben den internen `group_ids` die aufgelösten
+`group_names`, `primary_group_name`, `status` (`registrable`, `setup_required`,
+`registered`) und `status_rank`. Die Oberfläche zeigt nur Gruppennamen und sortiert
+zuerst nach Handlungspriorität, innerhalb des Status alphabetisch nach Forumname.
+Ein fehlender oder nicht auflösbarer primärer Gruppen-Term verhindert die Registrierung;
+die serverseitige Aktion prüft diese Voraussetzung ebenfalls.
+
 ## Persönliche Einladungen
 
 - Modell: `src/Domain/Invitation.php` (Zustände `pending`, `accepted`, `declined`, `revoked`, `expired`)
