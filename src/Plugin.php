@@ -35,6 +35,7 @@ use AFSpaces\Interface\ForumNavigation;
 use AFSpaces\Interface\ForumModerationControls;
 use AFSpaces\Interface\FrontendController;
 use AFSpaces\Interface\InvitationsView;
+use AFSpaces\Interface\InstallationSettingsPage;
 use AFSpaces\Interface\MembersView;
 use AFSpaces\Interface\MyInvitationsView;
 use AFSpaces\Interface\ProfileView;
@@ -133,11 +134,44 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$appearance = new AppearanceSettingsPage();
 			$appearance->init();
 
+			$installation = new InstallationSettingsPage();
+			$installation->init();
+
 			$creation_settings = new SpaceCreationSettingsPage();
 			$creation_settings->init();
 
 			$search_settings = new SearchSettingsPage( $search_indexer, $search_index );
 			$search_settings->init();
+
+			$activation_notice = get_option( 'afspaces_activation_notice', array() );
+			if ( is_array( $activation_notice ) && ! empty( $activation_notice ) ) {
+				add_action(
+					'admin_notices',
+					static function () use ( $activation_notice ): void {
+						if ( ! current_user_can( 'manage_options' ) ) {
+							return;
+						}
+
+						$page_id = (int) ( $activation_notice['page_id'] ?? 0 );
+						$version = (string) ( $activation_notice['asgaros_version'] ?? '' );
+						?>
+						<div class="notice notice-success is-dismissible">
+							<p><strong><?php echo esc_html__( 'AFSpaces ist eingerichtet.', 'afspaces' ); ?></strong></p>
+							<ul>
+								<li><?php echo esc_html( $page_id > 0 ? __( 'Arbeitsgruppen-Seite vorhanden.', 'afspaces' ) : __( 'Arbeitsgruppen-Seite konnte noch nicht angelegt werden.', 'afspaces' ) ); ?></li>
+								<li><?php echo esc_html( sprintf( __( 'Kompatible Asgaros-Version erkannt: %s.', 'afspaces' ), '' !== $version ? $version : __( 'unbekannt', 'afspaces' ) ) ); ?></li>
+								<li><?php echo esc_html__( 'Selbstgründung ist zunächst deaktiviert.', 'afspaces' ); ?></li>
+							</ul>
+							<p>
+								<a class="button button-primary" href="<?php echo esc_url( \AFSpaces\Interface\SpacesUrls::hub_url() ); ?>"><?php echo esc_html__( 'Arbeitsgruppen öffnen', 'afspaces' ); ?></a>
+								<a class="button" href="<?php echo esc_url( admin_url( 'options-general.php?page=afspaces-installation' ) ); ?>"><?php echo esc_html__( 'Einstellungen prüfen', 'afspaces' ); ?></a>
+							</p>
+						</div>
+						<?php
+						delete_option( 'afspaces_activation_notice' );
+					}
+				);
+			}
 
 			// Ortsunabhängiges Such-Overlay (Dialog) mit Live-Suche.
 			$search_modal = new SearchModal( $asgaros );
@@ -271,6 +305,69 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 					},
 				);
 
+				return $erasers;
+			} );
+
+			add_filter( 'wp_privacy_personal_data_exporters', static function ( array $exporters ) use ( $join_repo ): array {
+				$exporters['afspaces-join-requests'] = array(
+					'exporter_friendly_name' => __( 'AFSpaces Beitrittsanfragen', 'afspaces' ),
+					'callback'               => static function ( string $email ) use ( $join_repo ): array {
+						$user = get_user_by( 'email', $email );
+						if ( ! $user ) {
+							return array( 'data' => array(), 'done' => true );
+						}
+
+						$requests = array();
+						foreach ( array_merge( $join_repo->list_for_requester( (int) $user->ID ), $join_repo->list_for_decider( (int) $user->ID ) ) as $request ) {
+							$requests[ $request->id ] = $request;
+						}
+
+						$data = array();
+						foreach ( $requests as $request ) {
+							$item = array(
+								array( 'name' => 'request_id', 'value' => (string) $request->id ),
+								array( 'name' => 'space_id', 'value' => (string) $request->space_id ),
+								array( 'name' => 'status', 'value' => $request->status ),
+								array( 'name' => 'created_at', 'value' => $request->created_at ),
+							);
+							if ( (int) $request->requester_user_id === (int) $user->ID ) {
+								$item[] = array( 'name' => 'request_message', 'value' => $request->request_message );
+							}
+							if ( (int) $request->decider_user_id === (int) $user->ID ) {
+								$item[] = array( 'name' => 'decision_message', 'value' => $request->decision_message );
+							}
+							$data[] = array(
+								'group_id'    => 'afspaces_join_requests',
+								'group_label' => __( 'AFSpaces Beitrittsanfragen', 'afspaces' ),
+								'item_id'     => 'afspaces_join_request_' . $request->id,
+								'data'        => $item,
+							);
+						}
+
+						return array( 'data' => $data, 'done' => true );
+					},
+				);
+				return $exporters;
+			} );
+
+			add_filter( 'wp_privacy_personal_data_erasers', static function ( array $erasers ) use ( $join_repo ): array {
+				$erasers['afspaces-join-requests'] = array(
+					'eraser_friendly_name' => __( 'AFSpaces Beitrittsanfragen', 'afspaces' ),
+					'callback'             => static function ( string $email ) use ( $join_repo ): array {
+						$user = get_user_by( 'email', $email );
+						if ( ! $user ) {
+							return array( 'items_removed' => false, 'items_retained' => false, 'messages' => array(), 'done' => true );
+						}
+
+						$changed = $join_repo->erase_personal_messages_for_user( (int) $user->ID );
+						return array(
+							'items_removed'  => $changed > 0,
+							'items_retained' => true,
+							'messages'       => array( __( 'Status, Zeitstempel und IDs bleiben als notwendige Sicherheits- und Nachweisinformationen erhalten.', 'afspaces' ) ),
+							'done'           => true,
+						);
+					},
+				);
 				return $erasers;
 			} );
 		}

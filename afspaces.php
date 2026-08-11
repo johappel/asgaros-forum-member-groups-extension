@@ -8,6 +8,9 @@
  * Author URI:  https://github.com/johappel/
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Requires at least: 7.0
+ * Requires PHP: 8.1
+ * Requires Plugins: asgaros-forum
  * Text Domain: afspaces
  * Domain Path: /languages
  *
@@ -38,7 +41,7 @@ if ( ! defined( 'AFSPACES_DB_VERSION' ) ) {
 }
 // Minimale Asgaros-Version, gegen die MVP 1 entwickelt wird. Wird in COMPATIBILITY.md präzisiert.
 if ( ! defined( 'AFSPACES_MIN_ASGAROS_VERSION' ) ) {
-	define( 'AFSPACES_MIN_ASGAROS_VERSION', '3.0.0' );
+	define( 'AFSPACES_MIN_ASGAROS_VERSION', '3.4.0' );
 }
 
 require_once AFSPACES_PATH . 'includes/autoloader.php';

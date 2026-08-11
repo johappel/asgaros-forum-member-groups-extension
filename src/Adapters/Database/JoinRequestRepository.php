@@ -196,6 +196,58 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\JoinRequestRepository' ) ) {
 		}
 
 		/**
+		 * Listet Beitrittsanfragen, über die ein Benutzer entschieden hat.
+		 *
+		 * @param int         $decider_user_id Benutzer-ID.
+		 * @param string|null $status Optionaler Statusfilter.
+		 * @return JoinRequest[]
+		 */
+		public function list_for_decider( int $decider_user_id, ?string $status = null ): array {
+			if ( null !== $status && '' !== $status ) {
+				$rows = $this->db->get_results(
+					$this->db->prepare(
+						"SELECT * FROM {$this->table} WHERE decider_user_id = %d AND status = %s ORDER BY id DESC;",
+						$decider_user_id,
+						$status
+					),
+					ARRAY_A
+				);
+			} else {
+				$rows = $this->db->get_results(
+					$this->db->prepare( "SELECT * FROM {$this->table} WHERE decider_user_id = %d ORDER BY id DESC;", $decider_user_id ),
+					ARRAY_A
+				);
+			}
+
+			if ( empty( $rows ) ) {
+				return array();
+			}
+
+			return array_map( static fn( $row ) => new JoinRequest( $row ), $rows );
+		}
+
+		/**
+		 * Verwijdert persoonlijke berichtteksten, maar behoudt auditrelevante
+		 * status-, tijd- en gebruikers-ID's.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return int Aantal gewijzigde Datensätze.
+		 */
+		public function erase_personal_messages_for_user( int $user_id ): int {
+			$result = $this->db->query(
+				$this->db->prepare(
+					"UPDATE {$this->table} SET request_message = CASE WHEN requester_user_id = %d THEN '' ELSE request_message END, decision_message = CASE WHEN decider_user_id = %d THEN '' ELSE decision_message END WHERE requester_user_id = %d OR decider_user_id = %d;",
+					$user_id,
+					$user_id,
+					$user_id,
+					$user_id
+				)
+			);
+
+			return is_int( $result ) ? $result : 0;
+		}
+
+		/**
 		 * Zählt offene Beitrittsanfragen über mehrere Spaces.
 		 *
 		 * @param int[] $space_ids Space-IDs.

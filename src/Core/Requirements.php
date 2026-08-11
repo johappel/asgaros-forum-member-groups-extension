@@ -38,6 +38,10 @@ if ( ! class_exists( 'AFSpaces\\Core\\Requirements' ) ) {
 		public function check(): bool {
 			$this->messages = array();
 
+			if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
+				$this->messages[] = __( 'Asgaros Forum Spaces benötigt mindestens PHP 8.1.', 'afspaces' );
+			}
+
 			if ( ! $this->is_asgaros_active() ) {
 				$this->messages[] = __( 'Asgaros Forum ist nicht installiert oder aktiviert. Asgaros Forum Spaces benötigt Asgaros Forum.', 'afspaces' );
 			} elseif ( ! $this->is_asgaros_version_supported() ) {
@@ -59,8 +63,16 @@ if ( ! class_exists( 'AFSpaces\\Core\\Requirements' ) ) {
 		 * @return bool
 		 */
 		public function is_asgaros_active(): bool {
-			return class_exists( 'AsgarosForum', false )
-				|| function_exists( 'is_plugin_active' ) && is_plugin_active( 'asgaros-forum/asgaros-forum.php' );
+			if ( class_exists( 'AsgarosForum', false ) ) {
+				return true;
+			}
+
+			if ( function_exists( 'is_plugin_active' ) && is_plugin_active( 'asgaros-forum/asgaros-forum.php' ) ) {
+				return true;
+			}
+
+			$active_plugins = get_option( 'active_plugins', array() );
+			return is_array( $active_plugins ) && in_array( 'asgaros-forum/asgaros-forum.php', $active_plugins, true );
 		}
 
 		/**

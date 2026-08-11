@@ -36,6 +36,17 @@ Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich` plus Reset auf Standard.
 
 Konsumiert von `SpaceCreationPolicy` und `SpaceCreationService`.
 
+## Installation
+
+- Klasse: `src/Interface/InstallationSettingsPage.php`
+- Menü-Slug: `afspaces-installation`
+- Option: `afspaces_cleanup_on_uninstall`
+- Settings-Gruppe: `afspaces_installation_group`
+- Capability: `manage_options`
+- Default: `false`
+
+Das Kontrollkästchen aktiviert bewusst die vollständige Entfernung eigener AFSpaces-Tabellen, Optionen und der mit `_afspaces_managed_page=1` markierten Hub-Seite bei der Deinstallation. Asgaros-Daten werden nie entfernt. Ohne Opt-in bewahrt `Uninstaller::uninstall()` die AFSpaces-Daten.
+
 ## Suche
 
 - Klasse: `src/Interface/SearchSettingsPage.php`

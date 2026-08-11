@@ -1,5 +1,18 @@
 # TESTING.md
 
+## Production-Readiness-Prüfung (Issue #4)
+
+Der Lifecycle-Test `tests/Integration/HubLifecycleTest.php` prüft die Wiederverwendung einer gespeicherten Hub-Seite nach Titel-/Slug-Änderung sowie die Wiederherstellung nach Löschung. Die Unit-Suite enthält zusätzlich die Default- und Sanitizing-Prüfung für `afspaces_cleanup_on_uninstall`.
+
+Vor einem Release mindestens ausführen:
+
+```powershell
+vendor/bin/phpunit -c phpunit.xml.dist --no-coverage
+vendor/bin/phpunit -c phpunit-integration.xml.dist --no-coverage --filter HubLifecycleTest
+```
+
+Die vollständige Integration gegen die festgelegte WordPress-/Asgaros-Testinstanz bleibt für die Release-Abnahme erforderlich.
+
 ## Testpyramide
 
 1. Unit-Tests für Domain und Policies.

@@ -2,6 +2,17 @@
 
 Dieses Dokument konsolidiert die Arbeit aus den bisherigen TASKS-Dateien und beschreibt den tatsächlichen Umsetzungsstand als Entwicklerreferenz.
 
+## Production Readiness (Issue #4)
+
+Status: umgesetzt.
+
+- Hub-Seite wird bei Aktivierung automatisch angelegt und über `afspaces_hub_page_id` sowie `_afspaces_managed_page` sicher wiederverwendet.
+- Fremde Seiten mit dem Standard-Slug werden nicht übernommen oder beim Cleanup gelöscht; Titel und Slug der gespeicherten Hub-Seite bleiben erhalten.
+- Deinstallation bewahrt Daten standardmäßig. Vollständiges Cleanup ist über `afspaces_cleanup_on_uninstall` ausdrücklich aktivierbar und lässt Asgaros-Daten unberührt.
+- Produktionsvoraussetzungen sind PHP 8.1+, WordPress 7.0+ und Asgaros Forum 3.4.0+.
+- Aktivierungsstatus wird einmalig im Backend mit Links zur Hub-Seite und Installationseinstellung angezeigt.
+- Join-Request-Privacy exportiert persönliche Nachrichten und leert sie beim Eraser, während Status-, Zeit- und Nachweisdaten erhalten bleiben.
+
 ## MVP 1: Frontend-Mitgliederverwaltung
 
 Status: im Kern umgesetzt und laut Task-Dokument abgeschlossen.
@@ -113,7 +124,7 @@ Abdeckung nach Task-Blöcken:
 - M3.1.6 REST: umgesetzt.
 - M3.1.7 Tests: weitgehend umgesetzt.
 - M3.1.8 Abschlussverifikation: teilweise offen.
-- M3.1.9 Privacy und Doku: teilweise offen.
+- M3.1.9 Privacy und Doku: umgesetzt.
 
 Enthalten:
 
@@ -130,8 +141,8 @@ Enthalten:
 Noch offen laut Task-Stand:
 
 - Zusätzliche Axe- und Keyboard-Prüfungen für die neuen Oberflächen.
-- Erweiterung von Privacy Exporter und Eraser für Join-Request-Daten.
-- README-, TESTING- und COMPATIBILITY-Abgleich sowie Changelog-Eintrag.
+- Join-Request-Privacy ist über `Plugin::init` und `JoinRequestRepository` integriert.
+- README-, TESTING- und COMPATIBILITY-Abgleich sowie Changelog-Eintrag: umgesetzt.
 
 ## MVP 3.2: Arbeitsgruppenmodell für efabiNet
 

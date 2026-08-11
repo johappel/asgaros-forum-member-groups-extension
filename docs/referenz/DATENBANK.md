@@ -140,9 +140,9 @@ Keine Tokens oder sensiblen Inhalte im Audit. Personenbezogene Einladungsnachric
 | Tabelle | Personenbezug | Löschung |
 | --- | --- | --- |
 | `afspaces_invitations` | Einlader/Eingeladene, Nachricht | Privacy-Eraser entfernt Nachrichten (`InvitationRepository::erase_personal_messages_for_user`) |
-| `afspaces_join_requests` | Anfragende/Entscheidende | offener Restpunkt (siehe [FEATURE-STATUS.md](../FEATURE-STATUS.md)) |
+| `afspaces_join_requests` | Anfragende/Entscheidende, Nachrichten | Privacy-Exporter; Eraser leert Anfrage- und Entscheidungsnachrichten, behält Status, Zeitstempel und IDs |
 | `afspaces_audit` | Akteur/Ziel-IDs | Aufbewahrung sparsam, konfigurierbar |
-| `afspaces_search_index` | Autorname, Text | bei Deinstallation entfernt |
+| `afspaces_search_index` | Autorname, Text | nur bei ausdrücklich aktiviertem vollständigem Cleanup entfernt |
 
 ## Schema ändern
 

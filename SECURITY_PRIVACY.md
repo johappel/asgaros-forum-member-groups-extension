@@ -36,6 +36,16 @@ Zu testen sind mindestens:
 - keine verdeckte Profilbildung,
 - transparente Audit-Protokollierung.
 
+### Beitrittsanfragen
+
+`wp_afspaces_join_requests` enthält die Anfrage- und Entscheidungsnachrichten
+von Benutzern. Der WordPress-Privacy-Exporter gibt einer betroffenen Person nur
+die Nachricht aus, die sie selbst verfasst hat: als anfragende Person die
+Anfragenachricht, als entscheidende Person die Entscheidungsnachricht. Der
+Eraser leert diese Texte, bewahrt aber Status, Zeitstempel und Benutzer-IDs als
+notwendige Sicherheits- und Nachweisinformationen. Asgaros-Daten und Audit-
+Zusammenhänge werden dadurch nicht unkontrolliert entfernt.
+
 ## Semantische Suche (Embeddings)
 
 Die optionale semantische Suche überträgt Inhaltstexte an eine externe,
@@ -60,4 +70,3 @@ OpenRouter-kompatible Embedding-API. Dafür gelten folgende Schutzregeln:
   wird die Tabelle `wp_afspaces_search_index` entfernt.
 - **Kontrolle.** Betreiber sollten die Nutzung des Drittanbieters in ihrer
   Datenschutzerklärung dokumentieren; die Funktion ist jederzeit deaktivierbar.
-

@@ -2,6 +2,12 @@
 
 AFSpaces ist ein eigenständiges WordPress-Plugin, das Asgaros Forum um eine frontend-first Verwaltung privater, geschützter oder öffentlich sichtbarer Arbeitsgruppen erweitert. Asgaros bleibt die maßgebliche Quelle für Foren, Themen, Beiträge, Benutzergruppen und den eigentlichen Forenzugriff. AFSpaces ergänzt darauf eine Verwaltungs-, Einladungs-, Beitritts-, Such- und Moderationsschicht.
 
+## Installation und Lifecycle
+
+Nach der Aktivierung wird die zentrale Hub-Seite **Arbeitsgruppen** automatisch mit `[afspaces]` angelegt. Die gespeicherte Option `afspaces_hub_page_id` bleibt auch nach redaktionellen Änderungen an Titel oder Slug die primäre Referenz. Eine fremde Seite mit dem Slug `afspaces` wird nicht übernommen.
+
+Die Deinstallation bewahrt AFSpaces-Daten standardmäßig. Nur die Einstellung `afspaces_cleanup_on_uninstall` erlaubt ein vollständiges Cleanup; Asgaros-Foren, Kategorien, Gruppen, Beiträge und Mitgliedschaften bleiben in jedem Fall erhalten.
+
 ## Aktuelles Produktbild
 
 Im aktuellen Stand deckt das Plugin die folgenden Arbeitsbereiche bereits ab:

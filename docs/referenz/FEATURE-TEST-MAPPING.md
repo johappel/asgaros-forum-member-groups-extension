@@ -66,7 +66,15 @@ Schnellübersicht: Welche  Testdateien gehören zu welchem Feature?
 | Hub-URL-Verwaltung, View-Konstanten, Legacy-Slug-Mapping | `Interface/SpacesUrls.php` | `tests/SpacesUrlsTest.php` |
 | Arbeitsgruppen-Bezeichnungen (Labels, Zählungen) | `Interface/WorkingGroupTerminology.php` | `tests/WorkingGroupTerminologyTest.php` |
 
-## 9. Domänen-Modelle (Domain)
+## 9. Production Readiness
+
+| Feature | Quellklassen | Test |
+| --- | --- | --- |
+| Hub-Seite wiederverwenden und nach Löschung herstellen | `Core/Activator.php`, `Interface/SpacesUrls.php` | `tests/Integration/HubLifecycleTest.php` |
+| Sichere Deinstallations-Einstellung | `Interface/InstallationSettingsPage.php`, `Core/Uninstaller.php` | `tests/InstallationSettingsTest.php`, `tests/Integration/UninstallPolicyTest.php` |
+| Join-Request-Privacy | `Plugin.php`, `Adapters/Database/JoinRequestRepository.php` | `tests/Integration/JoinRequestPrivacyTest.php` |
+
+## 10. Domänen-Modelle (Domain)
 
 | Feature | Quellklasse | Test |
 | --- | --- | --- |

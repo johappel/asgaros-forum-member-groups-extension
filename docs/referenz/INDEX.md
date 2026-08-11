@@ -58,13 +58,15 @@ Nur Administratoren erhalten diese Caps bei Aktivierung (`Capabilities::register
 | `afspaces_audit` | `AuditRepository` | `Activator::activate` |
 | `afspaces_search_index` | `SearchIndexRepository` | `Activator::activate`, `Plugin::maybe_upgrade` |
 
-Deinstallation entfernt Tabellen und Optionen über `src/Core/Uninstaller.php`.
+Deinstallation bewahrt Tabellen und Optionen standardmäßig. Vollständiges Cleanup erfolgt nur über `afspaces_cleanup_on_uninstall` und `src/Core/Uninstaller.php`; Asgaros-Daten bleiben unangetastet.
 
 ### Admin-Optionsschlüssel
 
 | Option | Quelle |
 | --- | --- |
 | `afspaces_hub_page_id` | `SpacesUrls::HUB_PAGE_OPTION` |
+| `afspaces_activation_notice` | `Activator::activate`, einmalige Admin-Einrichtungsmeldung |
+| `afspaces_cleanup_on_uninstall` | `InstallationSettingsPage::OPTION`, Opt-in für vollständiges Cleanup |
 | `afspaces_installed_version` | `Plugin::maybe_upgrade` |
 | `afspaces_appearance_options` | `AppearanceSettingsPage` |
 | `afspaces_creation_options` | `SpaceCreationSettings::OPTION` |

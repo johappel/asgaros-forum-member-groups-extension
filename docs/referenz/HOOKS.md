@@ -19,6 +19,9 @@ Konsumierte Fremd-Hooks und eigene AFSpaces-Hooks. Alle Angaben belegt aus dem Q
 | `afspaces_reindex_search` (Cron) | `SearchIndexer` | täglicher Reindex, geplant via `SearchIndexer::schedule` |
 | `wp_privacy_personal_data_exporters` | `Plugin::init` | Einladungsdaten exportieren |
 | `wp_privacy_personal_data_erasers` | `Plugin::init` | persönliche Einladungsnachrichten löschen |
+| `wp_privacy_personal_data_exporters` | `Plugin::init` | Beitrittsanfragen exportieren |
+| `wp_privacy_personal_data_erasers` | `Plugin::init` | persönliche Nachrichten von Beitrittsanfragen löschen, Statusdaten behalten |
+| `admin_notices` | `Plugin::init` | einmalige Aktivierungs- und Einrichtungsmeldung |
 
 ## Konsumierte Asgaros-Hooks
 

@@ -32,6 +32,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 		public const HUB_PAGE_OPTION = 'afspaces_hub_page_id';
 
 		/**
+		 * Meta-Schlüssel zum Eigentumsnachweis der automatisch angelegten Seite.
+		 */
+		public const HUB_MANAGED_META = '_afspaces_managed_page';
+
+		/**
 		 * Name des Query-Parameters für die Unteransicht.
 		 */
 		public const VIEW_PARAM = 'afspaces_view';
@@ -106,17 +111,46 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 		 */
 		public static function hub_page_id(): int {
 			$stored = (int) get_option( self::HUB_PAGE_OPTION, 0 );
-			if ( $stored > 0 && 'page' === get_post_type( $stored ) && 'publish' === get_post_status( $stored ) ) {
+			if ( $stored > 0 && self::is_valid_hub_page( $stored ) ) {
 				return $stored;
 			}
 
-			$page = get_page_by_path( self::HUB_SLUG );
-			if ( $page ) {
+			// Nur eindeutig als AFSpaces verwaltete Seiten dürfen ohne gespeicherte
+			// ID wiedergefunden werden. Eine fremde Seite mit dem Standard-Slug
+			// darf niemals stillschweigend übernommen werden.
+			$pages = get_posts(
+				array(
+					'post_type'      => 'page',
+					'post_status'    => 'publish',
+					'posts_per_page' => 1,
+					'orderby'        => 'ID',
+					'order'          => 'ASC',
+					'meta_key'       => self::HUB_MANAGED_META,
+					'meta_value'     => '1',
+				)
+			);
+			$page  = $pages[0] ?? null;
+			if ( $page instanceof \WP_Post ) {
 				update_option( self::HUB_PAGE_OPTION, (int) $page->ID );
 				return (int) $page->ID;
 			}
 
 			return 0;
+		}
+
+		/**
+		 * Prüft, ob eine gespeicherte Hub-Seite noch verwendbar ist.
+		 *
+		 * Titel und Slug sind bewusst kein Teil der Prüfung: Administratoren
+		 * dürfen die redaktionelle URL und Bezeichnung der Seite ändern.
+		 *
+		 * @param int $page_id Seiten-ID.
+		 * @return bool
+		 */
+		public static function is_valid_hub_page( int $page_id ): bool {
+			return $page_id > 0
+				&& 'page' === get_post_type( $page_id )
+				&& 'publish' === get_post_status( $page_id );
 		}
 
 		/**

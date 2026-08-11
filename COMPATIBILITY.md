@@ -11,7 +11,7 @@ Asgaros dokumentiert zahlreiche Actions und Filters für Frontend-Erweiterungen 
 ## Geprüfte Versionen (Stand MVP 1)
 
 - **Getestete WP Local-Instanz:** Asgaros Forum `3.4.0`.
-- **Mindestversion (`AFSPACES_MIN_ASGAROS_VERSION`):** `3.0.0` (vorläufig; wird mit Adapter-Recherche in M1.2 präzisiert).
+- **Mindestversion (`AFSPACES_MIN_ASGAROS_VERSION`):** `3.4.0`.
 - **Hauptklasse:** `AsgarosForum` (definiert in `asgaros-forum/includes/forum.php`, instanziiert in `asgaros-forum.php`).
 - **Versionserkennung:** Konstante `ASGAROS_FORUM_VERSION` sofern definiert, sonst `get_plugin_data()` auf `asgaros-forum/asgaros-forum.php`.
 - **Aktivitätsprüfung:** `class_exists('AsgarosForum')` bzw. `is_plugin_active('asgaros-forum/asgaros-forum.php')`.
@@ -51,11 +51,13 @@ Die Frontend-Verwaltung ist über die Asgaros-Forum-Navigation erreichbar. Dafü
 - Filter `asgarosforum_filter_header_menu` — fügt den Menüpunkt „Räume" in die Forum-Navigation ein (nur für berechtigte, angemeldete Benutzer).
 - Action `asgarosforum_overview_custom_content_top` — rendert ein kompaktes Einstiegs-Panel auf der Forum-Übersicht.
 
-Die eigentliche Verwaltung läuft über eine einzelne WordPress-Hub-Seite (Slug `afspaces`) mit dem Shortcode `[afspaces]`. Die Unteransicht wird über den Query-Parameter `afspaces_view` gesteuert (`dashboard`, `members`, `invitations`, `join-requests`, `my-invitations`, `discover`, `create`). Es wird **kein** eigener Asgaros-`current_view` in das Forum-Routing eingehängt, da hierfür keine dokumentierte API existiert.
+Die eigentliche Verwaltung läuft über eine bei Aktivierung automatisch angelegte WordPress-Hub-Seite mit dem Shortcode `[afspaces]`. Der Standard-Slug ist `afspaces`; WordPress vergibt bei einem Konflikt einen freien eindeutigen Slug. Die Option `afspaces_hub_page_id` ist die primäre Referenz. Titel und Slug dürfen nachträglich geändert werden, ohne dass eine zweite Seite entsteht. Das Meta `_afspaces_managed_page=1` ist der Eigentumsnachweis für Cleanup und Wiederauffinden. Eine fremde Seite mit dem Standard-Slug wird nicht übernommen.
 
 Alte Einzelseiten (`afspaces-dashboard`, `afspaces-members`, `afspaces-invitations`, `afspaces-my-invitations`) werden per 301 auf die entsprechende Hub-Unteransicht umgeleitet.
 
-Die neue Seite `Einstellungen -> AFSpaces Look & Feel` nutzt ausschließlich WordPress-Settings-APIs und beeinflusst nur AFSpaces-Frontend-CSS (keine Asgaros-Interna).
+Die Seiten `Einstellungen -> AFSpaces Look & Feel` und `Einstellungen -> AFSpaces Installation` nutzen ausschließlich WordPress-Settings-APIs. Die Installationsseite steuert das optionale vollständige Cleanup; der Default ist AUS.
+
+Bei Aktivierung werden Voraussetzungen vor Tabellen- oder Seitenerstellung geprüft. AFSpaces initialisiert sich nur mit PHP 8.1+ und aktivem Asgaros Forum 3.4.0+. Die einmalige Admin-Meldung zeigt Hub-Status, erkannte Asgaros-Version und den sicheren Default der deaktivierten Selbstgründung.
 
 ## Forensuche (post-genaue Suche mit Deep-Links)
 
@@ -79,7 +81,7 @@ REST: `GET /wp-json/afspaces/v1/search` (`permission_callback`: angemeldet), Par
 - **Fusion:** `HybridSearchService` + `ResultFusion` (Reciprocal Rank Fusion) führen Foren-, WP- und semantische Ranglisten zusammen. Rein interne Logik, keine externen APIs.
 - **Indexierung:** `AsgarosAdapter::list_posts_for_index()` / `count_all_posts()` lesen dieselben Tabellen (`posts`/`topics`/`forums`) wie die Keyword-Suche (nur `t.approved = 1`). `SearchIndexer` läuft über `wp_cron` (`afspaces_reindex_search`, täglich) sowie die dokumentierten WP-Hooks `save_post`, `trashed_post`, `deleted_post`.
 - **Embedding-API:** `EmbeddingClient` spricht eine OpenRouter-kompatible API via `wp_remote_post` an (Modell-Default `perplexity/pplx-embed-v1-0.6b`). Standardmäßig deaktiviert; siehe SECURITY_PRIVACY.md.
-- **Eigene Tabelle:** `wp_afspaces_search_index` (Embeddings) via `dbDelta`; bei Deinstallation entfernt. Kein Bezug zu Asgaros-Tabellen.
+- **Eigene Tabelle:** `wp_afspaces_search_index` (Embeddings) via `dbDelta`; bei ausdrücklich aktiviertem vollständigem Cleanup entfernt. Kein Bezug zu Asgaros-Tabellen.
 - **Verhalten ohne Konfiguration:** Ist kein API-Schlüssel gesetzt, liefern Vektorsuche und Reindex einen sauberen No-op (keine Fehler); die Keyword-/Hybridsuche bleibt voll funktionsfähig.
 - **Relevanzschwelle:** Semantische Treffer unter einer konfigurierbaren Cosine-Mindestähnlichkeit (`semantic_min_score`, Default `0.30`) werden verworfen. Kalibrierung an der Testinstanz: echte Treffer ≈ 0.48–0.54, verwandte ≈ 0.36–0.42, Rauschen ≈ 0.20–0.28 — daher blendet 0.30 unpassende „Treffer“ (z. B. für Begriffe ohne Korpusbezug) aus.
 

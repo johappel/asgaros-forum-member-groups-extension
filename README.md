@@ -6,9 +6,9 @@ AFSpaces ist ein eigenständiges WordPress-Plugin für eine verständliche, sich
 
 ### Voraussetzungen
 
-- **WordPress:** > = 7.0 (getestet mit 7.0.2)
+- **WordPress:** >= 7.0
 - **PHP:** >= 8.1
-- **Asgaros Forum:** >= 3.0.0 (empfohlen und mit 3.4.0 getestet)
+- **Asgaros Forum:** >= 3.4.0 (mit Asgaros Forum 3.4.0 getestet)
 - **Datenbank:** MySQL/MariaDB mit Standard-WordPress-Tabellen
 
 ### Einrichtung
@@ -16,8 +16,10 @@ AFSpaces ist ein eigenständiges WordPress-Plugin für eine verständliche, sich
 1. Plugin-Dateien in `wp-content/plugins/asgaros-forum-member-groups-extension/` ablegen oder ZIP über „Plugins → Installieren“ hochladen.
 2. **Asgaros Forum vorher installieren und aktivieren**, sonst blockt die Anforderungsprüfung die Aktivierung.
 3. Plugin aktivieren. Falls eine ältere Asgaros-Version läuft, zeigt das Dashboard eine konkrete Fehlermeldung.
-4. WordPress-Seite anlegen (z. B. „Räume“) und Shortcode `[afspaces]` einfügen — das ist die zentrale Hub-Seite mit allen Unteransichten.
-5. Rechte prüfen: Administratoren haben volle Berechtigung; Manager/Owner einzelner Räume erhalten automatisch die passenden Capabilities.
+4. AFSpaces erzeugt automatisch die zentrale WordPress-Seite **Arbeitsgruppen** mit `[afspaces]` und speichert sie als verwaltete Hub-Seite.
+5. Nach der Aktivierung die einmalige Einrichtungsmeldung prüfen. Administratoren haben volle Berechtigung; Manager/Owner einzelner Räume erhalten automatisch die passenden Capabilities.
+
+Eine manuelle Seite oder das Kopieren eines Shortcodes ist für die reguläre Einrichtung nicht nötig. `[afspaces]` bleibt für fortgeschrittene und Legacy-Szenarien verfügbar. Alte `afspaces-*`-Seiten werden aus Rückwärtskompatibilität auf die passenden Hub-Ansichten umgeleitet.
 
 ### Einstellungen
 
@@ -25,11 +27,13 @@ Unter **Einstellungen → AFSpaces Look & Feel** werden Farben, Schriften und Ab
 
 Unter **Einstellungen → AFSpaces Raumgründung** legt der Administrator fest, ob Mitglieder selbst Räume gründen dürfen, welche Sichtbarkeiten erlaubt sind und ob neu gegründete Räume freigegeben werden müssen.
 
+Unter **Einstellungen → AFSpaces Installation** kann die vollständige Löschung beim Deinstallieren ausdrücklich aktiviert werden. Standardmäßig bleiben AFSpaces-Daten und die verwaltete Hub-Seite erhalten.
+
 ### Deaktivierung und Deinstallation
 
 **Deaktivierung** blockiert weder WordPress noch Asgaros Forum. Es werden nur der geplante Reindex-Cron-Job und die Rewrite-Rules entfernt. Die Hub-Seite und alle AFSpaces-Daten bleiben erhalten; das Forum funktioniert ganz normal weiter.
 
-**Deinstallation** löscht alle AFSpaces-Daten unwiderruflich:
+**Deinstallation** bewahrt AFSpaces-Daten standardmäßig. Nur mit dem ausdrücklichen Opt-in unter **Einstellungen → AFSpaces Installation** werden unwiderruflich gelöscht:
 - alle eigenen Tabellen (`wp_afspaces_*`),
 - die Hub-Seite,
 - die Plugin-Optionen sowie
@@ -37,7 +41,13 @@ Unter **Einstellungen → AFSpaces Raumgründung** legt der Administrator fest, 
 
 **Asgaros-Daten** (Foren, Gruppen, Kategorien, Beiträge, Benutzergruppen) bleiben unangetastet.
 
-> **Empfehlung:** Sichere vor der Deinstallation die eigenen AFSpaces-Tabellen oder exportiere relevante Daten (z. B. Räume, Einladungen, Audit-Log), falls sie später benötigt werden. Nach der Deinstallation sind sie nicht mehr wiederherstellbar.
+Beim vollständigen Cleanup gehen AFSpaces-Mappings, Einladungen, Beitrittsanfragen und Auditdaten verloren; Asgaros-Artefakte bleiben bestehen. Eine verwaltete AFSpaces-Hub-Seite wird nur dann gelöscht, wenn ihr Eigentumsmeta vorhanden ist. Fremde oder manuell übernommene Seiten werden nie gelöscht.
+
+## Betriebshinweise
+
+- **Caching:** Die Hub-Seite enthält nutzerabhängige Inhalte, Rechte und Nonces. Für eingeloggte Benutzer muss problematisches Full-Page-Caching ausgeschlossen oder korrekt varyiert werden.
+- **E-Mail:** Persönliche Einladungen werden über `wp_mail()` versendet. Vor dem Livebetrieb Zustellung und SMTP-Konfiguration prüfen.
+- **Kompatibilität:** Getestet ist Asgaros Forum 3.4.0 mit PHP 8.1+ und WordPress 7.0+. Darüber hinausgehende Kombinationen sind nicht automatisch zugesichert.
 
 ## Hauptfunktionen
 
