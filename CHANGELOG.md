@@ -5,7 +5,7 @@
 - Asgaros-Parent-Slug auf `asgarosforum-structure` korrigiert, damit AFSpaces im Menü „Forum → Struktur“ erscheint.
 - Zentrale Arbeitsgruppen-Settingsseite unter dem Asgaros-Forum-Menü mit nativen Tabs für Darstellung, Raumgründung, Suche und Installation ergänzt.
 - Direkte frühere Settings-Slugs leiten rückwärtskompatibel auf den jeweils passenden Tab weiter.
-- Plugin-Version auf `0.3.0` angehoben.
+- Plugin-Version auf `0.3.1` angehoben.
 
 - Developer-Reference-Hardening für Issue #6: REST-Routen, Capabilities, Adapter-Shapes, Hooks, physisches DB-Schema, Test-Mapping und generischer Entwickler-Quickstart gegen den aktuellen Code synchronisiert.
 - Production-Readiness-Pass für Issue #4: automatische und eigentumssichere Hub-Seite, Wiederverwendung nach redaktionellen Änderungen und sichere Wiederherstellung.
