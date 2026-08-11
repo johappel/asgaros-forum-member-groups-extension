@@ -248,6 +248,8 @@ Für jede MVP-Stufe:
 - Keyboard- und Screenreader-Kernpfade geprüft,
 - Upgrade-Pfad für Datenbankschema vorhanden,
 - Changelog-Eintrag erstellt.
+- Bei jeder größeren Codeänderung die Plugin-Version erhöhen, den passenden
+  Git-/Release-Tag aktualisieren und die Änderung im Changelog dokumentieren.
 
 ## 12. Arbeitsweise des Coding-Agenten
 
