@@ -42,22 +42,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 		 * @return void
 		 */
 		public function init(): void {
-			add_action( 'admin_menu', array( $this, 'register_menu' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 			add_action( 'admin_post_' . self::REINDEX_ACTION, array( $this, 'handle_reindex' ) );
-		}
-
-		/**
-		 * @return void
-		 */
-		public function register_menu(): void {
-			add_options_page(
-				__( 'AFSpaces Suche', 'afspaces' ),
-				__( 'AFSpaces Suche', 'afspaces' ),
-				'manage_options',
-				'afspaces-search',
-				array( $this, 'render_page' )
-			);
 		}
 
 		/**
@@ -90,13 +76,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 
 			$redirect = add_query_arg(
 				array(
-					'page'      => 'afspaces-search',
+					'page'      => AFSpacesSettingsPage::PAGE_SLUG,
+					'tab'       => 'search',
 					'reindexed' => 1,
 					'indexed'   => (int) $stats['indexed'],
 					'skipped'   => (int) $stats['skipped'],
 					'errors'    => (int) $stats['errors'],
 				),
-				admin_url( 'options-general.php' )
+				admin_url( 'admin.php' )
 			);
 
 			wp_safe_redirect( $redirect );
@@ -134,7 +121,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 		 *
 		 * @return void
 		 */
-		public function render_page(): void {
+		public function render_page( bool $embedded = false ): void {
 			if ( ! current_user_can( 'manage_options' ) ) {
 				return;
 			}
@@ -144,8 +131,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 			$forum_count = $this->index->count( SearchIndexRepository::SOURCE_FORUM );
 			$wp_count    = $this->index->count( SearchIndexRepository::SOURCE_WP );
 			?>
+			<?php if ( ! $embedded ) : ?>
 			<div class="wrap">
-				<h1><?php echo esc_html__( 'AFSpaces Suche', 'afspaces' ); ?></h1>
+				<h1><?php echo esc_html__( 'Arbeitsgruppen-Suche', 'afspaces' ); ?></h1>
+			<?php endif; ?>
 
 				<?php if ( isset( $_GET['reindexed'] ) ) : ?>
 					<div class="notice notice-success is-dismissible">
@@ -286,7 +275,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchSettingsPage' ) ) {
 						<p class="description"><?php echo esc_html__( 'Die semantische Suche ist noch nicht vollständig konfiguriert; die Reindexierung bleibt wirkungslos.', 'afspaces' ); ?></p>
 					<?php endif; ?>
 				</form>
+			<?php if ( ! $embedded ) : ?>
 			</div>
+			<?php endif; ?>
 			<?php
 		}
 	}

@@ -30,6 +30,7 @@ use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
+use AFSpaces\Interface\AFSpacesSettingsPage;
 use AFSpaces\Interface\AppearanceSettingsPage;
 use AFSpaces\Interface\ForumNavigation;
 use AFSpaces\Interface\ForumModerationControls;
@@ -143,6 +144,14 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_settings = new SearchSettingsPage( $search_indexer, $search_index );
 			$search_settings->init();
 
+			$settings_page = new AFSpacesSettingsPage(
+				$appearance,
+				$creation_settings,
+				$search_settings,
+				$installation
+			);
+			$settings_page->init();
+
 			$activation_notice = get_option( 'afspaces_activation_notice', array() );
 			if ( is_array( $activation_notice ) && ! empty( $activation_notice ) ) {
 				add_action(
@@ -164,7 +173,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 							</ul>
 							<p>
 								<a class="button button-primary" href="<?php echo esc_url( \AFSpaces\Interface\SpacesUrls::hub_url() ); ?>"><?php echo esc_html__( 'Arbeitsgruppen öffnen', 'afspaces' ); ?></a>
-								<a class="button" href="<?php echo esc_url( admin_url( 'options-general.php?page=afspaces-installation' ) ); ?>"><?php echo esc_html__( 'Einstellungen prüfen', 'afspaces' ); ?></a>
+								<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=afspaces-settings&tab=installation' ) ); ?>"><?php echo esc_html__( 'Einstellungen prüfen', 'afspaces' ); ?></a>
 							</p>
 						</div>
 						<?php

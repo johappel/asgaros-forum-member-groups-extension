@@ -24,21 +24,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InstallationSettingsPage' ) ) {
 		 * @return void
 		 */
 		public function init(): void {
-			add_action( 'admin_menu', array( $this, 'register_menu' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
-		}
-
-		/**
-		 * @return void
-		 */
-		public function register_menu(): void {
-			add_options_page(
-				__( 'AFSpaces Installation', 'afspaces' ),
-				__( 'AFSpaces Installation', 'afspaces' ),
-				'manage_options',
-				'afspaces-installation',
-				array( $this, 'render_page' )
-			);
 		}
 
 		/**
@@ -67,13 +53,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InstallationSettingsPage' ) ) {
 		/**
 		 * @return void
 		 */
-		public function render_page(): void {
+		public function render_page( bool $embedded = false ): void {
 			if ( ! current_user_can( 'manage_options' ) ) {
 				return;
 			}
 			?>
+			<?php if ( ! $embedded ) : ?>
 			<div class="wrap">
-				<h1><?php echo esc_html__( 'AFSpaces Installation', 'afspaces' ); ?></h1>
+				<h1><?php echo esc_html__( 'Arbeitsgruppen-Installation', 'afspaces' ); ?></h1>
+			<?php endif; ?>
 				<form action="options.php" method="post">
 					<?php settings_fields( 'afspaces_installation_group' ); ?>
 					<table class="form-table" role="presentation">
@@ -91,7 +79,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InstallationSettingsPage' ) ) {
 					</table>
 					<?php submit_button(); ?>
 				</form>
+			<?php if ( ! $embedded ) : ?>
 			</div>
+			<?php endif; ?>
 			<?php
 		}
 	}

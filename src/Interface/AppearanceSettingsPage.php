@@ -29,21 +29,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 		 * @return void
 		 */
 		public function init(): void {
-			add_action( 'admin_menu', array( $this, 'register_menu' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
-		}
-
-		/**
-		 * @return void
-		 */
-		public function register_menu(): void {
-			add_options_page(
-				__( 'AFSpaces Look & Feel', 'afspaces' ),
-				__( 'AFSpaces Look & Feel', 'afspaces' ),
-				'manage_options',
-				'afspaces-look-and-feel',
-				array( $this, 'render_page' )
-			);
 		}
 
 		/**
@@ -285,7 +271,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 		/**
 		 * @return void
 		 */
-		public function render_page(): void {
+		public function render_page( bool $embedded = false ): void {
 			if ( ! current_user_can( 'manage_options' ) ) {
 				return;
 			}
@@ -293,8 +279,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 			$opts = self::get_settings();
 			$presets = self::presets();
 			?>
+			<?php if ( ! $embedded ) : ?>
 			<div class="wrap">
-				<h1><?php echo esc_html__( 'AFSpaces Look & Feel', 'afspaces' ); ?></h1>
+				<h1><?php echo esc_html__( 'Arbeitsgruppen-Darstellung', 'afspaces' ); ?></h1>
+			<?php endif; ?>
 				<p><?php echo esc_html__( 'Hier kannst du Farben, Schrift und Grundlayout der AFSpaces-Oberfläche an das Asgaros-Design anpassen.', 'afspaces' ); ?></p>
 				<form method="post" action="options.php">
 					<?php settings_fields( 'afspaces_appearance_group' ); ?>
@@ -393,7 +381,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 					</table>
 					<?php submit_button(); ?>
 				</form>
+			<?php if ( ! $embedded ) : ?>
 			</div>
+			<?php endif; ?>
 			<?php
 		}
 	}

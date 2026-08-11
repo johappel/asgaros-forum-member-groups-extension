@@ -1,11 +1,23 @@
 # Settings-Pages-Referenz
 
-Alle Admin-Optionsseiten liegen unter `Einstellungen` (`options-general.php`), Capability durchgehend `manage_options`. Jede Seite nutzt die WordPress-Settings-API und beeinflusst nur AFSpaces (keine Asgaros-Interna).
+Die AFSpaces-Optionen liegen zentral als Untermenü von `Asgaros Forum` (`admin.php?page=afspaces-settings`). Die Capability ist durchgehend `manage_options`. Die Seite nutzt native WordPress-Tabs und die WordPress-Settings-API; sie beeinflusst nur AFSpaces (keine Asgaros-Interna).
 
-## Look & Feel
+## Zentrale Seite
+
+- Klasse: `src/Interface/AFSpacesSettingsPage.php`
+- Parent-Menü: `asgarosforum-structure` (Asgaros-Seite „Struktur")
+- Seiten-Slug: `afspaces-settings`
+- URL-Muster: `admin.php?page=afspaces-settings&tab={tab}`
+- Tabs: `appearance`, `creation`, `search`, `installation`
+- Standardtab: `appearance`
+- Capability: `manage_options`
+
+Die früheren direkten Seiten-Slugs (`afspaces-appearance`, `afspaces-look-and-feel`, `afspaces-creation`, `afspaces-search`, `afspaces-installation`) werden über `AFSpacesSettingsPage::redirect_legacy_pages()` dauerhaft auf den passenden Tab weitergeleitet. Optionsschlüssel und Settings-Gruppen bleiben dabei unverändert.
+
+## Darstellung
 
 - Klasse: `src/Interface/AppearanceSettingsPage.php`
-- Menü-Slug: `afspaces-appearance` (Titel „AFSpaces Look & Feel")
+- Tab: `appearance` (Titel „Arbeitsgruppen-Darstellung")
 - Option: `afspaces_appearance_options`
 - Anwendung: `enqueue_inline_style()` hängt Inline-CSS an `afspaces-frontend`; site-weit über `SearchModal`.
 
@@ -16,7 +28,7 @@ Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich` plus Reset auf Standard.
 ## Raumgründung
 
 - Klasse: `src/Interface/SpaceCreationSettingsPage.php`
-- Menü-Slug: `afspaces-creation` (Titel „AFSpaces Raumgründung")
+- Tab: `creation` (Titel „AFSpaces Raumgründung")
 - Option: `afspaces_creation_options` (`SpaceCreationSettings::OPTION`)
 - Settings-Group: `SpaceCreationSettingsPage::GROUP`
 
@@ -39,7 +51,7 @@ Konsumiert von `SpaceCreationPolicy` und `SpaceCreationService`.
 ## Installation
 
 - Klasse: `src/Interface/InstallationSettingsPage.php`
-- Menü-Slug: `afspaces-installation`
+- Tab: `installation`
 - Option: `afspaces_cleanup_on_uninstall`
 - Settings-Gruppe: `afspaces_installation_group`
 - Capability: `manage_options`
@@ -50,7 +62,7 @@ Das Kontrollkästchen aktiviert bewusst die vollständige Entfernung eigener AFS
 ## Suche
 
 - Klasse: `src/Interface/SearchSettingsPage.php`
-- Menü-Slug: `afspaces-search` (Titel „AFSpaces Suche")
+- Tab: `search` (Titel „Arbeitsgruppen-Suche")
 - Option: `afspaces_search_options` (`SearchSettings::OPTION_KEY`)
 - Settings-Group: `afspaces_search_group`
 - Reindex: `admin_post_afspaces_search_reindex` → `handle_reindex` (Nonce via `check_admin_referer`)
@@ -74,8 +86,8 @@ Konsumiert von `EmbeddingClient`, `VectorSearch`, `SearchIndexer`, `WpPostSearch
 
 ## Neue Optionsseite hinzufügen
 
-1. Klasse in `src/Interface` mit `init()` (Hooks `admin_menu`, `admin_init`).
-2. `add_options_page(..., 'manage_options', 'afspaces-...', ...)`.
-3. `register_setting` mit `sanitize_callback` und `default`.
+1. Tab in `AFSpacesSettingsPage::tabs()` ergänzen und die zugehörige Renderklasse injizieren.
+2. Bestehende oder neue Settingsklasse mit `init()` und `register_setting` anbinden.
+3. `register_setting` mit `sanitize_callback` und `default` verwenden.
 4. Instanziierung und `init()` in `Plugin::init` verdrahten.
 5. Werte über eine dedizierte Settings-/VO-Klasse kapseln, nicht direkt `get_option` in der Geschäftslogik streuen.

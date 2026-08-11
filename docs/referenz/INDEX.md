@@ -9,7 +9,7 @@ Nachschlagewerk für Entwickler. Jede Seite ist auf schnelles Finden ausgelegt: 
 - [FRONTEND-ACTIONS.md](FRONTEND-ACTIONS.md) — alle serverseitigen POST-Aktionen (`afspaces_action`), Nonce, Parameter, Service, Redirect.
 - [HOOKS.md](HOOKS.md) — konsumierte WordPress- und Asgaros-Hooks sowie eigene AFSpaces-Filter/Actions.
 - [ADAPTER.md](ADAPTER.md) — vollständiger Asgaros-Adapter-Vertrag (read vs. write) mit Signaturen.
-- [SETTINGS-PAGES.md](SETTINGS-PAGES.md) — Admin-Optionsseiten, Optionsschlüssel, Felder, Capability.
+- [SETTINGS-PAGES.md](SETTINGS-PAGES.md) — zentrale AFSpaces-Settingsseite unter Asgaros, Tabs, Optionsschlüssel, Felder, Capability.
 - [DOMAINMODELLE.md](DOMAINMODELLE.md) — Zustandsdiagramme und Kernattribute (Space, Invitation, InviteLink, JoinRequest, WorkingGroupMeta).
 - [DATENBANK.md](DATENBANK.md) — Kernfelder je Tabelle, Personenbezug, Schema-Änderungspfad.
 - [DESIGN-UND-LAYOUT.md](DESIGN-UND-LAYOUT.md) — Gestaltungs-, Farb-, Icon- und Barrierefreiheitsentscheidungen.

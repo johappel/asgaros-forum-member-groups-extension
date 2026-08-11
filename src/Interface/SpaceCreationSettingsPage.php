@@ -26,21 +26,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 		 * @return void
 		 */
 		public function init(): void {
-			add_action( 'admin_menu', array( $this, 'register_menu' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
-		}
-
-		/**
-		 * @return void
-		 */
-		public function register_menu(): void {
-			add_options_page(
-				__( 'AFSpaces Raumgründung', 'afspaces' ),
-				__( 'AFSpaces Raumgründung', 'afspaces' ),
-				'manage_options',
-				'afspaces-creation',
-				array( $this, 'render_page' )
-			);
 		}
 
 		/**
@@ -125,7 +111,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 		 *
 		 * @return void
 		 */
-		public function render_page(): void {
+		public function render_page( bool $embedded = false ): void {
 			if ( ! current_user_can( 'manage_options' ) ) {
 				return;
 			}
@@ -136,8 +122,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 				$roles = wp_roles()->roles;
 			}
 			?>
+			<?php if ( ! $embedded ) : ?>
 			<div class="wrap">
 				<h1><?php echo esc_html__( 'AFSpaces Raumgründung', 'afspaces' ); ?></h1>
+			<?php endif; ?>
 				<p><?php echo esc_html__( 'Hier legst du fest, wer eigene Arbeitsgruppen gründen darf und innerhalb welcher Grenzen.', 'afspaces' ); ?></p>
 				<form method="post" action="options.php">
 					<?php settings_fields( self::GROUP ); ?>
@@ -245,7 +233,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpaceCreationSettingsPage' ) ) {
 					</table>
 					<?php submit_button(); ?>
 				</form>
+			<?php if ( ! $embedded ) : ?>
 			</div>
+			<?php endif; ?>
 			<?php
 		}
 	}
