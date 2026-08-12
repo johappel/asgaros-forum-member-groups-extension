@@ -89,8 +89,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				<section class="afspaces-invite-links afspaces-section-card content-container" aria-labelledby="afspaces-invite-links-heading">
 					<div id="afspaces-invite-links-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Einladungslinks', 'afspaces' ); ?></div>
 					<p><?php echo esc_html__( 'Ein Link wird nur einmal vollständig angezeigt. Später ist nur noch die Verwaltung des Links möglich.', 'afspaces' ); ?></p>
-					<p class="description"><?php echo esc_html__( 'Die optionale Registrierung neuer Benutzer wird nur angeboten, wenn sie auf dieser Website zentral erlaubt ist.', 'afspaces' ); ?></p>
-
+					
 					<form method="post" class="afspaces-invite-link-form">
 						<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 						<input type="hidden" name="afspaces_action" value="create_invite_link" />
