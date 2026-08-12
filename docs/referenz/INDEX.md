@@ -8,6 +8,7 @@ Nachschlagewerk für Entwickler. Jede Seite ist auf schnelles Finden ausgelegt: 
 - [REST-API.md](REST-API.md) — alle Endpunkte unter `/wp-json/afspaces/v1`, Permission-Callbacks, Parameter, Service.
 - [FRONTEND-ACTIONS.md](FRONTEND-ACTIONS.md) — alle serverseitigen POST-Aktionen (`afspaces_action`), Nonce, Parameter, Service, Redirect.
 - [HOOKS.md](HOOKS.md) — konsumierte WordPress- und Asgaros-Hooks sowie eigene AFSpaces-Filter/Actions.
+- [USER-IDENTITY.md](USER-IDENTITY.md) — zentrale Auflösung von Anzeigenamen, Avataren und externer Benutzersuche.
 - [ADAPTER.md](ADAPTER.md) — vollständiger Asgaros-Adapter-Vertrag (read vs. write) mit Signaturen.
 - [SETTINGS-PAGES.md](SETTINGS-PAGES.md) — zentrale AFSpaces-Settingsseite unter Asgaros, Tabs, Optionsschlüssel, Felder, Capability.
 - [DOMAINMODELLE.md](DOMAINMODELLE.md) — Zustandsdiagramme und Kernattribute (Space, Invitation, InviteLink, JoinRequest, WorkingGroupMeta).

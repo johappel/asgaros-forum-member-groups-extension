@@ -20,6 +20,7 @@ use AFSpaces\Application\HybridSearchService;
 use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Application\SpaceModerationService;
+use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\Capabilities;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
@@ -42,6 +43,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private SpaceCreationService $space_creation;
 		private SpaceLifecycleService $space_lifecycle;
 		private SpaceModerationService $space_moderation;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
@@ -58,7 +60,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			HybridSearchService $forum_search,
 			SpaceCreationService $space_creation,
 			SpaceLifecycleService $space_lifecycle,
-			SpaceModerationService $space_moderation
+			SpaceModerationService $space_moderation,
+			?UserIdentityService $identity = null
 		) {
 			$this->frontend     = $frontend;
 			$this->spaces       = $spaces;
@@ -72,6 +75,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->space_creation = $space_creation;
 			$this->space_lifecycle = $space_lifecycle;
 			$this->space_moderation = $space_moderation;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -198,24 +202,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return $members_view->render( $space_id );
 
 				case SpacesUrls::VIEW_INVITATIONS:
-					$inv_view = new InvitationsView( $this->spaces, $this->asgaros, $this->invitations, $this->members, $this->invite_links );
+					$inv_view = new InvitationsView( $this->spaces, $this->asgaros, $this->invitations, $this->members, $this->invite_links, $this->identity );
 					return $inv_view->render( $space_id );
 
 				case SpacesUrls::VIEW_JOIN_REQUESTS:
-					$requests_view = new JoinRequestsView( $this->spaces, $this->asgaros, $this->join_requests );
+					$requests_view = new JoinRequestsView( $this->spaces, $this->asgaros, $this->join_requests, $this->identity );
 					return $requests_view->render( $space_id );
 
 				case SpacesUrls::VIEW_GROUP:
-					$group_view = new WorkingGroupView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->working_groups );
+					$group_view = new WorkingGroupView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->working_groups, $this->identity );
 					return $group_view->render( $space_id );
 
 				case SpacesUrls::VIEW_PROFILE:
 					$profile_user_id = isset( $_GET['user_id'] ) ? (int) $_GET['user_id'] : 0;
-					$profile_view = new ProfileView( $this->spaces, $this->asgaros, $this->working_groups );
+					$profile_view = new ProfileView( $this->spaces, $this->asgaros, $this->working_groups, $this->identity );
 					return $profile_view->render( $profile_user_id );
 
 				case SpacesUrls::VIEW_SETTINGS:
-					$settings_view = new WorkingGroupSettingsView( $this->spaces, $this->asgaros, $this->working_groups );
+					$settings_view = new WorkingGroupSettingsView( $this->spaces, $this->asgaros, $this->working_groups, $this->identity );
 					return $settings_view->render( $space_id );
 
 				case SpacesUrls::VIEW_MODERATION:
@@ -223,7 +227,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return $moderation_view->render( $space_id );
 
 				case SpacesUrls::VIEW_MY_INVITATIONS:
-					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros );
+					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros, $this->identity );
 					return $mine_view->render();
 
 				case SpacesUrls::VIEW_DISCOVER:
@@ -512,7 +516,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 							if ( '' === $forum_name ) {
 								$forum_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space->id );
 							}
-							$owner = get_userdata( $space->owner_user_id );
+							$owner_exists = $this->identity->user_exists( (int) $space->owner_user_id );
 							?>
 							<li class="afspaces-approval-item content-container">
 								<h3><?php echo esc_html( $forum_name ); ?></h3>
@@ -522,7 +526,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 										sprintf(
 											/* translators: 1: Name, 2: Sichtbarkeit */
 											__( 'Angefragt von %1$s · Sichtbarkeit: %2$s', 'afspaces' ),
-											$owner ? $owner->display_name : (string) $space->owner_user_id,
+											$owner_exists ? $this->identity->get_display_name( $space->owner_user_id ) : (string) $space->owner_user_id,
 											CreateSpaceView::visibility_label( $space->visibility )
 										)
 									);

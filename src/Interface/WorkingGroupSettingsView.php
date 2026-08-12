@@ -12,6 +12,7 @@ namespace AFSpaces\Interface;
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\WorkingGroupService;
+use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\SpaceCreationSettings;
 use AFSpaces\Domain\SpaceLifecycle;
@@ -27,11 +28,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
 		private WorkingGroupService $working_groups;
+		private UserIdentityService $identity;
 
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, WorkingGroupService $working_groups ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, WorkingGroupService $working_groups, ?UserIdentityService $identity = null ) {
 			$this->spaces = $spaces;
 			$this->asgaros = $asgaros;
 			$this->working_groups = $working_groups;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		public function render( int $space_id ): string {
@@ -79,7 +82,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 						<ul class="afspaces-responsibles-list">
 							<?php foreach ( $responsibles as $responsible ) : ?>
 								<li>
-									<a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => $responsible['user_id'] ) ) ); ?>"><?php echo esc_html( $responsible['display_name'] ); ?></a>
+									<a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => $responsible['user_id'] ) ) ); ?>"><?php echo esc_html( $this->identity->get_display_name( (int) $responsible['user_id'] ) ?: (string) $responsible['display_name'] ); ?></a>
 									<span class="afspaces-tag"><?php echo esc_html( $responsible['role_label'] ); ?></span>
 								</li>
 							<?php endforeach; ?>
@@ -222,7 +225,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 						<select id="afspaces-transfer-owner" name="new_owner_id">
 							<?php foreach ( $responsibles as $responsible ) : ?>
 								<?php if ( (int) $responsible['user_id'] !== $space->owner_user_id ) : ?>
-									<option value="<?php echo esc_attr( (string) $responsible['user_id'] ); ?>"><?php echo esc_html( $responsible['display_name'] ); ?></option>
+									<option value="<?php echo esc_attr( (string) $responsible['user_id'] ); ?>"><?php echo esc_html( $this->identity->get_display_name( (int) $responsible['user_id'] ) ?: (string) $responsible['display_name'] ); ?></option>
 								<?php endif; ?>
 							<?php endforeach; ?>
 						</select>

@@ -12,6 +12,7 @@ namespace AFSpaces\Interface;
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\JoinRequestService;
+use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\DomainException;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
@@ -24,14 +25,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
 		private JoinRequestService $join_requests;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, JoinRequestService $join_requests ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, JoinRequestService $join_requests, ?UserIdentityService $identity = null ) {
 			$this->spaces        = $spaces;
 			$this->asgaros       = $asgaros;
 			$this->join_requests = $join_requests;
+			$this->identity      = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -88,9 +91,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 						</thead>
 						<tbody>
 							<?php foreach ( $requests as $request ) : ?>
-								<?php $requester = get_userdata( $request->requester_user_id ); ?>
+								<?php $requester_exists = $this->identity->user_exists( (int) $request->requester_user_id ); ?>
 								<tr>
-									<td><?php echo esc_html( $requester ? $requester->display_name : (string) $request->requester_user_id ); ?></td>
+									<td><?php echo esc_html( $requester_exists ? $this->identity->get_display_name( $request->requester_user_id ) : (string) $request->requester_user_id ); ?></td>
 									<td><?php echo esc_html( $request->status ); ?></td>
 									<td><?php echo esc_html( $request->request_message ); ?></td>
 									<td><?php echo esc_html( $request->decision_message ); ?></td>

@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
+use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\DomainException;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
@@ -28,16 +29,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 		private InviteLinkService $invite_links;
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( InvitationService $invitations, JoinRequestService $join_requests, InviteLinkService $invite_links, SpaceRepository $spaces, AsgarosAdapterInterface $asgaros ) {
+		public function __construct( InvitationService $invitations, JoinRequestService $join_requests, InviteLinkService $invite_links, SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, ?UserIdentityService $identity = null ) {
 			$this->invitations = $invitations;
 			$this->join_requests = $join_requests;
 			$this->invite_links = $invite_links;
 			$this->spaces      = $spaces;
 			$this->asgaros     = $asgaros;
+			$this->identity    = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -73,7 +76,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 							<?php
 							$space  = $this->spaces->get_space( $inv->space_id );
 							$forum  = $space ? $this->asgaros->get_forum( $space->forum_id ) : null;
-							$sender = \get_userdata( $inv->inviter_user_id );
+							$sender_exists = $this->identity->user_exists( (int) $inv->inviter_user_id );
 							$token  = $this->invitations->build_token( $inv );
 							?>
 							<li class="afspaces-space-item content-container afspaces-content-container">
@@ -81,7 +84,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 									<div class="forum-status read" aria-hidden="true"><i class="fas fa-envelope"></i></div>
 									<div class="forum-name">
 										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $inv->space_id ) ); ?></span>
-										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Absender: %s', 'afspaces' ), $sender ? $sender->display_name : '-' ) ); ?></small>
+										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Absender: %s', 'afspaces' ), $sender_exists ? $this->identity->get_display_name( $inv->inviter_user_id ) : '-' ) ); ?></small>
 										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), $inv->effective_status() ) ); ?></small>
 										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Ablauf: %s', 'afspaces' ), $inv->expires_at ) ); ?></small>
 										<?php if ( '' !== $inv->message ) : ?>

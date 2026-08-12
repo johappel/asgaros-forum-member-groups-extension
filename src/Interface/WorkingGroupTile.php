@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Interface;
 
+use AFSpaces\Application\UserIdentityService;
+
 if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupTile' ) ) {
 
 	/**
@@ -36,7 +38,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupTile' ) ) {
 		 * }
 		 * @return string
 		 */
-		public static function render( array $args ): string {
+		public static function render( array $args, ?UserIdentityService $identity = null ): string {
+			$identity     = $identity ?: new UserIdentityService();
 			$name         = (string) ( $args['name'] ?? '' );
 			$url          = (string) ( $args['url'] ?? '' );
 			$description  = (string) ( $args['description'] ?? '' );
@@ -83,8 +86,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupTile' ) ) {
 								<?php $profile_url = SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => (int) $member['user_id'] ) ); ?>
 								<li class="afspaces-member-card">
 									<a class="afspaces-member-link" href="<?php echo esc_url( $profile_url ); ?>">
-										<span class="afspaces-member-avatar" aria-hidden="true"><?php echo get_avatar( (int) $member['user_id'], 40 ); ?></span>
-										<span class="afspaces-member-name"><?php echo esc_html( (string) $member['display_name'] ); ?></span>
+						<span class="afspaces-member-avatar" aria-hidden="true"><?php echo $identity->get_avatar_html( (int) $member['user_id'], 40 ); ?></span>
+						<span class="afspaces-member-name"><?php echo esc_html( $identity->get_display_name( (int) $member['user_id'] ) ?: (string) $member['display_name'] ); ?></span>
 									</a>
 								</li>
 							<?php endforeach; ?>

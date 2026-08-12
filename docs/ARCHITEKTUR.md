@@ -48,6 +48,11 @@ Implementiert die Use Cases des Plugins:
 - HybridSearchService
 - SearchIndexer
 
+`UserIdentityService` bildet die allgemeine Integrationsgrenze für sichtbare
+Benutzernamen, Avatare und Benutzersuche. AFSpaces kennt keine externen
+Profil-Plugins; diese liefern über dokumentierte Filter nur WordPress-User-IDs
+und sichtbare Profilwerte.
+
 Hier liegen die eigentlichen Geschäftsabläufe, die über Policies, Adapter und Repositories orchestriert werden.
 
 ### Adapters

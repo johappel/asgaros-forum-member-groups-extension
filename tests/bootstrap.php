@@ -28,6 +28,40 @@ if ( ! function_exists( '__' ) ) {
 	}
 }
 
+if ( ! function_exists( 'apply_filters' ) ) {
+	/**
+	 * @param string $hook  Filtername.
+	 * @param mixed  $value Ausgangswert.
+	 * @param mixed  ...$args Weitere Argumente.
+	 * @return mixed
+	 */
+	function apply_filters( string $hook, $value, ...$args ) {
+		global $afspaces_test_filters;
+		foreach ( (array) ( $afspaces_test_filters[ $hook ] ?? array() ) as $callback ) {
+			$value = call_user_func( $callback, $value, ...$args );
+		}
+		return $value;
+	}
+}
+
+if ( ! function_exists( 'wp_strip_all_tags' ) ) {
+	function wp_strip_all_tags( string $text ): string {
+		return strip_tags( $text );
+	}
+}
+
+if ( ! function_exists( 'get_avatar_url' ) ) {
+	function get_avatar_url( int $user_id, array $args = array() ): string {
+		return 'https://example.test/avatar-' . $user_id . '-' . (int) ( $args['size'] ?? 40 ) . '.jpg';
+	}
+}
+
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	function esc_url_raw( string $url ): string {
+		return $url;
+	}
+}
+
 if ( ! function_exists( 'esc_html__' ) ) {
 	/**
 	 * @param string $text

@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\WorkingGroupService;
+use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Domain\WorkingGroupMeta;
 
@@ -29,13 +30,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 		private InvitationService $invitations;
 		private JoinRequestService $join_requests;
 		private WorkingGroupService $working_groups;
+		private UserIdentityService $identity;
 
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, JoinRequestService $join_requests, WorkingGroupService $working_groups ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, JoinRequestService $join_requests, WorkingGroupService $working_groups, ?UserIdentityService $identity = null ) {
 			$this->spaces = $spaces;
 			$this->asgaros = $asgaros;
 			$this->invitations = $invitations;
 			$this->join_requests = $join_requests;
 			$this->working_groups = $working_groups;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		public function render( int $space_id ): string {
@@ -134,8 +137,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 									<?php $member_profile_url = SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => (int) $member['user_id'] ) ); ?>
 									<li class="afspaces-member-card">
 										<a class="afspaces-member-link" href="<?php echo esc_url( $member_profile_url ); ?>">
-											<span class="afspaces-member-avatar" aria-hidden="true"><?php echo get_avatar( (int) $member['user_id'], 40 ); ?></span>
-											<span class="afspaces-member-name"><?php echo esc_html( (string) $member['display_name'] ); ?></span>
+										<span class="afspaces-member-avatar" aria-hidden="true"><?php echo $this->identity->get_avatar_html( (int) $member['user_id'], 40 ); ?></span>
+										<span class="afspaces-member-name"><?php echo esc_html( $this->identity->get_display_name( (int) $member['user_id'] ) ?: (string) $member['display_name'] ); ?></span>
 										</a>
 									</li>
 								<?php endforeach; ?>

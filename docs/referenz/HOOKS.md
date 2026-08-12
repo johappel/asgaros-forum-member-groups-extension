@@ -30,6 +30,7 @@ Diese Referenz ist aus den `add_action()`, `add_filter()`, `do_action()` und `ap
 | `asgarosforum_content_top` | `ForumNavigation::init`; keine Argumente | — | Kategorie-Farbmarkierungen rendern |
 | `asgarosforum_after_post_message` | `ForumModerationControls::init`, Priorität 20, 2 Argumente: `int $author_id`, `int $post_id` | — | raumbezogene Moderationskontrollen rendern |
 | `asgarosforum_filter_user_groups_taxonomy_name` | `AsgarosAdapter`; aktueller Taxonomiename | Taxonomiename, Default `asgarosforum-usergroup` | interne Adapter-Auflösung; nicht als AFSpaces-Fach-API verwenden |
+| `asgarosforum_filter_username` | `UserIdentityService::get_display_name`; `string $name`, `WP_User $user` | string; unveränderter WordPress-Anzeigename | primärer externer Anzeigenamen-Filter |
 
 ## AFSpaces-Filter
 
@@ -55,6 +56,9 @@ Alle folgenden Filter sind im aktuellen Code öffentliche Erweiterungspunkte. Fi
 | `afspaces_profile_post_types` | `array<int,string> $post_types` | Array; Default `['profil']` | Profil-CPTs für die Profilauflösung |
 | `afspaces_profile_user_id` | `int $user_id`, `int $explicit_user_id` | int; zuvor erkannte ID | Profil-Zielperson überschreiben |
 | `afspaces_wp_search_args` | `array<string,mixed> $args`, `string $keywords` | WP_Query-Argument-Array | WordPress-Suchabfrage erweitern |
+| `afspaces_user_display_name` | `string $name`, `int $user_id`, `WP_User $user` | string; Ergebnis von `asgarosforum_filter_username` | sichtbaren Benutzernamen weiter anpassen |
+| `afspaces_user_avatar_url` | `string $url`, `int $user_id`, `int $size` | string; WordPress-Avatar-URL | externe Avatar-URL für AFSpaces liefern |
+| `afspaces_user_search_results` | `array{user_ids:int[],total:int} $result`, `string $search`, `int $page`, `int $per_page`, `int $candidate_limit` | gleicher Shape; WP-Suche als Default | externe Suchanbieter liefern zusätzliche User-IDs für das gemeinsame Kandidatenfenster |
 
 Tab-Definitionen für die beiden Hub-Filter verwenden die vom Renderer gelesenen Schlüssel `view`, `label`, `url` und `active`. Zusätzliche Schlüssel dürfen transportiert werden, werden aber vom AFSpaces-Renderer nicht automatisch ausgegeben.
 

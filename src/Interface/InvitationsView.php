@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\MemberService;
+use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\DomainException;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
@@ -28,16 +29,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 		private InvitationService $invitations;
 		private MemberService $members;
 		private InviteLinkService $invite_links;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, MemberService $members, InviteLinkService $invite_links ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, MemberService $members, InviteLinkService $invite_links, ?UserIdentityService $identity = null ) {
 			$this->spaces      = $spaces;
 			$this->asgaros     = $asgaros;
 			$this->invitations = $invitations;
 			$this->members     = $members;
 			$this->invite_links = $invite_links;
+			$this->identity    = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -245,9 +248,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 						</thead>
 						<tbody>
 							<?php foreach ( $list as $inv ) : ?>
-								<?php $user = get_userdata( $inv->invitee_user_id ); ?>
+								<?php $user_exists = $this->identity->user_exists( (int) $inv->invitee_user_id ); ?>
 								<tr>
-									<td><?php echo esc_html( $user ? $user->display_name : (string) $inv->invitee_user_id ); ?></td>
+									<td><?php echo esc_html( $user_exists ? $this->identity->get_display_name( $inv->invitee_user_id ) : (string) $inv->invitee_user_id ); ?></td>
 									<td><span><?php echo esc_html( $inv->effective_status() ); ?></span></td>
 									<td><?php echo esc_html( $inv->expires_at ); ?></td>
 									<td><?php echo esc_html( $inv->message ); ?></td>

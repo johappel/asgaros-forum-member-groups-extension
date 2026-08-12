@@ -12,6 +12,7 @@ namespace AFSpaces\Interface;
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\WorkingGroupService;
+use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\Capabilities;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
@@ -24,11 +25,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
 		private WorkingGroupService $working_groups;
+		private UserIdentityService $identity;
 
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, WorkingGroupService $working_groups ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, WorkingGroupService $working_groups, ?UserIdentityService $identity = null ) {
 			$this->spaces = $spaces;
 			$this->asgaros = $asgaros;
 			$this->working_groups = $working_groups;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		public function render( int $profile_user_id = 0, bool $compact = false ): string {
@@ -38,8 +41,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 
 			$viewer = get_current_user_id();
 			$profile_user_id = $profile_user_id > 0 ? $profile_user_id : $viewer;
-			$profile_user = get_userdata( $profile_user_id );
-			if ( ! $profile_user ) {
+			if ( ! $this->identity->user_exists( $profile_user_id ) ) {
 				return $this->notice( __( 'Dieses Profil wurde nicht gefunden.', 'afspaces' ) );
 			}
 
@@ -90,7 +92,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 			$is_own = $viewer === $profile_user_id;
 			$heading = $is_own
 				? __( 'Mein Arbeitsgruppenprofil', 'afspaces' )
-				: sprintf( __( 'Arbeitsgruppen von %s', 'afspaces' ), $profile_user->display_name );
+				: sprintf( __( 'Arbeitsgruppen von %s', 'afspaces' ), $this->identity->get_display_name( $profile_user_id ) );
 
 			ob_start();
 			?>
@@ -120,7 +122,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 									'topics'       => $item['topics'],
 									'forum_url'    => $item['forum_url'],
 									'can_view_forum' => $item['can_view_forum'],
-								)
+								),
+								$this->identity
 							);
 						}
 						?>

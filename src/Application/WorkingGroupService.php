@@ -31,19 +31,22 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 		private AsgarosAdapterInterface $asgaros;
 		private SpacePolicy $policy;
 		private AuditRepository $audit;
+		private UserIdentityService $identity;
 
 		public function __construct(
 			SpaceRepository $spaces,
 			SpaceMetaRepository $meta,
 			AsgarosAdapterInterface $asgaros,
 			SpacePolicy $policy,
-			AuditRepository $audit
+			AuditRepository $audit,
+			?UserIdentityService $identity = null
 		) {
 			$this->spaces = $spaces;
 			$this->meta = $meta;
 			$this->asgaros = $asgaros;
 			$this->policy = $policy;
 			$this->audit = $audit;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -209,7 +212,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 
 				$responsibles[] = array(
 					'user_id'      => (int) $user->ID,
-					'display_name' => (string) $user->display_name,
+					'display_name' => $this->identity->get_display_name( (int) $user->ID ),
 					'role'         => (string) $manager->role,
 					'role_label'   => 'owner' === $manager->role
 						? __( 'Owner', 'afspaces' )

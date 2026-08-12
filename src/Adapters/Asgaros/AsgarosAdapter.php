@@ -12,6 +12,7 @@ namespace AFSpaces\Adapters\Asgaros;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
 use AFSpaces\Core\Requirements;
+use AFSpaces\Application\UserIdentityService;
 
 if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 
@@ -47,12 +48,21 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 		private Requirements $requirements;
 
 		/**
+		 * Zentrale Benutzeridentität.
+		 *
+		 * @var UserIdentityService
+		 */
+		private UserIdentityService $identity;
+
+		/**
 		 * Konstruktor.
 		 *
-		 * @param Requirements $requirements Anforderungsprüfer.
+		 * @param Requirements        $requirements Anforderungsprüfer.
+		 * @param UserIdentityService|null $identity Benutzeridentität.
 		 */
-		public function __construct( Requirements $requirements ) {
+		public function __construct( Requirements $requirements, ?UserIdentityService $identity = null ) {
 			$this->requirements = $requirements;
+			$this->identity     = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -280,8 +290,8 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				}
 				$members[] = array(
 					'user_id'      => (int) $user->ID,
-					'display_name' => $user->display_name,
-					'user_login'   => $user->user_login,
+					'display_name' => $this->identity->get_display_name( (int) $user->ID ),
+					'user_login'   => (string) ( $user->user_login ?? '' ),
 				);
 			}
 
@@ -308,8 +318,9 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				if ( ! $user ) {
 					continue;
 				}
-				if ( false !== strpos( strtolower( $user->display_name ), $term )
-					|| false !== strpos( strtolower( $user->user_login ), $term ) ) {
+				$display_name = strtolower( $this->identity->get_display_name( (int) $user->ID ) );
+				$user_login    = strtolower( (string) ( $user->user_login ?? '' ) );
+				if ( false !== strpos( $display_name, $term ) || false !== strpos( $user_login, $term ) ) {
 					$found[] = (int) $user_id;
 				}
 			}
@@ -1044,7 +1055,6 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$topics_out = array();
 			foreach ( (array) $rows as $row ) {
 				$author_id = (int) ( $row['author_id'] ?? 0 );
-				$author    = $author_id > 0 ? get_userdata( $author_id ) : false;
 				$topics_out[] = array(
 					'id'          => (int) ( $row['id'] ?? 0 ),
 					'name'        => (string) ( $row['name'] ?? '' ),
@@ -1052,7 +1062,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 					'sticky'      => (int) ( $row['sticky'] ?? 0 ) > 0,
 					'approved'    => 1 === (int) ( $row['approved'] ?? 1 ),
 					'author_id'   => $author_id,
-					'author_name' => $author ? $author->display_name : '',
+					'author_name' => $author_id > 0 ? $this->identity->get_display_name( $author_id ) : '',
 					'post_count'  => (int) ( $row['post_count'] ?? 0 ),
 					'last_date'   => (string) ( $row['last_date'] ?? '' ),
 				);
@@ -1248,12 +1258,11 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			foreach ( (array) $rows as $row ) {
 				$post_id   = (int) ( $row['id'] ?? 0 );
 				$author_id = (int) ( $row['author_id'] ?? 0 );
-				$author    = $author_id > 0 ? get_userdata( $author_id ) : false;
 				$out[]     = array(
 					'id'          => $post_id,
 					'text'        => (string) ( $row['text'] ?? '' ),
 					'author_id'   => $author_id,
-					'author_name' => $author ? $author->display_name : '',
+					'author_name' => $author_id > 0 ? $this->identity->get_display_name( $author_id ) : '',
 					'date'        => (string) ( $row['date'] ?? '' ),
 					'is_first'    => $post_id === $first_id,
 				);

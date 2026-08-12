@@ -40,6 +40,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 		private ForumSearchService $forum;
 		private WpPostSearch $wp;
 		private VectorSearch $vector;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
@@ -48,10 +49,11 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 		 * @param WpPostSearch       $wp     WP-Beitragssuche.
 		 * @param VectorSearch       $vector Semantische Suche.
 		 */
-		public function __construct( ForumSearchService $forum, WpPostSearch $wp, VectorSearch $vector ) {
+		public function __construct( ForumSearchService $forum, WpPostSearch $wp, VectorSearch $vector, ?UserIdentityService $identity = null ) {
 			$this->forum  = $forum;
 			$this->wp     = $wp;
 			$this->vector = $vector;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -207,18 +209,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\HybridSearchService' ) ) {
 			$author_id   = (int) ( $filters['author_id'] ?? 0 );
 			$author_name = trim( (string) ( $filters['author_name'] ?? '' ) );
 
-			if ( $author_id < 1 && '' !== $author_name && class_exists( '\\WP_User_Query' ) ) {
-				$query = new \WP_User_Query(
-					array(
-						'search'         => '*' . $author_name . '*',
-						'search_columns' => array( 'display_name', 'user_login', 'user_nicename' ),
-						'number'         => 1,
-						'fields'         => array( 'ID' ),
-					)
-				);
-				$results = $query->get_results();
-				if ( ! empty( $results ) ) {
-					$author_id = (int) ( is_object( $results[0] ) ? $results[0]->ID : $results[0] );
+			if ( $author_id < 1 && '' !== $author_name ) {
+				$results = $this->identity->search_users( $author_name, 1, 1 );
+				if ( ! empty( $results['members'][0]['user_id'] ) ) {
+					$author_id = (int) $results['members'][0]['user_id'];
 				}
 			}
 

@@ -25,9 +25,9 @@ Der Asgaros-Adapter ist die einzige Stelle, die Asgaros-Interna kennen darf. Ver
 | --- | --- | --- |
 | `page` | int, Default `1`, mindestens 1 | 1-basierte Seite |
 | `per_page` | int, Default `20`, mindestens 1 | Seitengröße |
-| `search` | string, Default leer | Teilstring-Suche in `display_name` oder `user_login` |
+| `search` | string, Default leer | Teilstring-Suche in der zentral aufgelösten Anzeigeidentität oder `user_login` |
 
-Die Implementierung liefert `array{members: array<int,array{user_id:int,display_name:string,user_login:string}>, total:int, page:int, per_page:int}`. Bei nicht verfügbarem Asgaros oder einer leeren Gruppe kann sie ein leeres Array zurückgeben. E-Mail-Adressen werden nicht geliefert.
+Die Implementierung liefert `array{members: array<int,array{user_id:int,display_name:string,user_login:string}>, total:int, page:int, per_page:int}`. `display_name` kommt aus `UserIdentityService`; technische `user_id` und der reale `user_login` bleiben erhalten. Bei nicht verfügbarem Asgaros oder einer leeren Gruppe kann sie ein leeres Array zurückgeben. E-Mail-Adressen werden nicht geliefert.
 
 ## Mitgliedschaft schreiben
 

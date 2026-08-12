@@ -29,19 +29,22 @@ if ( ! class_exists( 'AFSpaces\\Application\\JoinRequestService' ) ) {
 		private AsgarosAdapterInterface $asgaros;
 		private SpacePolicy $policy;
 		private AuditRepository $audit;
+		private UserIdentityService $identity;
 
 		public function __construct(
 			SpaceRepository $spaces,
 			JoinRequestRepository $requests,
 			AsgarosAdapterInterface $asgaros,
 			SpacePolicy $policy,
-			AuditRepository $audit
+			AuditRepository $audit,
+			?UserIdentityService $identity = null
 		) {
 			$this->spaces   = $spaces;
 			$this->requests = $requests;
 			$this->asgaros  = $asgaros;
 			$this->policy   = $policy;
 			$this->audit    = $audit;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -228,7 +231,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\JoinRequestService' ) ) {
 			$central = (string) apply_filters( 'afspaces_central_notification_email', $central, $request );
 
 			$requester = get_userdata( $request->requester_user_id );
-			$requester_name = $requester ? (string) $requester->display_name : (string) $request->requester_user_id;
+			$requester_name = $requester ? $this->identity->get_display_name( $request->requester_user_id ) : (string) $request->requester_user_id;
 			$forum_name = $this->working_group_name( $request->space_id );
 			$subject = sprintf( __( 'Neue Beitrittsanfrage fuer "%s"', 'afspaces' ), $forum_name );
 			$body = sprintf( __( 'Für die Arbeitsgruppe "%s" ist eine neue Beitrittsanfrage eingegangen.', 'afspaces' ), $forum_name );

@@ -35,6 +35,7 @@ Abdeckung nach Task-Blöcken:
 - M1.4 Capabilities und Policies: umgesetzt.
 - M1.5 Frontend-Dashboard: umgesetzt.
 - M1.6 Mitgliederansicht: umgesetzt.
+- M1.6a User-Identity-Integration: umgesetzt; Anzeigename, Avatar und Suche sind über `UserIdentityService` und dokumentierte Filter erweiterbar.
 - M1.7 Optionale Drag-and-drop-Ansicht: umgesetzt als Progressive Enhancement, Kernfunktion bleibt ohne JavaScript nutzbar.
 - M1.8 Audit-Log: umgesetzt.
 - M1.9 Fehler und Rückmeldungen: umgesetzt.
@@ -47,6 +48,7 @@ Enthalten:
 - Zentrale Capabilities und SpacePolicy.
 - Dashboard und Mitgliederansicht auf der Hub-Seite.
 - Serverseitige WordPress-Benutzersuche.
+- Zentrale User-Identity-Auflösung mit WordPress-/Asgaros-Fallback und externer Suchprovider-Schnittstelle.
 - Direktes Hinzufügen und Entfernen von Mitgliedern.
 - Audit-Log für relevante Änderungen.
 - Verständliche Erfolgsmeldungen, idempotente Behandlung von Duplikaten und Race-Condition-Schutz.

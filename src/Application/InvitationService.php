@@ -34,6 +34,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\InvitationService' ) ) {
 		private AsgarosAdapterInterface $asgaros;
 		private SpacePolicy $policy;
 		private AuditRepository $audit;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
@@ -43,13 +44,15 @@ if ( ! class_exists( 'AFSpaces\\Application\\InvitationService' ) ) {
 			InvitationRepository $invitations,
 			AsgarosAdapterInterface $asgaros,
 			SpacePolicy $policy,
-			AuditRepository $audit
+			AuditRepository $audit,
+			?UserIdentityService $identity = null
 		) {
 			$this->spaces      = $spaces;
 			$this->invitations = $invitations;
 			$this->asgaros     = $asgaros;
 			$this->policy      = $policy;
 			$this->audit       = $audit;
+			$this->identity    = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -363,8 +366,8 @@ if ( ! class_exists( 'AFSpaces\\Application\\InvitationService' ) ) {
 			$body = sprintf(
 				/* translators: 1: Anzeigename Empfänger, 2: Anzeigename Einladender, 3: Raumname, 4: Ablaufdatum, 5: Link */
 				__( "Hallo %1\$s,\n\n%2\$s hat dich zum Space \"%3\$s\" eingeladen.\n\nAblauf: %4\$s\n\nEinladung annehmen oder ablehnen:\n%5\$s\n", 'afspaces' ),
-				$invitee->display_name,
-				$inviter->display_name,
+				$this->identity->get_display_name( $invitation->invitee_user_id ),
+				$this->identity->get_display_name( $invitation->inviter_user_id ),
 				$space_name,
 				$invitation->expires_at,
 				$accept_url

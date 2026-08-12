@@ -104,29 +104,30 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			$plugin->maybe_upgrade();
 
-			$spaces  = new SpaceRepository();
-			$asgaros = new AsgarosAdapter( $plugin->requirements );
+			$spaces   = new SpaceRepository();
+			$identity = new \AFSpaces\Application\UserIdentityService();
+			$asgaros  = new AsgarosAdapter( $plugin->requirements, $identity );
 			$policy  = new SpacePolicy( $spaces );
 			$audit   = new AuditRepository();
 			$inv_repo = new InvitationRepository();
 			$join_repo = new JoinRequestRepository();
 			$link_repo = new \AFSpaces\Adapters\Database\InviteLinkRepository();
 			$space_meta = new SpaceMetaRepository();
-			$members = new MemberService( $spaces, $asgaros, $policy, $audit );
-			$invites = new InvitationService( $spaces, $inv_repo, $asgaros, $policy, $audit );
-			$join_requests = new JoinRequestService( $spaces, $join_repo, $asgaros, $policy, $audit );
+			$members = new MemberService( $spaces, $asgaros, $policy, $audit, $identity );
+			$invites = new InvitationService( $spaces, $inv_repo, $asgaros, $policy, $audit, $identity );
+			$join_requests = new JoinRequestService( $spaces, $join_repo, $asgaros, $policy, $audit, $identity );
 			$invite_links = new \AFSpaces\Application\InviteLinkService( $spaces, $link_repo, $asgaros, $policy, $audit, $join_requests );
-			$working_groups = new WorkingGroupService( $spaces, $space_meta, $asgaros, $policy, $audit );
+			$working_groups = new WorkingGroupService( $spaces, $space_meta, $asgaros, $policy, $audit, $identity );
 			$space_registration = new SpaceRegistrationService( $spaces, $asgaros );
 			$space_creation = new SpaceCreationService( $spaces, $asgaros, $space_meta, $audit );
 			$space_lifecycle = new SpaceLifecycleService( $spaces, $asgaros, $space_meta, $audit );
 			$space_moderation = new SpaceModerationService( $spaces, $asgaros, $policy, $audit );
-			$forum_search = new ForumSearchService( $asgaros );
+			$forum_search = new ForumSearchService( $asgaros, $identity );
 			$search_index = new SearchIndexRepository();
-			$wp_search = new \AFSpaces\Search\WpPostSearch( \AFSpaces\Search\SearchSettings::wp_post_types() );
+			$wp_search = new \AFSpaces\Search\WpPostSearch( \AFSpaces\Search\SearchSettings::wp_post_types(), $identity );
 			$vector_search = new \AFSpaces\Search\VectorSearch( $search_index, $asgaros );
-			$hybrid_search = new HybridSearchService( $forum_search, $wp_search, $vector_search );
-			$search_indexer = new SearchIndexer( $asgaros, $search_index );
+			$hybrid_search = new HybridSearchService( $forum_search, $wp_search, $vector_search, $identity );
+			$search_indexer = new SearchIndexer( $asgaros, $search_index, $identity );
 			$search_indexer->init();
 
 			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle, $space_moderation );
@@ -187,7 +188,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_modal->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
-			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle, $space_moderation );
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle, $space_moderation, $identity );
 			$hub->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
@@ -212,19 +213,19 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			add_shortcode(
 				'afspaces_invitations',
-				static function () use ( $spaces, $asgaros, $invites, $members, $invite_links ): string {
+				static function () use ( $spaces, $asgaros, $invites, $members, $invite_links, $identity ): string {
 					if ( ! isset( $_GET['space_id'] ) ) {
 						return '';
 					}
-					$view = new InvitationsView( $spaces, $asgaros, $invites, $members, $invite_links );
+					$view = new InvitationsView( $spaces, $asgaros, $invites, $members, $invite_links, $identity );
 					return $view->render( (int) $_GET['space_id'] );
 				}
 			);
 
 			add_shortcode(
 				'afspaces_my_invitations',
-				static function () use ( $invites, $join_requests, $spaces, $asgaros, $invite_links ): string {
-					$view = new MyInvitationsView( $invites, $join_requests, $invite_links, $spaces, $asgaros );
+				static function () use ( $invites, $join_requests, $spaces, $asgaros, $invite_links, $identity ): string {
+					$view = new MyInvitationsView( $invites, $join_requests, $invite_links, $spaces, $asgaros, $identity );
 					return $view->render();
 				}
 			);
@@ -250,7 +251,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 					$profile_user_id = self::resolve_profile_user_id( (int) $atts['user_id'] );
 
-					$view = new ProfileView( $spaces, $asgaros, $working_groups );
+					$view = new ProfileView( $spaces, $asgaros, $working_groups, $identity );
 					return $view->render( $profile_user_id, true );
 				}
 			);

@@ -44,23 +44,31 @@ if ( ! class_exists( 'AFSpaces\\Application\\MemberService' ) ) {
 		private AuditRepository $audit;
 
 		/**
+		 * @var UserIdentityService
+		 */
+		private UserIdentityService $identity;
+
+		/**
 		 * Konstruktor.
 		 *
 		 * @param SpaceRepository         $spaces  Space-Repository.
 		 * @param AsgarosAdapterInterface $asgaros Asgaros-Adapter.
 		 * @param SpacePolicy            $policy  Policy.
 		 * @param AuditRepository        $audit   Audit-Repository.
+		 * @param UserIdentityService|null $identity Benutzeridentität.
 		 */
 		public function __construct(
 			SpaceRepository $spaces,
 			AsgarosAdapterInterface $asgaros,
 			SpacePolicy $policy,
-			AuditRepository $audit
+			AuditRepository $audit,
+			?UserIdentityService $identity = null
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
 			$this->policy  = $policy;
 			$this->audit   = $audit;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -225,32 +233,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\MemberService' ) ) {
 		 * @return array<string,mixed>
 		 */
 		public function search_users( string $search, int $page = 1, int $per_page = 20 ): array {
-			$args = array(
-				'search'         => '*' . sanitize_text_field( $search ) . '*',
-				'search_columns' => array( 'display_name', 'user_login' ),
-				'number'         => $per_page,
-				'paged'          => max( 1, $page ),
-				'fields'         => array( 'ID', 'display_name', 'user_login' ),
-			);
-
-			$user_query = new \WP_User_Query( $args );
-			$results    = $user_query->get_results();
-
-			$members = array();
-			foreach ( $results as $user ) {
-				$members[] = array(
-					'user_id'      => (int) $user->ID,
-					'display_name' => $user->display_name,
-					'user_login'   => $user->user_login,
-				);
-			}
-
-			return array(
-				'members'  => $members,
-				'total'    => (int) $user_query->get_total(),
-				'page'     => max( 1, $page ),
-				'per_page' => $per_page,
-			);
+			return $this->identity->search_users( $search, $page, $per_page );
 		}
 	}
 }

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- User-Identity-Abstraktion für Anzeigenamen, Avatare und Benutzersuche ergänzt; externe Profilintegrationen bleiben über Filter und WordPress-User-IDs entkoppelt.
+- Lokale Efabi-Bridge um den Asgaros-Namensfilter, den AFSpaces-Avatarfilter und die paginierte Efabi-Profil-Suche erweitert.
+- Plugin-Version auf `0.4.0` angehoben.
 - Einladungslinks verwenden in `afspaces_view=invitations` für entsprechend berechtigte Ersteller standardmäßig unbegrenzte Nutzungen (`0`); für andere Verantwortliche bleibt der sichere Default `1`.
 - Der Hinweis zur maximalen Nutzungszahl erklärt jetzt, dass das Limit alle Nutzungen eines Links umfasst und die Weitergabe begrenzen kann.
 

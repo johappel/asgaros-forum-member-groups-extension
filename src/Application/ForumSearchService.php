@@ -35,14 +35,16 @@ if ( ! class_exists( 'AFSpaces\\Application\\ForumSearchService' ) ) {
 		 * @var AsgarosAdapterInterface
 		 */
 		private AsgarosAdapterInterface $asgaros;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
 		 *
 		 * @param AsgarosAdapterInterface $asgaros Asgaros-Adapter.
 		 */
-		public function __construct( AsgarosAdapterInterface $asgaros ) {
+		public function __construct( AsgarosAdapterInterface $asgaros, ?UserIdentityService $identity = null ) {
 			$this->asgaros = $asgaros;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -152,15 +154,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\ForumSearchService' ) ) {
 				return __( 'Unbekannt', 'afspaces' );
 			}
 
-			$name = '';
-			if ( function_exists( 'get_the_author_meta' ) ) {
-				$name = (string) get_the_author_meta( 'display_name', $author_id );
-			}
-			if ( '' === $name && function_exists( 'get_userdata' ) ) {
-				$user = get_userdata( $author_id );
-				$name = $user ? (string) $user->display_name : '';
-			}
-
+			$name = $this->identity->get_display_name( $author_id );
 			return '' !== $name ? $name : __( 'Unbekannt', 'afspaces' );
 		}
 

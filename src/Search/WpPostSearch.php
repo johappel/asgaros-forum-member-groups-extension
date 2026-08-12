@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace AFSpaces\Search;
 
+use AFSpaces\Application\UserIdentityService;
+
 if ( ! class_exists( 'AFSpaces\\Search\\WpPostSearch' ) ) {
 
 	/**
@@ -26,14 +28,16 @@ if ( ! class_exists( 'AFSpaces\\Search\\WpPostSearch' ) ) {
 		 * @var string[]
 		 */
 		private array $post_types;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
 		 *
 		 * @param string[] $post_types Beitragstypen (Default: post, page).
 		 */
-		public function __construct( array $post_types = array( 'post', 'page' ) ) {
+		public function __construct( array $post_types = array( 'post', 'page' ), ?UserIdentityService $identity = null ) {
 			$this->post_types = array_values( array_filter( array_map( 'strval', $post_types ) ) );
+			$this->identity   = $identity ?: new UserIdentityService();
 			if ( empty( $this->post_types ) ) {
 				$this->post_types = array( 'post', 'page' );
 			}
@@ -171,7 +175,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\WpPostSearch' ) ) {
 			}
 			$snippet = SnippetBuilder::build( $source_text, $keywords );
 
-			$author_name = (string) get_the_author_meta( 'display_name', (int) $post->post_author );
+			$author_name = $this->identity->get_display_name( (int) $post->post_author );
 			if ( '' === $author_name ) {
 				$author_name = __( 'Unbekannt', 'afspaces' );
 			}

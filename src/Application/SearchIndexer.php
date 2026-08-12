@@ -43,6 +43,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\SearchIndexer' ) ) {
 
 		private AsgarosAdapterInterface $asgaros;
 		private SearchIndexRepository $index;
+		private UserIdentityService $identity;
 
 		/**
 		 * Konstruktor.
@@ -50,9 +51,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\SearchIndexer' ) ) {
 		 * @param AsgarosAdapterInterface $asgaros Asgaros-Adapter.
 		 * @param SearchIndexRepository   $index   Index-Repository.
 		 */
-		public function __construct( AsgarosAdapterInterface $asgaros, SearchIndexRepository $index ) {
+		public function __construct( AsgarosAdapterInterface $asgaros, SearchIndexRepository $index, ?UserIdentityService $identity = null ) {
 			$this->asgaros = $asgaros;
 			$this->index   = $index;
+			$this->identity = $identity ?: new UserIdentityService();
 		}
 
 		/**
@@ -408,10 +410,10 @@ if ( ! class_exists( 'AFSpaces\\Application\\SearchIndexer' ) ) {
 		 * @return string
 		 */
 		private function author_name( int $user_id ): string {
-			if ( $user_id < 1 || ! function_exists( 'get_the_author_meta' ) ) {
+			if ( $user_id < 1 ) {
 				return '';
 			}
-			return (string) get_the_author_meta( 'display_name', $user_id );
+			return $this->identity->get_display_name( $user_id );
 		}
 
 		/**
