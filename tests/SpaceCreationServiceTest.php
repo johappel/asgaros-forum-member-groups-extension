@@ -222,6 +222,14 @@ final class SpaceCreationServiceTest extends TestCase {
 		$this->service->create( 7, array( 'name' => 'Fremd', 'visibility' => 'private' ) );
 	}
 
+	public function test_disabled_setting_blocks_creation_even_when_legacy_flag_is_true(): void {
+		global $afspaces_test_options;
+		$afspaces_test_options[ SpaceCreationSettings::OPTION ]['enabled'] = false;
+		$afspaces_test_options['afspaces_enable_space_creation'] = true;
+
+		$this->assertFalse( $this->service->can_user_create( 42 ) );
+	}
+
 	public function test_quota_blocks_creation(): void {
 		$this->repo->live_count = 3;
 		$this->expectException( DomainException::class );

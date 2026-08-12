@@ -191,7 +191,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$hub->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
-			$navigation = new ForumNavigation( $spaces, $inv_repo, $join_repo, $asgaros, $space_meta, $space_lifecycle );
+			$navigation = new ForumNavigation( $spaces, $inv_repo, $join_repo, $asgaros, $space_meta, $space_creation, $space_lifecycle );
 			$navigation->init();
 
 			// Raum-begrenzte Moderationsaktionen direkt im Forum.

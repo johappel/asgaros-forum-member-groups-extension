@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Gründungsbutton und Gründungsberechtigung an die zentrale Option `afspaces_creation_options[enabled]` gebunden; die Deaktivierung blendet die Funktion auch für Administratoren aus und ignoriert den veralteten Legacy-Optionswert.
+- Plugin-Version auf `0.3.2` angehoben.
+
 - Asgaros-Parent-Slug auf `asgarosforum-structure` korrigiert, damit AFSpaces im Menü „Forum → Struktur“ erscheint.
 - Zentrale Arbeitsgruppen-Settingsseite unter dem Asgaros-Forum-Menü mit nativen Tabs für Darstellung, Raumgründung, Suche und Installation ergänzt.
 - Direkte frühere Settings-Slugs leiten rückwärtskompatibel auf den jeweils passenden Tab weiter.

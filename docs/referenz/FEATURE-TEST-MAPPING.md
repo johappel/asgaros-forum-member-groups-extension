@@ -31,7 +31,7 @@ Schnellübersicht: Welche  Testdateien gehören zu welchem Feature?
 | Gültige Status und erlaubte Übergänge | `Domain/SpaceLifecycle.php` | `tests/SpaceLifecycleTest.php` |
 | Zentrale Berechtigungslogik (manage, remove, invite, moderate) | `Domain/SpacePolicy.php` | `tests/SpacePolicyTest.php` |
 | Erstellungsrichtlinien (Quotas, Rate-Limits, Validierung) | `Domain/SpaceCreationPolicy.php` | `tests/SpaceCreationPolicyTest.php` |
-| Erstellungs-Einstellungen (Value Object) | `Core/SpaceCreationSettings.php` | `tests/SpaceCreationPolicyTest.php` |
+| Erstellungs-Einstellungen und globale Aktivierung (Value Object/Policy) | `Core/SpaceCreationSettings.php`, `Domain/SpaceCreationPolicy.php` | `tests/SpaceCreationPolicyTest.php`, `tests/SpaceCreationServiceTest.php` |
 | Sichtbarkeit und Zähler offener Freigaben | `Application/SpaceLifecycleService.php`, `Adapters/Database/SpaceRepository.php` | `tests/SpaceApprovalNavigationTest.php`, `tests/Integration/SpaceApprovalNavigationTest.php` |
 
 ## 5. Space-Dienste (Application)

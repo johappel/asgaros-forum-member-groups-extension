@@ -51,8 +51,12 @@ final class SpaceCreationPolicyTest extends TestCase {
 		$this->assertTrue( true );
 	}
 
-	public function test_admin_bypasses_all_checks(): void {
+	public function test_admin_does_not_bypass_disabled_feature(): void {
+		$this->expectException( DomainException::class );
 		$this->policy->assert_can_create( $this->settings( array( 'enabled' => false ) ), true, false, array() );
+	}
+
+	public function test_admin_bypasses_quota_and_rate_limit(): void {
 		$this->policy->assert_within_quota( $this->settings( array( 'max_spaces_per_user' => 1 ) ), true, 99 );
 		$this->policy->assert_rate_limit( $this->settings(), true, 0 );
 		$this->assertTrue( true );

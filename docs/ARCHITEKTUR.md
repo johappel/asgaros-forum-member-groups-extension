@@ -133,7 +133,7 @@ Bekannte Tabellennamen:
 
 ### Forum-integrierte UI
 
-1. ForumNavigation hängt Navigation und Panel in Asgaros ein.
+1. ForumNavigation hängt Navigation und Panel in Asgaros ein und verwendet für die Anzeige der Gründungsoption `SpaceCreationService::can_user_create()`.
 2. ForumModerationControls hängt kontextabhängige Aktionen in die Forenansicht.
 3. SearchModal öffnet die AFSpaces-Suche über Asgaros- und optional WordPress-Suchformulare.
 4. Freigabe-Navigation verwendet `SpaceLifecycleService::count_pending_for_actor()`;

@@ -40,12 +40,12 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpaceCreationPolicy' ) ) {
 			bool $has_create_cap,
 			array $actor_roles
 		): void {
-			if ( $can_manage_all ) {
-				return;
-			}
-
 			if ( ! $settings->enabled ) {
 				throw new DomainException( __( 'Die Selbstgründung von Arbeitsgruppen ist derzeit deaktiviert.', 'afspaces' ) );
+			}
+
+			if ( $can_manage_all ) {
+				return;
 			}
 
 			// Ist die Funktion aktiv und wurde KEINE Rolle eingeschränkt, dürfen

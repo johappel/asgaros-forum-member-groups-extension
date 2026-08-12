@@ -18,7 +18,7 @@ Deckt Selbstgründung, Lebenszyklus, Freigabe, Moderation und Arbeitsgruppen-Met
 
 `create`-Input: `name`, `description`, `visibility`. Ablauf transaktionsähnlich mit Rollback (Kategorie → Gruppe → Forum, bei Fehler rückwärts). Isolation über dedizierte Asgaros-Kategorie pro Arbeitsgruppe (siehe [ADAPTER.md](ADAPTER.md) und [COMPATIBILITY.md](../../COMPATIBILITY.md)).
 
-Berechtigung (`SpaceCreationPolicy::assert_can_create`): aktiviert plus Capability `CREATE_SPACE` ODER freigeschaltete Rolle; bei leerer Rollenliste alle angemeldeten Nutzer. Zusätzlich Limits: max. aktive Räume, Rate-Limit, reservierte Namen, erlaubte Sichtbarkeiten.
+Berechtigung (`SpaceCreationPolicy::assert_can_create`): Die globale Aktivierung ist eine notwendige Voraussetzung, auch für Administratoren. Danach gilt Capability `CREATE_SPACE` ODER freigeschaltete Rolle; bei leerer Rollenliste alle angemeldeten Nutzer. Zusätzlich Limits: max. aktive Räume, Rate-Limit, reservierte Namen, erlaubte Sichtbarkeiten.
 
 ## Lebenszyklus
 

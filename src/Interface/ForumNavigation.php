@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\JoinRequestRepository;
 use AFSpaces\Adapters\Database\InvitationRepository;
 use AFSpaces\Adapters\Database\SpaceMetaRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Core\Capabilities;
 
@@ -34,17 +35,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		private JoinRequestRepository $join_requests;
 		private AsgarosAdapterInterface $asgaros;
 		private SpaceMetaRepository $meta;
+		private SpaceCreationService $space_creation;
 		private SpaceLifecycleService $space_lifecycle;
 
 		/**
 		 * Konstruktor.
 		 */
-		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations, JoinRequestRepository $join_requests, AsgarosAdapterInterface $asgaros, SpaceMetaRepository $meta, SpaceLifecycleService $space_lifecycle ) {
+		public function __construct( SpaceRepository $spaces, InvitationRepository $invitations, JoinRequestRepository $join_requests, AsgarosAdapterInterface $asgaros, SpaceMetaRepository $meta, SpaceCreationService $space_creation, SpaceLifecycleService $space_lifecycle ) {
 			$this->spaces        = $spaces;
 			$this->invitations   = $invitations;
 			$this->join_requests = $join_requests;
 			$this->asgaros       = $asgaros;
 			$this->meta          = $meta;
+			$this->space_creation = $space_creation;
 			$this->space_lifecycle = $space_lifecycle;
 		}
 
@@ -461,9 +464,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		 * @return bool
 		 */
 		private function can_create_spaces( int $user_id ): bool {
-			$enabled = (bool) get_option( 'afspaces_enable_space_creation', false );
-			$enabled = (bool) apply_filters( 'afspaces_enable_space_creation', $enabled, $user_id );
-			return $enabled && user_can( $user_id, Capabilities::CREATE_SPACE );
+			$can_create = $this->space_creation->can_user_create( $user_id );
+			return (bool) apply_filters( 'afspaces_enable_space_creation', $can_create, $user_id );
 		}
 	}
 }

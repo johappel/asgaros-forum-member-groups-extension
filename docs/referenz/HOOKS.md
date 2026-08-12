@@ -51,7 +51,7 @@ Alle folgenden Filter sind im aktuellen Code öffentliche Erweiterungspunkte. Fi
 | `afspaces_hub_navigation_tabs` | `array<int,array<string,mixed>> $tabs`, `string $view`, `int $space_id`, `int $actor` | Tab-Array; AFSpaces-Standardtabs | globale Hub-Navigation erweitern |
 | `afspaces_hub_space_navigation_tabs` | `array<int,array<string,mixed>> $tabs`, `string $view`, `int $space_id`, `int $actor` | Tab-Array; AFSpaces-Standardtabs | Space-Kontextnavigation erweitern |
 | `afspaces_panel_cache_ttl` | `int $ttl` | int Sekunden; Default `30`; Werte `<= 0` deaktivieren Cache | Forum-Einstiegs-Panel |
-| `afspaces_enable_space_creation` | `bool $enabled`, `int $user_id` | bool; Default Option `afspaces_enable_space_creation` | Gründungsoption im Forum-Panel anzeigen |
+| `afspaces_enable_space_creation` | `bool $can_create`, `int $user_id` | bool; Default aus `SpaceCreationService::can_user_create()` auf Basis von `SpaceCreationSettings::OPTION` | Legacy-Filter für die Anzeige der Gründungsoption im Forum-Panel |
 | `afspaces_profile_post_types` | `array<int,string> $post_types` | Array; Default `['profil']` | Profil-CPTs für die Profilauflösung |
 | `afspaces_profile_user_id` | `int $user_id`, `int $explicit_user_id` | int; zuvor erkannte ID | Profil-Zielperson überschreiben |
 | `afspaces_wp_search_args` | `array<string,mixed> $args`, `string $keywords` | WP_Query-Argument-Array | WordPress-Suchabfrage erweitern |
