@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Repository-Lizenz auf GNU Affero General Public License v3 oder später (AGPL-3.0-or-later) umgestellt.
+
 - User-Identity-Abstraktion für Anzeigenamen, Avatare und Benutzersuche ergänzt; externe Profilintegrationen bleiben über Filter und WordPress-User-IDs entkoppelt.
 - Lokale Efabi-Bridge um den Asgaros-Namensfilter, den AFSpaces-Avatarfilter und die paginierte Efabi-Profil-Suche erweitert.
 - Plugin-Version auf `0.4.0` angehoben.

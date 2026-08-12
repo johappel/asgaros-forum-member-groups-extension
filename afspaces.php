@@ -6,8 +6,8 @@
  * Version:     0.4.0
  * Author:      Joachim Happel (im Auftrag des Comenius-Instituts)
  * Author URI:  https://github.com/johappel/
- * License:     GPL-2.0-or-later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * License:     AGPL-3.0-or-later
+ * License URI: https://www.gnu.org/licenses/agpl-3.0.html
  * Requires at least: 7.0
  * Requires PHP: 8.1
  * Requires Plugins: asgaros-forum

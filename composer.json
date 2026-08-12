@@ -2,7 +2,7 @@
 	"name": "afspaces/asgaros-forum-spaces",
 	"description": "Barrierearme Frontend-Verwaltung für Asgaros-Forenräume.",
 	"type": "wordpress-plugin",
-	"license": "GPL-2.0-or-later",
+	"license": "AGPL-3.0-or-later",
 	"require": {
 		"php": ">=8.1"
 	},
