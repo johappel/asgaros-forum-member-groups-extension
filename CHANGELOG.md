@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Einladungslinks verwenden in `afspaces_view=invitations` für entsprechend berechtigte Ersteller standardmäßig unbegrenzte Nutzungen (`0`); für andere Verantwortliche bleibt der sichere Default `1`.
+- Der Hinweis zur maximalen Nutzungszahl erklärt jetzt, dass das Limit alle Nutzungen eines Links umfasst und die Weitergabe begrenzen kann.
+
 - Gründungsbutton und Gründungsberechtigung an die zentrale Option `afspaces_creation_options[enabled]` gebunden; die Deaktivierung blendet die Funktion auch für Administratoren aus und ignoriert den veralteten Legacy-Optionswert.
 - Plugin-Version auf `0.3.2` angehoben.
 

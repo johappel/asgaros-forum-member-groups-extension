@@ -77,6 +77,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			if ( '' === $forum_name ) {
 				$forum_name = sprintf( 'Arbeitsgruppe #%d', $space_id );
 			}
+			$default_max_uses = $this->invite_links->can_create_unlimited_links( $space_id, $actor ) ? 0 : 1;
 
 			ob_start();
 			?>
@@ -102,8 +103,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 						</select>
 
 						<label for="invite_link_max_uses"><?php echo esc_html__( 'Maximale Nutzungen', 'afspaces' ); ?></label>
-						<input type="number" id="invite_link_max_uses" name="max_uses" min="0" max="1000" value="1" />
-						<p class="description"><?php echo esc_html__( '0 steht für unbegrenzt und wird nur bei entsprechender Freigabe akzeptiert.', 'afspaces' ); ?></p>
+						<input type="number" id="invite_link_max_uses" name="max_uses" min="0" max="1000" value="<?php echo esc_attr( (string) $default_max_uses ); ?>" />
+						<p class="description"><?php echo esc_html__( '0 steht für unbegrenzt. Das Limit zählt alle Nutzungen dieses Links und schützt vor ungewollter Weitergabe; unbegrenzte Links sind nur bei entsprechender Freigabe möglich.', 'afspaces' ); ?></p>
 
 						<label for="invite_link_expires_days"><?php echo esc_html__( 'Ablauf in Tagen', 'afspaces' ); ?></label>
 						<input type="number" id="invite_link_expires_days" name="expires_in_days" min="1" max="30" value="7" />

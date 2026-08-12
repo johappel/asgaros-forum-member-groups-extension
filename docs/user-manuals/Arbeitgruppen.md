@@ -217,7 +217,7 @@ Für größere oder weniger klar abgegrenzte Empfängergruppen ist **Beitrittsan
 
 ## Anzahl der Nutzungen
 
-Du kannst festlegen, wie oft der Link verwendet werden darf.
+Du kannst festlegen, wie oft der Link insgesamt verwendet werden darf. Das Limit zählt alle Personen, die über denselben Link beitreten; es ist vor allem ein Schutz, falls der Link ungewollt weitergegeben wird.
 
 Beispiel:
 
@@ -225,7 +225,7 @@ Beispiel:
 
 Danach wird der Link ungültig.
 
-Die Einstellung **0** kann – sofern auf der Website erlaubt – für eine unbegrenzte Zahl von Nutzungen stehen.
+Die Einstellung **0** kann – sofern auf der Website erlaubt – für eine unbegrenzte Zahl von Nutzungen stehen. Für berechtigte Ersteller ist **0** in der Einladungsansicht standardmäßig vorausgewählt; ein konkretes Limit kannst du bei Bedarf weiterhin eintragen.
 
 ## Ablauf
 

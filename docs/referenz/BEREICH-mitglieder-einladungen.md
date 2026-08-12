@@ -69,7 +69,7 @@ E-Mail/Hooks: `afspaces_invitation_mail_subject`, `afspaces_invitation_mail_body
 | `preview_link` | `(string $token, int $actor = 0): array` (Zustände `login_required`, `already_member`, `approval_required`, `ready`) |
 | `use_link` | `(string $token, int $actor): array{result,space_id,forum_url}` |
 
-`create_link`-Args: `approval_mode`, `max_uses`, `expires_in_days`, `allow_registration`. Registrierung nur bei aktivierter Policy (`afspaces_allow_invite_link_registration`).
+`create_link`-Args: `approval_mode`, `max_uses`, `expires_in_days`, `allow_registration`. `max_uses = 0` bedeutet unbegrenzte Nutzungen und wird nur bei entsprechender Berechtigung akzeptiert; in der Einladungsansicht ist `0` für berechtigte Ersteller der Standardwert, sonst `1`. Registrierung nur bei aktivierter Policy (`afspaces_allow_invite_link_registration`).
 
 ## Beitrittsanfragen
 
