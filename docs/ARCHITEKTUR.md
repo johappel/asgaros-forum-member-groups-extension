@@ -80,12 +80,19 @@ Stellt Frontend, REST und Admin-Einstellungen bereit:
 - FrontendController
 - RestController
 - ForumNavigation
+- ForumStyleLayer
 - ForumModerationControls
 - SearchModal
 - SearchSettingsPage
 - SpaceCreationSettingsPage
 - AppearanceSettingsPage
 - diverse Views für Dashboard, Mitglieder, Einladungen, Profil, Discover, Moderation und Suchoberflächen
+
+ForumStyleLayer lädt assets/afspaces-forum-overrides.css nur auf Seiten mit
+dem Asgaros-Shortcode [forum]. Der Hook läuft mit Priorität 999; zusätzlich
+werden registrierte Asgaros-Style-Handles als Dependencies übernommen. So
+bleibt der Override updatefest, ohne skin/style.css oder die von Asgaros
+generierte skin/custom.css zu verändern.
 
 ## Datenhoheit
 

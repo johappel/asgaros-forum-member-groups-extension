@@ -16,6 +16,16 @@ Asgaros dokumentiert zahlreiche Actions und Filters für Frontend-Erweiterungen 
 - **Versionserkennung:** Konstante `ASGAROS_FORUM_VERSION` sofern definiert, sonst `get_plugin_data()` auf `asgaros-forum/asgaros-forum.php`.
 - **Aktivitätsprüfung:** `class_exists('AsgarosForum')` bzw. `is_plugin_active('asgaros-forum/asgaros-forum.php')`.
 
+### Forum-Styles
+
+Der ForumStyleLayer verwendet die bekannten WordPress-Style-Handles
+asgarosforum-style und asgarosforum-custom-style nur dann als Dependency,
+wenn sie in der aktuellen Asgaros-Version registriert sind. Der Layer wird
+zusätzlich über wp_enqueue_scripts mit Priorität 999 enqueued. Damit bleibt
+die Reihenfolge auch bei einer abweichenden Handle-Registrierung updatefest:
+Asgaros style.css, Asgaros custom.css, danach
+assets/afspaces-forum-overrides.css. Asgaros-Dateien werden nicht verändert.
+
 > Hinweis: Die interne Gruppen- und Foren-API (für M1.2) ist noch nicht geprüft. Schreibende Adapter-Methoden bleiben bis dahin deaktiviert.
 
 ## Verpflichtende Prüfung

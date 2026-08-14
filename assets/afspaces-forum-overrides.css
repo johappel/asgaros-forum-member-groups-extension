@@ -1,0 +1,29 @@
+/*
+ * AFSpaces Forum-Override-Layer.
+ *
+ * Diese Datei wird hinter Asgaros skin/style.css und skin/custom.css geladen.
+ * Asgaros skin/custom.css wird bei Appearance-Änderungen neu erzeugt und darf
+ * deshalb niemals direkt verändert oder ersetzt werden.
+ */
+
+#af-wrapper {
+	--afspaces-forum-button-hover: #f5ae35;
+	--afspaces-forum-metadata-color: #4b5563;
+	--afspaces-forum-metadata-size: 0.875rem;
+}
+
+/* Issue #16: Standardbuttons erhalten beim Hover Efabi-Orange. */
+#af-wrapper .button-normal:hover {
+	background-color: var(--afspaces-forum-button-hover) !important;
+}
+
+/* Issue #12: Forum-Metadaten bleiben lesbar, ohne Asgaros-Datumsformatierung zu ersetzen. */
+#af-wrapper .forum-post-date,
+#af-wrapper .post-author-block-meta,
+#af-wrapper .post-author-block-group,
+#af-wrapper .post-meta,
+#af-wrapper .post-edit-date {
+	font-size: var(--afspaces-forum-metadata-size);
+	line-height: 1.45;
+	color: var(--afspaces-forum-metadata-color) !important;
+}

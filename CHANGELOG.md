@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Eigenen, updatefesten Asgaros-Forum-Override-Layer ergänzt: AFSpaces lädt
+  `assets/afspaces-forum-overrides.css` ausschließlich auf [forum]-Seiten
+  nach den registrierten Asgaros-Styles. Die initialen Regeln verbessern die
+  Hoverfarbe der Standardbuttons und die Lesbarkeit der Post-Metadaten.
+- Plugin-Version auf `0.4.1` angehoben.
+
 - Repository-Lizenz auf GNU Affero General Public License v3 oder später (AGPL-3.0-or-later) umgestellt.
 
 - User-Identity-Abstraktion für Anzeigenamen, Avatare und Benutzersuche ergänzt; externe Profilintegrationen bleiben über Filter und WordPress-User-IDs entkoppelt.

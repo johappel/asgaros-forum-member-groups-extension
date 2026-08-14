@@ -62,6 +62,20 @@ Farbe und Icon sind immer nur Ergänzung; Name und Status stehen zusätzlich als
 - Top-Navigation: hubweite Ansichten. Space-Kontext-Navigation nur beim Verwalten einer konkreten Arbeitsgruppe (Details/Mitglieder/Einladungen/Beitrittsanfragen/Moderation).
 - Wrapper-ID `#af-wrapper`; CSS in `assets/afspaces.css`. Einige Regeln sind bewusst unscoped, damit sie auch im site-weiten Such-Overlay greifen.
 
+## Asgaros-Forum-Override-Layer
+
+Forumbezogene Anpassungen an Asgaros gehören in
+assets/afspaces-forum-overrides.css und werden über
+AFSpaces\Interface\ForumStyleLayer::enqueue() geladen. Der Layer ist auf
+#af-wrapper und forumbezogene Klassen begrenzt und wird nur auf Seiten mit
+[forum] eingebunden. Er wird nach den registrierten Asgaros-Styles in die
+WordPress-Styles-Warteschlange eingereiht.
+
+asgaros-forum/skin/custom.css darf niemals direkt geändert werden: Asgaros
+erzeugt diese Datei aus den Appearance-Einstellungen neu. Neue AFSpaces-Regeln
+werden stattdessen in diesem Layer ergänzt. Die CSS Custom Properties am
+#af-wrapper bilden die spätere Anbindung an AFSpaces-Darstellungsoptionen.
+
 ## Such-Overlay
 
 - `src/Interface/SearchModal.php` + `assets/afspaces-search.js`.
@@ -97,6 +111,6 @@ Berechtigungsprüfungen bleiben unverändert.
 ## Layout ändern
 
 1. Globale Optik über `AppearanceSettingsPage`/Option erweitern, nicht über verstreute Inline-Styles.
-2. Neue CSS-Regeln in `assets/afspaces.css`; bei Overlay-Relevanz unscoped und `[hidden]`-Regeln nachziehen.
+2. Neue AFSpaces-Hub-Regeln in `assets/afspaces.css`; forumbezogene Asgaros-Overrides in assets/afspaces-forum-overrides.css.
 3. Farbe/Icon nie als alleinigen Bedeutungsträger einsetzen.
 4. Fokus, Tastaturpfad und `aria`-Attribute für jede neue interaktive Komponente prüfen.

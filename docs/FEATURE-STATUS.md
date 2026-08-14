@@ -1,5 +1,29 @@
 # Feature-Status
 
+## Asgaros-Forum-Style-Layer (Issues #8, #11, #12, #16)
+
+Status: technische Grundlage umgesetzt; weitergehende Gestaltung offen.
+
+- AFSpaces lädt assets/afspaces-forum-overrides.css ausschließlich auf
+  Asgaros-Seiten mit dem Shortcode [forum] und hinter den registrierten
+  Asgaros-Styles.
+- Enthalten sind der risikoarme Button-Hover in Efabi-Orange (#f5ae35) und
+  eine moderate Lesbarkeitsbasis für Post-Metadaten.
+- Issue #8 (Arbeitsgruppenfarben), Issue #11 (Namen/Profilgestaltung) und die
+  vollständige Ausarbeitung von Issue #12 (Typografie/Metadaten) bleiben
+  bewusst offen. Die CSS Custom Properties des Layers sind für spätere
+  Appearance-Optionen vorbereitet.
+
+Manueller Smoke-Test im Forum:
+
+1. Forumseite öffnen und in den DevTools unter Network/Styles prüfen, dass
+   Asgaros style.css und custom.css vor dem AFSpaces-Override geladen werden.
+2. Hover auf einem Standardbutton prüfen; erwartet wird #f5ae35.
+3. Datum/Zeit, Beitragszähler, Autoren-/Gruppenmetadaten, Bearbeitungsdatum
+   und Post-Aktionen auf Lesbarkeit prüfen.
+4. Eine Nicht-Forumseite öffnen und sicherstellen, dass
+   afspaces-forum-overrides.css dort nicht geladen wird.
+
 Dieses Dokument konsolidiert die Arbeit aus den bisherigen TASKS-Dateien und beschreibt den tatsächlichen Umsetzungsstand als Entwicklerreferenz.
 
 ## Developer Reference Hardening (Issue #6)

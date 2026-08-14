@@ -9,7 +9,7 @@ Diese Referenz ist aus den `add_action()`, `add_filter()`, `do_action()` und `ap
 | `init` | `FrontendController::init`; keine Argumente | — | serverseitige Frontend-Actions verarbeiten |
 | `wp_ajax_afspaces_action` | `FrontendController::init`; keine Argumente | — | AJAX-Variante derselben Frontend-Actions |
 | `rest_api_init` | `Plugin::init`; keine Argumente | — | REST-Routen registrieren |
-| `wp_enqueue_scripts` | `FrontendController`, `ForumNavigation`, `SearchModal`; keine Argumente | — | Frontend-Assets laden |
+| `wp_enqueue_scripts` | `FrontendController`, `ForumNavigation`, `ForumStyleLayer` (Priorität 999), `SearchModal`; keine Argumente | — | Frontend-Assets laden; ForumStyleLayer lädt den Asgaros-Override nur auf `[forum]`-Seiten |
 | `wp_footer` | `SearchModal::init`; keine Argumente | — | Such-Overlay ausgeben |
 | `template_redirect` | `SpacesHubController::init`; keine Argumente | — | Legacy-Seiten und die Asgaros-Suche umleiten |
 | `admin_menu` / `admin_init` | Settings-Pages; keine Argumente | — | Admin-Seiten und Settings registrieren |

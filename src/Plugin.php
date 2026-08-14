@@ -34,6 +34,7 @@ use AFSpaces\Interface\AFSpacesSettingsPage;
 use AFSpaces\Interface\AppearanceSettingsPage;
 use AFSpaces\Interface\ForumNavigation;
 use AFSpaces\Interface\ForumModerationControls;
+use AFSpaces\Interface\ForumStyleLayer;
 use AFSpaces\Interface\FrontendController;
 use AFSpaces\Interface\InvitationsView;
 use AFSpaces\Interface\InstallationSettingsPage;
@@ -194,6 +195,10 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			// Integration in die Asgaros-Forum-Navigation.
 			$navigation = new ForumNavigation( $spaces, $inv_repo, $join_repo, $asgaros, $space_meta, $space_creation, $space_lifecycle );
 			$navigation->init();
+
+			// Lädt AFSpaces-Forum-Overrides hinter Asgaros skin/style.css und custom.css.
+			$forum_style_layer = new ForumStyleLayer();
+			$forum_style_layer->init();
 
 			// Raum-begrenzte Moderationsaktionen direkt im Forum.
 			$forum_moderation = new ForumModerationControls( $spaces, $asgaros, $space_moderation );
