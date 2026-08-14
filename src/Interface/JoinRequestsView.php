@@ -60,19 +60,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 				return $this->notice( $e->getMessage() );
 			}
 
-			$forum_data = $this->asgaros->get_forum( $space->forum_id );
-			$forum_name = trim( (string) ( $forum_data['name'] ?? '' ) );
-			if ( '' === $forum_name ) {
-				$forum_name = sprintf( 'Arbeitsgruppe #%d', $space_id );
-			}
-
 			ob_start();
 			?>
 			<section class="afspaces-join-requests" id="afspaces-join-requests-view" aria-labelledby="afspaces-join-requests-heading">
-				<h2 id="afspaces-join-requests-heading"><?php echo esc_html( sprintf( __( 'Beitrittsanfragen - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<h2 id="afspaces-join-requests-heading"><?php echo esc_html__( 'Beitrittsanfragen verwalten', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier entscheidest du über offene Beitrittsanfragen für diese Arbeitsgruppe.', 'afspaces' ); ?></p>
-				<p class="description"><?php echo esc_html__( 'Diese Verantwortung umfasst Mitgliedschaften, Einladungen und Anfragen. Beitragsmoderation bleibt weiterhin außerhalb von AFSpaces.', 'afspaces' ); ?></p>
+				<p class="description"><?php echo esc_html__( 'Diese Verantwortung umfasst Mitgliedschaften, Einladungen und Anfragen.', 'afspaces' ); ?></p>
 
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-space-join-requests-heading">
 					<div id="afspaces-space-join-requests-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Anfragen dieser Arbeitsgruppe', 'afspaces' ); ?></div>

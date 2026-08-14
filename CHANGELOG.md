@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Issue #21: Der Name der verwalteten Arbeitsgruppe steht jetzt als dynamische
+  Kontextüberschrift zwischen Breadcrumbs und Subnavigation. Die H2 der
+  Verwaltungsansichten wiederholen den Gruppennamen nicht mehr.
+- Plugin-Version auf 0.4.7 angehoben.
+
 - Issue #21: Die Subnavigation ist jetzt eine transparente Tab-Leiste mit
   klar markiertem aktivem Tab.
 - Subcontent-Karten und Einladungslink-Formular an das äußere Rundungs- und

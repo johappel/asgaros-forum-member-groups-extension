@@ -75,17 +75,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				$search_results = $this->members->search_users( $search, 1, 20 )['members'] ?? array();
 			}
 
-			$forum_data = $this->asgaros->get_forum( $space->forum_id );
-			$forum_name = trim( (string) ( $forum_data['name'] ?? '' ) );
-			if ( '' === $forum_name ) {
-				$forum_name = sprintf( 'Arbeitsgruppe #%d', $space_id );
-			}
 			$default_max_uses = $this->invite_links->can_create_unlimited_links( $space_id, $actor ) ? 0 : 1;
 
 			ob_start();
 			?>
 			<section class="afspaces-invitations" id="afspaces-invitations-view" aria-labelledby="afspaces-invitations-heading">
-				<h2 id="afspaces-invitations-heading"><?php echo esc_html( sprintf( __( 'Einladungen - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<h2 id="afspaces-invitations-heading"><?php echo esc_html__( 'Einladungen zur Arbeitsgruppe', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich in diese Arbeitsgruppe einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
 				<?php echo $this->render_created_invite_link(); ?>
@@ -104,11 +99,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 							<option value="auto_join"><?php echo esc_html__( 'Automatische Aufnahme', 'afspaces' ); ?></option>
 							<option value="approval_required"><?php echo esc_html__( 'Beitrittsanfrage mit Freigabe', 'afspaces' ); ?></option>
 						</select>
-
-						<label for="invite_link_max_uses"><?php echo esc_html__( 'Maximale Nutzungen', 'afspaces' ); ?></label>
-						<input type="number" id="invite_link_max_uses" name="max_uses" min="0" max="1000" value="<?php echo esc_attr( (string) $default_max_uses ); ?>" />
-						<p class="description"><?php echo esc_html__( '0 steht für unbegrenzt. Das Limit zählt alle Nutzungen dieses Links und schützt vor ungewollter Weitergabe; unbegrenzte Links sind nur bei entsprechender Freigabe möglich.', 'afspaces' ); ?></p>
-
+						<div class="hidden">
+							<label for="invite_link_max_uses"><?php echo esc_html__( 'Maximale Nutzungen', 'afspaces' ); ?></label>
+							<input type="number" id="invite_link_max_uses" name="max_uses" min="0" max="1000" value="<?php echo esc_attr( (string) $default_max_uses ); ?>" />
+							<p class="description"><?php echo esc_html__( '0 steht für unbegrenzt. Das Limit zählt alle Nutzungen dieses Links und schützt vor ungewollter Weitergabe; unbegrenzte Links sind nur bei entsprechender Freigabe möglich.', 'afspaces' ); ?></p>
+						</div>
 						<label for="invite_link_expires_days"><?php echo esc_html__( 'Ablauf in Tagen', 'afspaces' ); ?></label>
 						<input type="number" id="invite_link_expires_days" name="expires_in_days" min="1" max="30" value="7" />
 
@@ -220,7 +215,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-space-invitations-heading">
 					<div id="afspaces-space-invitations-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Einladungen dieser Arbeitsgruppe', 'afspaces' ); ?></div>
-					<form method="get" class="afspaces-filter" aria-label="<?php echo esc_attr__( 'Einladungen filtern', 'afspaces' ); ?>">
+					<form method="get" class="afspaces-filter hidden" aria-label="<?php echo esc_attr__( 'Einladungen filtern', 'afspaces' ); ?>">
 					<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_INVITATIONS ); ?>" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 					<label for="inv_status"><?php echo esc_html__( 'Status', 'afspaces' ); ?></label>

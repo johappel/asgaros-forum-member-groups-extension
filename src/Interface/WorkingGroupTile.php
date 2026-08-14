@@ -96,9 +96,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupTile' ) ) {
 				</details>
 
 				<div class="afspaces-group-tile-actions">
-					<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html__( 'Arbeitsgruppe', 'afspaces' ); ?></a>
+					<a class="afspaces-button afspaces-button-primary" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html__( 'Arbeitsgruppe', 'afspaces' ); ?></a>
 					<?php if ( $can_view_forum ) : ?>
-						<a class="afspaces-button" href="<?php echo esc_url( $forum_url ); ?>"><?php echo esc_html__( 'Forum anzeigen', 'afspaces' ); ?></a>
+						<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $forum_url ); ?>"><?php echo esc_html__( 'Forum anzeigen', 'afspaces' ); ?></a>
 					<?php endif; ?>
 				</div>
 			</li>

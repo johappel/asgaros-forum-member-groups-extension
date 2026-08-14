@@ -467,9 +467,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				);
 			}
 
-			$heading = SpacesUrls::VIEW_SETTINGS === $view
-				? sprintf( '<h2 id="afspaces-space-context-heading" class="afspaces-space-context-title">%s</h2>', esc_html__( 'Arbeitsgruppen-Details bearbeiten', 'afspaces' ) )
-				: '';
+			$forum     = $this->asgaros->get_forum( $space->forum_id );
+			$room_name = trim( (string) ( $forum['name'] ?? '' ) );
+			if ( '' === $room_name ) {
+				$room_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space_id );
+			}
+
+			$heading = sprintf(
+				'<h2 id="afspaces-space-context-heading" class="afspaces-space-context-title">%s</h2>',
+				esc_html( sprintf( __( 'Arbeitsgruppe: %s', 'afspaces' ), $room_name ) )
+			);
 
 			return sprintf(
 				'<section class="afspaces-space-context">%1$s<nav class="afspaces-hub-nav afspaces-space-nav" aria-label="%2$s"><ul>%3$s</ul></nav></section>',

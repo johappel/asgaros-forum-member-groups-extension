@@ -51,16 +51,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 				return $this->notice( __( 'Du darfst dieses Forum nicht moderieren.', 'afspaces' ) );
 			}
 
-			$forum      = $this->asgaros->get_forum( $space->forum_id );
-			$forum_name = trim( (string) ( $forum['name'] ?? '' ) );
-			if ( '' === $forum_name ) {
-				$forum_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space_id );
-			}
-
 			// Beitragsebene: einzelnes Thema mit seinen Beiträgen moderieren.
 			$mod_topic = isset( $_GET['mod_topic'] ) ? (int) $_GET['mod_topic'] : 0;
 			if ( $mod_topic > 0 ) {
-				return $this->render_posts_panel( $space_id, $actor, $mod_topic, $forum_name );
+				return $this->render_posts_panel( $space_id, $actor, $mod_topic );
 			}
 
 			$page    = isset( $_GET['afp_page'] ) ? max( 1, (int) $_GET['afp_page'] ) : 1;
@@ -72,7 +66,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-moderation" aria-labelledby="afspaces-moderation-heading">
-				<h2 id="afspaces-moderation-heading"><?php echo esc_html( sprintf( __( 'Moderation - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<h2 id="afspaces-moderation-heading"><?php echo esc_html__( 'Moderation der Themen meiner Arbeitsgruppe', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier moderierst du ausschließlich die Themen deines eigenen Forums. Du kannst Themen schließen, wieder öffnen oder löschen. Diese Rechte gelten nur für dieses Forum.', 'afspaces' ); ?></p>
 
@@ -120,7 +114,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 													<input type="hidden" name="afspaces_action" value="moderate_close_topic" />
 													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 													<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
-													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Schließen', 'afspaces' ); ?></button>
+													<button type="submit" class="afspaces-button afspaces-button-primary"><?php echo esc_html__( 'Schließen', 'afspaces' ); ?></button>
 												</form>
 											<?php endif; ?>
 											<form method="post">
@@ -166,10 +160,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 		 * @param int    $space_id   Space-ID.
 		 * @param int    $actor      Akteur.
 		 * @param int    $topic_id   Themen-ID.
-		 * @param string $forum_name Forumsname.
 		 * @return string
 		 */
-		private function render_posts_panel( int $space_id, int $actor, int $topic_id, string $forum_name ): string {
+		private function render_posts_panel( int $space_id, int $actor, int $topic_id ): string {
 			try {
 				$result = $this->moderation->list_posts( $space_id, $actor, $topic_id, array( 'per_page' => 50 ) );
 			} catch ( \AFSpaces\Core\DomainException $e ) {
@@ -183,7 +176,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-moderation" aria-labelledby="afspaces-moderation-posts-heading">
-				<h2 id="afspaces-moderation-posts-heading"><?php echo esc_html( sprintf( __( 'Beiträge moderieren - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<h2 id="afspaces-moderation-posts-heading"><?php echo esc_html__( 'Beiträge moderieren', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
 				<p><a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $back ); ?>"><?php echo esc_html__( 'Zurück zu den Themen', 'afspaces' ); ?></a></p>
 

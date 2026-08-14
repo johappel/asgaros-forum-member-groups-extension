@@ -115,6 +115,17 @@ werden stattdessen in diesem Layer ergänzt. Die CSS Custom Properties am
 
 ## Such-Overlay
 
+## Arbeitsgruppen-KontextÃ¼berschrift
+
+Bei jeder verwalteten Arbeitsgruppe steht zwischen Breadcrumbs und
+Subnavigation die dynamische Kontextzeile
+`#afspaces-space-context-heading.afspaces-space-context-title` mit dem Muster
+`Arbeitsgruppe: <Forumsname>`. Der Forumsname stammt aus dem Asgaros-Adapter und
+wird escaped ausgegeben. Die H2 der nachfolgenden Verwaltungsansichten
+wiederholen den Forumsnamen nicht; sie lauten beispielsweise `Mitglieder
+verwalten`, `Einladungen zur Arbeitsgruppe`, `Beitrittsanfragen`, `Moderation`
+und `Beiträge moderieren`.
+
 - `src/Interface/SearchModal.php` + `assets/afspaces-search.js`.
 - Barrierearmer Dialog: `aria-modal`, Fokusfalle, Escape schließt, Rückgabe des Fokus.
 - Spinner respektiert `[hidden]` (CSS-Regel `.afspaces-spinner[hidden]{display:none!important}`), weil eigene `display`-Regeln sonst `[hidden]` überschreiben.

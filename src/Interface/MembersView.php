@@ -69,12 +69,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 				return $this->notice( __( 'Diese Arbeitsgruppe existiert nicht.', 'afspaces' ) );
 			}
 
-			$forum = $this->asgaros->get_forum( $space->forum_id );
-			$forum_name = (string) ( $forum['name'] ?? '' );
-			if ( '' === $forum_name ) {
-				$forum_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space->id );
-			}
-
 			$actor = get_current_user_id();
 			if ( ! $this->can_manage( $space_id, $actor ) ) {
 				return $this->notice( __( 'Du bist nicht berechtigt, diese Arbeitsgruppe zu verwalten.', 'afspaces' ) );
@@ -122,7 +116,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-members" aria-labelledby="afspaces-members-heading">
-				<h2 id="afspaces-members-heading"><?php echo esc_html( sprintf( __( 'Mitglieder verwalten - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<h2 id="afspaces-members-heading"><?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten hier Mitgliedschaften.', 'afspaces' ); ?></p>
 

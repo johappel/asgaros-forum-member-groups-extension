@@ -245,7 +245,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 
 			add_shortcode(
 				'afspaces_profile',
-				static function ( $atts = array() ) use ( $spaces, $asgaros, $working_groups ): string {
+				static function ( $atts = array() ) use ( $spaces, $asgaros, $working_groups, $identity ): string {
 					$atts = shortcode_atts(
 						array(
 							'user_id' => 0,

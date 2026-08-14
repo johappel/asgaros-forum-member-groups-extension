@@ -169,9 +169,9 @@
 .afspaces-button {
 	display: inline-block;
 	padding: 0.5rem 1rem;
-	background: #2271b1 !important;
+	background: #2d5d7f !important;
 	color: #fff !important;
-	border: 1px solid #2271b1 !important;
+	/* border: 1px solid #2d5d7f !important; */
 	border-radius: 4px;
 	text-decoration: none;
 	cursor: pointer;
@@ -179,9 +179,17 @@
 	font-size: 1rem;
 }
 
+.afspaces-button-primary {
+	background: #2d5d7f !important;
+}
+
+.afspaces-button-secondary {
+	background: #50575e !important;
+}
 .afspaces-button:hover,
 .afspaces-button:focus {
-	background: #135e96 !important;
+	background: #f8b425 !important;
+	color: #000 !important;
 }
 
 .afspaces-button-danger {
@@ -253,7 +261,7 @@
 	display: inline-block;
 	padding: 0.25rem 0.55rem;
 	border: 1px solid currentColor;
-	border-radius: 999px;
+	border-radius: 9px;
 	font-weight: 700;
 	line-height: 1.25;
 }
@@ -371,15 +379,6 @@
 	flex-wrap: wrap;
 }
 
-.afspaces-button-secondary {
-	background: #50575e !important;
-	border-color: #50575e !important;
-}
-
-.afspaces-button-secondary:hover,
-.afspaces-button-secondary:focus {
-	background: #3c434a !important;
-}
 
 .afspaces-tag {
 	display: inline-block;
@@ -1062,7 +1061,10 @@ a.afspaces-link.is-active {
 	background: #2f74ae !important;
 	border-color: #2f74ae !important;
 }
-
+#af-wrapper.afspaces-wrapper .afspaces-button:hover {
+	background: #f8b521 !important;
+	color: #000 !important;
+}
 #af-wrapper.afspaces-wrapper .afspaces-button-secondary {
 	background: #667789 !important;
 	border-color: #667789 !important;
@@ -2478,7 +2480,7 @@ color: #fff !important;
 }
 
 .afspaces-button-secondary {
-background-color: #7f98ac !important;
+background-color: #50575e !important;
 color: #fff !important;
 }
 
@@ -2740,4 +2742,8 @@ min-width: 220px;
 	margin: 0 0 0.4rem;
 	font-size: 0.9em;
 	color: #555;
+}
+
+.hidden, .afspaces-moderation-move {
+	display: none !important;
 }

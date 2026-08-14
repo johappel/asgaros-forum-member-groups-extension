@@ -119,7 +119,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 					'pager_background'       => '#ffffff',
 					'pager_text_color'       => '#1a1a1a',
 					'button_primary_bg'      => '#005b99',
-					'button_secondary_bg'    => '#4f5f6f',
+					'button_secondary_bg'    => '#50575e',
 					'button_text_color'      => '#ffffff',
 				),
 			);
