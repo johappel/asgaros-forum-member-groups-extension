@@ -279,7 +279,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 			$css = '';
 			foreach ( $by_category as $category_id => $accent ) {
 				$css .= sprintf(
-					'#forum-category-%1$d{background-color:%2$s !important;border-color:%2$s !important;}',
+					'#af-wrapper #forum-category-%1$d,#af-wrapper #forum-category-%1$d .title-element{background-color:%2$s !important;border-color:%2$s !important;}',
 					$category_id,
 					$accent
 				);

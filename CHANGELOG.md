@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Kategorie-Farbregeln der Arbeitsgruppen mit einer höheren, auf
+  #af-wrapper und die Kategorie-ID begrenzten Spezifität ausgegeben, damit
+  individuelle Farben nicht von Asgaros .title-element-Regeln überschrieben
+  werden.
+- Plugin-Version auf `0.4.2` angehoben.
+
 - Eigenen, updatefesten Asgaros-Forum-Override-Layer ergänzt: AFSpaces lädt
   `assets/afspaces-forum-overrides.css` ausschließlich auf [forum]-Seiten
   nach den registrierten Asgaros-Styles. Die initialen Regeln verbessern die

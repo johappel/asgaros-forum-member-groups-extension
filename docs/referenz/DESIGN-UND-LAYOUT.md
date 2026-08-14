@@ -64,6 +64,11 @@ Farbe und Icon sind immer nur Ergänzung; Name und Status stehen zusätzlich als
 
 ## Asgaros-Forum-Override-Layer
 
+Die dynamischen Arbeitsgruppenfarben werden in
+ForumNavigation::render_category_colors() mit #af-wrapper und der
+Kategorie-ID ausgegeben. Diese höhere Spezifität ist erforderlich, weil
+Asgaros #af-wrapper .title-element ebenfalls mit !important stylt.
+
 Forumbezogene Anpassungen an Asgaros gehören in
 assets/afspaces-forum-overrides.css und werden über
 AFSpaces\Interface\ForumStyleLayer::enqueue() geladen. Der Layer ist auf
