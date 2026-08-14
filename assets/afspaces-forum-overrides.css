@@ -27,3 +27,8 @@
 	line-height: 1.45;
 	color: var(--afspaces-forum-metadata-color) !important;
 }
+
+#af-wrapper #statistics .title-element {
+  background-color: var(--afspaces-forum-metadata-color)!important;
+  font-size: var(--afspaces-forum-metadata-size);
+} 
