@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Arbeitsgruppen-Subnavigation an die zurückhaltende Tab-Optik angepasst:
+  transparenter Hintergrund, nur eine blaue Linie am unteren Rand und weißer
+  Hintergrund ausschließlich für den aktiven Tab.
+- Plugin-Version auf 0.4.12 angehoben.
+
+- Button-Textfarben, Hoverfarben und die aktive Arbeitsgruppen-Subnavigation
+  in der Darstellungsseite ergänzt; bestehende alte Buttonwerte werden beim
+  Einlesen auf die neue Palette korrigiert.
+- Plugin-Version auf 0.4.10 angehoben.
+
+- Hover und Fokus von Primär- und Sekundärbuttons verwenden verbindlich
+  EfabiNet-Gelb (`#f5ae35`); Sekundärbuttons verwenden `#364149`.
+- Plugin-Version auf 0.4.9 angehoben.
+
+- Zentrale EfabiNet-Farbvariablen für Blau, Gelb, Lila, Text, sekundäre und
+  helle Hintergründe ergänzt. Das Preset `Asgaros-Nah` verwendet diese Palette.
+- Plugin-Version auf 0.4.8 angehoben.
+
 - Issue #21: Der Name der verwalteten Arbeitsgruppe steht jetzt als dynamische
   Kontextüberschrift zwischen Breadcrumbs und Subnavigation. Die H2 der
   Verwaltungsansichten wiederholen den Gruppennamen nicht mehr.

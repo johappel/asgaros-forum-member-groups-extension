@@ -52,16 +52,23 @@ final class Issue21DesignTest extends TestCase {
 
 	public function test_space_subnavigation_uses_compact_neutral_hover_style(): void {
 		$source = (string) file_get_contents( dirname( __DIR__ ) . '/assets/afspaces.css' );
+		$settings_source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Interface/AppearanceSettingsPage.php' );
 
 		self::assertStringContainsString( '.afspaces-space-nav .afspaces-hub-tab:hover', $source );
 		self::assertStringContainsString( 'font-size: 16px;', $source );
-		self::assertStringContainsString( 'color: #50575e;', $source );
+		self::assertStringContainsString( 'color: var(--afspaces-color-text);', $source );
 		self::assertStringContainsString( 'text-decoration: underline;', $source );
 		self::assertStringContainsString( 'background: transparent !important;', $source );
-		self::assertStringContainsString( 'border-bottom: 3px solid #224c75;', $source );
+		self::assertStringContainsString( 'background: #ffffff !important;', $source );
+		self::assertStringContainsString( 'border: 0 !important;', $source );
+		self::assertStringContainsString( 'border-bottom: 1px solid var(--afspaces-color-blue) !important;', $source );
+		self::assertStringContainsString( 'border-bottom: 3px solid var(--afspaces-color-blue);', $source );
+		self::assertStringNotContainsString( 'background: var(--afspaces-color-yellow) !important;\n\tcolor: var(--afspaces-color-text);', $source );
 		self::assertStringContainsString( 'border-radius: 16px;', $source );
 		self::assertStringContainsString( '.afspaces-invite-link-form > button[type="submit"]', $source );
 		self::assertStringContainsString( 'margin-top: 0.5rem;', $source );
+		self::assertStringContainsString( '#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header { background: %10$s;', $settings_source );
+		self::assertStringNotContainsString( '#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header, #af-wrapper.afspaces-wrapper .afspaces-space-nav', $settings_source );
 	}
 
 	public function test_owner_role_is_translated_to_german_ui_term(): void {

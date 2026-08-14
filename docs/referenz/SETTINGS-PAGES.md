@@ -21,7 +21,7 @@ Die früheren direkten Seiten-Slugs (`afspaces-appearance`, `afspaces-look-and-f
 - Option: `afspaces_appearance_options`
 - Anwendung: `enqueue_inline_style()` hängt Inline-CSS an `afspaces-frontend`; site-weit über `SearchModal`.
 
-Feldschlüssel (Auszug): `base_font_family`, `heading_font_family`, `base_font_size`, `heading_color`, `text_color`, `link_color`, `breadcrumb_text_color`, `wrapper_background`, `wrapper_border_color`, `wrapper_border_radius`, `nav_background`, `nav_text_color`, `nav_active_background`, `nav_active_text_color`, `pager_background`, `pager_text_color`, `button_primary_bg`, `button_secondary_bg`, `button_text_color`.
+Feldschlüssel (Auszug): `base_font_family`, `heading_font_family`, `base_font_size`, `heading_color`, `text_color`, `link_color`, `breadcrumb_text_color`, `wrapper_background`, `wrapper_border_color`, `wrapper_border_radius`, `nav_background`, `nav_text_color`, `nav_active_background`, `nav_active_text_color`, `pager_background`, `pager_text_color`, `button_primary_bg`, `button_secondary_bg`, `button_text_color`, `button_secondary_text_color`, `button_hover_bg`, `button_hover_text_color`.
 
 Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich` plus Reset auf Standard.
 

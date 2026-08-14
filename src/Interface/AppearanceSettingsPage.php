@@ -56,21 +56,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				'heading_font_family'    => 'Quicksand, sans-serif',
 				'base_font_size'         => 20,
 				'heading_color'          => '#2d5d7f',
-				'text_color'             => '#444444',
+				'text_color'             => '#3a4f66',
 				'link_color'             => '#2d5d7f',
-				'breadcrumb_text_color'  => '#888888',
-				'wrapper_background'     => '#fafbfc',
-				'wrapper_border_color'   => '#e1e8ed',
+				'breadcrumb_text_color'  => '#3a4f66',
+				'wrapper_background'     => '#d9d9d9',
+				'wrapper_border_color'   => '#d9d9d9',
 				'wrapper_border_radius'  => 30,
 				'nav_background'         => '#2d5d7f',
 				'nav_text_color'         => '#ffffff',
-				'nav_active_background'  => '#ffffff',
-				'nav_active_text_color'  => '#1d2f43',
-				'pager_background'       => '#f2f2f2',
-				'pager_text_color'       => '#888888',
+				'nav_active_background'  => '#2d5d7f',
+				'nav_active_text_color'  => '#ffffff',
+				'pager_background'       => '#d9d9d9',
+				'pager_text_color'       => '#3a4f66',
 				'button_primary_bg'      => '#2d5d7f',
-				'button_secondary_bg'    => '#7f98ac',
+				'button_secondary_bg'    => '#364149',
 				'button_text_color'      => '#ffffff',
+				'button_secondary_text_color' => '#ffffff',
+				'button_hover_bg'        => '#f5ae35',
+				'button_hover_text_color' => '#3a4f66',
 			);
 		}
 
@@ -100,6 +103,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 					'button_primary_bg'      => '#2f74ae',
 					'button_secondary_bg'    => '#6d7f90',
 					'button_text_color'      => '#ffffff',
+					'button_secondary_text_color' => '#ffffff',
+					'button_hover_bg'        => '#f8b521',
+					'button_hover_text_color' => '#000000',
 				),
 				self::PRESET_CONTRAST => array(
 					'base_font_family'       => 'Arial, sans-serif',
@@ -121,6 +127,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 					'button_primary_bg'      => '#005b99',
 					'button_secondary_bg'    => '#50575e',
 					'button_text_color'      => '#ffffff',
+					'button_secondary_text_color' => '#ffffff',
+					'button_hover_bg'        => '#ffb900',
+					'button_hover_text_color' => '#111111',
 				),
 			);
 		}
@@ -134,7 +143,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				$stored = array();
 			}
 
-			return array_merge( self::defaults(), $stored );
+			$settings = array_merge( self::defaults(), $stored );
+			$legacy_values = array(
+				'button_primary_bg'   => array( '#f5ae35' ),
+				'button_secondary_bg' => array( '#5c677c' ),
+				'button_text_color'   => array( '#3a4f66' ),
+			);
+			foreach ( $legacy_values as $key => $values ) {
+				if ( isset( $stored[ $key ] ) && in_array( strtolower( trim( (string) $stored[ $key ] ) ), $values, true ) ) {
+					$settings[ $key ] = self::defaults()[ $key ];
+				}
+			}
+
+			return $settings;
 		}
 
 		/**
@@ -167,16 +188,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 			$radius      = (int) $s['wrapper_border_radius'];
 
 			return sprintf(
-				'#af-wrapper.afspaces-wrapper { font-family: %1$s; font-size: %2$dpx; color: %3$s; background: %4$s; border-color: %5$s !important; border-radius: %6$dpx; }'
+				'#af-wrapper.afspaces-wrapper { --afspaces-color-blue: %7$s; --afspaces-color-yellow: %21$s; --afspaces-color-purple: #561188; --afspaces-color-text: %3$s; --afspaces-color-secondary-background: %17$s; --afspaces-color-light-background: %4$s; font-family: %1$s; font-size: %2$dpx; color: %3$s; background: %4$s; border-color: %5$s !important; border-radius: %6$dpx; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-dashboard h2, #af-wrapper.afspaces-wrapper .afspaces-members h2, #af-wrapper.afspaces-wrapper .afspaces-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-join-requests h2, #af-wrapper.afspaces-wrapper .afspaces-my-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-space-context-title { color: %7$s; font-family: %8$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-breadcrumb, #af-wrapper.afspaces-wrapper .afspaces-breadcrumb a { color: %9$s; }'
-				. '#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header, #af-wrapper.afspaces-wrapper .afspaces-space-nav { background: %10$s; border-color: %10$s; }'
+				. '#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header { background: %10$s; border-color: %10$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-hub-tab { color: %11$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-hub-tab.is-active { background: %12$s; color: %13$s; border-bottom-color: %12$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-pagination a { background: %14$s; color: %15$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-pagination a[aria-current="page"] { background: %10$s; color: %11$s; border-color: %10$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-button { background: %16$s !important; border-color: %16$s !important; color: %18$s !important; }'
-				. '#af-wrapper.afspaces-wrapper .afspaces-button-secondary { background: %17$s !important; border-color: %17$s !important; color: %18$s !important; }'
+				. '#af-wrapper.afspaces-wrapper .afspaces-button:hover, #af-wrapper.afspaces-wrapper .afspaces-button:focus { background: %21$s !important; border-color: %21$s !important; color: %22$s !important; }'
+				. '#af-wrapper.afspaces-wrapper .afspaces-button-secondary { background: %17$s !important; border-color: %17$s !important; color: %20$s !important; }'
+				. '#af-wrapper.afspaces-wrapper .afspaces-button-secondary:hover, #af-wrapper.afspaces-wrapper .afspaces-button-secondary:focus { background: %21$s !important; border-color: %21$s !important; color: %22$s !important; }'
 				. '#af-wrapper.afspaces-wrapper a { color: %19$s; }',
 				$font_base,
 				$font_size,
@@ -196,7 +219,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				(string) $s['button_primary_bg'],
 				(string) $s['button_secondary_bg'],
 				(string) $s['button_text_color'],
-				(string) $s['link_color']
+				(string) $s['link_color'],
+				(string) $s['button_secondary_text_color'],
+				(string) $s['button_hover_bg'],
+				(string) $s['button_hover_text_color']
 			);
 		}
 
@@ -242,6 +268,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				'button_primary_bg',
 				'button_secondary_bg',
 				'button_text_color',
+				'button_secondary_text_color',
+				'button_hover_bg',
+				'button_hover_text_color',
 			);
 
 			foreach ( $color_keys as $key ) {
@@ -377,6 +406,18 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 						<tr>
 							<th scope="row"><label for="afspaces_button_text_color"><?php echo esc_html__( 'Button-Textfarbe', 'afspaces' ); ?></label></th>
 							<td><input type="color" id="afspaces_button_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_text_color]" value="<?php echo esc_attr( (string) $opts['button_text_color'] ); ?>" /></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="afspaces_button_secondary_text_color"><?php echo esc_html__( 'SekundÃ¤r-Button Textfarbe', 'afspaces' ); ?></label></th>
+							<td><input type="color" id="afspaces_button_secondary_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_secondary_text_color]" value="<?php echo esc_attr( (string) $opts['button_secondary_text_color'] ); ?>" /></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="afspaces_button_hover_bg"><?php echo esc_html__( 'Button-Hover Hintergrund', 'afspaces' ); ?></label></th>
+							<td><input type="color" id="afspaces_button_hover_bg" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_hover_bg]" value="<?php echo esc_attr( (string) $opts['button_hover_bg'] ); ?>" /></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="afspaces_button_hover_text_color"><?php echo esc_html__( 'Button-Hover Textfarbe', 'afspaces' ); ?></label></th>
+							<td><input type="color" id="afspaces_button_hover_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_hover_text_color]" value="<?php echo esc_attr( (string) $opts['button_hover_text_color'] ); ?>" /></td>
 						</tr>
 					</table>
 					<?php submit_button(); ?>

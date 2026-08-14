@@ -21,34 +21,53 @@ Standardwerte (Preset „Asgaros-Nah"):
 | `base_font_family` / `heading_font_family` | `Quicksand, sans-serif` |
 | `base_font_size` | `20` |
 | `heading_color` | `#2d5d7f` |
-| `text_color` | `#444444` |
+| `text_color` | `#3a4f66` |
 | `link_color` | `#2d5d7f` |
-| `breadcrumb_text_color` | `#888888` |
-| `wrapper_background` | `#fafbfc` |
-| `wrapper_border_color` | `#e1e8ed` |
+| `breadcrumb_text_color` | `#3a4f66` |
+| `wrapper_background` | `#d9d9d9` |
+| `wrapper_border_color` | `#d9d9d9` |
 | `wrapper_border_radius` | `30` |
 | `nav_background` | `#2d5d7f` |
 | `nav_text_color` | `#ffffff` |
-| `nav_active_background` | `#ffffff` |
-| `nav_active_text_color` | `#1d2f43` |
-| `pager_background` | `#f2f2f2` |
-| `pager_text_color` | `#888888` |
+| `nav_active_background` | `#2d5d7f` |
+| `nav_active_text_color` | `#ffffff` |
+| `pager_background` | `#d9d9d9` |
+| `pager_text_color` | `#3a4f66` |
 | `button_primary_bg` | `#2d5d7f` |
-| `button_secondary_bg` | `#7f98ac` |
+| `button_secondary_bg` | `#364149` |
 | `button_text_color` | `#ffffff` |
+| `button_secondary_text_color` | `#ffffff` |
+| `button_hover_bg` / `button_hover_text_color` | `#f5ae35` / `#3a4f66` |
 
 Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich`, plus Reset. Kontrastreich existiert bewusst als Barrierefreiheits-Option.
+
+## Zentrale EfabiNet-Farbvariablen
+
+Die Frontend-Styles definieren die verbindlichen Rollen als CSS Custom
+Properties auf `#af-wrapper`:
+
+| Variable | Wert | Verwendung |
+| --- | --- | --- |
+| `--afspaces-color-blue` | `#2d5d7f` | Navigation, Links und Überschriften |
+| `--afspaces-color-yellow` | `#f5ae35` | Hover, Primäraktionen und Akzent |
+| `--afspaces-color-purple` | `#561188` | Lila Akzent |
+| `--afspaces-color-text` | `#3a4f66` | Lauftext und Text auf gelben Primäraktionen |
+| `--afspaces-color-secondary-background` | `#364149` | Sekundäre Hintergründe |
+| `--afspaces-color-light-background` | `#d9d9d9` | Heller Oberflächenhintergrund |
+
+`AppearanceSettingsPage::build_inline_css()` setzt dieselben Variablen aus
+den Einstellungen, sodass individuelle Einstellungen weiterhin möglich sind.
 
 ## Arbeitsgruppen-Subnavigation
 
 Die raumbezogene Subnavigation wird in
 `SpacesHubController::render_space_context_navigation()` als Tab-Leiste
 gerendert. `assets/afspaces.css` überschreibt dafür die allgemeine
-`afspaces-hub-nav`-Fläche: Der Hintergrund bleibt transparent, die Tabs sind
-kleiner und dunkelgrau (`#50575e`). Beim Hover wird der Tab-Text unterstrichen.
-Der aktive Tab wird zusätzlich durch dunkelblaue Schrift und eine untere
-Linie (`#224c75`) eindeutig markiert; die Auswahl ist damit nicht nur über
-Farbe allein erkennbar.
+`afspaces-hub-nav`-Fläche: Die Tab-Leiste bleibt transparent und hat nur eine
+dünne blaue Linie am unteren Rand. Inaktive Tabs bleiben transparent, während
+nur der aktive Tab weiß hinterlegt wird und eine blaue Unterkante erhält. Beim
+Hover wird der Tab-Text blau und unterstrichen; die Auswahl ist damit nicht nur
+über Farbe allein erkennbar.
 
 Subcontent-Karten verwenden `border-radius: 16px`, passend zur abgerundeten
 AFSpaces-Oberfläche. Das Einladungslink-Formular wird als einspaltiges Grid
