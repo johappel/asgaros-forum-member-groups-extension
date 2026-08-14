@@ -146,6 +146,10 @@
 	margin-top: 1.5rem;
 }
 
+.afspaces-dashboard h2{
+	color: #2d5d7f;
+}
+
 .afspaces-space-list {
 	list-style: none;
 	padding: 0;
@@ -1269,7 +1273,7 @@ a.afspaces-link.is-active {
 	font-size: 42px;
 	font-weight: 700;
 	line-height: 40px;
-	color: #f6a81d;
+	color: #2d5d7f;
 	letter-spacing: 0;
 }
 

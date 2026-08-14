@@ -20,7 +20,7 @@ Standardwerte (Preset „Asgaros-Nah"):
 | --- | --- |
 | `base_font_family` / `heading_font_family` | `Quicksand, sans-serif` |
 | `base_font_size` | `20` |
-| `heading_color` | `#f6a81d` |
+| `heading_color` | `#2d5d7f` |
 | `text_color` | `#444444` |
 | `link_color` | `#2d5d7f` |
 | `breadcrumb_text_color` | `#888888` |

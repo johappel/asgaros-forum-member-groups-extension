@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Die Standardfarbe der AFSpaces-Arbeitsgruppenüberschriften, einschließlich
+  .afspaces-dashboard h2, ist jetzt EfabiNet-Blau (#2d5d7f).
+- Plugin-Version auf 0.4.5 angehoben.
+
 - Die Corporate-Design-Farben werden im Arbeitsgruppen-Select zusätzlich als
   farbige Option-Hintergründe mit kontrastierender Schrift dargestellt.
 - Plugin-Version auf 0.4.4 angehoben.
