@@ -105,10 +105,12 @@ erlaubte Palette liegt in WorkingGroupMeta::accent_colors():
 - #5563a5 — EfabiNet-Indigo
 
 Die Bearbeitungsansicht verwendet WorkingGroupService::accent_color_options()
-als Select. WorkingGroupMeta::normalize_accent_color() normalisiert zusätzlich
-historische oder manipulierte Fremdwerte auf den Standard #2d5d7f.
-Die Optionen tragen zusätzlich ihre Palettefarbe als Hintergrund und eine
-kontrastierende Vordergrundfarbe.
+als zugängliche Radio-Auswahlkacheln. Jede Kachel zeigt ein Farbfeld, den
+Farbnamen und den Hexwert; die aktuell gespeicherte Auswahl erhält eine
+farbige Umrandung und bleibt damit sofort erkennbar. WorkingGroupMeta::
+normalize_accent_color() normalisiert zusätzlich historische oder manipulierte
+Fremdwerte auf den Standard #2d5d7f. `assets/afspaces.js` aktualisiert die
+sichtbare Markierung beim Wechsel unmittelbar.
 
 ## Hub-Layout
 

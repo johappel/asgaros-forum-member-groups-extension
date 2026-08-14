@@ -369,4 +369,18 @@
 			menu.classList.add('afspaces-has-mod');
 		}
 	});
+
+	// Hält die sichtbare Auswahl der Corporate-Design-Farbkacheln aktuell.
+	document.querySelectorAll('.afspaces-accent-option input[type="radio"]').forEach(function (input) {
+		input.addEventListener('change', function () {
+			var group = input.closest('.afspaces-accent-options');
+			if (!group) {
+				return;
+			}
+
+			group.querySelectorAll('.afspaces-accent-option').forEach(function (option) {
+				option.classList.toggle('is-selected', option.contains(input));
+			});
+		});
+	});
 })();

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Arbeitsgruppen-Farbwahl in `working-group-settings` als sichtbare,
+  zugängliche Auswahlkacheln mit Farbfeld, Bezeichnung, Hexwert und klarer
+  Markierung der aktuell gewählten Farbe gestaltet.
+- Plugin-Version auf 0.4.14 angehoben.
+
 - Appearance-Settings um eine zentrale Hex-Farbbedienung mit Farbwähler und
   Copy-and-paste-Feld für alle Farbrollen einschließlich Lila-Akzent erweitert.
 - Hex-Kurzformen und Werte ohne führendes `#` werden normalisiert; ungültige

@@ -95,13 +95,23 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					<label for="afspaces-contact-text"><?php echo esc_html__( 'Kontakttext für Arbeitsgruppenverantwortliche', 'afspaces' ); ?></label>
 					<textarea id="afspaces-contact-text" name="contact_text" rows="4"><?php echo esc_textarea( $meta->contact_text ); ?></textarea>
 
-					<label for="afspaces-accent-color"><?php echo esc_html__( 'Akzentfarbe (Corporate Design)', 'afspaces' ); ?></label>
-					<select id="afspaces-accent-color" name="accent_color">
-						<?php foreach ( WorkingGroupService::accent_color_options() as $color => $label ) : ?>
-							<?php $option_text_color = '#f5ae35' === $color ? '#1d2327' : '#ffffff'; ?>
-							<option value="<?php echo esc_attr( $color ); ?>" style="background-color: <?php echo esc_attr( $color ); ?>; color: <?php echo esc_attr( $option_text_color ); ?>;" <?php selected( $meta->accent_color, $color ); ?>><?php echo esc_html( $label . ' (' . $color . ')' ); ?></option>
-						<?php endforeach; ?>
-					</select>
+					<fieldset class="afspaces-accent-fieldset">
+						<legend><?php echo esc_html__( 'Akzentfarbe (Corporate Design)', 'afspaces' ); ?></legend>
+						<div class="afspaces-accent-options">
+							<?php foreach ( WorkingGroupService::accent_color_options() as $color => $label ) : ?>
+								<?php $is_selected = $meta->accent_color === $color; ?>
+								<label class="afspaces-accent-option<?php echo $is_selected ? ' is-selected' : ''; ?>" style="--afspaces-accent-option-color: <?php echo esc_attr( $color ); ?>;">
+									<input type="radio" name="accent_color" value="<?php echo esc_attr( $color ); ?>" <?php checked( $is_selected ); ?> />
+									<span class="afspaces-accent-swatch" style="background-color: <?php echo esc_attr( $color ); ?>;" aria-hidden="true"></span>
+									<span class="afspaces-accent-option-text">
+										<strong><?php echo esc_html( $label ); ?></strong>
+										<code><?php echo esc_html( strtoupper( $color ) ); ?></code>
+									</span>
+								</label>
+							<?php endforeach; ?>
+						</div>
+						<p class="description"><?php echo esc_html__( 'Die markierte Kachel ist aktuell ausgewählt. Klicke auf eine andere Farbe, um die Auswahl zu ändern.', 'afspaces' ); ?></p>
+					</fieldset>
 
 					<label for="afspaces-icon"><?php echo esc_html__( 'Symbol', 'afspaces' ); ?></label>
 					<select id="afspaces-icon" name="icon">
