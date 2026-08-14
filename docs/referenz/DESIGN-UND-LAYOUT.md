@@ -69,6 +69,8 @@ erlaubte Palette liegt in WorkingGroupMeta::accent_colors():
 Die Bearbeitungsansicht verwendet WorkingGroupService::accent_color_options()
 als Select. WorkingGroupMeta::normalize_accent_color() normalisiert zusätzlich
 historische oder manipulierte Fremdwerte auf den Standard #2d5d7f.
+Die Optionen tragen zusätzlich ihre Palettefarbe als Hintergrund und eine
+kontrastierende Vordergrundfarbe.
 
 ## Hub-Layout
 

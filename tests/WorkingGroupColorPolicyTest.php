@@ -18,6 +18,7 @@ final class WorkingGroupColorPolicyTest extends TestCase {
 
 		self::assertStringContainsString( 'WorkingGroupService::accent_color_options()', $source );
 		self::assertStringContainsString( '<select id="afspaces-accent-color"', $source );
+		self::assertStringContainsString( 'background-color:', $source );
 		self::assertStringNotContainsString( 'type="color" id="afspaces-accent-color"', $source );
 	}
 }

@@ -104,7 +104,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					<label for="afspaces-accent-color"><?php echo esc_html__( 'Akzentfarbe (Corporate Design)', 'afspaces' ); ?></label>
 					<select id="afspaces-accent-color" name="accent_color">
 						<?php foreach ( WorkingGroupService::accent_color_options() as $color => $label ) : ?>
-							<option value="<?php echo esc_attr( $color ); ?>" <?php selected( $meta->accent_color, $color ); ?>><?php echo esc_html( $label . ' (' . $color . ')' ); ?></option>
+							<?php $option_text_color = '#f5ae35' === $color ? '#1d2327' : '#ffffff'; ?>
+							<option value="<?php echo esc_attr( $color ); ?>" style="background-color: <?php echo esc_attr( $color ); ?>; color: <?php echo esc_attr( $option_text_color ); ?>;" <?php selected( $meta->accent_color, $color ); ?>><?php echo esc_html( $label . ' (' . $color . ')' ); ?></option>
 						<?php endforeach; ?>
 					</select>
 

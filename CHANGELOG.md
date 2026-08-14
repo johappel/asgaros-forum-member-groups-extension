@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Die Corporate-Design-Farben werden im Arbeitsgruppen-Select zusätzlich als
+  farbige Option-Hintergründe mit kontrastierender Schrift dargestellt.
+- Plugin-Version auf 0.4.4 angehoben.
+
 - Freie Arbeitsgruppenfarben entfernt. Die Bearbeitungsansicht bietet nur
   noch die Corporate-Design-Palette; Server und Domain normalisieren fremde
   Farbwerte auf #2d5d7f.
