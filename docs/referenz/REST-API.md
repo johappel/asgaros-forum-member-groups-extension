@@ -31,6 +31,10 @@ Controller-Callbacks übersetzen Domain-Fehler in bereichsspezifische `afspaces_
 
 ## Spaces und Arbeitsgruppen
 
+Bei Arbeitsgruppen akzeptiert accent_color ausschließlich die Palette aus
+WorkingGroupMeta::accent_colors(). Fremde Werte werden serverseitig auf
+den Standard #2d5d7f normalisiert.
+
 | Methode | Route | Permission | Service | Request |
 | --- | --- | --- | --- | --- |
 | POST | `/spaces` | `can_create_space` | `SpaceCreationService::create` | `name` string, erforderlich; `description` string, optional; `visibility` string, optional |

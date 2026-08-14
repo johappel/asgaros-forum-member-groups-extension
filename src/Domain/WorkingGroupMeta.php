@@ -16,6 +16,18 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 	 */
 	class WorkingGroupMeta {
 
+		/**
+		 * Verbindliche Corporate-Design-Palette für Arbeitsgruppen.
+		 *
+		 * @var list<string>
+		 */
+		private const ACCENT_COLORS = array(
+			'#77429e',
+			'#2d5d7f',
+			'#f5ae35',
+			'#5563a5',
+		);
+
 		public const DIRECTORY_LISTED = 'listed';
 		public const DIRECTORY_MEMBERS = 'members';
 		public const DIRECTORY_HIDDEN = 'hidden';
@@ -44,7 +56,7 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 
 			$this->space_id = (int) $data['space_id'];
 			$this->description = (string) $data['description'];
-			$this->accent_color = (string) $data['accent_color'];
+			$this->accent_color = self::normalize_accent_color( $data['accent_color'] );
 			$this->icon = (string) $data['icon'];
 			$this->contact_text = (string) $data['contact_text'];
 			$this->directory_visibility = (string) $data['directory_visibility'];
@@ -68,6 +80,31 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 				'join_requests_enabled' => true,
 				'topic_ids'             => array(),
 			);
+		}
+
+		/**
+		 * Gibt die erlaubten Arbeitsgruppenfarben zurück.
+		 *
+		 * @return list<string>
+		 */
+		public static function accent_colors(): array {
+			return self::ACCENT_COLORS;
+		}
+
+		/**
+		 * Normalisiert eine Farbe auf die Corporate-Design-Palette.
+		 *
+		 * Historische oder manipulierte Fremdwerte werden bewusst auf den
+		 * Standardwert zurückgeführt.
+		 *
+		 * @param mixed $value Rohwert.
+		 * @return string
+		 */
+		public static function normalize_accent_color( $value ): string {
+			$value = is_scalar( $value ) ? strtolower( trim( (string) $value ) ) : '';
+			return in_array( $value, self::ACCENT_COLORS, true )
+				? $value
+				: (string) self::defaults()['accent_color'];
 		}
 
 		/**

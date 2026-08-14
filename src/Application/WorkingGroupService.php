@@ -63,6 +63,27 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 		}
 
 		/**
+		 * Beschriftete Auswahl der erlaubten Corporate-Design-Farben.
+		 *
+		 * @return array<string,string>
+		 */
+		public static function accent_color_options(): array {
+			$labels = array(
+				'#77429e' => __( 'EfabiNet-Lila', 'afspaces' ),
+				'#2d5d7f' => __( 'EfabiNet-Blau', 'afspaces' ),
+				'#f5ae35' => __( 'EfabiNet-Orange', 'afspaces' ),
+				'#5563a5' => __( 'EfabiNet-Indigo', 'afspaces' ),
+			);
+
+			$options = array();
+			foreach ( WorkingGroupMeta::accent_colors() as $color ) {
+				$options[ $color ] = $labels[ $color ] ?? $color;
+			}
+
+			return $options;
+		}
+
+		/**
 		 * @param string|null $icon Icon-Schluessel.
 		 * @return string
 		 */
@@ -106,7 +127,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 				array(
 					'space_id'              => $space_id,
 					'description'           => $this->sanitize_textarea( $input['description'] ?? '' ),
-					'accent_color'          => $this->sanitize_hex_color( (string) ( $input['accent_color'] ?? '' ) ),
+					'accent_color'          => $this->sanitize_accent_color( $input['accent_color'] ?? '' ),
 					'icon'                  => $this->sanitize_icon( (string) ( $input['icon'] ?? '' ) ),
 					'contact_text'          => $this->sanitize_textarea( $input['contact_text'] ?? '' ),
 					'directory_visibility'  => $this->sanitize_directory_visibility( (string) ( $input['directory_visibility'] ?? '' ) ),
@@ -249,16 +270,11 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 		}
 
 		/**
-		 * @param string $value Farbe.
+		 * @param mixed $value Akzentfarbe.
 		 * @return string
 		 */
-		private function sanitize_hex_color( string $value ): string {
-			$value = trim( $value );
-			if ( preg_match( '/^#[0-9a-fA-F]{6}$/', $value ) ) {
-				return strtolower( $value );
-			}
-
-			return (string) WorkingGroupMeta::defaults()['accent_color'];
+		private function sanitize_accent_color( $value ): string {
+			return WorkingGroupMeta::normalize_accent_color( $value );
 		}
 
 		/**

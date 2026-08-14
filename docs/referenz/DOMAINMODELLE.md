@@ -108,6 +108,10 @@ Idempotenz: nur eine offene Anfrage pro Nutzer und Arbeitsgruppe. Genehmigung er
 
 ## WorkingGroupMeta
 
+Das Feld accent_color ist auf die Corporate-Design-Palette aus
+WorkingGroupMeta::accent_colors() begrenzt. Freie Hex-Farben werden beim
+Einlesen und Speichern auf den Standardwert #2d5d7f normalisiert.
+
 `src/Domain/WorkingGroupMeta.php`. Metadaten oberhalb des technischen Space.
 
 `directory_visibility` (Sichtbarkeit im Verzeichnis, unabhängig vom Zugriff):

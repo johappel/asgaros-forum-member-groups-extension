@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Freie Arbeitsgruppenfarben entfernt. Die Bearbeitungsansicht bietet nur
+  noch die Corporate-Design-Palette; Server und Domain normalisieren fremde
+  Farbwerte auf #2d5d7f.
+- Plugin-Version auf 0.4.3 angehoben.
+
 - Kategorie-Farbregeln der Arbeitsgruppen mit einer höheren, auf
   #af-wrapper und die Kategorie-ID begrenzten Spezifität ausgegeben, damit
   individuelle Farben nicht von Asgaros .title-element-Regeln überschrieben

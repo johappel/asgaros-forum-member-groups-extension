@@ -56,6 +56,20 @@ Pro Arbeitsgruppe in `afspaces_space_meta`:
 
 Farbe und Icon sind immer nur Ergänzung; Name und Status stehen zusätzlich als Text (keine reine Farb-/Symbolbedeutung).
 
+### Corporate-Design-Palette für Arbeitsgruppen
+
+Arbeitsgruppen dürfen keine freien Hex-Farben verwenden. Die serverseitig
+erlaubte Palette liegt in WorkingGroupMeta::accent_colors():
+
+- #77429e — EfabiNet-Lila
+- #2d5d7f — EfabiNet-Blau
+- #f5ae35 — EfabiNet-Orange
+- #5563a5 — EfabiNet-Indigo
+
+Die Bearbeitungsansicht verwendet WorkingGroupService::accent_color_options()
+als Select. WorkingGroupMeta::normalize_accent_color() normalisiert zusätzlich
+historische oder manipulierte Fremdwerte auf den Standard #2d5d7f.
+
 ## Hub-Layout
 
 - Eine Hub-Seite (`[afspaces]`) mit Router (`SpacesHubController`), Brotkrümel und zweistufiger Navigation.

@@ -34,7 +34,7 @@ final class WorkingGroupMetaFlowTest extends IntegrationTestCase {
 			$owner,
 			array(
 				'description' => 'Arbeitsgruppe fuer regionale Kooperation',
-				'accent_color' => '#114488',
+				'accent_color' => '#5563a5',
 				'icon' => 'briefcase',
 				'contact_text' => 'Kontakt ueber das Team Nord',
 				'directory_visibility' => 'listed',
@@ -45,7 +45,7 @@ final class WorkingGroupMetaFlowTest extends IntegrationTestCase {
 
 		$this->assertSame( 'Arbeitsgruppe fuer regionale Kooperation', $meta->description );
 		$stored = $this->space_meta_repository->get_for_space( $space_id );
-		$this->assertSame( '#114488', $stored->accent_color );
+		$this->assertSame( '#5563a5', $stored->accent_color );
 		$this->assertSame( 'briefcase', $stored->icon );
 		$this->assertSame( 'Kontakt ueber das Team Nord', $stored->contact_text );
 		$this->assertSame( 'invite_only', $stored->join_policy );

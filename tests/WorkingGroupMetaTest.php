@@ -37,4 +37,17 @@ final class WorkingGroupMetaTest extends TestCase {
 
 		$this->assertSame( array( 3, 5 ), $meta->topic_ids );
 	}
+
+	public function test_accent_color_is_limited_to_the_corporate_palette(): void {
+		$this->assertSame(
+			array( '#77429e', '#2d5d7f', '#f5ae35', '#5563a5' ),
+			WorkingGroupMeta::accent_colors()
+		);
+
+		$invalid = new WorkingGroupMeta( array( 'accent_color' => '#114488' ) );
+		$this->assertSame( '#2d5d7f', $invalid->accent_color );
+
+		$allowed = new WorkingGroupMeta( array( 'accent_color' => '#F5AE35' ) );
+		$this->assertSame( '#f5ae35', $allowed->accent_color );
+	}
 }
