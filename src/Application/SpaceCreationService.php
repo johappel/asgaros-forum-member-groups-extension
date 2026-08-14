@@ -233,15 +233,12 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceCreationService' ) ) {
 					)
 				);
 
-				// 4. Sichtbare Metadaten (Beschreibung/Verzeichnissichtbarkeit) speichern.
+				// 4. Arbeitsgruppen-Metadaten (Beschreibung und Beitrittslogik) speichern.
 				$this->meta->save(
 					new WorkingGroupMeta(
 						array(
 							'space_id'             => $space_id,
 							'description'          => $description,
-							'directory_visibility' => ( SpaceCreationSettings::VISIBILITY_PRIVATE === $visibility )
-								? WorkingGroupMeta::DIRECTORY_MEMBERS
-								: WorkingGroupMeta::DIRECTORY_LISTED,
 							'join_policy'          => WorkingGroupMeta::JOIN_POLICY_REQUEST,
 							'join_requests_enabled' => 1,
 						)

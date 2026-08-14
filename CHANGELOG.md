@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Issue #21: Die Subnavigation ist jetzt eine transparente Tab-Leiste mit
+  klar markiertem aktivem Tab.
+- Subcontent-Karten und Einladungslink-Formular an das äußere Rundungs- und
+  Abstandsdesign angepasst.
+
+- Issue #21: Untermenü und Detailbearbeitung übersichtlicher gestaltet,
+  Verzeichnis-Sichtbarkeit entfernt, Arbeitsgruppen für angemeldete Personen
+  auffindbar gemacht und Rollenbegriff „Besitzer:in“ eingeführt.
+- Plugin-Version auf 0.4.6 angehoben.
+
 - Die Standardfarbe der AFSpaces-Arbeitsgruppenüberschriften, einschließlich
   .afspaces-dashboard h2, ist jetzt EfabiNet-Blau (#2d5d7f).
 - Plugin-Version auf 0.4.5 angehoben.

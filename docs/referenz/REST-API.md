@@ -43,7 +43,7 @@ den Standard #2d5d7f normalisiert.
 | POST | `/spaces/{space_id}/reject` | `can_moderate_space` | `SpaceLifecycleService::reject` | `rejection_reason` string, optional |
 | GET | `/spaces/discover` | `can_respond_to_invitation` | Repositories, `WorkingGroupService` | `search` string, optional; `topic_id` integer, optional |
 | GET | `/spaces/{space_id}/working-group` | `can_respond_to_invitation` | `WorkingGroupService` | — |
-| PATCH* | `/spaces/{space_id}/working-group` | `can_manage` | `WorkingGroupService::save_metadata` | `description`, `accent_color`, `icon`, `contact_text`, `directory_visibility`, `join_policy`, `join_requests_enabled`, `topic_ids`; Werte werden im Service normalisiert |
+| PATCH* | `/spaces/{space_id}/working-group` | `can_manage` | `WorkingGroupService::save_metadata` | `description`, `accent_color`, `icon`, `contact_text`, `join_policy`, `join_requests_enabled`, `topic_ids`; Werte werden im Service normalisiert |
 | GET | `/profiles/{user_id}/working-groups` | `can_respond_to_invitation` | `WorkingGroupService` und Repositories | — |
 
 Antworten:

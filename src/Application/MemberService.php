@@ -217,7 +217,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\MemberService' ) ) {
 			}
 
 			if ( (int) $space->owner_user_id === $target_user_id && $this->spaces->count_owners( $space_id ) <= 1 ) {
-				throw new DomainException( __( 'Der letzte Owner kann nicht als Raumverantwortlicher entfernt werden.', 'afspaces' ) );
+				throw new DomainException( __( 'Die letzte Person mit der Rolle „Besitzer:in“ kann nicht als Raumverantwortliche entfernt werden.', 'afspaces' ) );
 			}
 
 			$this->spaces->remove_manager( $space_id, $target_user_id );

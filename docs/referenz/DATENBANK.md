@@ -39,7 +39,7 @@ Fachliche Rollenwerte sind `owner` und `manager`; dies ist keine WordPress-Rolle
 | `accent_color` | `varchar(7)` | NOT NULL, Default `#2d5d7f` | — |
 | `icon` | `varchar(40)` | NOT NULL, Default `users` | — |
 | `contact_text` | `text` | NOT NULL | — |
-| `directory_visibility` | `varchar(20)` | NOT NULL, Default `listed` | `KEY directory_visibility` |
+| `directory_visibility` | `varchar(20)` | Legacy-Spalte, Default `listed` | `KEY directory_visibility`; wird ignoriert |
 | `join_policy` | `varchar(20)` | NOT NULL, Default `request` | `KEY join_policy` |
 | `join_requests_enabled` | `tinyint(1)` | NOT NULL, Default `1` | — |
 | `topic_ids` | `longtext` | NOT NULL | serialisierte Topic-ID-Liste |

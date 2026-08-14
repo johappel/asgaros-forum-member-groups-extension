@@ -106,7 +106,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DiscoverView' ) ) {
 			<section class="afspaces-discover" aria-labelledby="afspaces-discover-heading">
 				<h2 id="afspaces-discover-heading"><?php echo esc_html( WorkingGroupTerminology::label( WorkingGroupTerminology::DISCOVER ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier findest du sichtbare Arbeitsgruppen, erkennst deinen Status und kannst bei Bedarf einen Beitritt anfragen.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier findest du Arbeitsgruppen, erkennst deinen Status und kannst bei Bedarf einen Beitritt anfragen.', 'afspaces' ); ?></p>
 
 				<form method="get" class="afspaces-filter afspaces-discover-filter" aria-label="<?php echo esc_attr__( 'Arbeitsgruppen filtern', 'afspaces' ); ?>">
 					<input type="hidden" name="afspaces_view" value="<?php echo esc_attr( SpacesUrls::VIEW_DISCOVER ); ?>" />
@@ -125,7 +125,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DiscoverView' ) ) {
 				</form>
 
 				<?php if ( empty( $discoverable ) ) : ?>
-					<p><?php echo esc_html__( 'Derzeit sind keine passenden Arbeitsgruppen für dich sichtbar.', 'afspaces' ); ?></p>
+					<p><?php echo esc_html__( 'Derzeit gibt es keine passenden Arbeitsgruppen.', 'afspaces' ); ?></p>
 				<?php else : ?>
 					<ul class="afspaces-space-list afspaces-group-tiles">
 						<?php
@@ -275,10 +275,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DiscoverView' ) ) {
 			}
 
 			if ( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY === $meta->join_policy ) {
-				return __( 'Diese Arbeitsgruppe ist sichtbar, aber nur per Einladung beitretbar.', 'afspaces' );
+				return __( 'Diese Arbeitsgruppe kann nur per Einladung betreten werden.', 'afspaces' );
 			}
 
-			return __( 'Diese Arbeitsgruppe ist sichtbar, aber aktuell nicht beitretbar.', 'afspaces' );
+			return __( 'Diese Arbeitsgruppe kann aktuell nicht betreten werden.', 'afspaces' );
 		}
 
 		/**

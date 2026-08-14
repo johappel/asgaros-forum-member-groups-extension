@@ -168,19 +168,9 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpacePolicy' ) ) {
 		 * @return bool
 		 */
 		public function can_view_working_group( WorkingGroupMeta $meta, bool $viewer_is_member, bool $viewer_is_manager, bool $viewer_is_subject = false ): bool {
-			if ( $viewer_is_manager || $viewer_is_subject ) {
-				return true;
-			}
-
-			if ( WorkingGroupMeta::DIRECTORY_LISTED === $meta->directory_visibility ) {
-				return true;
-			}
-
-			if ( WorkingGroupMeta::DIRECTORY_MEMBERS === $meta->directory_visibility ) {
-				return $viewer_is_member;
-			}
-
-			return false;
+			// Arbeitsgruppen sind für angemeldete Personen grundsätzlich auffindbar.
+			// Der Zugriff auf die Foreninhalte bleibt davon getrennt in Space::visibility.
+			return true;
 		}
 
 		/**

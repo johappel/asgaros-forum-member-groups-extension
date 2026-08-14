@@ -39,6 +39,22 @@ Standardwerte (Preset „Asgaros-Nah"):
 
 Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich`, plus Reset. Kontrastreich existiert bewusst als Barrierefreiheits-Option.
 
+## Arbeitsgruppen-Subnavigation
+
+Die raumbezogene Subnavigation wird in
+`SpacesHubController::render_space_context_navigation()` als Tab-Leiste
+gerendert. `assets/afspaces.css` überschreibt dafür die allgemeine
+`afspaces-hub-nav`-Fläche: Der Hintergrund bleibt transparent, die Tabs sind
+kleiner und dunkelgrau (`#50575e`). Beim Hover wird der Tab-Text unterstrichen.
+Der aktive Tab wird zusätzlich durch dunkelblaue Schrift und eine untere
+Linie (`#224c75`) eindeutig markiert; die Auswahl ist damit nicht nur über
+Farbe allein erkennbar.
+
+Subcontent-Karten verwenden `border-radius: 16px`, passend zur abgerundeten
+AFSpaces-Oberfläche. Das Einladungslink-Formular wird als einspaltiges Grid
+gerendert; der abschließende Erstellungsbutton steht dadurch immer unter den
+Eingabefeldern und erhält zusätzlich einen vertikalen Abstand.
+
 ## Arbeitsgruppen-Akzentfarbe und Icon
 
 Pro Arbeitsgruppe in `afspaces_space_meta`:

@@ -130,7 +130,6 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 					'accent_color'          => $this->sanitize_accent_color( $input['accent_color'] ?? '' ),
 					'icon'                  => $this->sanitize_icon( (string) ( $input['icon'] ?? '' ) ),
 					'contact_text'          => $this->sanitize_textarea( $input['contact_text'] ?? '' ),
-					'directory_visibility'  => $this->sanitize_directory_visibility( (string) ( $input['directory_visibility'] ?? '' ) ),
 					'join_policy'           => $this->sanitize_join_policy( (string) ( $input['join_policy'] ?? '' ) ),
 					'join_requests_enabled' => ! empty( $input['join_requests_enabled'] ),
 					'topic_ids'             => $this->sanitize_topic_ids( $input['topic_ids'] ?? array() ),
@@ -236,7 +235,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 					'display_name' => $this->identity->get_display_name( (int) $user->ID ),
 					'role'         => (string) $manager->role,
 					'role_label'   => 'owner' === $manager->role
-						? __( 'Owner', 'afspaces' )
+						? __( 'Besitzer:in', 'afspaces' )
 						: __( 'Arbeitsgruppenverantwortlich', 'afspaces' ),
 				);
 			}
@@ -284,20 +283,6 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 		private function sanitize_icon( string $value ): string {
 			$value = function_exists( '\sanitize_key' ) ? sanitize_key( $value ) : strtolower( preg_replace( '/[^a-z0-9_-]/', '', $value ) );
 			return array_key_exists( $value, self::icon_options() ) ? $value : self::DEFAULT_ICON;
-		}
-
-		/**
-		 * @param string $value Sichtbarkeit.
-		 * @return string
-		 */
-		private function sanitize_directory_visibility( string $value ): string {
-			$allowed = array(
-				WorkingGroupMeta::DIRECTORY_LISTED,
-				WorkingGroupMeta::DIRECTORY_MEMBERS,
-				WorkingGroupMeta::DIRECTORY_HIDDEN,
-			);
-
-			return in_array( $value, $allowed, true ) ? $value : WorkingGroupMeta::DIRECTORY_LISTED;
 		}
 
 		/**

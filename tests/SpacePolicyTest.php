@@ -173,16 +173,14 @@ final class SpacePolicyTest extends TestCase {
 		$this->assertFalse( $this->policy->can_create_unlimited_invite_links( 1, 42 ) );
 	}
 
-	public function test_listed_working_group_is_visible_to_logged_in_viewer(): void {
-		$meta = new WorkingGroupMeta( array( 'directory_visibility' => WorkingGroupMeta::DIRECTORY_LISTED ) );
+	public function test_every_working_group_is_visible_to_logged_in_viewer(): void {
+		$meta = new WorkingGroupMeta( array() );
 		$this->assertTrue( $this->policy->can_view_working_group( $meta, false, false ) );
 	}
 
-	public function test_hidden_working_group_is_only_visible_to_subject_or_manager(): void {
-		$meta = new WorkingGroupMeta( array( 'directory_visibility' => WorkingGroupMeta::DIRECTORY_HIDDEN ) );
-		$this->assertFalse( $this->policy->can_view_working_group( $meta, false, false, false ) );
-		$this->assertTrue( $this->policy->can_view_working_group( $meta, false, true, false ) );
-		$this->assertTrue( $this->policy->can_view_working_group( $meta, false, false, true ) );
+	public function test_membership_does_not_limit_working_group_discovery(): void {
+		$meta = new WorkingGroupMeta( array() );
+		$this->assertTrue( $this->policy->can_view_working_group( $meta, false, false, false ) );
 	}
 
 	public function test_join_request_policy_respects_metadata_and_existing_state(): void {

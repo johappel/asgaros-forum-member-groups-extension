@@ -99,12 +99,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 			<section class="afspaces-profile-view" aria-labelledby="afspaces-profile-view-heading">
 				<?php if ( ! $compact ) : ?>
 					<h2 id="afspaces-profile-view-heading"><?php echo esc_html( $heading ); ?></h2>
-					<p><?php echo esc_html__( 'Hier siehst du sichtbare Mitgliedschaften und Verantwortlichkeiten im Arbeitsgruppenmodell.', 'afspaces' ); ?></p>
+					<p><?php echo esc_html__( 'Hier siehst du Mitgliedschaften und Verantwortlichkeiten im Arbeitsgruppenmodell.', 'afspaces' ); ?></p>
 				<?php else : ?>
 					<h3 id="afspaces-profile-view-heading" class="screen-reader-text"><?php echo esc_html( $heading ); ?></h3>
 				<?php endif; ?>
 				<?php if ( empty( $items ) ) : ?>
-					<p class="afspaces-empty"><?php echo esc_html( $is_own ? __( 'Für dein Profil sind aktuell keine sichtbaren Arbeitsgruppen hinterlegt.', 'afspaces' ) : __( 'Für dieses Profil sind keine sichtbaren Arbeitsgruppen freigegeben.', 'afspaces' ) ); ?></p>
+					<p class="afspaces-empty"><?php echo esc_html( $is_own ? __( 'Für dein Profil sind aktuell keine Arbeitsgruppen hinterlegt.', 'afspaces' ) : __( 'Für dieses Profil sind keine Arbeitsgruppen freigegeben.', 'afspaces' ) ); ?></p>
 				<?php else : ?>
 					<ul class="afspaces-space-list afspaces-group-tiles afspaces-profile-groups">
 						<?php

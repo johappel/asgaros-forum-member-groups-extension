@@ -61,7 +61,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 			$is_manager = $this->spaces->is_manager( $space_id, $actor ) || user_can( $actor, Capabilities::MANAGE_ALL_SPACES );
 			$is_member = $this->asgaros->is_user_in_group( $actor, $space->primary_group_id );
 			if ( ! $this->working_groups->can_view_group( $meta, $is_member, $is_manager ) ) {
-				return $this->notice( __( 'Diese Arbeitsgruppe ist für dich nicht sichtbar.', 'afspaces' ) );
+				return $this->notice( __( 'Diese Arbeitsgruppe kann derzeit nicht geöffnet werden.', 'afspaces' ) );
 			}
 
 			$requests = $this->join_requests->list_my_requests( $actor );
@@ -86,12 +86,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 			?>
 			<section class="afspaces-working-group-view" aria-labelledby="afspaces-working-group-view-heading">
 				<h2 id="afspaces-working-group-view-heading"><?php echo esc_html( (string) $forum['name'] ); ?></h2>
-				<?php if ( $is_manager ) : ?>
-					<div class="afspaces-detail-toggle" role="group" aria-label="<?php echo esc_attr__( 'Zwischen Ansicht und Bearbeiten wechseln', 'afspaces' ); ?>">
-						<a class="afspaces-button is-active" aria-current="page" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Ansicht', 'afspaces' ); ?></a>
-						<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Bearbeiten', 'afspaces' ); ?></a>
-					</div>
-				<?php endif; ?>
 				<?php echo $this->render_message(); ?>
 				<div class="afspaces-working-group-card" style="--afspaces-accent: <?php echo esc_attr( $meta->accent_color ); ?>;">
 					<div class="afspaces-working-group-card-header">
@@ -130,7 +124,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 					<div class="afspaces-working-group-members">
 						<strong><?php echo esc_html( sprintf( __( 'Mitglieder (%s):', 'afspaces' ), WorkingGroupTerminology::membership_count( $member_count ) ) ); ?></strong>
 						<?php if ( empty( $members ) ) : ?>
-							<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine Mitglieder sichtbar.', 'afspaces' ); ?></p>
+							<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine Mitglieder eingetragen.', 'afspaces' ); ?></p>
 						<?php else : ?>
 							<ul class="afspaces-members-list afspaces-members-grid">
 								<?php foreach ( $members as $member ) : ?>
@@ -239,11 +233,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 			}
 
 			if ( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY === $meta->join_policy ) {
-				return __( 'Diese Arbeitsgruppe ist sichtbar, aber nur per Einladung beitretbar.', 'afspaces' );
+				return __( 'Diese Arbeitsgruppe kann nur per Einladung betreten werden.', 'afspaces' );
 			}
 
 			if ( WorkingGroupMeta::JOIN_POLICY_CLOSED === $meta->join_policy || ! $meta->join_requests_enabled ) {
-				return __( 'Diese Arbeitsgruppe ist sichtbar, aber aktuell nicht beitretbar.', 'afspaces' );
+				return __( 'Diese Arbeitsgruppe kann aktuell nicht betreten werden.', 'afspaces' );
 			}
 
 			return __( 'Für diese Arbeitsgruppe ist aktuell keine weitere Aktion verfügbar.', 'afspaces' );

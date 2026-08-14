@@ -105,7 +105,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\CreateSpaceView' ) ) {
 					</fieldset>
 
 					<fieldset class="afspaces-wizard-step" data-afspaces-step="2">
-						<legend><?php echo esc_html__( 'Schritt 2: Sichtbarkeit', 'afspaces' ); ?></legend>
+						<legend><?php echo esc_html__( 'Schritt 2: Zugriff auf das Forum', 'afspaces' ); ?></legend>
 						<?php foreach ( $visibilities as $index => $visibility ) : ?>
 							<p class="afspaces-radio-option">
 								<label>
@@ -169,7 +169,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\CreateSpaceView' ) ) {
 		public static function visibility_description( string $visibility ): string {
 			switch ( $visibility ) {
 				case SpaceCreationSettings::VISIBILITY_PUBLIC:
-					return __( 'Für alle Besucherinnen und Besucher sichtbar.', 'afspaces' );
+					return __( 'Für alle Besucherinnen und Besucher lesbar.', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PROTECTED:
 					return __( 'Für alle angemeldeten Personen lesbar.', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PRIVATE:

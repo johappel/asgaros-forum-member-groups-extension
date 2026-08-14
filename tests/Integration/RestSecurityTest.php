@@ -348,7 +348,7 @@ final class RestSecurityTest extends IntegrationTestCase {
 
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertSame( array(), $data['working_groups'] );
+		$this->assertCount( 1, $data['working_groups'] );
 
 		$this->cleanup_user_from_group( $member );
 	}

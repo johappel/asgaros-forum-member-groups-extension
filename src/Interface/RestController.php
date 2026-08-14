@@ -1541,7 +1541,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 					'accent_color'            => $meta->accent_color,
 					'icon'                    => $meta->icon,
 					'contact_text'            => $meta->contact_text,
-					'directory_visibility'    => $meta->directory_visibility,
 					'join_policy'             => $meta->join_policy,
 					'join_requests_enabled'   => $meta->join_requests_enabled,
 					'topic_names'             => $this->working_groups->topic_names( $meta ),
@@ -1577,7 +1576,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 			$is_manager = $this->spaces->is_manager( $space_id, $actor ) || user_can( $actor, Capabilities::MANAGE_ALL_SPACES );
 			$is_member = $this->asgaros->is_user_in_group( $actor, $space->primary_group_id );
 			if ( ! $this->working_groups->can_view_group( $meta, $is_member, $is_manager ) ) {
-				return new WP_Error( 'afspaces_rest_working_group_forbidden', __( 'Diese Arbeitsgruppe ist für dich nicht sichtbar.', 'afspaces' ), array( 'status' => 403 ) );
+				return new WP_Error( 'afspaces_rest_working_group_forbidden', __( 'Du hast keinen Zugriff auf diese Arbeitsgruppe.', 'afspaces' ), array( 'status' => 403 ) );
 			}
 
 			$invitations = $this->invitations->list_my_invitations( $actor );
@@ -1600,7 +1599,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\RestController' ) ) {
 					'accent_color'          => $meta->accent_color,
 					'icon'                  => $meta->icon,
 					'contact_text'          => $meta->contact_text,
-					'directory_visibility'  => $meta->directory_visibility,
 					'join_policy'           => $meta->join_policy,
 					'join_requests_enabled' => $meta->join_requests_enabled,
 					'topic_names'           => $this->working_groups->topic_names( $meta ),

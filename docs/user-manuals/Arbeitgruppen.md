@@ -16,7 +16,7 @@ Eine Arbeitsgruppe verbindet:
 * eine Gruppe von Mitgliedern,
 * eine oder mehrere verantwortliche Personen.
 
-Je nach Einstellung kann eine Arbeitsgruppe nur für ihre Mitglieder sichtbar sein oder auch von anderen Personen gefunden bzw. gelesen werden.
+Je nach Zugriffseinstellung können die Foreninhalte nur für Mitglieder oder auch für weitere Personen lesbar sein. Die Arbeitsgruppe selbst ist für alle angemeldeten Personen auffindbar.
 
 Wenn du Mitglied bist, kannst du das zugehörige Forum über **Forum öffnen** aufrufen.
 
@@ -122,7 +122,7 @@ Alle angemeldeten Benutzerinnen und Benutzer können den Bereich lesen.
 
 **Öffentlich**
 
-Der Bereich kann auch für nicht angemeldete Besucherinnen und Besucher sichtbar sein.
+Der Bereich kann auch für nicht angemeldete Besucherinnen und Besucher lesbar sein.
 
 Wenn du unsicher bist, wähle **Privat**.
 
@@ -313,25 +313,13 @@ Hier kannst du unter anderem festlegen:
 
 ---
 
-# Zwei verschiedene Arten von Sichtbarkeit
+# Auffindbarkeit und Zugriff
 
-Bei der Verwaltung einer Arbeitsgruppe gibt es zwei Einstellungen, die leicht verwechselt werden können.
+Alle angemeldeten Personen können Arbeitsgruppen unter **Entdecken** finden.
+Eine separate Einstellung für die Auffindbarkeit gibt es nicht mehr.
 
-## Sichtbarkeit in Übersichten
-
-Diese Einstellung bestimmt, **wer die Arbeitsgruppe beispielsweise unter „Entdecken“ finden kann**.
-
-Mögliche Einstellungen sind unter anderem:
-
-* für angemeldete Personen sichtbar,
-* nur für Mitglieder sichtbar,
-* nur im eigenen Profil und in der Verwaltung sichtbar.
-
-Diese Einstellung entscheidet **nicht darüber, wer die Beiträge des Forums lesen darf**.
-
-## Sichtbarkeit des Forums
-
-Unter **Arbeitsgruppe verwalten → Sichtbarkeit** wird festgelegt, wer tatsächlich auf den Forenbereich zugreifen kann.
+Unter **Arbeitsgruppe verwalten → Zugriff auf das Forum** wird festgelegt, wer
+tatsächlich auf den Forenbereich zugreifen kann.
 
 Je nach Konfiguration stehen zur Verfügung:
 
@@ -496,7 +484,7 @@ Angemeldete Benutzerinnen und Benutzer können den Forenbereich lesen.
 
 ## Was bedeutet „Öffentlich“?
 
-Der Bereich kann auch für Besucherinnen und Besucher sichtbar sein.
+Der Bereich kann auch für Besucherinnen und Besucher lesbar sein.
 
 ## Muss ich das WordPress-Dashboard benutzen?
 

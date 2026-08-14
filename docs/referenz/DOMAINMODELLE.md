@@ -114,13 +114,10 @@ Einlesen und Speichern auf den Standardwert #2d5d7f normalisiert.
 
 `src/Domain/WorkingGroupMeta.php`. Metadaten oberhalb des technischen Space.
 
-`directory_visibility` (Sichtbarkeit im Verzeichnis, unabhängig vom Zugriff):
-
-| Wert | Bedeutung |
-| --- | --- |
-| `listed` | im Entdecken sichtbar |
-| `members` | nur für Mitglieder sichtbar |
-| `hidden` | nicht im Verzeichnis |
+Arbeitsgruppen sind für alle angemeldeten Personen auffindbar. Eine separate
+Verzeichnis-Sichtbarkeit gehört nicht mehr zum bearbeitbaren Domänenmodell.
+Der Zugriff auf Foreninhalte bleibt ausschließlich über `Space::visibility`
+und die Asgaros-Zugriffsgruppe geregelt.
 
 `join_policy`:
 
@@ -131,5 +128,3 @@ Einlesen und Speichern auf den Standardwert #2d5d7f normalisiert.
 | `closed` | kein Beitritt |
 
 Weitere Felder: `join_requests_enabled` (nur wirksam mit `join_policy = request`), `accent_color`, `icon` (siehe [DESIGN-UND-LAYOUT.md](DESIGN-UND-LAYOUT.md)), `contact_text`, `topic_ids`.
-
-> Wichtig: `directory_visibility` (Auffindbarkeit) ist nicht dasselbe wie `Space::visibility` (Zugriff).

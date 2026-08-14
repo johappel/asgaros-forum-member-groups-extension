@@ -359,7 +359,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				} elseif ( 'change_space_visibility' === $action ) {
 					$visibility = isset( $_POST['visibility'] ) ? sanitize_key( wp_unslash( $_POST['visibility'] ) ) : '';
 					$this->space_lifecycle->change_visibility( $space_id, $actor, $visibility );
-					$this->set_message( 'success', __( 'Die Sichtbarkeit der Arbeitsgruppe wurde geändert.', 'afspaces' ) );
+					$this->set_message( 'success', __( 'Der Zugriff auf das Forum wurde geändert.', 'afspaces' ) );
 				} elseif ( 'transfer_space_owner' === $action ) {
 					$new_owner = isset( $_POST['new_owner_id'] ) ? (int) $_POST['new_owner_id'] : 0;
 					$this->space_lifecycle->transfer_owner( $space_id, $actor, $new_owner );

@@ -37,7 +37,6 @@ final class WorkingGroupMetaFlowTest extends IntegrationTestCase {
 				'accent_color' => '#5563a5',
 				'icon' => 'briefcase',
 				'contact_text' => 'Kontakt ueber das Team Nord',
-				'directory_visibility' => 'listed',
 				'join_policy' => 'invite_only',
 				'join_requests_enabled' => false,
 			)

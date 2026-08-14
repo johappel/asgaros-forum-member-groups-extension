@@ -113,13 +113,12 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceMetaRepository' ) ) {
 					'accent_color'          => $meta->accent_color,
 					'icon'                  => $meta->icon,
 					'contact_text'          => $meta->contact_text,
-					'directory_visibility'  => $meta->directory_visibility,
 					'join_policy'           => $meta->join_policy,
 					'join_requests_enabled' => $meta->join_requests_enabled ? 1 : 0,
 					'topic_ids'             => wp_json_encode( $meta->topic_ids ),
 					'updated_at'            => current_time( 'mysql' ),
 				),
-				array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s' )
+				array( '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s' )
 			);
 		}
 	}

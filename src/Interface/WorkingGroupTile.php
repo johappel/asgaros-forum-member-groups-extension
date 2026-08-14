@@ -79,7 +79,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupTile' ) ) {
 						<span class="afspaces-members-summary-hint" aria-hidden="true"></span>
 					</summary>
 					<?php if ( empty( $members ) ) : ?>
-						<p class="afspaces-members-empty"><?php echo esc_html__( 'Keine Mitglieder sichtbar.', 'afspaces' ); ?></p>
+						<p class="afspaces-members-empty"><?php echo esc_html__( 'Keine Mitglieder vorhanden.', 'afspaces' ); ?></p>
 					<?php else : ?>
 						<ul class="afspaces-members-list afspaces-members-grid">
 							<?php foreach ( $members as $member ) : ?>

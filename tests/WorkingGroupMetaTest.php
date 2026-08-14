@@ -21,7 +21,6 @@ final class WorkingGroupMetaTest extends TestCase {
 
 		$this->assertSame( 42, $meta->space_id );
 		$this->assertSame( '#2d5d7f', $meta->accent_color );
-		$this->assertSame( WorkingGroupMeta::DIRECTORY_LISTED, $meta->directory_visibility );
 		$this->assertSame( WorkingGroupMeta::JOIN_POLICY_REQUEST, $meta->join_policy );
 		$this->assertTrue( $meta->join_requests_enabled );
 		$this->assertSame( array(), $meta->topic_ids );

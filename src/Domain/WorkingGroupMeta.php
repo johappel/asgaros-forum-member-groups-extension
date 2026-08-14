@@ -28,10 +28,6 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 			'#5563a5',
 		);
 
-		public const DIRECTORY_LISTED = 'listed';
-		public const DIRECTORY_MEMBERS = 'members';
-		public const DIRECTORY_HIDDEN = 'hidden';
-
 		public const JOIN_POLICY_REQUEST = 'request';
 		public const JOIN_POLICY_INVITE_ONLY = 'invite_only';
 		public const JOIN_POLICY_CLOSED = 'closed';
@@ -41,7 +37,6 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 		public string $accent_color;
 		public string $icon;
 		public string $contact_text;
-		public string $directory_visibility;
 		public string $join_policy;
 		public bool $join_requests_enabled;
 		/** @var int[] */
@@ -59,7 +54,6 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 			$this->accent_color = self::normalize_accent_color( $data['accent_color'] );
 			$this->icon = (string) $data['icon'];
 			$this->contact_text = (string) $data['contact_text'];
-			$this->directory_visibility = (string) $data['directory_visibility'];
 			$this->join_policy = (string) $data['join_policy'];
 			$this->join_requests_enabled = self::to_bool( $data['join_requests_enabled'] );
 			$this->topic_ids = self::normalize_topic_ids( $data['topic_ids'] );
@@ -75,7 +69,6 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 				'accent_color'          => '#2d5d7f',
 				'icon'                  => 'users',
 				'contact_text'          => '',
-				'directory_visibility'  => self::DIRECTORY_LISTED,
 				'join_policy'           => self::JOIN_POLICY_REQUEST,
 				'join_requests_enabled' => true,
 				'topic_ids'             => array(),
@@ -127,7 +120,6 @@ if ( ! class_exists( 'AFSpaces\\Domain\\WorkingGroupMeta' ) ) {
 				'accent_color'          => $this->accent_color,
 				'icon'                  => $this->icon,
 				'contact_text'          => $this->contact_text,
-				'directory_visibility'  => $this->directory_visibility,
 				'join_policy'           => $this->join_policy,
 				'join_requests_enabled' => $this->join_requests_enabled,
 				'topic_ids'             => $this->topic_ids,

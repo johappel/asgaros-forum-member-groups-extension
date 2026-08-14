@@ -64,20 +64,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 
 			ob_start();
 			?>
-			<section class="afspaces-working-group-settings" aria-labelledby="afspaces-working-group-settings-heading">
-				<h2 id="afspaces-working-group-settings-heading"><?php echo esc_html( sprintf( __( 'Arbeitsgruppen-Details - %s', 'afspaces' ), $forum_name ) ); ?></h2>
-				<div class="afspaces-detail-toggle" role="group" aria-label="<?php echo esc_attr__( 'Zwischen Ansicht und Bearbeiten wechseln', 'afspaces' ); ?>">
-					<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Ansicht', 'afspaces' ); ?></a>
-					<a class="afspaces-button is-active" aria-current="page" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Bearbeiten', 'afspaces' ); ?></a>
-				</div>
+			<section class="afspaces-working-group-settings" aria-label="<?php echo esc_attr__( 'Arbeitsgruppen-Details bearbeiten', 'afspaces' ); ?>">
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier pflegst du Beschreibung, Sichtbarkeit und Kontaktinformationen dieser Arbeitsgruppe.', 'afspaces' ); ?></p>
-				<p class="description"><?php echo esc_html__( '„Sichtbarkeit in Übersichten" steuert nur, ob die Arbeitsgruppe unter „Entdecken" auffindbar ist – nicht, wer das Forum lesen darf. Den Zugriff auf die Forumsinhalte legst du weiter unten über „Arbeitsgruppe verwalten → Sichtbarkeit" (privat, geschützt, öffentlich) fest.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier pflegst du Beschreibung und Kontaktinformationen dieser Arbeitsgruppe.', 'afspaces' ); ?></p>
 
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-working-group-contact-heading">
 					<div id="afspaces-working-group-contact-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Arbeitsgruppenverantwortliche', 'afspaces' ); ?></div>
 					<?php if ( empty( $responsibles ) ) : ?>
-						<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine Verantwortlichen sichtbar hinterlegt.', 'afspaces' ); ?></p>
+						<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine Verantwortlichen hinterlegt.', 'afspaces' ); ?></p>
 					<?php else : ?>
 						<ul class="afspaces-responsibles-list">
 							<?php foreach ( $responsibles as $responsible ) : ?>
@@ -116,13 +110,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 						<?php endforeach; ?>
 					</select>
 
-					<label for="afspaces-directory-visibility"><?php echo esc_html__( 'Sichtbarkeit in Übersichten', 'afspaces' ); ?></label>
-					<select id="afspaces-directory-visibility" name="directory_visibility">
-						<option value="<?php echo esc_attr( WorkingGroupMeta::DIRECTORY_LISTED ); ?>" <?php selected( $meta->directory_visibility, WorkingGroupMeta::DIRECTORY_LISTED ); ?>><?php echo esc_html__( 'Für angemeldete Personen sichtbar', 'afspaces' ); ?></option>
-						<option value="<?php echo esc_attr( WorkingGroupMeta::DIRECTORY_MEMBERS ); ?>" <?php selected( $meta->directory_visibility, WorkingGroupMeta::DIRECTORY_MEMBERS ); ?>><?php echo esc_html__( 'Nur für Mitglieder sichtbar', 'afspaces' ); ?></option>
-						<option value="<?php echo esc_attr( WorkingGroupMeta::DIRECTORY_HIDDEN ); ?>" <?php selected( $meta->directory_visibility, WorkingGroupMeta::DIRECTORY_HIDDEN ); ?>><?php echo esc_html__( 'Nur im eigenen Profil und Management sichtbar', 'afspaces' ); ?></option>
-					</select>
-
 					<label for="afspaces-join-policy"><?php echo esc_html__( 'Beitrittslogik', 'afspaces' ); ?></label>
 					<select id="afspaces-join-policy" name="join_policy">
 						<option value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>" <?php selected( $meta->join_policy, WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>><?php echo esc_html__( 'Beitritt per Anfrage', 'afspaces' ); ?></option>
@@ -156,6 +143,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 				</section>
 
 				<?php echo $this->render_management( $space, $actor, $forum_name, $responsibles ); ?>
+
+				<p class="afspaces-settings-return"><a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?></a></p>
 			</section>
 			<?php
 
@@ -212,13 +201,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 					<input type="hidden" name="afspaces_action" value="change_space_visibility" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-					<label for="afspaces-visibility"><?php echo esc_html__( 'Sichtbarkeit', 'afspaces' ); ?></label>
-					<select id="afspaces-visibility" name="visibility">
+					<label for="afspaces-forum-access"><?php echo esc_html__( 'Zugriff auf das Forum', 'afspaces' ); ?></label>
+					<select id="afspaces-forum-access" name="visibility">
 						<?php foreach ( $settings->allowed_visibilities as $visibility ) : ?>
 							<option value="<?php echo esc_attr( $visibility ); ?>" <?php selected( $space->visibility, $visibility ); ?>><?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?></option>
 						<?php endforeach; ?>
 					</select>
-					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Sichtbarkeit speichern', 'afspaces' ); ?></button>
+					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Zugriff speichern', 'afspaces' ); ?></button>
 				</form>
 
 				<?php if ( $is_owner && count( $responsibles ) > 0 ) : ?>

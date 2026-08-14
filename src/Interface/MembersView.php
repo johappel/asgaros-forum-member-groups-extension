@@ -122,9 +122,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-members" aria-labelledby="afspaces-members-heading">
-				<h2 id="afspaces-members-heading"><?php echo esc_html( sprintf( __( 'Mitglieder - %s', 'afspaces' ), $forum_name ) ); ?></h2>
+				<h2 id="afspaces-members-heading"><?php echo esc_html( sprintf( __( 'Mitglieder verwalten - %s', 'afspaces' ), $forum_name ) ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten hier Mitgliedschaften. Die Moderation von Forenbeiträgen bleibt weiterhin in Asgaros getrennt.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten hier Mitgliedschaften.', 'afspaces' ); ?></p>
 
 				<div class="afspaces-section-card content-container">
 					<div class="title-element afspaces-section-title"><?php echo esc_html__( 'Mitglieder suchen', 'afspaces' ); ?></div>
@@ -194,7 +194,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 									<td><a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => $user_id ) ) ); ?>"><?php echo esc_html( $member['display_name'] ); ?></a></td>
 									<td>
 										<?php if ( $is_owner ) : ?>
-											<span class="afspaces-tag"><?php echo esc_html__( 'Owner', 'afspaces' ); ?></span>
+										<span class="afspaces-tag"><?php echo esc_html__( 'Besitzer:in', 'afspaces' ); ?></span>
 										<?php elseif ( $is_manager ) : ?>
 											<span class="afspaces-tag"><?php echo esc_html__( 'Arbeitsgruppenverantwortlich', 'afspaces' ); ?></span>
 										<?php else : ?>

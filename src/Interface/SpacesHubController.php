@@ -412,12 +412,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				return '';
 			}
 
-			$forum = $this->asgaros->get_forum( $space->forum_id );
-			$room_name = trim( (string) ( $forum['name'] ?? '' ) );
-			if ( '' === $room_name ) {
-				$room_name = sprintf( __( 'Arbeitsgruppe #%d', 'afspaces' ), $space_id );
-			}
-
 			$tabs = array(
 				array(
 					'view'   => SpacesUrls::VIEW_SETTINGS,
@@ -473,9 +467,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				);
 			}
 
+			$heading = SpacesUrls::VIEW_SETTINGS === $view
+				? sprintf( '<h2 id="afspaces-space-context-heading" class="afspaces-space-context-title">%s</h2>', esc_html__( 'Arbeitsgruppen-Details bearbeiten', 'afspaces' ) )
+				: '';
+
 			return sprintf(
-				'<section class="afspaces-space-context" aria-labelledby="afspaces-space-context-heading"><h2 id="afspaces-space-context-heading" class="afspaces-space-context-title">%1$s</h2><nav class="afspaces-hub-nav afspaces-space-nav" aria-label="%2$s"><ul>%3$s</ul></nav></section>',
-				esc_html( WorkingGroupTerminology::manage_context( $room_name ) ),
+				'<section class="afspaces-space-context">%1$s<nav class="afspaces-hub-nav afspaces-space-nav" aria-label="%2$s"><ul>%3$s</ul></nav></section>',
+				$heading,
 				esc_attr__( 'Arbeitsgruppenbezogene Verwaltung', 'afspaces' ),
 				$items
 			);
@@ -524,8 +522,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 									<?php
 									echo esc_html(
 										sprintf(
-											/* translators: 1: Name, 2: Sichtbarkeit */
-											__( 'Angefragt von %1$s · Sichtbarkeit: %2$s', 'afspaces' ),
+								/* translators: 1: Name, 2: Zugriff */
+								__( 'Angefragt von %1$s · Zugriff: %2$s', 'afspaces' ),
 											$owner_exists ? $this->identity->get_display_name( $space->owner_user_id ) : (string) $space->owner_user_id,
 											CreateSpaceView::visibility_label( $space->visibility )
 										)
