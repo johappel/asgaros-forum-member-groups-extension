@@ -57,6 +57,9 @@ Properties auf `#af-wrapper`:
 
 `AppearanceSettingsPage::build_inline_css()` setzt dieselben Variablen aus
 den Einstellungen, sodass individuelle Einstellungen weiterhin möglich sind.
+Die Farbfelder der Settingspage akzeptieren Copy-and-paste-Hexwerte; die
+Darstellung wird client- und serverseitig auf sechsstellige `#RRGGBB`-Werte
+normalisiert.
 
 ## Arbeitsgruppen-Subnavigation
 

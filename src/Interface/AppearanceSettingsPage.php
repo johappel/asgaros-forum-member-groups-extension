@@ -30,6 +30,27 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 		 */
 		public function init(): void {
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		}
+
+		/**
+		 * Lädt die progressive Hex-Farbbedienung nur auf der AFSpaces-Settingsseite.
+		 *
+		 * @return void
+		 */
+		public function enqueue_admin_assets(): void {
+			$page = isset( $_GET['page'] ) ? sanitize_key( (string) $_GET['page'] ) : '';
+			if ( 'afspaces-settings' !== $page ) {
+				return;
+			}
+
+			wp_enqueue_script(
+				'afspaces-admin',
+				AFSPACES_URL . 'assets/afspaces-admin.js',
+				array(),
+				AFSPACES_VERSION,
+				true
+			);
 		}
 
 		/**
@@ -56,6 +77,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				'heading_font_family'    => 'Quicksand, sans-serif',
 				'base_font_size'         => 20,
 				'heading_color'          => '#2d5d7f',
+				'purple_color'           => '#561188',
 				'text_color'             => '#3a4f66',
 				'link_color'             => '#2d5d7f',
 				'breadcrumb_text_color'  => '#3a4f66',
@@ -88,6 +110,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 					'heading_font_family'    => 'Segoe UI, Arial, sans-serif',
 					'base_font_size'         => 18,
 					'heading_color'          => '#1f3f5b',
+					'purple_color'           => '#561188',
 					'text_color'             => '#2d3742',
 					'link_color'             => '#2d5d7f',
 					'breadcrumb_text_color'  => '#687482',
@@ -112,6 +135,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 					'heading_font_family'    => 'Arial, sans-serif',
 					'base_font_size'         => 20,
 					'heading_color'          => '#c66d00',
+					'purple_color'           => '#561188',
 					'text_color'             => '#1a1a1a',
 					'link_color'             => '#003d73',
 					'breadcrumb_text_color'  => '#444444',
@@ -154,6 +178,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 					$settings[ $key ] = self::defaults()[ $key ];
 				}
 			}
+			foreach ( array_keys( self::color_fields() ) as $key ) {
+				$normalized = self::normalize_hex_color( $settings[ $key ] ?? '' );
+				$settings[ $key ] = $normalized ?: (string) self::defaults()[ $key ];
+			}
 
 			return $settings;
 		}
@@ -188,7 +216,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 			$radius      = (int) $s['wrapper_border_radius'];
 
 			return sprintf(
-				'#af-wrapper.afspaces-wrapper { --afspaces-color-blue: %7$s; --afspaces-color-yellow: %21$s; --afspaces-color-purple: #561188; --afspaces-color-text: %3$s; --afspaces-color-secondary-background: %17$s; --afspaces-color-light-background: %4$s; font-family: %1$s; font-size: %2$dpx; color: %3$s; background: %4$s; border-color: %5$s !important; border-radius: %6$dpx; }'
+				'#af-wrapper.afspaces-wrapper { --afspaces-color-blue: %7$s; --afspaces-color-yellow: %21$s; --afspaces-color-purple: %23$s; --afspaces-color-text: %3$s; --afspaces-color-secondary-background: %17$s; --afspaces-color-light-background: %4$s; font-family: %1$s; font-size: %2$dpx; color: %3$s; background: %4$s; border-color: %5$s !important; border-radius: %6$dpx; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-dashboard h2, #af-wrapper.afspaces-wrapper .afspaces-members h2, #af-wrapper.afspaces-wrapper .afspaces-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-join-requests h2, #af-wrapper.afspaces-wrapper .afspaces-my-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-space-context-title { color: %7$s; font-family: %8$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-breadcrumb, #af-wrapper.afspaces-wrapper .afspaces-breadcrumb a { color: %9$s; }'
 				. '#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header { background: %10$s; border-color: %10$s; }'
@@ -222,7 +250,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				(string) $s['link_color'],
 				(string) $s['button_secondary_text_color'],
 				(string) $s['button_hover_bg'],
-				(string) $s['button_hover_text_color']
+				(string) $s['button_hover_text_color'],
+				(string) $s['purple_color']
 			);
 		}
 
@@ -254,6 +283,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 
 			$color_keys = array(
 				'heading_color',
+				'purple_color',
 				'text_color',
 				'link_color',
 				'breadcrumb_text_color',
@@ -275,11 +305,84 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 
 			foreach ( $color_keys as $key ) {
 				$raw = isset( $input[ $key ] ) ? (string) $input[ $key ] : (string) $out[ $key ];
-				$san = sanitize_hex_color( $raw );
+				$san = self::normalize_hex_color( $raw );
 				$out[ $key ] = $san ?: (string) self::defaults()[ $key ];
 			}
 
 			return $out;
+		}
+
+		/**
+		 * Normalisiert drei- und sechsstellige Hexwerte auf #RRGGBB.
+		 *
+		 * @param mixed $value Farbwert.
+		 * @return string
+		 */
+		private static function normalize_hex_color( $value ): string {
+			$raw = trim( (string) $value );
+			if ( 1 !== preg_match( '/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i', $raw, $matches ) ) {
+				return '';
+			}
+
+			$hex = strtoupper( $matches[1] );
+			if ( 3 === strlen( $hex ) ) {
+				$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+			}
+
+			return '#' . $hex;
+		}
+
+		/**
+		 * @return array<string,string>
+		 */
+		private static function color_fields(): array {
+			return array(
+				'heading_color'              => __( 'Überschriftenfarbe', 'afspaces' ),
+				'purple_color'               => __( 'Lila Akzentfarbe', 'afspaces' ),
+				'text_color'                 => __( 'Textfarbe', 'afspaces' ),
+				'link_color'                 => __( 'Linkfarbe', 'afspaces' ),
+				'breadcrumb_text_color'      => __( 'Breadcrumb-Farbe', 'afspaces' ),
+				'wrapper_background'          => __( 'Panel-Hintergrund', 'afspaces' ),
+				'wrapper_border_color'        => __( 'Panel-Randfarbe', 'afspaces' ),
+				'nav_background'              => __( 'Top-Navigation Hintergrund', 'afspaces' ),
+				'nav_text_color'              => __( 'Top-Navigation Text', 'afspaces' ),
+				'nav_active_background'       => __( 'Aktiver Tab Hintergrund', 'afspaces' ),
+				'nav_active_text_color'       => __( 'Aktiver Tab Text', 'afspaces' ),
+				'pager_background'            => __( 'Pager Hintergrund', 'afspaces' ),
+				'pager_text_color'            => __( 'Pager Text', 'afspaces' ),
+				'button_primary_bg'           => __( 'Primär-Button Hintergrund', 'afspaces' ),
+				'button_secondary_bg'         => __( 'Sekundär-Button Hintergrund', 'afspaces' ),
+				'button_text_color'           => __( 'Button-Textfarbe', 'afspaces' ),
+				'button_secondary_text_color' => __( 'Sekundär-Button Textfarbe', 'afspaces' ),
+				'button_hover_bg'             => __( 'Button-Hover Hintergrund', 'afspaces' ),
+				'button_hover_text_color'     => __( 'Button-Hover Textfarbe', 'afspaces' ),
+			);
+		}
+
+		/**
+		 * @param string               $key Optionenschlüssel.
+		 * @param string               $label Sichtbarer Feldname.
+		 * @param array<string,mixed>  $opts Aktuelle Optionen.
+		 * @return void
+		 */
+		private static function render_color_field( string $key, string $label, array $opts ): void {
+			$field_id = 'afspaces_' . $key;
+			$value = self::normalize_hex_color( $opts[ $key ] ?? '' );
+			if ( '' === $value ) {
+				$value = '#000000';
+			}
+			?>
+			<tr>
+				<th scope="row"><label for="<?php echo esc_attr( $field_id . '_hex' ); ?>"><?php echo esc_html( $label ); ?></label></th>
+				<td>
+					<div class="afspaces-admin-color-control" data-afspaces-color-control>
+						<input type="color" id="<?php echo esc_attr( $field_id . '_picker' ); ?>" value="<?php echo esc_attr( strtolower( $value ) ); ?>" data-afspaces-color-picker aria-label="<?php echo esc_attr( $label . ' Farbwähler' ); ?>" />
+						<input type="text" id="<?php echo esc_attr( $field_id . '_hex' ); ?>" name="<?php echo esc_attr( self::OPTION_KEY . '[' . $key . ']' ); ?>" value="<?php echo esc_attr( $value ); ?>" class="regular-text afspaces-hex-color" data-afspaces-hex-input inputmode="text" maxlength="7" pattern="#?[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?" autocomplete="off" spellcheck="false" aria-describedby="<?php echo esc_attr( $field_id . '_description' ); ?>" />
+						<span id="<?php echo esc_attr( $field_id . '_description' ); ?>" class="description">#RRGGBB</span>
+					</div>
+				</td>
+			</tr>
+			<?php
 		}
 
 		/**
@@ -313,6 +416,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				<h1><?php echo esc_html__( 'Arbeitsgruppen-Darstellung', 'afspaces' ); ?></h1>
 			<?php endif; ?>
 				<p><?php echo esc_html__( 'Hier kannst du Farben, Schrift und Grundlayout der AFSpaces-Oberfläche an das Asgaros-Design anpassen.', 'afspaces' ); ?></p>
+				<p class="description"><?php echo esc_html__( 'Farben können per Farbwähler oder direkt als Hexwert eingegeben und per Copy-and-paste übernommen werden. Erlaubt sind zum Beispiel #2D5D7F und #ABC.', 'afspaces' ); ?></p>
 				<form method="post" action="options.php">
 					<?php settings_fields( 'afspaces_appearance_group' ); ?>
 					<table class="form-table" role="presentation">
@@ -343,82 +447,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 							<th scope="row"><label for="afspaces_base_font_size"><?php echo esc_html__( 'Grundschriftgroesse (px)', 'afspaces' ); ?></label></th>
 							<td><input type="number" min="12" max="22" id="afspaces_base_font_size" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[base_font_size]" value="<?php echo esc_attr( (string) $opts['base_font_size'] ); ?>" /></td>
 						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_heading_color"><?php echo esc_html__( 'Ueberschriftenfarbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_heading_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[heading_color]" value="<?php echo esc_attr( (string) $opts['heading_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_text_color"><?php echo esc_html__( 'Textfarbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[text_color]" value="<?php echo esc_attr( (string) $opts['text_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_link_color"><?php echo esc_html__( 'Linkfarbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_link_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[link_color]" value="<?php echo esc_attr( (string) $opts['link_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_breadcrumb_text_color"><?php echo esc_html__( 'Brotkruemel-Farbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_breadcrumb_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[breadcrumb_text_color]" value="<?php echo esc_attr( (string) $opts['breadcrumb_text_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_wrapper_background"><?php echo esc_html__( 'Panel-Hintergrund', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_wrapper_background" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[wrapper_background]" value="<?php echo esc_attr( (string) $opts['wrapper_background'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_wrapper_border_color"><?php echo esc_html__( 'Panel-Randfarbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_wrapper_border_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[wrapper_border_color]" value="<?php echo esc_attr( (string) $opts['wrapper_border_color'] ); ?>" /></td>
-						</tr>
+						<?php foreach ( self::color_fields() as $key => $label ) : ?>
+							<?php self::render_color_field( $key, $label, $opts ); ?>
+						<?php endforeach; ?>
 						<tr>
 							<th scope="row"><label for="afspaces_wrapper_border_radius"><?php echo esc_html__( 'Panel-Rundung (px)', 'afspaces' ); ?></label></th>
 							<td><input type="number" min="0" max="40" id="afspaces_wrapper_border_radius" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[wrapper_border_radius]" value="<?php echo esc_attr( (string) $opts['wrapper_border_radius'] ); ?>" /></td>
 						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_nav_background"><?php echo esc_html__( 'Top-Navigation Hintergrund', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_nav_background" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[nav_background]" value="<?php echo esc_attr( (string) $opts['nav_background'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_nav_text_color"><?php echo esc_html__( 'Top-Navigation Text', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_nav_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[nav_text_color]" value="<?php echo esc_attr( (string) $opts['nav_text_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_nav_active_background"><?php echo esc_html__( 'Aktiver Tab Hintergrund', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_nav_active_background" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[nav_active_background]" value="<?php echo esc_attr( (string) $opts['nav_active_background'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_nav_active_text_color"><?php echo esc_html__( 'Aktiver Tab Text', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_nav_active_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[nav_active_text_color]" value="<?php echo esc_attr( (string) $opts['nav_active_text_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_pager_background"><?php echo esc_html__( 'Pager Hintergrund', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_pager_background" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[pager_background]" value="<?php echo esc_attr( (string) $opts['pager_background'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_pager_text_color"><?php echo esc_html__( 'Pager Text', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_pager_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[pager_text_color]" value="<?php echo esc_attr( (string) $opts['pager_text_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_button_primary_bg"><?php echo esc_html__( 'Primär-Button Hintergrund', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_button_primary_bg" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_primary_bg]" value="<?php echo esc_attr( (string) $opts['button_primary_bg'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_button_secondary_bg"><?php echo esc_html__( 'Sekundär-Button Hintergrund', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_button_secondary_bg" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_secondary_bg]" value="<?php echo esc_attr( (string) $opts['button_secondary_bg'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_button_text_color"><?php echo esc_html__( 'Button-Textfarbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_button_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_text_color]" value="<?php echo esc_attr( (string) $opts['button_text_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_button_secondary_text_color"><?php echo esc_html__( 'SekundÃ¤r-Button Textfarbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_button_secondary_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_secondary_text_color]" value="<?php echo esc_attr( (string) $opts['button_secondary_text_color'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_button_hover_bg"><?php echo esc_html__( 'Button-Hover Hintergrund', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_button_hover_bg" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_hover_bg]" value="<?php echo esc_attr( (string) $opts['button_hover_bg'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="afspaces_button_hover_text_color"><?php echo esc_html__( 'Button-Hover Textfarbe', 'afspaces' ); ?></label></th>
-							<td><input type="color" id="afspaces_button_hover_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[button_hover_text_color]" value="<?php echo esc_attr( (string) $opts['button_hover_text_color'] ); ?>" /></td>
-						</tr>
+
 					</table>
 					<?php submit_button(); ?>
 				</form>

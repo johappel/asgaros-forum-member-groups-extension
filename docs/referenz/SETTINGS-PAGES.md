@@ -21,7 +21,14 @@ Die früheren direkten Seiten-Slugs (`afspaces-appearance`, `afspaces-look-and-f
 - Option: `afspaces_appearance_options`
 - Anwendung: `enqueue_inline_style()` hängt Inline-CSS an `afspaces-frontend`; site-weit über `SearchModal`.
 
-Feldschlüssel (Auszug): `base_font_family`, `heading_font_family`, `base_font_size`, `heading_color`, `text_color`, `link_color`, `breadcrumb_text_color`, `wrapper_background`, `wrapper_border_color`, `wrapper_border_radius`, `nav_background`, `nav_text_color`, `nav_active_background`, `nav_active_text_color`, `pager_background`, `pager_text_color`, `button_primary_bg`, `button_secondary_bg`, `button_text_color`, `button_secondary_text_color`, `button_hover_bg`, `button_hover_text_color`.
+Feldschlüssel: `base_font_family`, `heading_font_family`, `base_font_size`, `heading_color`, `purple_color`, `text_color`, `link_color`, `breadcrumb_text_color`, `wrapper_background`, `wrapper_border_color`, `wrapper_border_radius`, `nav_background`, `nav_text_color`, `nav_active_background`, `nav_active_text_color`, `pager_background`, `pager_text_color`, `button_primary_bg`, `button_secondary_bg`, `button_text_color`, `button_secondary_text_color`, `button_hover_bg`, `button_hover_text_color`.
+
+Alle Farbfelder werden über `AppearanceSettingsPage::color_fields()` zentral
+gerendert. Neben dem nativen Farbwähler steht jeweils ein Textfeld für
+Copy-and-paste bereit. `assets/afspaces-admin.js` synchronisiert beide Felder
+und normalisiert `#abc`, `abc` sowie `#AABBCC` zu einem sechsstelligen
+`#RRGGBB`-Wert. Serverseitig verwirft `sanitize_options()` ungültige Werte und
+verwendet dafür den jeweiligen Standardwert.
 
 Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich` plus Reset auf Standard.
 

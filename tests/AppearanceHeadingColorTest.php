@@ -26,6 +26,7 @@ final class AppearanceHeadingColorTest extends TestCase {
 		$settings = AppearanceSettingsPage::presets()['asgaros'];
 
 		self::assertSame( '#2d5d7f', $settings['heading_color'] );
+		self::assertSame( '#561188', $settings['purple_color'] );
 		self::assertSame( '#2d5d7f', $settings['button_primary_bg'] );
 		self::assertSame( '#3a4f66', $settings['text_color'] );
 		self::assertSame( '#364149', $settings['button_secondary_bg'] );
@@ -50,8 +51,36 @@ final class AppearanceHeadingColorTest extends TestCase {
 	public function test_inline_button_states_override_stored_appearance_values(): void {
 		$source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Interface/AppearanceSettingsPage.php' );
 
+		self::assertStringContainsString( '--afspaces-color-purple: %23$s;', $source );
 		self::assertStringContainsString( '.afspaces-button:hover, #af-wrapper.afspaces-wrapper .afspaces-button:focus', $source );
 		self::assertStringContainsString( 'background: %21$s !important;', $source );
 		self::assertStringContainsString( '.afspaces-button-secondary { background: %17$s !important;', $source );
+	}
+
+	public function test_color_values_are_normalized_for_paste_and_copy(): void {
+		$page = new AppearanceSettingsPage();
+		$settings = $page->sanitize_options(
+			array(
+				'heading_color'  => '2d5d7f',
+				'purple_color'   => '#abc',
+				'button_hover_bg' => 'not-a-color',
+			)
+		);
+
+		self::assertSame( '#2D5D7F', $settings['heading_color'] );
+		self::assertSame( '#AABBCC', $settings['purple_color'] );
+		self::assertSame( '#f5ae35', $settings['button_hover_bg'] );
+	}
+
+	public function test_settings_page_exposes_picker_and_hex_input_for_all_color_options(): void {
+		$source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Interface/AppearanceSettingsPage.php' );
+		$script = (string) file_get_contents( dirname( __DIR__ ) . '/assets/afspaces-admin.js' );
+
+		self::assertStringContainsString( 'data-afspaces-color-picker', $source );
+		self::assertStringContainsString( 'data-afspaces-hex-input', $source );
+		self::assertStringContainsString( 'pattern="#?[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?"', $source );
+		self::assertStringContainsString( 'normalizeHex', $script );
+		self::assertStringContainsString( 'setCustomValidity', $script );
+		self::assertStringContainsString( "'purple_color'", $source );
 	}
 }

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Appearance-Settings um eine zentrale Hex-Farbbedienung mit Farbwähler und
+  Copy-and-paste-Feld für alle Farbrollen einschließlich Lila-Akzent erweitert.
+- Hex-Kurzformen und Werte ohne führendes `#` werden normalisiert; ungültige
+  Eingaben fallen serverseitig sicher auf den jeweiligen Standardwert zurück.
+- Plugin-Version auf 0.4.13 angehoben.
+
 - Arbeitsgruppen-Subnavigation an die zurückhaltende Tab-Optik angepasst:
   transparenter Hintergrund, nur eine blaue Linie am unteren Rand und weißer
   Hintergrund ausschließlich für den aktiven Tab.

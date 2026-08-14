@@ -1816,16 +1816,42 @@ a.afspaces-link.is-active {
 	padding-bottom: 0.25rem;
 }
 
-#af-wrapper.afspaces-wrapper .afspaces-button,
-#af-wrapper.afspaces-wrapper .afspaces-button-secondary,
-#af-wrapper.afspaces-wrapper .afspaces-button-danger {
-	min-height: 37px;
-	padding: 0 14px;
-	border-radius: 4px;
-	font-family: Quicksand, sans-serif;
-	font-size: 16px;
-	font-weight: 500;
-	line-height: 37px;
+Element {
+}
+#af-wrapper.afspaces-wrapper .afspaces-button:hover, #af-wrapper.afspaces-wrapper .afspaces-button:focus {
+  background: #F5AE35 !important;
+
+  border-color: #F5AE35 !important;
+
+  color: #3A4F66 !important;
+}
+#af-wrapper.afspaces-wrapper .afspaces-button:hover, #af-wrapper.afspaces-wrapper .afspaces-button:focus {
+  background: var(--afspaces-color-yellow) !important;
+  border-color: var(--afspaces-color-yellow) !important;
+  color: var(--afspaces-color-text) !important;
+}
+#af-wrapper.afspaces-wrapper .afspaces-button:hover {
+  background: #f8b521 !important;
+  color: #000 !important;
+}
+#af-wrapper.afspaces-wrapper .afspaces-button {
+  background: #2D5D7F !important;
+  border-color: #2D5D7F !important;
+  color: #FFFFFF !important;
+}
+#af-wrapper.afspaces-wrapper .afspaces-button {
+  background: var(--afspaces-color-blue) !important;
+  border-color: var(--afspaces-color-blue) !important;
+  color: var(--afspaces-color-text) !important;
+}
+#af-wrapper.afspaces-wrapper .afspaces-button, #af-wrapper.afspaces-wrapper .afspaces-button-secondary, #af-wrapper.afspaces-wrapper .afspaces-button-danger {
+  min-height: 37px;
+  padding: 9px 14px;
+  border-radius: 4px;
+  font-family: Quicksand, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  /* line-height: 37px; */
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-pagination {
