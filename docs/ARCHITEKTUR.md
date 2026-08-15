@@ -151,6 +151,9 @@ Zustand bleiben vollständig bei Asgaros.
 
 1. ForumNavigation hängt Navigation und Panel in Asgaros ein und verwendet für die Anzeige der Gründungsoption `SpaceCreationService::can_user_create()`.
 2. ForumModerationControls hängt kontextabhängige Aktionen in die Forenansicht.
+   `ModerationActionVisibility` blendet einen lokalen Menüpunkt nur dann aus,
+   wenn Asgaros für genau dieselbe Topic-/Post-Aktion bereits eine native
+   Berechtigung und Darstellung anbietet.
 3. SearchModal öffnet die AFSpaces-Suche über Asgaros- und optional WordPress-Suchformulare.
 4. Freigabe-Navigation verwendet `SpaceLifecycleService::count_pending_for_actor()`;
    die serverseitige Berechtigungsprüfung und eine statusbasierte `COUNT(*)`-
@@ -174,7 +177,8 @@ Nur der Adapter kennt interne Asgaros-Methoden. Bereits dokumentierte und verwen
 - Lesen zugänglicher Kategorien für Suche und Sichtbarkeit.
 - Berechnung von Post-Deep-Links für Suchtreffer.
 - Erstellen von Kategorien, Gruppen und Foren für selbst gegründete Arbeitsgruppen.
-- Forum-Moderationsoperationen wie Schließen, Löschen, Verschieben.
+- Forum-Moderationsoperationen wie Schließen, Löschen, Verschieben sowie die
+  gekapselte Prüfung nativer Asgaros-Moderationsaktionen.
 
 Wenn neue Asgaros-Interna benötigt werden, gilt:
 

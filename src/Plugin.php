@@ -26,6 +26,7 @@ use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Application\SpaceModerationService;
+use AFSpaces\Application\ModerationActionVisibility;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\Requirements;
@@ -201,7 +202,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$forum_style_layer->init();
 
 			// Raum-begrenzte Moderationsaktionen direkt im Forum.
-			$forum_moderation = new ForumModerationControls( $spaces, $asgaros, $space_moderation );
+			$forum_moderation = new ForumModerationControls( $spaces, $asgaros, $space_moderation, new ModerationActionVisibility( $asgaros ) );
 			$forum_moderation->init();
 
 			// Mitgliederansicht in denselben Shortcode integrieren.

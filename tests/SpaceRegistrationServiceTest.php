@@ -78,6 +78,10 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 		return '3.4.0';
 	}
 
+	public function can_perform_moderation_action( string $action, int $user_id, int $topic_id = 0, int $post_id = 0 ): bool {
+		return false;
+	}
+
 	public function relocate_subscription_navigation(): void {
 	}
 

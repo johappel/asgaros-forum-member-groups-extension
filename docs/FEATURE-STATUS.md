@@ -251,6 +251,9 @@ Enthalten:
 - Bearbeiten von Name, Beschreibung, Sichtbarkeit und Owner-Übertragung im Frontend.
 - Archivierung, Reaktivierung und Löschung mit definierter Cleanup-Strategie.
 - Arbeitsgruppenbezogene Moderation für Themen und Beiträge, einschließlich Verschieben.
+- Inline-Moderationsaktionen werden gegen aktionsgleiche native Asgaros-
+  Aktionen dedupliziert; Beitrag-verschieben bleibt als lokale Ergänzung
+  sichtbar, weil Asgaros dafür keinen nativen Menüpunkt anbietet.
 
 Wichtige Architekturentscheidungen:
 

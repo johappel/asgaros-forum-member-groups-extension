@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Moderationsaktionen im Asgaros-Topic-/Post-Menü werden aktionsbezogen
+  gegen die native Asgaros-Berechtigung dedupliziert. Globale Moderatoren
+  und Administratoren sehen dadurch keine semantisch identischen AFSpaces-
+  Links für Löschen, Verschieben, Pinning oder Öffnen/Schließen; lokale
+  Arbeitsgruppenmoderation und die serverseitigen Prüfungen bleiben erhalten.
+  Das Verschieben einzelner Beiträge bleibt sichtbar, da Asgaros dafür keinen
+  entsprechenden nativen Bedienweg anbietet.
+- Plugin-Version auf 0.4.19 angehoben.
+
 - Issue #15: Raumverantwortliche können Themen in ihren privaten
   Arbeitsgruppenforen sicher oben halten und wieder lösen. Die Funktion nutzt
   die bestehende Space-Policy, Topic-/Forum-Prüfung und Audit-Ereignisse,

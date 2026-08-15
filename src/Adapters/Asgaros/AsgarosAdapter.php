@@ -83,6 +83,101 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 		}
 
 		/**
+		 * Prüft die native Asgaros-Moderation für genau eine Aktion.
+		 *
+		 * Geprüft gegen Asgaros Forum 3.4.0: Die Methoden liegen am
+		 * `AsgarosForumPermissions`-Objekt. Das Verschieben eines Themas wird
+		 * von Asgaros direkt über `isModerator()` freigeschaltet; ein natives
+		 * Verschieben einzelner Beiträge gibt es in dieser Ansicht nicht.
+		 *
+		 * @param string $action   Eine MODERATION_ACTION_ Konstante.
+		 * @param int    $user_id  WordPress-Benutzer-ID.
+		 * @param int    $topic_id Themen-ID, falls die Aktion themenbezogen ist.
+		 * @param int    $post_id  Beitrags-ID, falls die Aktion beitragsbezogen ist.
+		 * @return bool
+		 */
+		public function can_perform_moderation_action( string $action, int $user_id, int $topic_id = 0, int $post_id = 0 ): bool {
+			if ( $user_id < 1 ) {
+				return false;
+			}
+
+			$forum = $this->forum();
+			if ( null === $forum || ! isset( $forum->permissions ) || ! is_object( $forum->permissions ) ) {
+				return false;
+			}
+
+			$permissions = $forum->permissions;
+			try {
+				switch ( $action ) {
+					case AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_DELETE:
+						return $topic_id > 0
+							&& method_exists( $permissions, 'can_delete_topic' )
+							&& (bool) $permissions->can_delete_topic( $user_id, $topic_id );
+
+					case AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_MOVE:
+						return $topic_id > 0
+							&& $this->is_topic_approved_for_native_action( $forum, $topic_id )
+							&& method_exists( $permissions, 'isModerator' )
+							&& (bool) $permissions->isModerator( $user_id );
+
+					case AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_PIN:
+						return $topic_id > 0
+							&& $this->is_topic_approved_for_native_action( $forum, $topic_id )
+							&& method_exists( $permissions, 'can_pin_topic' )
+							&& (bool) $permissions->can_pin_topic( $user_id, $topic_id );
+
+					case AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_CLOSE:
+						return $topic_id > 0
+							&& $this->is_topic_approved_for_native_action( $forum, $topic_id )
+							&& method_exists( $permissions, 'can_close_topic' )
+							&& (bool) $permissions->can_close_topic( $user_id, $topic_id );
+
+					case AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_OPEN:
+						return $topic_id > 0
+							&& $this->is_topic_approved_for_native_action( $forum, $topic_id )
+							&& method_exists( $permissions, 'can_open_topic' )
+							&& (bool) $permissions->can_open_topic( $user_id, $topic_id );
+
+					case AsgarosAdapterInterface::MODERATION_ACTION_POST_DELETE:
+						$location = $post_id > 0 ? $this->get_post_location( $post_id ) : null;
+						return null !== $location
+							&& $this->is_topic_approved_for_native_action( $forum, (int) $location['topic_id'] )
+							&& method_exists( $permissions, 'can_delete_post' )
+							&& (bool) $permissions->can_delete_post( $user_id, $post_id );
+
+					case AsgarosAdapterInterface::MODERATION_ACTION_POST_MOVE:
+						// Asgaros 3.4.0 bietet hierfür keinen nativen Post-Menüpunkt.
+						return false;
+				}
+			} catch ( \Throwable $exception ) {
+				// Eine unbekannte/inkompatible API darf kein AFSpaces-Control
+				// ausblenden; die lokale Sicherheitsprüfung bleibt zuständig.
+				return false;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Prüft die Voraussetzung, unter der Asgaros seine Topic-/Post-Aktionen
+		 * im Topic-Menü rendert.
+		 *
+		 * @param object $forum    Asgaros-Forum-Instanz.
+		 * @param int    $topic_id Themen-ID.
+		 * @return bool
+		 */
+		private function is_topic_approved_for_native_action( object $forum, int $topic_id ): bool {
+			if ( $topic_id < 1
+				|| ! isset( $forum->approval )
+				|| ! is_object( $forum->approval )
+				|| ! method_exists( $forum->approval, 'is_topic_approved' ) ) {
+				return false;
+			}
+
+			return (bool) $forum->approval->is_topic_approved( $topic_id );
+		}
+
+		/**
 		 * Verschiebt die bestehenden Asgaros-Abonnement-Controls in die Navigation.
 		 *
 		 * Asgaros erzeugt die Links inklusive aktuellem Zustand, Ziel-URL und

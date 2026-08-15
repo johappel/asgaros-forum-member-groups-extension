@@ -152,6 +152,21 @@ Formulare nicht mehr abschneiden. Die Sichtbarkeit und
 `aria-expanded` werden weiter durch das native `details`-Toggle gesteuert;
 die serverseitigen Nonces und POST-Aktionen bleiben unverändert.
 
+### Konsolidierte Moderationsaktionen
+
+`ForumModerationControls::render_controls()` und `ModerationView` rendern
+lokale Aktionen nur, wenn `ModerationActionVisibility::should_render_local_action()`
+die lokale AFSpaces-Berechtigung bestätigt und
+`AsgarosAdapter::can_perform_moderation_action()` keinen gleichwertigen
+nativen Asgaros-Bedienweg meldet. Die Entscheidung erfolgt getrennt für
+Thema löschen, Thema verschieben, An-/Abpinnen, Öffnen/Schließen und Beitrag
+löschen. „Beitrag verschieben“ bleibt als lokale Ergänzung sichtbar, weil
+Asgaros dafür keinen nativen Post-Menüpunkt besitzt.
+
+Das ist ausschließlich eine serverseitige Rendering-Entscheidung und keine
+Sicherheitsmaßnahme. Die Nonce-, Capability-, Raum- und Objektprüfungen der
+AFSpaces-Handler bleiben unabhängig davon bestehen.
+
 asgaros-forum/skin/custom.css darf niemals direkt geändert werden: Asgaros
 erzeugt diese Datei aus den Appearance-Einstellungen neu. Neue AFSpaces-Regeln
 werden stattdessen in diesem Layer ergänzt. Die CSS Custom Properties am

@@ -17,6 +17,31 @@ Der Asgaros-Adapter ist die einzige Stelle, die Asgaros-Interna kennen darf. Ver
 | `is_user_in_group(int $user_id, int $group_id)` | WordPress-/Gruppen-ID | `bool` |
 | `is_search_request()` | — | `bool`; erkennt die aktuelle Asgaros-Suchansicht |
 
+### Native Moderationsberechtigungen
+
+`can_perform_moderation_action(string $action, int $user_id, int $topic_id = 0,
+int $post_id = 0)` kapselt die aktionsbezogenen Prüfungen am nativen
+`AsgarosForumPermissions`-Objekt. Die erlaubten Werte sind die Konstanten
+`MODERATION_ACTION_TOPIC_DELETE`, `TOPIC_MOVE`, `TOPIC_PIN`, `TOPIC_CLOSE`,
+`TOPIC_OPEN`, `POST_DELETE` und `POST_MOVE` aus
+`AsgarosAdapterInterface`.
+
+| AFSpaces-Aktion | Native Asgaros-Prüfung |
+| --- | --- |
+| Thema löschen | `can_delete_topic($user_id, $topic_id)` |
+| Thema verschieben | freigegebenes Thema plus `isModerator($user_id)` |
+| Thema an-/abpinnen | freigegebenes Thema plus `can_pin_topic($user_id, $topic_id)` |
+| Thema schließen/öffnen | freigegebenes Thema plus `can_close_topic()` / `can_open_topic()` |
+| Beitrag löschen | freigegebenes Thema plus `can_delete_post($user_id, $post_id)` |
+| Beitrag verschieben | bewusst `false`: kein entsprechender nativer Asgaros-Menüpunkt |
+
+Die Prüfung entscheidet über die zusätzliche Darstellung im
+`ForumModerationControls`-Inline-Menü und im separaten
+`ModerationView`-Verwaltungsweg. Die dortigen Formulare bleiben vollständig
+serverseitig geschützt. Unbekannte oder fehlende Asgaros-Methoden führen zu
+`false` für die native Aktion; dadurch bleibt die lokale AFSpaces-Aktion
+sichtbar, während ihre Nonce-, Policy- und Objektprüfungen unverändert greifen.
+
 ### Abonnement-Navigation
 
 `relocate_subscription_navigation()` entfernt die bestehende Asgaros-Ausgabe

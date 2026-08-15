@@ -170,6 +170,32 @@ Adapter und setzt nur `sticky = 1` (lokal) oder `sticky = 0`; der globale Wert
 `2` wird nicht verwendet. Die raumbezogene Policy- und Objektprüfung erfolgt
 vorher im `SpaceModerationService`.
 
+### Moderations-UI-Deduplizierung gegen Asgaros 3.4.0
+
+Die native Moderationsdarstellung wurde gegen
+`includes/forum-permissions.php` und `includes/forum.php` geprüft. Der
+Adapter kapselt folgende aktionsbezogene Methoden:
+
+- `can_delete_topic()` für „Thema löschen“.
+- `can_delete_post()` für „Beitrag löschen“.
+- `can_open_topic()` und `can_close_topic()` für Öffnen/Schließen.
+- `can_pin_topic()` für Anpinnen und Abpinnen.
+- `isModerator()` für „Thema verschieben“, weil Asgaros dort keine eigene
+  `can_move_topic()`-Methode nutzt.
+
+Für Topic-/Post-Aktionen, die Asgaros nur bei freigegebenen Themen in der
+aktuellen Topic-Ansicht rendert, prüft der Adapter zusätzlich
+`approval->is_topic_approved()`. Das verhindert, dass AFSpaces einen lokalen
+Link ausblendet, wenn der native Button in diesem Kontext gar nicht erscheint.
+Asgaros stellt in dieser Ansicht keinen nativen „Beitrag verschieben“-Button
+bereit; diese lokale AFSpaces-Aktion wird daher nicht dedupliziert.
+
+Die Zuordnung und die UI-Entscheidung liegen in
+`AsgarosAdapter::can_perform_moderation_action()` sowie
+`ModerationActionVisibility::should_render_local_action()`. Bei fehlenden
+Methoden oder unbekannten Versionen wird konservativ `false` für die native
+Aktion zurückgegeben. Die lokalen Handler bleiben unabhängig davon geschützt.
+
 Kategorie, Gruppe und Forum werden nacheinander angelegt; bei einem Teilfehler entfernt der
 `SpaceCreationService` die bereits erstellten Artefakte in umgekehrter Reihenfolge
 (Forum → Gruppe → Kategorie) und löscht den Space-Datensatz. Live gegen Asgaros 3.4.0

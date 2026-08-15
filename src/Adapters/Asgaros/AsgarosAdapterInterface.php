@@ -16,6 +16,14 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 	 */
 	interface AsgarosAdapterInterface {
 
+		public const MODERATION_ACTION_TOPIC_DELETE = 'topic_delete';
+		public const MODERATION_ACTION_TOPIC_MOVE   = 'topic_move';
+		public const MODERATION_ACTION_TOPIC_PIN    = 'topic_pin';
+		public const MODERATION_ACTION_TOPIC_CLOSE  = 'topic_close';
+		public const MODERATION_ACTION_TOPIC_OPEN   = 'topic_open';
+		public const MODERATION_ACTION_POST_DELETE  = 'post_delete';
+		public const MODERATION_ACTION_POST_MOVE    = 'post_move';
+
 		/**
 		 * Gibt zurück, ob Asgaros verfügbar und kompatibel ist.
 		 *
@@ -29,6 +37,21 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return string|null
 		 */
 		public function get_version(): ?string;
+
+		/**
+		 * Prüft, ob Asgaros selbst eine konkrete Moderationsaktion anbietet.
+		 *
+		 * Die Implementierung muss die aktionsbezogene Asgaros-Berechtigung
+		 * verwenden. `false` bedeutet auch, dass Asgaros die native Aktion im
+		 * aktuellen Objekt-/Ansichtskontext nicht anbietet.
+		 *
+		 * @param string $action   Eine MODERATION_ACTION_ Konstante.
+		 * @param int    $user_id  WordPress-Benutzer-ID.
+		 * @param int    $topic_id Themen-ID, falls die Aktion themenbezogen ist.
+		 * @param int    $post_id  Beitrags-ID, falls die Aktion beitragsbezogen ist.
+		 * @return bool
+		 */
+		public function can_perform_moderation_action( string $action, int $user_id, int $topic_id = 0, int $post_id = 0 ): bool;
 
 		/**
 		 * Verschiebt die eingebauten Abonnement-Links vom unteren Bereich als

@@ -11,6 +11,7 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\ModerationActionVisibility;
 use AFSpaces\Application\SpaceModerationService;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
@@ -29,6 +30,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
 		private SpaceModerationService $moderation;
+		private ModerationActionVisibility $visibility;
 
 		/**
 		 * Zwischenspeicher je Forum-ID: [space, can_moderate, targets].
@@ -37,10 +39,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 		 */
 		private array $forum_cache = array();
 
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, SpaceModerationService $moderation ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, SpaceModerationService $moderation, ?ModerationActionVisibility $visibility = null ) {
 			$this->spaces     = $spaces;
 			$this->asgaros    = $asgaros;
 			$this->moderation = $moderation;
+			$this->visibility = $visibility ?: new ModerationActionVisibility( $asgaros );
 		}
 
 		/**
@@ -107,16 +110,25 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 			echo '<span class="afspaces-post-mod" data-afspaces-post-mod>';
 
 			if ( $is_first ) {
-				$this->render_pin_topic_item( $space_id, $topic_id, $forum_url, $is_pinned );
-				$this->render_delete_topic_item( $space_id, $topic_id, $forum_url );
-				$this->render_move_topic_item( $space_id, $topic_id, (array) $context['forum_targets'], $forum_url );
+				if ( $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_PIN, $user_id, $topic_id ) ) {
+					$this->render_pin_topic_item( $space_id, $topic_id, $forum_url, $is_pinned );
+				}
+				if ( $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_DELETE, $user_id, $topic_id ) ) {
+					$this->render_delete_topic_item( $space_id, $topic_id, $forum_url );
+				}
+				if ( $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_MOVE, $user_id, $topic_id ) ) {
+					$this->render_move_topic_item( $space_id, $topic_id, (array) $context['forum_targets'], $forum_url );
+				}
 			} else {
 			// Nur render_delete_post_item, wenn der aktuelle Nutzer NICHT der Autor ist.
 			// Falls der Autor sein eigenes Posting löschen möchte, bietet Asgaros seinen Button.
-			if ( $user_id !== (int) $author_id ) {
+			if ( $user_id !== (int) $author_id
+				&& $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_POST_DELETE, $user_id, $topic_id, $post_id ) ) {
 				$this->render_delete_post_item( $space_id, $post_id, $topic_url );
 			}
-				$this->render_move_post_item( $space_id, $post_id, (array) $context['topic_targets'], $topic_url );
+				if ( $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_POST_MOVE, $user_id, $topic_id, $post_id ) ) {
+					$this->render_move_post_item( $space_id, $post_id, (array) $context['topic_targets'], $topic_url );
+				}
 			}
 
 			echo '</span>';
@@ -131,7 +143,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 		 */
 		private function render_pin_topic_item( int $space_id, int $topic_id, string $return_to, bool $is_pinned ): void {
 			$action = $is_pinned ? 'moderate_unpin_topic' : 'moderate_pin_topic';
-			$label  = $is_pinned ? __( 'Nicht mehr oben halten', 'afspaces' ) : __( 'Oben halten', 'afspaces' );
+			$label  = $is_pinned ? __( 'Abpinnen', 'afspaces' ) : __( 'Anpinnen', 'afspaces' );
 			?>
 			<details class="afspaces-mod-move">
 				<summary class="afspaces-mod-item"><span class="menu-icon fas fa-thumbtack" aria-hidden="true"></span><?php echo esc_html( $label ); ?></summary>
@@ -251,7 +263,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 							<option value="<?php echo esc_attr( (string) $target['space_id'] ); ?>"><?php echo esc_html( (string) $target['name'] ); ?></option>
 						<?php endforeach; ?>
 					</select>
-					<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Verschieben', 'afspaces' ); ?></button>
+					<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Thema verschieben', 'afspaces' ); ?></button>
 				</form>
 			</details>
 			<?php
@@ -271,7 +283,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 			$select_id = 'afspaces-move-post-' . $post_id;
 			?>
 			<details class="afspaces-mod-move">
-				<summary class="afspaces-mod-item"><span class="menu-icon fas fa-arrow-right" aria-hidden="true"></span><?php echo esc_html__( 'In anderes Thema verschieben', 'afspaces' ); ?></summary>
+				<summary class="afspaces-mod-item"><span class="menu-icon fas fa-arrow-right" aria-hidden="true"></span><?php echo esc_html__( 'Beitrag in anderes Thema verschieben', 'afspaces' ); ?></summary>
 				<form method="post" class="afspaces-mod-move-form">
 					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 					<input type="hidden" name="afspaces_action" value="moderate_move_post" />
@@ -284,10 +296,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 							<option value="<?php echo esc_attr( (string) $target['topic_id'] ); ?>"><?php echo esc_html( (string) $target['name'] ); ?></option>
 						<?php endforeach; ?>
 					</select>
-					<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Verschieben', 'afspaces' ); ?></button>
+					<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Beitrag verschieben', 'afspaces' ); ?></button>
 				</form>
 			</details>
 			<?php
+		}
+
+		/**
+		 * Lokale Policy und native Asgaros-Aktion für einen Menüpunkt verbinden.
+		 * Die lokale Policy wurde bereits durch `resolve_forum_context()` erfüllt.
+		 *
+		 * @param string $action   Native Vergleichsaktion.
+		 * @param int    $user_id  Aktuelle Benutzer-ID.
+		 * @param int    $topic_id Themen-ID.
+		 * @param int    $post_id  Beitrags-ID.
+		 * @return bool
+		 */
+		private function should_render_local_action( string $action, int $user_id, int $topic_id = 0, int $post_id = 0 ): bool {
+			return $this->visibility->should_render_local_action( $action, true, $user_id, $topic_id, $post_id );
 		}
 	}
 }

@@ -3,7 +3,7 @@
  * Plugin Name: Asgaros Forum Spaces
  * Plugin URI:  https://github.com/johappel/asgaros-forum-member-groups-extension
  * Description: Barrierearme Frontend-Verwaltung für Mitglieder, Einladungen und private Forenräume und semantische Suche in Asgaros Forum.
- * Version:     0.4.18
+ * Version:     0.4.19
  * Author:      Joachim Happel (im Auftrag des Comenius-Instituts)
  * Author URI:  https://github.com/johappel/
  * License:     AGPL-3.0-or-later
@@ -34,7 +34,7 @@ if ( ! defined( 'AFSPACES_URL' ) ) {
 	define( 'AFSPACES_URL', plugin_dir_url( __FILE__ ) );
 }
 if ( ! defined( 'AFSPACES_VERSION' ) ) {
-	define( 'AFSPACES_VERSION', '0.4.18' );
+	define( 'AFSPACES_VERSION', '0.4.19' );
 }
 if ( ! defined( 'AFSPACES_DB_VERSION' ) ) {
 	define( 'AFSPACES_DB_VERSION', 1 );

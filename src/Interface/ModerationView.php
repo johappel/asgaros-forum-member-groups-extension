@@ -11,6 +11,7 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
+use AFSpaces\Application\ModerationActionVisibility;
 use AFSpaces\Application\SpaceModerationService;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
@@ -23,11 +24,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 		private SpaceRepository $spaces;
 		private AsgarosAdapterInterface $asgaros;
 		private SpaceModerationService $moderation;
+		private ModerationActionVisibility $visibility;
 
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, SpaceModerationService $moderation ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, SpaceModerationService $moderation, ?ModerationActionVisibility $visibility = null ) {
 			$this->spaces     = $spaces;
 			$this->asgaros    = $asgaros;
 			$this->moderation = $moderation;
+			$this->visibility = $visibility ?: new ModerationActionVisibility( $asgaros );
 		}
 
 		/**
@@ -85,9 +88,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 							</tr>
 						</thead>
 						<tbody>
-							<?php foreach ( $topics as $topic ) : ?>
-								<?php $topic_id = (int) $topic['id']; ?>
-								<tr>
+			<?php foreach ( $topics as $topic ) : ?>
+				<?php $topic_id = (int) $topic['id']; ?>
+				<?php $pin_action = AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_PIN; ?>
+				<tr>
 									<th scope="row"><?php echo esc_html( (string) $topic['name'] ); ?></th>
 									<td><?php echo esc_html( (string) ( $topic['author_name'] ?? '' ) ); ?></td>
 									<td><?php echo esc_html( (string) (int) ( $topic['post_count'] ?? 0 ) ); ?></td>
@@ -98,15 +102,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 											<span class="afspaces-tag"><?php echo esc_html__( 'Offen', 'afspaces' ); ?></span>
 										<?php endif; ?>
 									</td>
-									<td>
-										<div class="afspaces-moderation-actions">
-											<?php if ( ! empty( $topic['sticky'] ) ) : ?>
-												<form method="post">
+					<td>
+						<div class="afspaces-moderation-actions">
+							<?php if ( $this->should_render_local_action( $pin_action, $actor, $topic_id ) ) : ?>
+							<?php if ( ! empty( $topic['sticky'] ) ) : ?>
+								<form method="post">
 													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 													<input type="hidden" name="afspaces_action" value="moderate_unpin_topic" />
 													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 													<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
-													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Nicht mehr oben halten', 'afspaces' ); ?></button>
+									<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Abpinnen', 'afspaces' ); ?></button>
 												</form>
 											<?php else : ?>
 												<form method="post">
@@ -114,16 +119,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 													<input type="hidden" name="afspaces_action" value="moderate_pin_topic" />
 													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 													<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
-													<button type="submit" class="afspaces-button afspaces-button-primary"><?php echo esc_html__( 'Oben halten', 'afspaces' ); ?></button>
-												</form>
-											<?php endif; ?>
-											<?php if ( ! empty( $topic['closed'] ) ) : ?>
+									<button type="submit" class="afspaces-button afspaces-button-primary"><?php echo esc_html__( 'Anpinnen', 'afspaces' ); ?></button>
+								</form>
+							<?php endif; ?>
+							<?php endif; ?>
+							<?php $close_action = ! empty( $topic['closed'] ) ? AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_OPEN : AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_CLOSE; ?>
+							<?php if ( $this->should_render_local_action( $close_action, $actor, $topic_id ) ) : ?>
+							<?php if ( ! empty( $topic['closed'] ) ) : ?>
 												<form method="post">
 													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 													<input type="hidden" name="afspaces_action" value="moderate_reopen_topic" />
 													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 													<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
-													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Öffnen', 'afspaces' ); ?></button>
+									<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Thema öffnen', 'afspaces' ); ?></button>
 												</form>
 											<?php else : ?>
 												<form method="post">
@@ -131,18 +139,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 													<input type="hidden" name="afspaces_action" value="moderate_close_topic" />
 													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 													<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
-													<button type="submit" class="afspaces-button afspaces-button-primary"><?php echo esc_html__( 'Schließen', 'afspaces' ); ?></button>
-												</form>
-											<?php endif; ?>
-											<form method="post">
+									<button type="submit" class="afspaces-button afspaces-button-primary"><?php echo esc_html__( 'Thema schließen', 'afspaces' ); ?></button>
+								</form>
+							<?php endif; ?>
+							<?php endif; ?>
+							<?php if ( $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_DELETE, $actor, $topic_id ) ) : ?>
+							<form method="post">
 												<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 												<input type="hidden" name="afspaces_action" value="moderate_delete_topic" />
 												<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 												<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
-												<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr__( 'Dieses Thema mit allen Beiträgen wirklich löschen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Löschen', 'afspaces' ); ?></button>
-											</form>
-											<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id, 'mod_topic' => $topic_id ) ) ); ?>"><?php echo esc_html__( 'Beiträge', 'afspaces' ); ?></a>
-											<?php if ( ! empty( $targets ) ) : ?>
+								<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr__( 'Dieses Thema mit allen Beiträgen wirklich löschen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Thema löschen', 'afspaces' ); ?></button>
+							</form>
+							<?php endif; ?>
+							<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id, 'mod_topic' => $topic_id ) ) ); ?>"><?php echo esc_html__( 'Beiträge', 'afspaces' ); ?></a>
+							<?php if ( ! empty( $targets ) && $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_MOVE, $actor, $topic_id ) ) : ?>
 												<form method="post" class="afspaces-moderation-move">
 													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 													<input type="hidden" name="afspaces_action" value="moderate_move_topic" />
@@ -154,7 +165,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 															<option value="<?php echo esc_attr( (string) $target['space_id'] ); ?>"><?php echo esc_html( (string) $target['name'] ); ?></option>
 														<?php endforeach; ?>
 													</select>
-													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Verschieben', 'afspaces' ); ?></button>
+															<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Thema verschieben', 'afspaces' ); ?></button>
 												</form>
 											<?php endif; ?>
 										</div>
@@ -201,26 +212,31 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 					<p role="status"><?php echo esc_html__( 'Dieses Thema hat keine Beiträge (mehr).', 'afspaces' ); ?></p>
 				<?php else : ?>
 					<ul class="afspaces-moderation-posts">
-						<?php foreach ( $posts as $post ) : ?>
+							<?php foreach ( $posts as $post ) : ?>
+							<?php $is_first_post = ! empty( $post['is_first'] ); ?>
+							<?php $delete_action = $is_first_post ? AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_DELETE : AsgarosAdapterInterface::MODERATION_ACTION_POST_DELETE; ?>
 							<li class="afspaces-moderation-post content-container">
 								<p class="afspaces-moderation-post-meta">
 									<strong><?php echo esc_html( (string) ( $post['author_name'] ?? '' ) ); ?></strong>
-									<?php if ( ! empty( $post['is_first'] ) ) : ?>
+									<?php if ( $is_first_post ) : ?>
 										<span class="afspaces-tag"><?php echo esc_html__( 'Eröffnungsbeitrag', 'afspaces' ); ?></span>
 									<?php endif; ?>
 								</p>
 								<div class="afspaces-moderation-post-text"><?php echo wp_kses_post( (string) ( $post['text'] ?? '' ) ); ?></div>
 								<div class="afspaces-moderation-actions">
+									<?php if ( $this->should_render_local_action( $delete_action, $actor, $topic_id, (int) $post['id'] ) ) : ?>
 									<form method="post">
 										<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 										<input type="hidden" name="afspaces_action" value="moderate_delete_post" />
 										<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 										<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) (int) $post['id'] ); ?>" />
 										<input type="hidden" name="redirect_to" value="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id, 'mod_topic' => $topic_id ) ) ); ?>" />
-										<?php $confirm = ! empty( $post['is_first'] ) ? __( 'Der Eröffnungsbeitrag wird gelöscht – dadurch wird das gesamte Thema entfernt. Fortfahren?', 'afspaces' ) : __( 'Diesen Beitrag wirklich löschen?', 'afspaces' ); ?>
-										<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr( $confirm ); ?>"><?php echo esc_html__( 'Beitrag löschen', 'afspaces' ); ?></button>
+										<?php $confirm = $is_first_post ? __( 'Der Eröffnungsbeitrag wird gelöscht – dadurch wird das gesamte Thema entfernt. Fortfahren?', 'afspaces' ) : __( 'Diesen Beitrag wirklich löschen?', 'afspaces' ); ?>
+										<?php $delete_label = $is_first_post ? __( 'Thema löschen', 'afspaces' ) : __( 'Beitrag löschen', 'afspaces' ); ?>
+										<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr( $confirm ); ?>"><?php echo esc_html( $delete_label ); ?></button>
 									</form>
-									<?php if ( empty( $post['is_first'] ) && ! empty( $post_targets ) ) : ?>
+									<?php endif; ?>
+									<?php if ( ! $is_first_post && ! empty( $post_targets ) && $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_POST_MOVE, $actor, $topic_id, (int) $post['id'] ) ) : ?>
 										<form method="post" class="afspaces-moderation-move">
 											<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 											<input type="hidden" name="afspaces_action" value="moderate_move_post" />
@@ -233,7 +249,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 													<option value="<?php echo esc_attr( (string) $target['topic_id'] ); ?>"><?php echo esc_html( (string) $target['name'] ); ?></option>
 												<?php endforeach; ?>
 											</select>
-											<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Verschieben', 'afspaces' ); ?></button>
+											<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Beitrag verschieben', 'afspaces' ); ?></button>
 										</form>
 									<?php endif; ?>
 								</div>
@@ -276,6 +292,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 				esc_attr__( 'Seitennavigation der Themen', 'afspaces' ),
 				$items
 			);
+		}
+
+		/**
+		 * Wendet die aktionsbezogene native Asgaros-Deduplizierung an.
+		 *
+		 * @param string $action   Native Vergleichsaktion.
+		 * @param int    $actor    Aktuelle Benutzer-ID.
+		 * @param int    $topic_id Themen-ID.
+		 * @param int    $post_id  Beitrags-ID.
+		 * @return bool
+		 */
+		private function should_render_local_action( string $action, int $actor, int $topic_id = 0, int $post_id = 0 ): bool {
+			return $this->visibility->should_render_local_action( $action, true, $actor, $topic_id, $post_id );
 		}
 
 		/**

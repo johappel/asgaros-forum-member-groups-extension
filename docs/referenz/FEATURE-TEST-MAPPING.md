@@ -61,6 +61,7 @@ Issue #15 (Topic pinnen/lösen) ist durch `SpaceModerationServiceTest` abgedeckt
 | Feature | Quellklasse | Test |
 | --- | --- | --- |
 | Verfügbarkeitsprüfung, Exception-Normalisierung | `Adapters/Asgaros/AsgarosAdapter.php` | `tests/AdapterExceptionTest.php` |
+| Native Moderationsprüfung und aktionsbezogene UI-Deduplizierung | `Adapters/Asgaros/AsgarosAdapter.php`, `Application/ModerationActionVisibility.php` | `tests/ModerationActionVisibilityTest.php` |
 
 ## 8. Schnittstellen & Bezeichnungen (Interface)
 
