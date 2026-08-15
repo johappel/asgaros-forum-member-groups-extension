@@ -109,6 +109,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$spaces   = new SpaceRepository();
 			$identity = new \AFSpaces\Application\UserIdentityService();
 			$asgaros  = new AsgarosAdapter( $plugin->requirements, $identity );
+			$content_write_policy = new \AFSpaces\Application\ForumContentWritePolicy( $spaces, $asgaros );
+			$content_write_policy->init();
 			$policy  = new SpacePolicy( $spaces );
 			$audit   = new AuditRepository();
 			$inv_repo = new InvitationRepository();

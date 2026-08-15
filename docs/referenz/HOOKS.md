@@ -36,6 +36,8 @@ ursprüngliche Registrierung im unteren Navigationsbereich entfernt wurde.
 | `asgarosforum_after_post_message` | `ForumModerationControls::init`, Priorität 20, 2 Argumente: `int $author_id`, `int $post_id` | — | raumbezogene Moderationskontrollen rendern |
 | `asgarosforum_filter_user_groups_taxonomy_name` | `AsgarosAdapter`; aktueller Taxonomiename | Taxonomiename, Default `asgarosforum-usergroup` | interne Adapter-Auflösung; nicht als AFSpaces-Fach-API verwenden |
 | `asgarosforum_filter_username` | `UserIdentityService::get_display_name`; `string $name`, `WP_User $user` | string; unveränderter WordPress-Anzeigename | primärer externer Anzeigenamen-Filter |
+| `asgarosforum_filter_check_access` | `ForumContentWritePolicy::validate_editor_access`; `bool $allowed`, `int $category_id` | bool; Themenansicht bleibt lesbar, direkte Add-Topic/Add-Post-Editoren für geschützte Nichtmitglieder werden gesperrt | Schreibrecht nicht aus dem Leserecht ableiten |
+| `asgarosforum_filter_insert_custom_validation` | `ForumContentWritePolicy::validate_submission`; `bool $allowed` | bool; geschützte Nichtmitglieder dürfen Themen und Beiträge auch bei manipuliertem POST nicht speichern | serverseitiger Schreibschutz |
 
 ## AFSpaces-Filter
 

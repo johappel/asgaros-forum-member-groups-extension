@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Zugang und Mitgliedschaft in den Arbeitsgruppen-Einstellungen fachlich
+  getrennt: Das Leserecht wird als „Wer darf die Beiträge dieser Arbeitsgruppe
+  lesen?“ mit verständlichen Radio-Optionen und Hilfetexten dargestellt; die
+  Mitgliedschaft erhält eine eigene Radio-Gruppe. Geschützte Nichtmitglieder
+  können lesen, erhalten aber weder Mitgliedschaft noch Schreibrecht.
+- Plugin-Version auf 0.4.22 angehoben.
+
 - Öffentliche Forumssichtbarkeit aus der Arbeitsgruppen-Nutzeransicht entfernt
   und die Join-Auswahl per CSS sauber ausgerichtet. Die Mitgliederverwaltung
   ist aus dem Verantwortlichen-Abschnitt direkt erreichbar.

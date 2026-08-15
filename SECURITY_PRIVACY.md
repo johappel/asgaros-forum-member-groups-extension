@@ -12,6 +12,13 @@
 - Speicherung ausschließlich als Hash,
 - keine sensitiven Daten in Logs.
 
+Leserecht und Schreibrecht werden getrennt behandelt: In einer geschützten
+Arbeitsgruppe (`protected`) dürfen angemeldete Nichtmitglieder Inhalte lesen,
+werden dadurch aber weder Mitglieder noch Moderatoren und können keine Themen
+oder Beiträge speichern. `ForumContentWritePolicy` erzwingt diese Grenze über
+serverseitige Asgaros-Filter; Mitglieder und globale Asgaros-Moderatoren
+bleiben schreibberechtigt.
+
 ## Bedrohungen
 
 Zu testen sind mindestens:

@@ -19,6 +19,7 @@ final class WorkingGroupSettingsDesignTest extends TestCase {
 
 	public function test_normal_settings_use_one_common_form_and_keep_navigation_separate(): void {
 		$source = $this->source( 'src/Interface/WorkingGroupSettingsView.php' );
+		$visibility_source = $this->source( 'src/Interface/CreateSpaceView.php' );
 
 		self::assertSame( 1, substr_count( $source, 'value="save_working_group_settings"' ) );
 		self::assertStringContainsString( 'Änderungen speichern', $source );
@@ -29,6 +30,24 @@ final class WorkingGroupSettingsDesignTest extends TestCase {
 		self::assertStringContainsString( 'Wie können andere mit der Gruppe Kontakt aufnehmen?', $source );
 		self::assertStringContainsString( 'Darstellung', $source );
 		self::assertStringContainsString( 'Zugang und Mitgliedschaft', $source );
+		self::assertStringContainsString( 'Wer darf die Beiträge dieser Arbeitsgruppe lesen?', $source );
+		self::assertStringContainsString( 'Lesen', $source );
+		self::assertStringContainsString( 'visibility_label( $visibility )', $source );
+		self::assertStringContainsString( 'Nur Mitglieder der Arbeitsgruppe', $visibility_source );
+		self::assertStringContainsString( 'Alle angemeldeten Personen', $visibility_source );
+		self::assertStringContainsString( 'Sie werden dadurch nicht automatisch Mitglieder der Arbeitsgruppe.', $visibility_source );
+		self::assertStringContainsString( 'Schreiben können nur Personen mit den dafür vorgesehenen Rechten.', $visibility_source );
+		self::assertStringContainsString( 'Neue Mitglieder können nur von berechtigten Personen eingeladen werden.', $source );
+		self::assertStringContainsString( 'Die Arbeitsgruppe nimmt derzeit keine weiteren Mitglieder auf.', $source );
+		self::assertStringContainsString( 'Angemeldete Personen können eine Mitgliedschaft anfragen.', $source );
+		self::assertStringContainsString( 'Wer kann Mitglied werden?', $source );
+		self::assertStringContainsString( 'Mitgliedschaft', $source );
+		self::assertStringContainsString( 'name="visibility"', $source );
+		self::assertStringContainsString( 'name="join_policy"', $source );
+		self::assertStringContainsString( 'aria-describedby', $source );
+		self::assertStringNotContainsString( 'Wer kann das Forum sehen?', $source );
+		self::assertStringNotContainsString( 'Privat (nur Mitglieder)', $source );
+		self::assertStringNotContainsString( 'Geschützt (alle angemeldeten Personen)', $source );
 		self::assertStringContainsString( 'Verantwortliche', $source );
 		self::assertStringContainsString( 'Verwaltung', $source );
 		self::assertStringContainsString( 'Gefahrenbereich', $source );

@@ -74,6 +74,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					static fn( string $visibility ): bool => SpaceCreationSettings::VISIBILITY_PUBLIC !== $visibility
 				)
 			);
+			// Ein bereits gespeicherter Modus bleibt sichtbar, auch wenn die
+			// aktuelle globale Auswahl ihn für neue Änderungen nicht mehr anbietet.
+			// So kann ein Formular ohne Änderung sicher erneut gespeichert werden.
+			if ( SpaceCreationSettings::VISIBILITY_PUBLIC !== $space->visibility
+				&& ! in_array( $space->visibility, $visibility_options, true ) ) {
+				array_unshift( $visibility_options, $space->visibility );
+			}
 			$join_mode = self::join_mode( $meta );
 
 			ob_start();
@@ -148,19 +155,36 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					<section class="afspaces-settings-section" aria-labelledby="afspaces-access-heading">
 						<h3 id="afspaces-access-heading"><?php echo esc_html__( 'Zugang und Mitgliedschaft', 'afspaces' ); ?></h3>
 						<div class="afspaces-settings-fields">
-							<div class="afspaces-settings-field">
-								<label for="afspaces-forum-access"><?php echo esc_html__( 'Wer kann das Forum sehen?', 'afspaces' ); ?></label>
-								<select id="afspaces-forum-access" name="visibility">
-									<?php foreach ( $visibility_options as $visibility ) : ?>
-										<option value="<?php echo esc_attr( $visibility ); ?>" <?php selected( $space->visibility, $visibility ); ?>><?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?></option>
-									<?php endforeach; ?>
-								</select>
-							</div>
-							<fieldset class="afspaces-join-options afspaces-settings-field">
-								<legend><?php echo esc_html__( 'Wie können neue Mitglieder beitreten?', 'afspaces' ); ?></legend>
-								<label><input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?> /> <?php echo esc_html__( 'Beitritt auf Anfrage', 'afspaces' ); ?></label>
-								<label><input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?>" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?> /> <?php echo esc_html__( 'Nur auf Einladung', 'afspaces' ); ?></label>
-								<label><input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?>" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?> /> <?php echo esc_html__( 'Keine neuen Mitglieder', 'afspaces' ); ?></label>
+							<h4 class="afspaces-access-subheading"><?php echo esc_html__( 'Lesen', 'afspaces' ); ?></h4>
+							<fieldset class="afspaces-access-options afspaces-settings-field">
+								<legend><?php echo esc_html__( 'Wer darf die Beiträge dieser Arbeitsgruppe lesen?', 'afspaces' ); ?></legend>
+								<?php foreach ( $visibility_options as $visibility ) : ?>
+									<?php $visibility_help_id = 'afspaces-visibility-help-' . sanitize_key( $visibility ); ?>
+									<label class="afspaces-radio-option">
+										<input type="radio" name="visibility" value="<?php echo esc_attr( $visibility ); ?>" aria-describedby="<?php echo esc_attr( $visibility_help_id ); ?>" <?php checked( $space->visibility, $visibility ); ?> />
+										<span><?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?></span>
+									</label>
+									<p id="<?php echo esc_attr( $visibility_help_id ); ?>" class="description"><?php echo esc_html( CreateSpaceView::visibility_description( $visibility ) ); ?></p>
+								<?php endforeach; ?>
+							</fieldset>
+							<h4 class="afspaces-membership-subheading"><?php echo esc_html__( 'Mitgliedschaft', 'afspaces' ); ?></h4>
+							<fieldset class="afspaces-membership-options afspaces-settings-field">
+								<legend><?php echo esc_html__( 'Wer kann Mitglied werden?', 'afspaces' ); ?></legend>
+								<label class="afspaces-radio-option">
+									<input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>" aria-describedby="afspaces-membership-help-request" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?> />
+									<span><?php echo esc_html__( 'Beitritt auf Anfrage', 'afspaces' ); ?></span>
+								</label>
+								<p id="afspaces-membership-help-request" class="description"><?php echo esc_html( self::join_policy_description( WorkingGroupMeta::JOIN_POLICY_REQUEST ) ); ?></p>
+								<label class="afspaces-radio-option">
+									<input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?>" aria-describedby="afspaces-membership-help-invite-only" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?> />
+									<span><?php echo esc_html__( 'Nur auf Einladung', 'afspaces' ); ?></span>
+								</label>
+								<p id="afspaces-membership-help-invite-only" class="description"><?php echo esc_html( self::join_policy_description( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ) ); ?></p>
+								<label class="afspaces-radio-option">
+									<input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?>" aria-describedby="afspaces-membership-help-closed" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?> />
+									<span><?php echo esc_html__( 'Keine neuen Mitglieder', 'afspaces' ); ?></span>
+								</label>
+								<p id="afspaces-membership-help-closed" class="description"><?php echo esc_html( self::join_policy_description( WorkingGroupMeta::JOIN_POLICY_CLOSED ) ); ?></p>
 							</fieldset>
 						</div>
 					</section>
@@ -208,6 +232,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 			return WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY === $meta->join_policy
 				? WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY
 				: WorkingGroupMeta::JOIN_POLICY_CLOSED;
+		}
+
+		/**
+		 * Gibt die fachliche Erläuterung eines Beitrittsmodus zurück.
+		 *
+		 * @param string $join_policy Interner Beitrittswert.
+		 * @return string
+		 */
+		private static function join_policy_description( string $join_policy ): string {
+			switch ( $join_policy ) {
+				case WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY:
+					return __( 'Neue Mitglieder können nur von berechtigten Personen eingeladen werden.', 'afspaces' );
+				case WorkingGroupMeta::JOIN_POLICY_CLOSED:
+					return __( 'Die Arbeitsgruppe nimmt derzeit keine weiteren Mitglieder auf.', 'afspaces' );
+				case WorkingGroupMeta::JOIN_POLICY_REQUEST:
+				default:
+					return __( 'Angemeldete Personen können eine Mitgliedschaft anfragen. Die Anfrage muss von den Verantwortlichen der Arbeitsgruppe bestätigt werden.', 'afspaces' );
+			}
 		}
 
 		/**

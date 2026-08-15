@@ -76,6 +76,9 @@ final class FakeSearchAdapter implements AsgarosAdapterInterface {
 	public function is_user_in_group( int $user_id, int $group_id ): bool {
 		return false;
 	}
+	public function get_current_forum_id(): int { return 0; }
+	public function get_current_view(): string { return ''; }
+	public function is_forum_moderator( int $user_id ): bool { return false; }
 
 	public function search_posts( string $keywords, array $args = [] ): array {
 		$this->last_args = $args;

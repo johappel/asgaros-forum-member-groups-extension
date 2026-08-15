@@ -106,12 +106,19 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceLifecycleService' ) ) {
 		 * @return string Validierter Sichtbarkeitswert.
 		 */
 		public function validate_visibility( int $space_id, int $actor_user_id, string $visibility ): string {
-			$this->require_managed_space( $space_id, $actor_user_id );
+			$space      = $this->require_managed_space( $space_id, $actor_user_id );
 			$settings   = SpaceCreationSettings::load();
 			$privileged = user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
 				|| user_can( $actor_user_id, Capabilities::MODERATE_SPACE );
+			$allowed    = $settings->visibilities_for( $privileged );
 
-			return $this->policy->validate_visibility( $settings, $visibility, $settings->visibilities_for( $privileged ) );
+			// Bereits bestehende Werte bleiben für ein unverändertes Speichern
+			// zulässig, auch wenn die globale Auswahl inzwischen enger ist.
+			if ( $visibility === $space->visibility && ! in_array( $visibility, $allowed, true ) ) {
+				$allowed[] = $visibility;
+			}
+
+			return $this->policy->validate_visibility( $settings, $visibility, $allowed );
 		}
 
 		/**

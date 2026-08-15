@@ -153,10 +153,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\CreateSpaceView' ) ) {
 				case SpaceCreationSettings::VISIBILITY_PUBLIC:
 					return __( 'Öffentlich', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PROTECTED:
-					return __( 'Geschützt (alle angemeldeten Personen)', 'afspaces' );
+					return __( 'Alle angemeldeten Personen', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PRIVATE:
 				default:
-					return __( 'Privat (nur Mitglieder)', 'afspaces' );
+					return __( 'Nur Mitglieder der Arbeitsgruppe', 'afspaces' );
 			}
 		}
 
@@ -171,10 +171,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\CreateSpaceView' ) ) {
 				case SpaceCreationSettings::VISIBILITY_PUBLIC:
 					return __( 'Für alle Besucherinnen und Besucher lesbar.', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PROTECTED:
-					return __( 'Für alle angemeldeten Personen lesbar.', 'afspaces' );
+					return __( 'Alle angemeldeten Personen auf dieser Plattform können die Beiträge und Themen lesen. Sie werden dadurch nicht automatisch Mitglieder der Arbeitsgruppe. Schreiben können nur Personen mit den dafür vorgesehenen Rechten.', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PRIVATE:
 				default:
-					return __( 'Nur eingeladene Mitglieder haben Zugriff.', 'afspaces' );
+					return __( 'Nur Mitglieder dieser Arbeitsgruppe können die Beiträge und Themen lesen.', 'afspaces' );
 			}
 		}
 

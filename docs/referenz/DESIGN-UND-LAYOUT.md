@@ -132,6 +132,15 @@ die administrative Sichtbarkeits-Policy bleibt für eine spätere Freigabe
 erhalten. Die Verantwortlichen-Sektion verlinkt für Rollenänderungen in die
 Mitgliederverwaltung.
 
+Der Abschnitt „Zugang und Mitgliedschaft“ enthält zwei semantisch getrennte
+`fieldset`-Radio-Gruppen: „Wer darf die Beiträge dieser Arbeitsgruppe lesen?“
+und „Wer kann Mitglied werden?“. Die Leseoptionen heißen „Nur Mitglieder der
+Arbeitsgruppe“ und „Alle angemeldeten Personen“ und erklären ausdrücklich,
+dass Lesen keine Mitgliedschaft erzeugt. Die drei Beitrittsoptionen tragen
+jeweils einen eigenen Hilfetext. Die beiden Gruppen verwenden
+unterschiedliche `name`-Attribute; die Erläuterungen sind über
+`aria-describedby` den jeweiligen Eingaben zugeordnet.
+
 ## Hub-Layout
 
 - Eine Hub-Seite (`[afspaces]`) mit Router (`SpacesHubController`), Brotkrümel und zweistufiger Navigation.

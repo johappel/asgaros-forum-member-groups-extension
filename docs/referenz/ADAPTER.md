@@ -15,6 +15,9 @@ Der Asgaros-Adapter ist die einzige Stelle, die Asgaros-Interna kennen darf. Ver
 | `list_accessible_forums()` | — | `array<int,array{id:int,name:string}>` |
 | `list_accessible_category_ids()` | — | `int[]` |
 | `is_user_in_group(int $user_id, int $group_id)` | WordPress-/Gruppen-ID | `bool` |
+| `get_current_forum_id()` | — | `int`; aktuelle Forum-ID im Asgaros-Request, sonst `0` |
+| `get_current_view()` | — | `string`; aktuelle Asgaros-Ansicht, sonst leer |
+| `is_forum_moderator(int $user_id)` | WordPress-Benutzer-ID | `bool`; globale Asgaros-Moderationsrolle |
 | `is_search_request()` | — | `bool`; erkennt die aktuelle Asgaros-Suchansicht |
 
 ### Native Moderationsberechtigungen
@@ -107,6 +110,12 @@ Alle Methoden schreiben über Asgaros-interne APIs und werfen bei fehlender Komp
 | `delete_group(int $group_id)` | — | `void`; löscht die Asgaros-Gruppe |
 
 Die Isolation privater Räume erfolgt über eine dedizierte Asgaros-Kategorie, Gruppe und ein Forum, weil Asgaros Zugriffe auf Kategorieebene steuert.
+
+`Application\ForumContentWritePolicy` nutzt den Adapter-Requestkontext, um
+Lesen und Schreiben getrennt zu halten. Im Modus `protected` dürfen eingeloggte
+Nichtmitglieder lesen, erhalten dadurch aber weder AFSpaces-Mitgliedschaft noch
+Schreibrecht. Schreiben dürfen Mitglieder und globale Asgaros-Moderatoren;
+private Räume bleiben zusätzlich durch die Asgaros-Gruppensperre geschützt.
 
 ## Moderation
 

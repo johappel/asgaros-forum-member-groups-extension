@@ -85,6 +85,14 @@ Wichtig: Jede Operation prüft Objektzugehörigkeit gegen `space.forum_id` (kein
 - Views: `src/Interface/WorkingGroupView.php`, `src/Interface/WorkingGroupSettingsView.php`, `src/Interface/WorkingGroupTile.php`
 - Terminologie: `src/Interface/WorkingGroupTerminology.php`
 
+Die Einstellungsansicht trennt Leserecht und Mitgliedschaft. `private` bedeutet
+„Nur Mitglieder der Arbeitsgruppe“, `protected` bedeutet „Alle angemeldeten
+Personen“ mit Leserecht ohne automatische Mitgliedschaft. Das native Asgaros-
+Leserecht würde bei `protected` allein auch das Schreiben ermöglichen; deshalb
+prüft `Application\ForumContentWritePolicy` Themen- und Beitrags-Requests
+serverseitig erneut und lässt dort nur Mitglieder oder globale Asgaros-
+Moderatoren zu.
+
 | Methode (`WorkingGroupService`) | Signatur |
 | --- | --- |
 | `get_metadata` | `(int $space_id): WorkingGroupMeta` |

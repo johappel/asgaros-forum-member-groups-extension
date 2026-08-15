@@ -49,6 +49,9 @@ Implementiert die Use Cases des Plugins:
   `SpaceLifecycleService::validate_visibility()` erlauben der gemeinsamen
   Settings-Action, alle beteiligten Policies vor dem ersten Write zu prüfen.
 - SpaceModerationService
+- `ForumContentWritePolicy` trennt das Asgaros-Leserecht vom Schreibrecht:
+  `protected`-Räume bleiben für angemeldete Nichtmitglieder lesbar, aber deren
+  Add-Topic-/Add-Post-Requests werden serverseitig über Asgaros-Filter abgewiesen.
 - ForumSearchService
 - HybridSearchService
 - SearchIndexer
@@ -184,6 +187,8 @@ Nur der Adapter kennt interne Asgaros-Methoden. Bereits dokumentierte und verwen
 - Erstellen von Kategorien, Gruppen und Foren für selbst gegründete Arbeitsgruppen.
 - Forum-Moderationsoperationen wie Schließen, Löschen, Verschieben sowie die
   gekapselte Prüfung nativer Asgaros-Moderationsaktionen.
+- Requestkontext und globale Moderationsrolle für den Schreibschutz von
+  geschützten Arbeitsgruppen.
 
 Wenn neue Asgaros-Interna benötigt werden, gilt:
 

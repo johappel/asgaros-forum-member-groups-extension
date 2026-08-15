@@ -18,7 +18,7 @@ final class Issue21DesignTest extends TestCase {
 
 		self::assertStringNotContainsString( 'directory_visibility', $source );
 		self::assertStringNotContainsString( 'Sichtbarkeit in Übersichten', $source );
-		self::assertStringContainsString( 'Wer kann das Forum sehen?', $source );
+		self::assertStringContainsString( 'Wer darf die Beiträge dieser Arbeitsgruppe lesen?', $source );
 		self::assertStringContainsString( 'Arbeitsgruppe ansehen', $source );
 	}
 

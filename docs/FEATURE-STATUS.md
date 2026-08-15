@@ -250,6 +250,9 @@ Enthalten:
 - Freigabeprozess mit pending, approve und reject.
 - SpaceLifecycle mit pending, active, archived, rejected und deleted.
 - Bearbeiten von Name, Beschreibung, Sichtbarkeit und Owner-Übertragung im Frontend.
+- Einstellungsansicht trennt Leserecht („Nur Mitglieder der Arbeitsgruppe“ /
+  „Alle angemeldeten Personen“) von Mitgliedschaft; geschützte Nichtmitglieder
+  bleiben leseberechtigt, erhalten aber keinen Schreibzugriff.
 - Archivierung, Reaktivierung und Löschung mit definierter Cleanup-Strategie.
 - Arbeitsgruppenbezogene Moderation für Themen und Beiträge, einschließlich Verschieben.
 - Inline-Moderationsaktionen werden gegen aktionsgleiche native Asgaros-

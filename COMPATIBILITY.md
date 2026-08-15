@@ -121,6 +121,8 @@ Die Raumgründung nutzt folgende interne Asgaros-Funktionen (Quellcode geprüft 
 - Forenkategorie = WP-Term der Taxonomie `asgarosforum-category` (Literal, ungefiltert).
   Zugriffslevel über Term-Meta `category_access` (`everyone` | `loggedin` | `moderator`),
   Sortierung über Term-Meta `order`.
+- `AsgarosForumPermissions::isModerator( $user_id )` wird für den globalen
+  Moderationsausnahmepfad des Schreibschutzes verwendet.
 - `AsgarosForumUserGroups::insertUserGroup($parent_category_id, $name, $color, $visibility, $auto_add, $icon)`
   legt eine Benutzergruppe (Term der Taxonomie `asgarosforum-usergroup`) an. Der Rückgabewert
   enthält NICHT die Term-ID; diese wird über `get_term_by('name', …, $taxonomy)` ermittelt.
@@ -152,6 +154,17 @@ konfigurierbare Sichtbarkeit steuert das Zugriffslevel der dedizierten Kategorie
 - `private`  → `category_access=loggedin` + Gruppe als Zugriffssperre (nur Mitglieder).
 - `protected`→ `category_access=loggedin`, Gruppe nur zur Mitgliederverwaltung (alle Angemeldeten lesen).
 - `public`   → `category_access=everyone`.
+
+Asgaros 3.4.0 prüft beim Einfügen von Themen und Beiträgen standardmäßig nur
+Anmeldung, Forumstatus und globale Forenrechte; `category_access=loggedin`
+begrenzt das Lesen, aber nicht das Schreiben. Deshalb nutzt AFSpaces zusätzlich
+die dokumentierten Filter `asgarosforum_filter_insert_custom_validation` und
+`asgarosforum_filter_check_access`, gekapselt in
+`Application\ForumContentWritePolicy`. Die Policy erlaubt in `private` und
+`protected` nur Gruppenmitglieder oder globale Asgaros-Moderatoren. Bei fehlendem
+aktuellen Forum-/Asgaros-Kontext wirkt der Schutz nur für nicht von AFSpaces
+registrierte Foren; registrierte Räume werden ohne gültigen Mitglieds- oder
+Moderationsnachweis nicht schreibbar.
 
 Räume mit Freigabepflicht (`pending`) werden bis zur Freigabe **immer** über die Gruppe
 beschränkt, unabhängig von der Zielsichtbarkeit, damit vor der Freigabe kein ungewollter

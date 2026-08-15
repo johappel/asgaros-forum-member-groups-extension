@@ -132,6 +132,31 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function is_user_in_group( int $user_id, int $group_id ): bool;
 
 		/**
+		 * Gibt das aktuell gerenderte Forum zurück.
+		 *
+		 * Wird für serverseitige, raumbezogene Schreibprüfungen im Asgaros-
+		 * Request-Kontext verwendet. Außerhalb einer Forum-Anfrage ist der Wert 0.
+		 *
+		 * @return int
+		 */
+		public function get_current_forum_id(): int;
+
+		/**
+		 * Gibt die aktuelle Asgaros-Ansicht im Request zurück.
+		 *
+		 * @return string
+		 */
+		public function get_current_view(): string;
+
+		/**
+		 * Prüft die globale Asgaros-Moderationsrolle eines Benutzers.
+		 *
+		 * @param int $user_id Benutzer-ID.
+		 * @return bool
+		 */
+		public function is_forum_moderator( int $user_id ): bool;
+
+		/**
 		 * Durchsucht Forenbeiträge post-genau per Volltext.
 		 *
 		 * Die Treffer werden NICHT nach Thema zusammengefasst: jeder gefundene

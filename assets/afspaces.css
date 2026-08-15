@@ -2986,9 +2986,6 @@ right: auto;
 
 /* Ruhige, zusammenhängende Oberfläche für die Arbeitsgruppen-Einstellungen. */
 
-
-Element {
-}
 @media (max-width: 640px) {
   .afspaces-working-group-settings .afspaces-settings-header {
     flex-direction: column;
@@ -3022,6 +3019,13 @@ Element {
 .afspaces-working-group-settings .afspaces-settings-fields {
 	display: grid;
 	gap: 1rem;
+}
+
+.afspaces-working-group-settings .afspaces-access-subheading,
+.afspaces-working-group-settings .afspaces-membership-subheading {
+	margin: 0;
+	color: var(--afspaces-heading-color, #2d5d7f);
+	font-size: 1rem;
 }
 
 .afspaces-working-group-settings .afspaces-settings-field {
@@ -3070,6 +3074,41 @@ Element {
 	gap: 0.65rem;
 	padding: 0 !important;
 	border: 0 !important;
+}
+
+.afspaces-working-group-settings .afspaces-access-options,
+.afspaces-working-group-settings .afspaces-membership-options {
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+}
+
+.afspaces-working-group-settings .afspaces-membership-options {
+	margin-top: 0 !important;
+}
+
+.afspaces-working-group-settings .afspaces-access-options legend,
+.afspaces-working-group-settings .afspaces-membership-options legend {
+	display: block;
+	width: 100%;
+	margin: 0 0 0.75rem !important;
+	padding: 0 !important;
+}
+
+.afspaces-working-group-settings .afspaces-access-options .afspaces-radio-option,
+.afspaces-working-group-settings .afspaces-membership-options .afspaces-radio-option {
+	display: block;
+	margin: 0 0 0.35rem;
+	font-weight: 400;
+}
+
+.afspaces-working-group-settings .afspaces-access-options .description,
+.afspaces-working-group-settings .afspaces-membership-options .description {
+	display: block;
+	margin: 0 0 0.75rem 1.5rem;
 }
 
 .afspaces-working-group-settings .afspaces-join-options legend {

@@ -33,6 +33,7 @@ Schnellübersicht: Welche  Testdateien gehören zu welchem Feature?
 | Erstellungsrichtlinien (Quotas, Rate-Limits, Validierung) | `Domain/SpaceCreationPolicy.php` | `tests/SpaceCreationPolicyTest.php` |
 | Erstellungs-Einstellungen und globale Aktivierung (Value Object/Policy) | `Core/SpaceCreationSettings.php`, `Domain/SpaceCreationPolicy.php` | `tests/SpaceCreationPolicyTest.php`, `tests/SpaceCreationServiceTest.php` |
 | Sichtbarkeit und Zähler offener Freigaben | `Application/SpaceLifecycleService.php`, `Adapters/Database/SpaceRepository.php` | `tests/SpaceApprovalNavigationTest.php`, `tests/Integration/SpaceApprovalNavigationTest.php` |
+| Trennung von Leserecht und Schreibrecht in geschützten Arbeitsgruppen | `Application/ForumContentWritePolicy.php`, `Adapters/Asgaros/AsgarosAdapter.php` | `tests/ForumContentWritePolicyTest.php` |
 
 ## 5. Space-Dienste (Application)
 

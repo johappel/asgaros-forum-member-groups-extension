@@ -612,6 +612,38 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 		}
 
 		/**
+		 * {@inheritDoc}
+		 */
+		public function get_current_forum_id(): int {
+			$forum = $this->forum();
+			return null !== $forum && isset( $forum->current_forum ) ? (int) $forum->current_forum : 0;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get_current_view(): string {
+			$forum = $this->forum();
+			return null !== $forum && isset( $forum->current_view ) ? (string) $forum->current_view : '';
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function is_forum_moderator( int $user_id ): bool {
+			if ( $user_id < 1 ) {
+				return false;
+			}
+
+			$forum = $this->forum();
+			return null !== $forum
+				&& isset( $forum->permissions )
+				&& is_object( $forum->permissions )
+				&& method_exists( $forum->permissions, 'isModerator' )
+				&& (bool) $forum->permissions->isModerator( $user_id );
+		}
+
+		/**
 		 * Gibt die für den aktuellen Benutzer zugänglichen Kategorie-Term-IDs zurück.
 		 *
 		 * Nutzt `AsgarosForum::content->get_categories()`, das intern bereits die
