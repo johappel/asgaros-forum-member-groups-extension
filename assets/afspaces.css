@@ -175,7 +175,7 @@
 	border-radius: 4px;
 	text-decoration: none;
 	cursor: pointer;
-	min-height: 44px;
+	/* min-height: 44px; */
 	font-size: 1rem;
 }
 
@@ -2817,7 +2817,7 @@ text-decoration: underline;
 .afspaces-mod-move {
 position: relative;
 display: inline-block;
-margin-left: 14px;
+margin-left: 0px;
 }
 
 .afspaces-mod-move > summary {

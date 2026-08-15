@@ -11,13 +11,19 @@
 	--afspaces-color-yellow: #f5ae35;
 	--afspaces-color-purple: #561188;
 	--afspaces-color-text: #3a4f66;
-	--afspaces-color-secondary-background: #364149;
+	--afspaces-color-secondary-background: #4b5563;
 	--afspaces-color-light-background: #d9d9d9;
+	--afspaces-color-danger: #f91111;
 	--afspaces-forum-button-hover: var(--afspaces-color-yellow);
 	--afspaces-forum-metadata-color: var(--afspaces-color-text);
 	--afspaces-forum-metadata-size: 0.875rem;
-}
+	--afspaces-forum-mod-items-size: 0.80rem;
+	--afspaces-forum-title-size: 1.5rem;
 
+}
+#af-wrapper {
+	font-size: initial !important;
+}
 /* Issue #16: Standardbuttons erhalten beim Hover Efabi-Orange. */
 #af-wrapper .button-normal:hover {
 	background-color: var(--afspaces-forum-button-hover) !important;
@@ -39,6 +45,88 @@
   font-size: var(--afspaces-forum-metadata-size);
 }
 
+#af-wrapper .button-normal, #af-wrapper .title-element, #af-wrapper #forum-header, #af-wrapper #profile-header .background-avatar, #af-wrapper #profile-navigation, #af-wrapper input[type="radio"]:checked::before {
+  background-color: var(--afspaces-color-blue) !important;
+}
 #af-wrapper a.highlight-admin {
 	color: var(--afspaces-color-purple) !important;
+}
+
+
+#af-wrapper .button {
+  padding: 3px 12px;
+}
+#af-wrapper .button-normal:hover, #af-wrapper .button-neutral, #af-wrapper .button:hover,#af-wrapper a:hover  {
+  background-color: var(--afspaces-color-yellow);
+  color: #000;
+}
+#af-wrapper .button-red {
+  background: var(--afspaces-color-secondary-background);
+
+}
+#af-wrapper .button-red:hover {
+  background: var(--afspaces-color-danger);
+  color: #fff;
+}
+
+#af-wrapper .button-neutral {
+  background-color:var(--afspaces-color-secondary-background) !important;
+  color: #fff;
+}
+#af-wrapper .report-link.fas.fa-exclamation-triangle {
+	  color: var(--afspaces-color-danger);
+}
+
+#af-wrapper .topic-name > a,
+#af-wrapper .forum-name > a.forum-title
+
+{
+	font-weight: 600;
+	color: var(--afspaces-color-text)!important;
+	font-size: var(--afspaces-forum-title-size)!important;
+
+}
+#af-wrapper a:not(a.button):not(a.highlight-admin):not(a.highlight-moderator){
+  color: var(--afspaces-color-blue)!important;
+}
+
+#af-wrapper .post-author-blocks .mention-nice-name ,
+#af-wrapper .post-author-blocks .post-author-block-meta ,
+#af-wrapper .post-author-blocks .post-author-block-group ,
+#af-wrapper .post-author-blocks .af-usergroup-tag
+{
+  font-size: var(--afspaces-forum-metadata-size)!important;
+  font-weight: 400!important;
+}
+#af-wrapper .post-author-blocks  span.af-usergroup-tag{
+  border: 1px solid #dddddd!important;
+  border-radius: 16px;
+}
+#af-wrapper .post-author-blocks .af-usergroup-tag.topic-author{
+   background-color: #fff!important;
+   border: 1px solid var(--afspaces-color-blue)!important;
+   padding: 1px 7px!important;
+           	
+}
+#af-wrapper small, #af-wrapper .forum-poster-summary a{
+  font-size: var(--afspaces-forum-metadata-size)!important	;
+  font-weight: 400!important;
+}
+
+#af-wrapper .forum-post-menu.afspaces-has-mod a ,.afspaces-post-mod .afspaces-mod-item{
+  font-size: var(--afspaces-forum-mod-items-size)!important;
+  font-weight: 300!important;
+  margin: 0px 2px!important;
+  padding: 0px 4px!important;
+  margin-bottom: -4px!important;
+}
+#af-wrapper .forum-post-menu.afspaces-has-mod a[title="Beitrag melden"]{
+	float: inline-end;
+}
+#af-wrapper .forum-post-menu.afspaces-has-mod {
+	margin-bottom: -4px!important;
+}
+#af-wrapper .forum-post-date, #af-wrapper .forum-post-date a{
+	font-size: var(--afspaces-forum-metadata-size)!important;
+	color: var(--afspaces-forum-metadata-color)!important;
 }
