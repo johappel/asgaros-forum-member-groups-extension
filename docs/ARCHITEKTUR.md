@@ -41,8 +41,13 @@ Implementiert die Use Cases des Plugins:
 - InviteLinkService
 - JoinRequestService
 - WorkingGroupService
+- `WorkingGroupService::validate_metadata()` stellt für zusammengesetzte
+  Frontend-Requests die vollständige Metadatenprüfung ohne Write bereit.
 - SpaceCreationService
 - SpaceLifecycleService
+- `SpaceLifecycleService::validate_name()` und
+  `SpaceLifecycleService::validate_visibility()` erlauben der gemeinsamen
+  Settings-Action, alle beteiligten Policies vor dem ersten Write zu prüfen.
 - SpaceModerationService
 - ForumSearchService
 - HybridSearchService

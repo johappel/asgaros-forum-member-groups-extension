@@ -22,6 +22,7 @@ use AFSpaces\Application\SpaceRegistrationService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
+use AFSpaces\Domain\WorkingGroupMeta;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
@@ -327,6 +328,31 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							(string) ( $forum['name'] ?? (string) $space->forum_id )
 						)
 					);
+				} elseif ( 'save_working_group_settings' === $action ) {
+					$name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+					$visibility = isset( $_POST['visibility'] ) ? sanitize_key( wp_unslash( $_POST['visibility'] ) ) : '';
+					$join_policy = isset( $_POST['join_policy'] ) ? sanitize_key( wp_unslash( $_POST['join_policy'] ) ) : '';
+					if ( 'public' === $visibility ) {
+						throw new DomainException( __( 'Eine öffentliche Sichtbarkeit ist für Arbeitsgruppen derzeit nicht verfügbar.', 'afspaces' ) );
+					}
+					if ( ! in_array( $join_policy, array( WorkingGroupMeta::JOIN_POLICY_REQUEST, WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY, WorkingGroupMeta::JOIN_POLICY_CLOSED ), true ) ) {
+						throw new DomainException( __( 'Bitte wähle eine gültige Beitrittsoption.', 'afspaces' ) );
+					}
+
+					// Eine Auswahl bildet den gesamten fachlichen Beitrittszustand ab.
+					$meta_input = wp_unslash( $_POST );
+					$meta_input['join_policy'] = $join_policy;
+					$meta_input['join_requests_enabled'] = WorkingGroupMeta::JOIN_POLICY_REQUEST === $join_policy;
+
+					// Alle Policies werden vor dem ersten Schreibzugriff geprüft.
+					$this->working_groups->validate_metadata( $space_id, $actor, $meta_input );
+					$this->space_lifecycle->validate_name( $space_id, $actor, $name );
+					$this->space_lifecycle->validate_visibility( $space_id, $actor, $visibility );
+
+					$this->space_lifecycle->rename( $space_id, $actor, $name );
+					$this->space_lifecycle->change_visibility( $space_id, $actor, $visibility );
+					$this->working_groups->save_metadata( $space_id, $actor, $meta_input );
+					$this->set_message( 'success', __( 'Änderungen gespeichert.', 'afspaces' ) );
 				} elseif ( 'save_working_group_meta' === $action ) {
 					$this->working_groups->save_metadata( $space_id, $actor, wp_unslash( $_POST ) );
 					$this->set_message( 'success', __( 'Die Arbeitsgruppen-Details wurden gespeichert.', 'afspaces' ) );
@@ -454,7 +480,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				exit;
 			}
 
-			if ( 'save_working_group_meta' === $action ) {
+			if ( in_array( $action, array( 'save_working_group_meta', 'save_working_group_settings' ), true ) ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
 				exit;
 			}

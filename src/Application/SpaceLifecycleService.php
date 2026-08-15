@@ -60,7 +60,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceLifecycleService' ) ) {
 		 */
 		public function rename( int $space_id, int $actor_user_id, string $name ): void {
 			$space = $this->require_managed_space( $space_id, $actor_user_id );
-			$name  = $this->policy->validate_name( SpaceCreationSettings::load(), $name );
+			$name  = $this->validate_name( $space_id, $actor_user_id, $name );
 
 			$this->asgaros->update_forum( $space->forum_id, array( 'name' => $name ) );
 			$this->audit->log( $space_id, $actor_user_id, $actor_user_id, 'space_renamed', 'space' );
@@ -77,14 +77,41 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceLifecycleService' ) ) {
 		 */
 		public function change_visibility( int $space_id, int $actor_user_id, string $visibility ): void {
 			$space      = $this->require_managed_space( $space_id, $actor_user_id );
-			$settings   = SpaceCreationSettings::load();
-			$privileged = user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
-				|| user_can( $actor_user_id, Capabilities::MODERATE_SPACE );
-			$visibility = $this->policy->validate_visibility( $settings, $visibility, $settings->visibilities_for( $privileged ) );
+			$visibility = $this->validate_visibility( $space_id, $actor_user_id, $visibility );
 
 			$this->apply_visibility( $space, $visibility );
 			$this->spaces->update_visibility( $space_id, $visibility );
 			$this->audit->log( $space_id, $actor_user_id, $actor_user_id, 'space_visibility_changed', 'space' );
+		}
+
+		/**
+		 * Validiert einen Namen ohne einen Schreibzugriff.
+		 *
+		 * @param int    $space_id      Space-ID.
+		 * @param int    $actor_user_id Akteur.
+		 * @param string $name          Neuer Name.
+		 * @return string Normalisierter Name.
+		 */
+		public function validate_name( int $space_id, int $actor_user_id, string $name ): string {
+			$this->require_managed_space( $space_id, $actor_user_id );
+			return $this->policy->validate_name( SpaceCreationSettings::load(), $name );
+		}
+
+		/**
+		 * Validiert die Sichtbarkeit ohne einen Schreibzugriff.
+		 *
+		 * @param int    $space_id      Space-ID.
+		 * @param int    $actor_user_id Akteur.
+		 * @param string $visibility    Sichtbarkeitswert.
+		 * @return string Validierter Sichtbarkeitswert.
+		 */
+		public function validate_visibility( int $space_id, int $actor_user_id, string $visibility ): string {
+			$this->require_managed_space( $space_id, $actor_user_id );
+			$settings   = SpaceCreationSettings::load();
+			$privileged = user_can( $actor_user_id, Capabilities::MANAGE_ALL_SPACES )
+				|| user_can( $actor_user_id, Capabilities::MODERATE_SPACE );
+
+			return $this->policy->validate_visibility( $settings, $visibility, $settings->visibilities_for( $privileged ) );
 		}
 
 		/**

@@ -114,6 +114,26 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 		 * @return WorkingGroupMeta
 		 */
 		public function save_metadata( int $space_id, int $actor_user_id, array $input ): WorkingGroupMeta {
+			$meta = $this->validate_metadata( $space_id, $actor_user_id, $input );
+
+			$this->meta->save( $meta );
+			$this->audit->log( $space_id, $actor_user_id, $actor_user_id, 'working_group_meta_updated', 'working_group' );
+
+			return $meta;
+		}
+
+		/**
+		 * Validiert Metadaten ohne einen Schreibzugriff.
+		 *
+		 * Die Methode wird von Sammelaktionen verwendet, die vor dem ersten
+		 * Write mehrere beteiligte Services validieren müssen.
+		 *
+		 * @param int                  $space_id      Space-ID.
+		 * @param int                  $actor_user_id Akteur.
+		 * @param array<string,mixed>  $input          Formulardaten.
+		 * @return WorkingGroupMeta
+		 */
+		public function validate_metadata( int $space_id, int $actor_user_id, array $input ): WorkingGroupMeta {
 			$space = $this->spaces->get_space( $space_id );
 			if ( ! $space ) {
 				throw new DomainException( __( 'Die Arbeitsgruppe existiert nicht.', 'afspaces' ) );
@@ -135,10 +155,6 @@ if ( ! class_exists( 'AFSpaces\\Application\\WorkingGroupService' ) ) {
 					'topic_ids'             => $this->sanitize_topic_ids( $input['topic_ids'] ?? array() ),
 				)
 			);
-
-			$this->meta->save( $meta );
-			$this->audit->log( $space_id, $actor_user_id, $actor_user_id, 'working_group_meta_updated', 'working_group' );
-
 			return $meta;
 		}
 

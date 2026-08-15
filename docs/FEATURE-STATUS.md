@@ -204,7 +204,8 @@ Abdeckung nach Task-Blöcken:
 - M3.2.6 Profilintegration: teilweise umgesetzt.
 - M3.2.7 ACF- und Themenintegration: offen.
 - M3.2.8 Migration und Kompatibilität: teilweise umgesetzt.
-- M3.2.9 Arbeitsgruppenverwaltung im Frontend: teilweise umgesetzt.
+- M3.2.9 Arbeitsgruppenverwaltung im Frontend: gemeinsame Einstellungsansicht
+  umgesetzt; Lifecycle- und Owner-Aktionen bleiben separat.
 
 Bereits sichtbar oder vorbereitet:
 
@@ -218,7 +219,7 @@ Bereits sichtbar oder vorbereitet:
 Als noch nicht abgeschlossen zu betrachten:
 
 - Vollständige Umstellung aller sichtbaren Begriffe ohne Restvokabular aus der Space-Terminologie.
-- Durchgängige Metadatenverwaltung im Frontend, inklusive Beschreibung, Kontakt, Farbe, Symbol und Beitrittslogik.
+- Durchgängige Metadatenverwaltung im Frontend, inklusive Beschreibung, Kontakt, Farbe, Symbol und Beitrittslogik, ist als gemeinsames Formular umgesetzt.
 - ACF-Themenintegration.
 - Vollständige Profilintegration mit Sichtbarkeitsregeln.
 - Benachrichtigungs- und Privacy-Vervollständigung.

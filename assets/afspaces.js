@@ -140,6 +140,7 @@
 			use_invite_link: true,
 			request_invite_link_registration: true,
 			create_space: true,
+			save_working_group_settings: true,
 			rename_space: true,
 			change_space_visibility: true,
 			transfer_space_owner: true,

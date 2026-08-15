@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Öffentliche Forumssichtbarkeit aus der Arbeitsgruppen-Nutzeransicht entfernt
+  und die Join-Auswahl per CSS sauber ausgerichtet. Die Mitgliederverwaltung
+  ist aus dem Verantwortlichen-Abschnitt direkt erreichbar.
+- Arbeitsgruppen-Einstellungen in der Frontend-Ansicht als zusammenhängende
+  Oberfläche mit einer gemeinsamen `save_working_group_settings`-Action
+  umgesetzt. Name, Beschreibung, Themen, Darstellung, Zugang und Beitritt
+  werden vor dem ersten Schreibzugriff vollständig validiert; Owner-Transfer,
+  Lifecycle und Löschung bleiben separate, berechtigungsgeschützte Aktionen.
+- Plugin-Version auf 0.4.21 angehoben.
+
 - Farbrollen semantisch getrennt: `--afspaces-color-blue` bleibt die feste
   Primärfarbe; konfigurierbare Überschriften- und Linkfarben werden über
   `--afspaces-heading-color` bzw. `--afspaces-link-color` gesetzt.

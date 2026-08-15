@@ -1453,10 +1453,11 @@ a.afspaces-link.is-active {
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-section-card {
-	padding: 0 16px 16px;
-	margin: 0 0 15px;
-	border-radius: 16px;
-	overflow: hidden;
+  padding: 0 16px 16px;
+  margin: 0 0 19px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #999;
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-section-title {
@@ -2981,4 +2982,178 @@ right: auto;
 #af-wrapper.afspaces-wrapper .afspaces-search input:focus-visible,
 #af-wrapper.afspaces-wrapper .afspaces-inline-form button:focus-visible {
 	outline-color: var(--afspaces-color-yellow);
+}
+
+/* Ruhige, zusammenhängende Oberfläche für die Arbeitsgruppen-Einstellungen. */
+
+
+Element {
+}
+@media (max-width: 640px) {
+  .afspaces-working-group-settings .afspaces-settings-header {
+    flex-direction: column;
+  }
+}
+.afspaces-working-group-settings .afspaces-settings-header {
+  display: flex;
+  align-items: inherit;
+  justify-content: end;
+  gap: 1rem;
+
+  margin-bottom: 1.5rem;
+}
+
+.afspaces-working-group-settings .afspaces-settings-header h2,
+.afspaces-working-group-settings .afspaces-settings-section h3 {
+	margin-top: 0;
+	color: var(--afspaces-heading-color, #2d5d7f);
+}
+
+.afspaces-working-group-settings .afspaces-settings-section {
+	margin: 0;
+	padding: 1.5rem 0;
+	border-top: 1px solid #d9e0e5;
+}
+
+.afspaces-working-group-settings .afspaces-settings-section h3 {
+	margin-bottom: 1rem;
+}
+
+.afspaces-working-group-settings .afspaces-settings-fields {
+	display: grid;
+	gap: 1rem;
+}
+
+.afspaces-working-group-settings .afspaces-settings-field {
+	display: grid;
+	gap: 0.4rem;
+}
+
+.afspaces-working-group-settings .afspaces-accent-fieldset {
+	display: grid;
+	gap: 0.4rem;
+	padding: 0;
+	border: 0;
+}
+
+.afspaces-working-group-settings .afspaces-settings-field > label,
+.afspaces-working-group-settings .afspaces-settings-field > legend {
+	font-weight: 600;
+}
+
+.afspaces-working-group-settings .afspaces-settings-field > legend {
+	padding: 0;
+}
+
+.afspaces-working-group-settings .afspaces-settings-field > input[type="text"],
+.afspaces-working-group-settings .afspaces-settings-field > select,
+.afspaces-working-group-settings .afspaces-settings-field > textarea {
+	width: 100%;
+	max-width: 100%;
+	min-height: 44px;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.afspaces-working-group-settings .afspaces-settings-field > textarea {
+	min-height: 8rem;
+	resize: vertical;
+}
+
+.afspaces-working-group-settings .afspaces-join-options {
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+	margin: 0 !important;
+	gap: 0.65rem;
+	padding: 0 !important;
+	border: 0 !important;
+}
+
+.afspaces-working-group-settings .afspaces-join-options legend {
+	display: block;
+	width: 100%;
+	margin: 0 0 0.75rem !important;
+	padding: 0 !important;
+}
+
+.afspaces-working-group-settings .afspaces-join-options label {
+	display: block;
+	margin: 0;
+	font-weight: 400;
+}
+
+.afspaces-working-group-settings .afspaces-responsibles-section {
+	padding-bottom: 1rem;
+}
+
+.afspaces-working-group-settings .afspaces-responsibles-section .afspaces-inline-hint {
+	margin-top: 1rem;
+}
+
+.afspaces-working-group-settings .afspaces-settings-submit {
+	margin: 1.25rem 0 0.5rem;
+}
+
+.afspaces-working-group-settings .afspaces-owner-transfer {
+	padding-top: 1rem;
+}
+
+.afspaces-working-group-settings .afspaces-owner-transfer-form {
+	display: flex;
+	align-items: end;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.afspaces-working-group-settings .afspaces-owner-transfer-form label {
+	width: 100%;
+	font-weight: 600;
+}
+
+.afspaces-working-group-settings .afspaces-owner-transfer-form select {
+	min-height: 44px;
+	min-width: 16rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.afspaces-working-group-settings .afspaces-space-management {
+	margin-top: 1rem;
+}
+
+.afspaces-working-group-settings .afspaces-danger-zone {
+	margin-top: 1rem;
+	padding: 1.25rem;
+	border: 1px solid #b32d2e;
+	border-radius: 6px;
+	background: #fff8f8;
+}
+
+.afspaces-working-group-settings .afspaces-danger-zone h3 {
+	color: #8a2424;
+}
+
+.afspaces-working-group-settings .afspaces-delete-space {
+	margin: 0;
+}
+
+@media (max-width: 640px) {
+	.afspaces-working-group-settings .afspaces-settings-header {
+		flex-direction: column;
+	}
+
+	.afspaces-working-group-settings .afspaces-owner-transfer-form {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.afspaces-working-group-settings .afspaces-owner-transfer-form select {
+		min-width: 0;
+		width: 100%;
+	}
 }

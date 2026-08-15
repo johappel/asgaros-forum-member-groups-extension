@@ -1,6 +1,6 @@
 <?php
 /**
- * Frontend-Ansicht fuer Arbeitsgruppen-Metadaten.
+ * Frontend-Ansicht für die Einstellungen einer Arbeitsgruppe.
  *
  * @package AFSpaces
  */
@@ -11,18 +11,17 @@ namespace AFSpaces\Interface;
 
 use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
-use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Application\UserIdentityService;
+use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\SpaceCreationSettings;
+use AFSpaces\Domain\Space;
 use AFSpaces\Domain\SpaceLifecycle;
 use AFSpaces\Domain\WorkingGroupMeta;
 
 if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 
-	/**
-	 * Rendert die bearbeitbaren Metadaten einer Arbeitsgruppe.
-	 */
+	/** Rendert die bearbeitbaren Einstellungen einer Arbeitsgruppe. */
 	class WorkingGroupSettingsView {
 
 		private SpaceRepository $spaces;
@@ -37,6 +36,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 			$this->identity = $identity ?: new UserIdentityService();
 		}
 
+		/**
+		 * Rendert die Einstellungsseite.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @return string
+		 */
 		public function render( int $space_id ): string {
 			$actor = get_current_user_id();
 			if ( 0 === $actor ) {
@@ -61,100 +66,128 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 			$meta = $this->working_groups->get_metadata( $space_id );
 			$topics = $this->working_groups->list_topics();
 			$responsibles = $this->working_groups->list_responsibles( $space_id );
+			$settings = SpaceCreationSettings::load();
+			$is_privileged = user_can( $actor, Capabilities::MANAGE_ALL_SPACES ) || user_can( $actor, Capabilities::MODERATE_SPACE );
+			$visibility_options = array_values(
+				array_filter(
+					$settings->visibilities_for( $is_privileged ),
+					static fn( string $visibility ): bool => SpaceCreationSettings::VISIBILITY_PUBLIC !== $visibility
+				)
+			);
+			$join_mode = self::join_mode( $meta );
 
 			ob_start();
 			?>
-			<section class="afspaces-working-group-settings" aria-label="<?php echo esc_attr__( 'Arbeitsgruppen-Details bearbeiten', 'afspaces' ); ?>">
+			<section class="afspaces-working-group-settings" aria-label="<?php echo esc_attr__( 'Arbeitsgruppen-Details', 'afspaces' ); ?>">
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier pflegst du Beschreibung und Kontaktinformationen dieser Arbeitsgruppe.', 'afspaces' ); ?></p>
+				<header class="afspaces-settings-header">
+					<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?></a>
+				</header>
 
-				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-working-group-contact-heading">
-					<div id="afspaces-working-group-contact-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Arbeitsgruppenverantwortliche', 'afspaces' ); ?></div>
-					<?php if ( empty( $responsibles ) ) : ?>
-						<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine Verantwortlichen hinterlegt.', 'afspaces' ); ?></p>
-					<?php else : ?>
-						<ul class="afspaces-responsibles-list">
-							<?php foreach ( $responsibles as $responsible ) : ?>
-								<li>
-									<a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => $responsible['user_id'] ) ) ); ?>"><?php echo esc_html( $this->identity->get_display_name( (int) $responsible['user_id'] ) ?: (string) $responsible['display_name'] ); ?></a>
-									<span class="afspaces-tag"><?php echo esc_html( $responsible['role_label'] ); ?></span>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					<?php endif; ?>
-				</section>
-
-				<form method="post" class="afspaces-working-group-form afspaces-form-grid">
+				<form method="post" class="afspaces-working-group-form afspaces-settings-form">
 					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-					<input type="hidden" name="afspaces_action" value="save_working_group_meta" />
+					<input type="hidden" name="afspaces_action" value="save_working_group_settings" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
 
-					<label for="afspaces-description"><?php echo esc_html__( 'Beschreibung', 'afspaces' ); ?></label>
-					<textarea id="afspaces-description" name="description" rows="5"><?php echo esc_textarea( $meta->description ); ?></textarea>
-
-					<label for="afspaces-contact-text"><?php echo esc_html__( 'Kontakttext für Arbeitsgruppenverantwortliche', 'afspaces' ); ?></label>
-					<textarea id="afspaces-contact-text" name="contact_text" rows="4"><?php echo esc_textarea( $meta->contact_text ); ?></textarea>
-
-					<fieldset class="afspaces-accent-fieldset">
-						<legend><?php echo esc_html__( 'Akzentfarbe (Corporate Design)', 'afspaces' ); ?></legend>
-						<div class="afspaces-accent-options">
-							<?php foreach ( WorkingGroupService::accent_color_options() as $color => $label ) : ?>
-								<?php $is_selected = $meta->accent_color === $color; ?>
-								<label class="afspaces-accent-option<?php echo $is_selected ? ' is-selected' : ''; ?>" style="--afspaces-accent-option-color: <?php echo esc_attr( $color ); ?>;">
-									<input type="radio" name="accent_color" value="<?php echo esc_attr( $color ); ?>" <?php checked( $is_selected ); ?> />
-									<span class="afspaces-accent-swatch" style="background-color: <?php echo esc_attr( $color ); ?>;" aria-hidden="true"></span>
-									<span class="afspaces-accent-option-text">
-										<strong><?php echo esc_html( $label ); ?></strong>
-										<code><?php echo esc_html( strtoupper( $color ) ); ?></code>
-									</span>
-								</label>
-							<?php endforeach; ?>
+					<section class="afspaces-settings-section" aria-label="<?php echo esc_attr__( 'Allgemeine Angaben', 'afspaces' ); ?>">
+						<div class="afspaces-settings-fields">
+							<div class="afspaces-settings-field">
+								<label for="afspaces-name"><?php echo esc_html__( 'Name der Arbeitsgruppe', 'afspaces' ); ?></label>
+								<input type="text" id="afspaces-name" name="name" value="<?php echo esc_attr( $forum_name ); ?>" maxlength="<?php echo esc_attr( (string) $settings->name_max_length ); ?>" required />
+							</div>
+							<div class="afspaces-settings-field">
+								<label for="afspaces-description"><?php echo esc_html__( 'Worum geht es?', 'afspaces' ); ?></label>
+								<textarea id="afspaces-description" name="description" rows="5"><?php echo esc_textarea( $meta->description ); ?></textarea>
+							</div>
+							<?php if ( ! empty( $topics ) ) : ?>
+								<div class="afspaces-settings-field">
+									<label for="afspaces-topics"><?php echo esc_html__( 'Themen', 'afspaces' ); ?></label>
+									<select id="afspaces-topics" name="topic_ids[]" multiple size="5">
+										<?php foreach ( $topics as $topic ) : ?>
+											<option value="<?php echo esc_attr( (string) $topic['id'] ); ?>" <?php selected( in_array( (int) $topic['id'], $meta->topic_ids, true ) ); ?>><?php echo esc_html( (string) $topic['name'] ); ?></option>
+										<?php endforeach; ?>
+									</select>
+									<p class="description"><?php echo esc_html__( 'Mehrfachauswahl ist möglich. Es werden nur gültige Begriffe der konfigurierten Themen-Taxonomie gespeichert.', 'afspaces' ); ?></p>
+								</div>
+							<?php endif; ?>
+							<div class="afspaces-settings-field">
+								<label for="afspaces-contact-text"><?php echo esc_html__( 'Wie können andere mit der Gruppe Kontakt aufnehmen?', 'afspaces' ); ?></label>
+								<textarea id="afspaces-contact-text" name="contact_text" rows="4"><?php echo esc_textarea( $meta->contact_text ); ?></textarea>
+							</div>
 						</div>
-						<p class="description"><?php echo esc_html__( 'Die markierte Kachel ist aktuell ausgewählt. Klicke auf eine andere Farbe, um die Auswahl zu ändern.', 'afspaces' ); ?></p>
-					</fieldset>
+					</section>
 
-					<label for="afspaces-icon"><?php echo esc_html__( 'Symbol', 'afspaces' ); ?></label>
-					<select id="afspaces-icon" name="icon">
-						<?php foreach ( WorkingGroupService::icon_options() as $icon => $label ) : ?>
-							<option value="<?php echo esc_attr( $icon ); ?>" <?php selected( $meta->icon, $icon ); ?>><?php echo esc_html( $label ); ?></option>
-						<?php endforeach; ?>
-					</select>
+					<section class="afspaces-settings-section" aria-labelledby="afspaces-appearance-heading">
+						<h3 id="afspaces-appearance-heading"><?php echo esc_html__( 'Darstellung', 'afspaces' ); ?></h3>
+						<div class="afspaces-settings-fields">
+							<div class="afspaces-settings-field">
+								<label for="afspaces-icon"><?php echo esc_html__( 'Symbol', 'afspaces' ); ?></label>
+								<select id="afspaces-icon" name="icon">
+									<?php foreach ( WorkingGroupService::icon_options() as $icon => $label ) : ?>
+										<option value="<?php echo esc_attr( $icon ); ?>" <?php selected( $meta->icon, $icon ); ?>><?php echo esc_html( $label ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<fieldset class="afspaces-accent-fieldset">
+								<legend><?php echo esc_html__( 'Akzentfarbe', 'afspaces' ); ?></legend>
+								<div class="afspaces-accent-options">
+									<?php foreach ( WorkingGroupService::accent_color_options() as $color => $label ) : ?>
+										<?php $is_selected = $meta->accent_color === $color; ?>
+										<label class="afspaces-accent-option<?php echo $is_selected ? ' is-selected' : ''; ?>" style="--afspaces-accent-option-color: <?php echo esc_attr( $color ); ?>;">
+											<input type="radio" name="accent_color" value="<?php echo esc_attr( $color ); ?>" <?php checked( $is_selected ); ?> />
+											<span class="afspaces-accent-swatch" style="background-color: <?php echo esc_attr( $color ); ?>;" aria-hidden="true"></span>
+											<span class="afspaces-accent-option-text"><strong><?php echo esc_html( $label ); ?></strong><code><?php echo esc_html( strtoupper( $color ) ); ?></code></span>
+										</label>
+									<?php endforeach; ?>
+								</div>
+								<p class="description"><?php echo esc_html__( 'Diese Farbe wird zur Kennzeichnung der Arbeitsgruppe verwendet. Die markierte Kachel ist aktuell ausgewählt.', 'afspaces' ); ?></p>
+							</fieldset>
+						</div>
+					</section>
 
-					<label for="afspaces-join-policy"><?php echo esc_html__( 'Beitrittslogik', 'afspaces' ); ?></label>
-					<select id="afspaces-join-policy" name="join_policy">
-						<option value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>" <?php selected( $meta->join_policy, WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>><?php echo esc_html__( 'Beitritt per Anfrage', 'afspaces' ); ?></option>
-						<option value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?>" <?php selected( $meta->join_policy, WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?>><?php echo esc_html__( 'Nur per Einladung', 'afspaces' ); ?></option>
-						<option value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?>" <?php selected( $meta->join_policy, WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?>><?php echo esc_html__( 'Geschlossen ohne Beitritt', 'afspaces' ); ?></option>
-					</select>
+					<section class="afspaces-settings-section" aria-labelledby="afspaces-access-heading">
+						<h3 id="afspaces-access-heading"><?php echo esc_html__( 'Zugang und Mitgliedschaft', 'afspaces' ); ?></h3>
+						<div class="afspaces-settings-fields">
+							<div class="afspaces-settings-field">
+								<label for="afspaces-forum-access"><?php echo esc_html__( 'Wer kann das Forum sehen?', 'afspaces' ); ?></label>
+								<select id="afspaces-forum-access" name="visibility">
+									<?php foreach ( $visibility_options as $visibility ) : ?>
+										<option value="<?php echo esc_attr( $visibility ); ?>" <?php selected( $space->visibility, $visibility ); ?>><?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<fieldset class="afspaces-join-options afspaces-settings-field">
+								<legend><?php echo esc_html__( 'Wie können neue Mitglieder beitreten?', 'afspaces' ); ?></legend>
+								<label><input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?> /> <?php echo esc_html__( 'Beitritt auf Anfrage', 'afspaces' ); ?></label>
+								<label><input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?>" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?> /> <?php echo esc_html__( 'Nur auf Einladung', 'afspaces' ); ?></label>
+								<label><input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?>" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_CLOSED ); ?> /> <?php echo esc_html__( 'Keine neuen Mitglieder', 'afspaces' ); ?></label>
+							</fieldset>
+						</div>
+					</section>
 
-					<label for="afspaces-join-requests-enabled" class="afspaces-checkbox">
-						<input type="checkbox" id="afspaces-join-requests-enabled" name="join_requests_enabled" value="1" <?php checked( $meta->join_requests_enabled ); ?> />
-						<span><?php echo esc_html__( 'Beitrittsanfragen grundsätzlich erlauben', 'afspaces' ); ?></span>
-					</label>
-					<p class="description"><?php echo esc_html__( 'Wirkt nur zusammen mit der Beitrittslogik „Beitritt per Anfrage". Ist die Beitrittslogik „Nur per Einladung" oder „Geschlossen", hat dieses Häkchen keine Wirkung.', 'afspaces' ); ?></p>
+					<section class="afspaces-settings-section afspaces-responsibles-section" aria-labelledby="afspaces-responsibles-heading">
+						<h3 id="afspaces-responsibles-heading"><?php echo esc_html__( 'Verantwortliche', 'afspaces' ); ?></h3>
+						<?php if ( empty( $responsibles ) ) : ?>
+							<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine Verantwortlichen hinterlegt.', 'afspaces' ); ?></p>
+						<?php else : ?>
+							<ul class="afspaces-responsibles-list">
+								<?php foreach ( $responsibles as $responsible ) : ?>
+									<li>
+										<a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => $responsible['user_id'] ) ) ); ?>"><?php echo esc_html( $this->identity->get_display_name( (int) $responsible['user_id'] ) ?: (string) $responsible['display_name'] ); ?></a>
+										<span class="afspaces-tag"><?php echo esc_html( $responsible['role_label'] ); ?></span>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
+						<p class="afspaces-inline-hint"><?php echo esc_html__( 'Verantwortliche verwalten Mitglieder, Einladungen und Beitrittsanfragen. Außerdem können sie ausschließlich das Forum dieser Arbeitsgruppe moderieren.', 'afspaces' ); ?></p>
+						<p class="afspaces-inline-hint"><a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MEMBERS, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Verantwortliche in der Mitgliederverwaltung bearbeiten', 'afspaces' ); ?></a></p>
+					</section>
 
-					<?php if ( ! empty( $topics ) ) : ?>
-						<label for="afspaces-topics"><?php echo esc_html__( 'Themen', 'afspaces' ); ?></label>
-						<select id="afspaces-topics" name="topic_ids[]" multiple size="5">
-							<?php foreach ( $topics as $topic ) : ?>
-								<option value="<?php echo esc_attr( (string) $topic['id'] ); ?>" <?php selected( in_array( (int) $topic['id'], $meta->topic_ids, true ) ); ?>><?php echo esc_html( (string) $topic['name'] ); ?></option>
-							<?php endforeach; ?>
-						</select>
-						<p class="description"><?php echo esc_html__( 'Mehrfachauswahl ist möglich. Es werden nur gültige Begriffe der konfigurierten Themen-Taxonomie gespeichert.', 'afspaces' ); ?></p>
-					<?php endif; ?>
-
-					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Arbeitsgruppen-Details speichern', 'afspaces' ); ?></button>
+					<button type="submit" class="afspaces-button afspaces-settings-submit"><?php echo esc_html__( 'Änderungen speichern', 'afspaces' ); ?></button>
 				</form>
 
-				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-working-group-scope-heading">
-					<div id="afspaces-working-group-scope-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Verantwortung und Moderation', 'afspaces' ); ?></div>
-					<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten Mitglieder, Einladungen und Beitrittsanfragen innerhalb von AFSpaces.', 'afspaces' ); ?></p>
-					<p><?php echo esc_html__( 'Als Verantwortliche moderierst du außerdem die Themen deines eigenen Forums (Themen schließen, wieder öffnen oder löschen) über den Reiter „Moderation". Diese Rechte gelten ausschließlich für dein Forum und geben keine Moderationsrechte in anderen Foren.', 'afspaces' ); ?></p>
-				</section>
-
-				<?php echo $this->render_management( $space, $actor, $forum_name, $responsibles ); ?>
-
-				<p class="afspaces-settings-return"><a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?></a></p>
+				<?php echo $this->render_owner_transfer( $space, $actor, $responsibles ); ?>
+				<?php echo $this->render_management( $space, $actor ); ?>
 			</section>
 			<?php
 
@@ -162,79 +195,82 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 		}
 
 		/**
-		 * Rendert die Lebenszyklus- und Verwaltungssteuerung eines Raums (MVP 4).
+		 * Gibt die fachliche Beitrittsauswahl für bestehende Daten zurück.
 		 *
-		 * @param \AFSpaces\Domain\Space          $space        Space.
-		 * @param int                             $actor        Akteur.
-		 * @param string                          $forum_name   Anzeigename.
-		 * @param array<int,array<string,mixed>>  $responsibles Verantwortliche.
+		 * @param WorkingGroupMeta $meta Metadaten.
 		 * @return string
 		 */
-		private function render_management( $space, int $actor, string $forum_name, array $responsibles ): string {
-			$is_admin = user_can( $actor, Capabilities::MANAGE_ALL_SPACES );
-			$is_owner = $is_admin || ( $space->owner_user_id === $actor );
-			$settings = SpaceCreationSettings::load();
+		private static function join_mode( WorkingGroupMeta $meta ): string {
+			if ( WorkingGroupMeta::JOIN_POLICY_REQUEST === $meta->join_policy && $meta->join_requests_enabled ) {
+				return WorkingGroupMeta::JOIN_POLICY_REQUEST;
+			}
+
+			return WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY === $meta->join_policy
+				? WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY
+				: WorkingGroupMeta::JOIN_POLICY_CLOSED;
+		}
+
+		/**
+		 * Rendert die separate, berechtigungsgeschützte Owner-Übertragung.
+		 *
+		 * @param Space                          $space         Space.
+		 * @param int                            $actor         Akteur.
+		 * @param array<int,array<string,mixed>> $responsibles Verantwortliche.
+		 * @return string
+		 */
+		private function render_owner_transfer( Space $space, int $actor, array $responsibles ): string {
+			$is_owner = user_can( $actor, Capabilities::MANAGE_ALL_SPACES ) || $space->owner_user_id === $actor;
+			$candidates = array_values(
+				array_filter(
+					$responsibles,
+					static fn( array $responsible ): bool => (int) $responsible['user_id'] !== $space->owner_user_id
+				)
+			);
+
+			if ( ! $is_owner || empty( $candidates ) ) {
+				return '';
+			}
 
 			ob_start();
 			?>
-			<section class="afspaces-section-card content-container afspaces-space-management" aria-labelledby="afspaces-space-management-heading">
-				<div id="afspaces-space-management-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Arbeitsgruppe verwalten', 'afspaces' ); ?></div>
-
-				<p class="description">
-					<?php
-					echo esc_html(
-						sprintf(
-							/* translators: %s: Status */
-							__( 'Aktueller Status: %s', 'afspaces' ),
-							self::status_label( $space->status )
-						)
-					);
-					?>
-				</p>
-
-				<?php if ( SpaceLifecycle::STATUS_REJECTED === $space->status && '' !== $space->rejection_reason ) : ?>
-					<p class="afspaces-message afspaces-message-error" role="alert">
-						<?php echo esc_html( sprintf( __( 'Ablehnungsgrund: %s', 'afspaces' ), $space->rejection_reason ) ); ?>
-					</p>
-				<?php endif; ?>
-
-				<form method="post" class="afspaces-form-grid">
+			<section class="afspaces-settings-section afspaces-owner-transfer" aria-labelledby="afspaces-owner-transfer-heading">
+				<h3 id="afspaces-owner-transfer-heading"><?php echo esc_html__( 'Hauptverantwortung', 'afspaces' ); ?></h3>
+				<p><?php echo esc_html__( 'Aktuell verantwortlich:', 'afspaces' ); ?> <strong><?php echo esc_html( $this->identity->get_display_name( $space->owner_user_id ) ); ?></strong></p>
+				<form method="post" class="afspaces-owner-transfer-form">
 					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-					<input type="hidden" name="afspaces_action" value="rename_space" />
+					<input type="hidden" name="afspaces_action" value="transfer_space_owner" />
 					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-					<label for="afspaces-rename"><?php echo esc_html__( 'Name der Arbeitsgruppe', 'afspaces' ); ?></label>
-					<input type="text" id="afspaces-rename" name="name" value="<?php echo esc_attr( $forum_name ); ?>" maxlength="<?php echo esc_attr( (string) $settings->name_max_length ); ?>" />
-					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Namen speichern', 'afspaces' ); ?></button>
-				</form>
-
-				<form method="post" class="afspaces-form-grid">
-					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-					<input type="hidden" name="afspaces_action" value="change_space_visibility" />
-					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-					<label for="afspaces-forum-access"><?php echo esc_html__( 'Zugriff auf das Forum', 'afspaces' ); ?></label>
-					<select id="afspaces-forum-access" name="visibility">
-						<?php foreach ( $settings->allowed_visibilities as $visibility ) : ?>
-							<option value="<?php echo esc_attr( $visibility ); ?>" <?php selected( $space->visibility, $visibility ); ?>><?php echo esc_html( CreateSpaceView::visibility_label( $visibility ) ); ?></option>
+					<label for="afspaces-transfer-owner"><?php echo esc_html__( 'Verantwortung übertragen an', 'afspaces' ); ?></label>
+					<select id="afspaces-transfer-owner" name="new_owner_id">
+						<?php foreach ( $candidates as $responsible ) : ?>
+							<option value="<?php echo esc_attr( (string) $responsible['user_id'] ); ?>"><?php echo esc_html( $this->identity->get_display_name( (int) $responsible['user_id'] ) ?: (string) $responsible['display_name'] ); ?></option>
 						<?php endforeach; ?>
 					</select>
-					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Zugriff speichern', 'afspaces' ); ?></button>
+					<button type="submit" class="afspaces-button" data-afspaces-confirm="<?php echo esc_attr__( 'Möchtest du die Verantwortung wirklich übertragen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Verantwortung übertragen', 'afspaces' ); ?></button>
 				</form>
+			</section>
+			<?php
+			return (string) ob_get_clean();
+		}
 
-				<?php if ( $is_owner && count( $responsibles ) > 0 ) : ?>
-					<form method="post" class="afspaces-form-grid">
-						<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-						<input type="hidden" name="afspaces_action" value="transfer_space_owner" />
-						<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-						<label for="afspaces-transfer-owner"><?php echo esc_html__( 'Verantwortung übertragen an', 'afspaces' ); ?></label>
-						<select id="afspaces-transfer-owner" name="new_owner_id">
-							<?php foreach ( $responsibles as $responsible ) : ?>
-								<?php if ( (int) $responsible['user_id'] !== $space->owner_user_id ) : ?>
-									<option value="<?php echo esc_attr( (string) $responsible['user_id'] ); ?>"><?php echo esc_html( $this->identity->get_display_name( (int) $responsible['user_id'] ) ?: (string) $responsible['display_name'] ); ?></option>
-								<?php endif; ?>
-							<?php endforeach; ?>
-						</select>
-						<button type="submit" class="afspaces-button" data-afspaces-confirm="<?php echo esc_attr__( 'Möchtest du die Verantwortung wirklich übertragen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Verantwortung übertragen', 'afspaces' ); ?></button>
-					</form>
+		/**
+		 * Rendert Status, Lifecycle-Aktionen und den Gefahrenbereich.
+		 *
+		 * @param Space $space Space.
+		 * @param int   $actor Akteur.
+		 * @return string
+		 */
+		private function render_management( Space $space, int $actor ): string {
+			$is_owner = user_can( $actor, Capabilities::MANAGE_ALL_SPACES ) || $space->owner_user_id === $actor;
+
+			ob_start();
+			?>
+			<section class="afspaces-settings-section afspaces-space-management" aria-labelledby="afspaces-space-management-heading">
+				<h3 id="afspaces-space-management-heading"><?php echo esc_html__( 'Verwaltung', 'afspaces' ); ?></h3>
+				<p class="description"><strong><?php echo esc_html__( 'Status:', 'afspaces' ); ?></strong> <?php echo esc_html( self::status_label( $space->status ) ); ?></p>
+
+				<?php if ( SpaceLifecycle::STATUS_REJECTED === $space->status && '' !== $space->rejection_reason ) : ?>
+					<p class="afspaces-message afspaces-message-error" role="alert"><?php echo esc_html( sprintf( __( 'Ablehnungsgrund: %s', 'afspaces' ), $space->rejection_reason ) ); ?></p>
 				<?php endif; ?>
 
 				<div class="afspaces-management-lifecycle">
@@ -243,38 +279,36 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 							<input type="hidden" name="afspaces_action" value="archive_space" />
 							<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-							<button type="submit" class="afspaces-button" data-afspaces-confirm="<?php echo esc_attr__( 'Arbeitsgruppe wirklich archivieren?', 'afspaces' ); ?>"><?php echo esc_html__( 'Archivieren', 'afspaces' ); ?></button>
+							<button type="submit" class="afspaces-button" data-afspaces-confirm="<?php echo esc_attr__( 'Arbeitsgruppe wirklich archivieren?', 'afspaces' ); ?>"><?php echo esc_html__( 'Arbeitsgruppe archivieren', 'afspaces' ); ?></button>
 						</form>
 					<?php elseif ( SpaceLifecycle::STATUS_ARCHIVED === $space->status ) : ?>
 						<form method="post">
 							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 							<input type="hidden" name="afspaces_action" value="reactivate_space" />
 							<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-							<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Reaktivieren', 'afspaces' ); ?></button>
-						</form>
-					<?php endif; ?>
-
-					<?php if ( $is_owner && SpaceLifecycle::STATUS_DELETED !== $space->status ) : ?>
-						<form method="post" class="afspaces-delete-space">
-							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
-							<input type="hidden" name="afspaces_action" value="delete_space" />
-							<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
-							<p class="description afspaces-danger-hint"><?php echo esc_html__( 'Das Löschen entfernt den Forenbereich der Arbeitsgruppe endgültig. Diese Aktion kann nicht rückgängig gemacht werden.', 'afspaces' ); ?></p>
-							<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr__( 'Diese Arbeitsgruppe wirklich unwiderruflich löschen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Arbeitsgruppe löschen', 'afspaces' ); ?></button>
+							<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Arbeitsgruppe reaktivieren', 'afspaces' ); ?></button>
 						</form>
 					<?php endif; ?>
 				</div>
 			</section>
+
+			<?php if ( $is_owner && SpaceLifecycle::STATUS_DELETED !== $space->status ) : ?>
+				<section class="afspaces-settings-section afspaces-danger-zone" aria-labelledby="afspaces-danger-heading">
+					<h3 id="afspaces-danger-heading"><?php echo esc_html__( 'Gefahrenbereich', 'afspaces' ); ?></h3>
+					<p class="afspaces-danger-hint"><?php echo esc_html__( 'Das Löschen entfernt den Forenbereich der Arbeitsgruppe endgültig. Diese Aktion kann nicht rückgängig gemacht werden.', 'afspaces' ); ?></p>
+					<form method="post" class="afspaces-delete-space">
+						<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+						<input type="hidden" name="afspaces_action" value="delete_space" />
+						<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space->id ); ?>" />
+						<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr__( 'Diese Arbeitsgruppe wirklich unwiderruflich löschen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Arbeitsgruppe löschen', 'afspaces' ); ?></button>
+					</form>
+				</section>
+			<?php endif; ?>
 			<?php
 			return (string) ob_get_clean();
 		}
 
-		/**
-		 * Menschlich lesbare Statusbezeichnung.
-		 *
-		 * @param string $status Status.
-		 * @return string
-		 */
+		/** @param string $status Status. @return string */
 		private static function status_label( string $status ): string {
 			switch ( $status ) {
 				case SpaceLifecycle::STATUS_PENDING:
@@ -306,8 +340,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 
 			$msg = $_SESSION['afspaces_message'];
 			unset( $_SESSION['afspaces_message'] );
-
 			$role = ( 'error' === $msg['type'] ) ? 'alert' : 'status';
+
 			return sprintf(
 				'<div class="afspaces-message afspaces-message-%1$s" role="%2$s" aria-live="polite">%3$s</div>',
 				esc_attr( $msg['type'] ),

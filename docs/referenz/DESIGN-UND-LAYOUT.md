@@ -116,6 +116,22 @@ normalize_accent_color() normalisiert zusätzlich historische oder manipulierte
 Fremdwerte auf den Standard #2d5d7f. `assets/afspaces.js` aktualisiert die
 sichtbare Markierung beim Wechsel unmittelbar.
 
+### Arbeitsgruppen-Einstellungen
+
+`WorkingGroupSettingsView::render()` ordnet die Seite in allgemeine Angaben
+ohne zusätzliche sichtbare Abschnittsüberschrift, Darstellung, Zugang und Mitgliedschaft,
+Verantwortliche,
+Verwaltung und Gefahrenbereich. Die normale Konfiguration wird in einem
+Formular mit dem Button „Änderungen speichern“ gesendet. „Arbeitsgruppe
+ansehen“ bleibt ein GET-Link im Seitenkopf; Owner-Übertragung, Archivierung,
+Reaktivierung und Löschung sind davon getrennte Formulare. Die Join-Auswahl
+zeigt nur die drei fachlichen Zustände Anfrage, Einladung und keine neuen
+Mitglieder und verwendet weiterhin die bestehende `WorkingGroupMeta`-Struktur.
+Die öffentliche Sichtbarkeit wird in dieser Nutzeransicht nicht angeboten;
+die administrative Sichtbarkeits-Policy bleibt für eine spätere Freigabe
+erhalten. Die Verantwortlichen-Sektion verlinkt für Rollenänderungen in die
+Mitgliederverwaltung.
+
 ## Hub-Layout
 
 - Eine Hub-Seite (`[afspaces]`) mit Router (`SpacesHubController`), Brotkrümel und zweistufiger Navigation.

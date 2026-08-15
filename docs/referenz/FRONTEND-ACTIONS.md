@@ -53,6 +53,7 @@ Alle serverseitigen Formular-Aktionen laufen über ein einziges POST-Feld `afspa
 | --- | --- | --- | --- |
 | `register_space` | `SpaceRegistrationService` | `forum_id` | `dashboard` |
 | `save_working_group_meta` | `WorkingGroupService::save_metadata` | Metadatenfelder (`wp_unslash($_POST)`) | `working-group-settings` |
+| `save_working_group_settings` | `SpaceLifecycleService` + `WorkingGroupService` | `name`, `description`, `contact_text`, `topic_ids[]`, `icon`, `accent_color`, `visibility`, `join_policy` | `working-group-settings` |
 
 ## Arbeitsgruppen-Gründung & Lifecycle
 
@@ -67,6 +68,14 @@ Alle serverseitigen Formular-Aktionen laufen über ein einziges POST-Feld `afspa
 | `delete_space` | `SpaceLifecycleService::delete` | — | `dashboard` |
 | `approve_space` | `SpaceLifecycleService::approve` | — | `approvals` |
 | `reject_space` | `SpaceLifecycleService::reject` | `rejection_reason` | `approvals` |
+
+`save_working_group_settings` ist die gemeinsame Frontend-Aktion für normale
+Einstellungen. Sie prüft vor dem ersten Schreibzugriff Metadaten, Namen und
+Sichtbarkeit. `join_policy=request` wird intern als
+`join_policy=request` plus `join_requests_enabled=1` gespeichert; `invite_only`
+und `closed` setzen `join_requests_enabled=0`. Die älteren Einzelaktionen
+`save_working_group_meta`, `rename_space` und `change_space_visibility` bleiben
+für bestehende Aufrufer erhalten.
 
 ## Moderation (`SpaceModerationService`)
 
