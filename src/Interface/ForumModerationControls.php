@@ -89,6 +89,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 			$space    = $context['space'];
 			$space_id = (int) $space->id;
 			$is_first = ! empty( $location['is_first'] );
+			$is_pinned = $this->asgaros->is_topic_pinned( $topic_id );
 
 			$forum     = $this->asgaros->get_forum( $forum_id );
 			$slug      = sanitize_title( (string) ( $forum['slug'] ?? '' ) );
@@ -106,6 +107,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 			echo '<span class="afspaces-post-mod" data-afspaces-post-mod>';
 
 			if ( $is_first ) {
+				$this->render_pin_topic_item( $space_id, $topic_id, $forum_url, $is_pinned );
 				$this->render_delete_topic_item( $space_id, $topic_id, $forum_url );
 				$this->render_move_topic_item( $space_id, $topic_id, (array) $context['forum_targets'], $forum_url );
 			} else {
@@ -118,6 +120,31 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 			}
 
 			echo '</span>';
+		}
+
+		/**
+		 * @param int    $space_id  Space-ID.
+		 * @param int    $topic_id  Themen-ID.
+		 * @param string $return_to Ziel-URL.
+		 * @param bool   $is_pinned Aktueller Pinstatus.
+		 * @return void
+		 */
+		private function render_pin_topic_item( int $space_id, int $topic_id, string $return_to, bool $is_pinned ): void {
+			$action = $is_pinned ? 'moderate_unpin_topic' : 'moderate_pin_topic';
+			$label  = $is_pinned ? __( 'Nicht mehr oben halten', 'afspaces' ) : __( 'Oben halten', 'afspaces' );
+			?>
+			<details class="afspaces-mod-move">
+				<summary class="afspaces-mod-item"><span class="menu-icon fas fa-thumbtack" aria-hidden="true"></span><?php echo esc_html( $label ); ?></summary>
+				<form method="post" class="afspaces-mod-move-form">
+					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+					<input type="hidden" name="afspaces_action" value="<?php echo esc_attr( $action ); ?>" />
+					<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+					<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
+					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $return_to ); ?>" />
+					<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Bestätigen', 'afspaces' ); ?></button>
+				</form>
+			</details>
+			<?php
 		}
 
 		/**

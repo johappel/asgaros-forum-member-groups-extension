@@ -102,8 +102,12 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 	public function get_topic_forum( int $topic_id ): int {
 		return $this->topic_forum[ $topic_id ] ?? 0;
 	}
+	public function is_topic_pinned( int $topic_id ): bool { return false; }
 	public function set_topic_closed( int $topic_id, bool $closed ): void {
 		$this->calls[] = ( $closed ? 'close:' : 'open:' ) . $topic_id;
+	}
+	public function set_topic_pinned( int $topic_id, bool $pinned ): void {
+		$this->calls[] = ( $pinned ? 'pin:' : 'unpin:' ) . $topic_id;
 	}
 	public function delete_forum_topic( int $topic_id ): void {
 		$this->calls[] = 'delete_topic:' . $topic_id;
@@ -132,6 +136,7 @@ final class SpaceModerationServiceTest extends TestCase {
 
 	private StubModerationRepository $repo;
 	private StubModerationAdapter $adapter;
+	private StubModerationAudit $audit;
 	private SpaceModerationService $service;
 
 	protected function setUp(): void {
@@ -152,7 +157,8 @@ final class SpaceModerationServiceTest extends TestCase {
 		);
 
 		$policy = new SpacePolicy( $this->repo );
-		$this->service = new SpaceModerationService( $this->repo, $this->adapter, $policy, new StubModerationAudit() );
+		$this->audit = new StubModerationAudit();
+		$this->service = new SpaceModerationService( $this->repo, $this->adapter, $policy, $this->audit );
 
 		global $afspaces_user_can_callback;
 		$afspaces_user_can_callback = static function ( int $user_id, string $cap ): bool {
@@ -168,6 +174,51 @@ final class SpaceModerationServiceTest extends TestCase {
 	public function test_admin_can_delete_own_topic(): void {
 		$this->service->delete_topic( 10, 1, 99 );
 		$this->assertContains( 'delete_topic:99', $this->adapter->calls );
+	}
+
+	public function test_manager_can_pin_own_topic(): void {
+		$this->service->pin_topic( 10, 7, 99 );
+		$this->assertContains( 'pin:99', $this->adapter->calls );
+	}
+
+	public function test_manager_can_unpin_own_topic(): void {
+		$this->service->unpin_topic( 10, 7, 99 );
+		$this->assertContains( 'unpin:99', $this->adapter->calls );
+	}
+
+	public function test_manager_of_another_space_cannot_pin_topic(): void {
+		$this->expectException( DomainException::class );
+		$this->service->pin_topic( 10, 8, 99 );
+	}
+
+	public function test_manager_of_another_space_cannot_unpin_topic(): void {
+		$this->expectException( DomainException::class );
+		$this->service->unpin_topic( 10, 8, 99 );
+	}
+
+	public function test_normal_user_cannot_pin_topic(): void {
+		$this->expectException( DomainException::class );
+		$this->service->pin_topic( 10, 42, 99 );
+	}
+
+	public function test_admin_can_pin_topic(): void {
+		$this->service->pin_topic( 10, 1, 99 );
+		$this->assertContains( 'pin:99', $this->adapter->calls );
+	}
+
+	public function test_pin_and_unpin_are_audited_as_topic_actions(): void {
+		$this->service->pin_topic( 10, 7, 99 );
+		$this->service->unpin_topic( 10, 7, 99 );
+
+		$this->assertSame( 'topic_pinned', $this->audit->entries[0]['action'] );
+		$this->assertSame( 'topic_unpinned', $this->audit->entries[1]['action'] );
+		$this->assertSame( 'topic', $this->audit->entries[0]['object_type'] );
+		$this->assertSame( 99, $this->audit->entries[0]['target_user_id'] );
+	}
+
+	public function test_foreign_topic_cannot_be_pinned(): void {
+		$this->expectException( DomainException::class );
+		$this->service->pin_topic( 10, 7, 77 );
 	}
 
 	public function test_non_manager_cannot_moderate(): void {

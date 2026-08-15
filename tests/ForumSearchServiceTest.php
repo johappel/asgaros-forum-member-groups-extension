@@ -140,7 +140,14 @@ final class FakeSearchAdapter implements AsgarosAdapterInterface {
 		return 0;
 	}
 
+	public function is_topic_pinned( int $topic_id ): bool {
+		return false;
+	}
+
 	public function set_topic_closed( int $topic_id, bool $closed ): void {
+	}
+
+	public function set_topic_pinned( int $topic_id, bool $pinned ): void {
 	}
 
 	public function delete_forum_topic( int $topic_id ): void {

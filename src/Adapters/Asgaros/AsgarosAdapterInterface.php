@@ -279,6 +279,14 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function get_topic_forum( int $topic_id ): int;
 
 		/**
+		 * Gibt zurück, ob ein Thema im aktuellen Forum angepinnt ist.
+		 *
+		 * @param int $topic_id Themen-ID.
+		 * @return bool
+		 */
+		public function is_topic_pinned( int $topic_id ): bool;
+
+		/**
 		 * Öffnet oder schließt ein Thema.
 		 *
 		 * @param int  $topic_id Themen-ID.
@@ -286,6 +294,18 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 * @return void
 		 */
 		public function set_topic_closed( int $topic_id, bool $closed ): void;
+
+		/**
+		 * Setzt oder entfernt den lokalen Pinstatus eines Themas.
+		 *
+		 * Der Wert 1 pinnt nur im aktuellen Forum; der globale Asgaros-Sticky-
+		 * Wert 2 wird von AFSpaces bewusst nicht verwendet.
+		 *
+		 * @param int  $topic_id Themen-ID.
+		 * @param bool $pinned  true = anpinnen, false = lösen.
+		 * @return void
+		 */
+		public function set_topic_pinned( int $topic_id, bool $pinned ): void;
 
 		/**
 		 * Löscht ein Thema inklusive aller Beiträge (nutzt die Asgaros-Kernlogik).

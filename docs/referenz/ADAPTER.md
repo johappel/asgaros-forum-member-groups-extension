@@ -85,17 +85,32 @@ Die Isolation privater Räume erfolgt über eine dedizierte Asgaros-Kategorie, G
 
 ## Moderation
 
+Für Issue #15 liefert der Adapter zusätzlich `is_topic_pinned(int $topic_id): bool`
+und `set_topic_pinned(int $topic_id, bool $pinned): void`.
+
 | Methode | Parameter / Rückgabe |
 | --- | --- |
 | `list_forum_topics(int $forum_id, array $args = [])` | Args `page`, `per_page`; `array{topics:array<int,array<string,mixed>>,total:int}` |
 | `get_topic_forum(int $topic_id)` | `int` Forum-ID, `0` falls unbekannt |
+| `is_topic_pinned(int $topic_id)` | `bool`; liest den lokalen Pinstatus |
 | `set_topic_closed(int $topic_id, bool $closed)` | `void` |
+| `set_topic_pinned(int $topic_id, bool $pinned)` | `void`; setzt `topics.sticky` auf `1` oder `0` |
 | `delete_forum_topic(int $topic_id)` | `void` |
 | `get_post_location(int $post_id)` | `array{topic_id:int,forum_id:int,is_first:bool}|null` |
 | `delete_forum_post(int $post_id)` | `void` |
 | `move_topic(int $topic_id, int $target_forum_id)` | `void` |
 | `list_topic_posts(int $topic_id, array $args = [])` | Args `page`, `per_page`; `array{posts:array<int,array<string,mixed>>,total:int}` |
 | `move_post(int $post_id, int $target_topic_id, int $target_forum_id)` | `void` |
+
+### Pinstatus gegen Asgaros 3.4.0
+
+Asgaros speichert den lokalen Sticky-Status in `{$forum->tables->topics}.sticky`.
+Die interne Methode `AsgarosForum::set_sticky()` ist für AFSpaces nicht verwendbar:
+Sie prüft globale Asgaros-Moderatorrechte und verweigert Topics in privaten Foren.
+`AsgarosAdapter::set_topic_pinned()` kapselt deshalb das vorbereitete
+`$forum->db->update()` ausschließlich im Adapter und verwendet nur `1` (lokal)
+oder `0` (nicht angepinnt), niemals `2` (global). Die raumbezogene Autorisierung
+erfolgt vorher in `SpaceModerationService`.
 
 ## Neue Adaptermethode
 

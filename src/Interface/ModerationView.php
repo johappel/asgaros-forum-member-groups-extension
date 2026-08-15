@@ -68,7 +68,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 			<section class="afspaces-moderation" aria-labelledby="afspaces-moderation-heading">
 				<h2 id="afspaces-moderation-heading"><?php echo esc_html__( 'Moderation der Themen meiner Arbeitsgruppe', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier moderierst du ausschließlich die Themen deines eigenen Forums. Du kannst Themen schließen, wieder öffnen oder löschen. Diese Rechte gelten nur für dieses Forum.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier moderierst du ausschließlich die Themen deines eigenen Forums. Du kannst Themen oben halten, schließen, wieder öffnen oder löschen. Diese Rechte gelten nur für dieses Forum und geben keine globalen Asgaros-Moderatorrechte.', 'afspaces' ); ?></p>
 
 				<?php if ( empty( $topics ) ) : ?>
 					<p role="status"><?php echo esc_html__( 'In diesem Forum gibt es noch keine Themen.', 'afspaces' ); ?></p>
@@ -100,6 +100,23 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 									</td>
 									<td>
 										<div class="afspaces-moderation-actions">
+											<?php if ( ! empty( $topic['sticky'] ) ) : ?>
+												<form method="post">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="moderate_unpin_topic" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
+													<button type="submit" class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Nicht mehr oben halten', 'afspaces' ); ?></button>
+												</form>
+											<?php else : ?>
+												<form method="post">
+													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+													<input type="hidden" name="afspaces_action" value="moderate_pin_topic" />
+													<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+													<input type="hidden" name="topic_id" value="<?php echo esc_attr( (string) $topic_id ); ?>" />
+													<button type="submit" class="afspaces-button afspaces-button-primary"><?php echo esc_html__( 'Oben halten', 'afspaces' ); ?></button>
+												</form>
+											<?php endif; ?>
 											<?php if ( ! empty( $topic['closed'] ) ) : ?>
 												<form method="post">
 													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>

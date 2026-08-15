@@ -157,7 +157,18 @@ Räume mit Freigabepflicht (`pending`) werden bis zur Freigabe **immer** über d
 beschränkt, unabhängig von der Zielsichtbarkeit, damit vor der Freigabe kein ungewollter
 öffentlicher Zugriff entsteht.
 
+## Topic-Pinning in Asgaros 3.4.0
+
 ### Transaktion und Rollback
+
+Asgaros speichert den lokalen Sticky-Status in der Spalte `sticky` der
+Topics-Tabelle. Die interne Methode `AsgarosForum::set_sticky()` ist für
+AFSpaces nicht geeignet: Sie prüft globale Asgaros-Moderatorrechte und
+verweigert Topics in privaten Foren. `AsgarosAdapter::set_topic_pinned()`
+kapselt deshalb das vorbereitete `$forum->db->update()` ausschließlich im
+Adapter und setzt nur `sticky = 1` (lokal) oder `sticky = 0`; der globale Wert
+`2` wird nicht verwendet. Die raumbezogene Policy- und Objektprüfung erfolgt
+vorher im `SpaceModerationService`.
 
 Kategorie, Gruppe und Forum werden nacheinander angelegt; bei einem Teilfehler entfernt der
 `SpaceCreationService` die bereits erstellten Artefakte in umgekehrter Reihenfolge

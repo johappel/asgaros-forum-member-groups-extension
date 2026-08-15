@@ -1223,6 +1223,22 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 		/**
 		 * {@inheritDoc}
 		 */
+		public function is_topic_pinned( int $topic_id ): bool {
+			$forum = $this->forum();
+			if ( null === $forum || $topic_id < 1 ) {
+				return false;
+			}
+
+			$sticky = $forum->db->get_var(
+				$forum->db->prepare( "SELECT sticky FROM {$forum->tables->topics} WHERE id = %d;", $topic_id )
+			);
+
+			return (int) $sticky > 0;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
 		public function set_topic_closed( int $topic_id, bool $closed ): void {
 			$this->assert_writable();
 
@@ -1234,6 +1250,30 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$forum->db->update(
 				$forum->tables->topics,
 				array( 'closed' => $closed ? 1 : 0 ),
+				array( 'id' => $topic_id ),
+				array( '%d' ),
+				array( '%d' )
+			);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function set_topic_pinned( int $topic_id, bool $pinned ): void {
+			$this->assert_writable();
+
+			$forum = $this->forum();
+			if ( null === $forum || $topic_id < 1 ) {
+				return;
+			}
+
+			// Asgaros 3.4.0 speichert 1 als lokalen Sticky-Status. Der Wert 2
+			// wäre global und darf von AFSpaces nicht gesetzt werden. Die native
+			// set_sticky()-Methode prüft globale Moderatorrechte und verweigert
+			// private Foren; deshalb bleibt die DB-Änderung hier gekapselt.
+			$forum->db->update(
+				$forum->tables->topics,
+				array( 'sticky' => $pinned ? 1 : 0 ),
 				array( 'id' => $topic_id ),
 				array( '%d' ),
 				array( '%d' )

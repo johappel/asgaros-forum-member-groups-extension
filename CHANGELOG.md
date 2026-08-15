@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Issue #15: Raumverantwortliche können Themen in ihren privaten
+  Arbeitsgruppenforen sicher oben halten und wieder lösen. Die Funktion nutzt
+  die bestehende Space-Policy, Topic-/Forum-Prüfung und Audit-Ereignisse,
+  ohne globale Asgaros-Moderatorrechte zu vergeben.
+- Plugin-Version auf 0.4.18 angehoben.
+
 - Moderationsformulare zum Verschieben und Löschen aus dem begrenzenden
   Asgaros-Post-Wrapper in den `body` portaliert, damit sie nicht mehr durch
   `overflow` abgeschnitten werden; Ausrichtung und `details`-Bedienung bleiben

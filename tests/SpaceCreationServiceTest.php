@@ -147,7 +147,9 @@ final class StubCreationAdapter implements AsgarosAdapterInterface {
 
 	public function list_forum_topics( int $forum_id, array $args = [] ): array { return array( 'topics' => array(), 'total' => 0 ); }
 	public function get_topic_forum( int $topic_id ): int { return 0; }
+	public function is_topic_pinned( int $topic_id ): bool { return false; }
 	public function set_topic_closed( int $topic_id, bool $closed ): void {}
+	public function set_topic_pinned( int $topic_id, bool $pinned ): void {}
 	public function delete_forum_topic( int $topic_id ): void {}
 	public function get_post_location( int $post_id ): ?array { return null; }
 	public function delete_forum_post( int $post_id ): void {}

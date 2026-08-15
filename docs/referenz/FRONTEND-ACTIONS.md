@@ -70,6 +70,18 @@ Alle serverseitigen Formular-Aktionen laufen über ein einziges POST-Feld `afspa
 
 ## Moderation (`SpaceModerationService`)
 
+Die Pin-/Löse-Aktionen sind serverseitig durch Login, Nonce, `SpacePolicy` und
+die Topic-zu-Forum-Prüfung geschützt. Ein vom Client gelieferter `space_id`
+begründet keine Berechtigung; die Verantwortlichen erhalten keine globalen
+Asgaros-Moderatorrechte.
+
+Zusätzliche Topic-Aktionen:
+
+| Aktion | Felder | Effekt |
+| --- | --- | --- |
+| `moderate_pin_topic` | `topic_id` | Thema im eigenen Forum oben halten |
+| `moderate_unpin_topic` | `topic_id` | Pinstatus des Themas entfernen |
+
 | `afspaces_action` | Felder | Effekt |
 | --- | --- | --- |
 | `moderate_close_topic` | `topic_id` | Thema schließen |

@@ -394,6 +394,14 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$topic_id = isset( $_POST['topic_id'] ) ? (int) $_POST['topic_id'] : 0;
 					$this->space_moderation->reopen_topic( $space_id, $actor, $topic_id );
 					$this->set_message( 'success', __( 'Das Thema wurde wieder geöffnet.', 'afspaces' ) );
+				} elseif ( 'moderate_pin_topic' === $action ) {
+					$topic_id = isset( $_POST['topic_id'] ) ? (int) $_POST['topic_id'] : 0;
+					$this->space_moderation->pin_topic( $space_id, $actor, $topic_id );
+					$this->set_message( 'success', __( 'Das Thema wird jetzt oben gehalten.', 'afspaces' ) );
+				} elseif ( 'moderate_unpin_topic' === $action ) {
+					$topic_id = isset( $_POST['topic_id'] ) ? (int) $_POST['topic_id'] : 0;
+					$this->space_moderation->unpin_topic( $space_id, $actor, $topic_id );
+					$this->set_message( 'success', __( 'Das Thema wird nicht mehr oben gehalten.', 'afspaces' ) );
 				} elseif ( 'moderate_delete_topic' === $action ) {
 					$topic_id = isset( $_POST['topic_id'] ) ? (int) $_POST['topic_id'] : 0;
 					$this->space_moderation->delete_topic( $space_id, $actor, $topic_id );
@@ -456,7 +464,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				exit;
 			}
 
-			if ( in_array( $action, array( 'moderate_close_topic', 'moderate_reopen_topic', 'moderate_delete_topic', 'moderate_delete_post', 'moderate_move_topic', 'moderate_move_post' ), true ) ) {
+			if ( in_array( $action, array( 'moderate_close_topic', 'moderate_reopen_topic', 'moderate_pin_topic', 'moderate_unpin_topic', 'moderate_delete_topic', 'moderate_delete_post', 'moderate_move_topic', 'moderate_move_post' ), true ) ) {
 				// Wurde die Aktion aus dem Forum ausgelöst, kehren wir dorthin zurück.
 				$default = SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id ) );
 				$return  = isset( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : '';

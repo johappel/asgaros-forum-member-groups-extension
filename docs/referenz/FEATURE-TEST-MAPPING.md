@@ -36,6 +36,8 @@ Schnellübersicht: Welche  Testdateien gehören zu welchem Feature?
 
 ## 5. Space-Dienste (Application)
 
+Issue #15 (Topic pinnen/lösen) ist durch `SpaceModerationServiceTest` abgedeckt.
+
 | Feature | Quellklasse | Test |
 | --- | --- | --- |
 | Space-Erstellung mit Transaktions-Rollback | `Application/SpaceCreationService.php` | `tests/SpaceCreationServiceTest.php` |

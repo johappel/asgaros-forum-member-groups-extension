@@ -103,6 +103,38 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		}
 
 		/**
+		 * Hält ein Thema im eigenen Forum oben.
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @param int $topic_id      Themen-ID.
+		 * @return void
+		 * @throws DomainException Bei fehlender Berechtigung oder fremdem Thema.
+		 */
+		public function pin_topic( int $space_id, int $actor_user_id, int $topic_id ): void {
+			$space = $this->require_moderatable_space( $space_id, $actor_user_id );
+			$this->assert_topic_in_space( $topic_id, $space );
+			$this->asgaros->set_topic_pinned( $topic_id, true );
+			$this->audit->log( $space_id, $actor_user_id, $topic_id, 'topic_pinned', 'topic' );
+		}
+
+		/**
+		 * Löst ein Thema im eigenen Forum.
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @param int $topic_id      Themen-ID.
+		 * @return void
+		 * @throws DomainException Bei fehlender Berechtigung oder fremdem Thema.
+		 */
+		public function unpin_topic( int $space_id, int $actor_user_id, int $topic_id ): void {
+			$space = $this->require_moderatable_space( $space_id, $actor_user_id );
+			$this->assert_topic_in_space( $topic_id, $space );
+			$this->asgaros->set_topic_pinned( $topic_id, false );
+			$this->audit->log( $space_id, $actor_user_id, $topic_id, 'topic_unpinned', 'topic' );
+		}
+
+		/**
 		 * Löscht ein Thema im eigenen Forum (inklusive Beiträge).
 		 *
 		 * @param int $space_id      Space-ID.

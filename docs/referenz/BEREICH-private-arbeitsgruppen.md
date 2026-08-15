@@ -52,6 +52,12 @@ Berechtigung (`SpaceCreationPolicy::assert_can_create`): Die globale Aktivierung
 
 ## Moderation (raum-begrenzt)
 
+`SpaceModerationService::pin_topic()` und `unpin_topic()` ergänzen die
+raumbezogene Themenmoderation. Die Aktion funktioniert auch in privaten
+Asgaros-Foren, in denen Asgaros die native Pin-Schaltfläche ausblendet.
+Arbeitsgruppenverantwortliche erhalten dadurch keine globalen Asgaros-
+Moderatorrechte.
+
 - Policy: `SpacePolicy::can_moderate` (= `can_manage`, NICHT global)
 - Service: `src/Application/SpaceModerationService.php`
 - Hub-View: `src/Interface/ModerationView.php`
@@ -62,6 +68,7 @@ Berechtigung (`SpaceCreationPolicy::assert_can_create`): Die globale Aktivierung
 | `can_moderate` | `(int $space_id, int $actor): bool` |
 | `list_topics` | `(int $space_id, int $actor, array $args = []): array` |
 | `close_topic` / `reopen_topic` | `(int $space_id, int $actor, int $topic_id): void` |
+| `pin_topic` / `unpin_topic` | `(int $space_id, int $actor, int $topic_id): void` |
 | `delete_topic` | `(int $space_id, int $actor, int $topic_id): void` |
 | `delete_post` | `(int $space_id, int $actor, int $post_id): void` |
 | `move_topic` | `(int $space_id, int $actor, int $topic_id, int $target_space_id): void` |
