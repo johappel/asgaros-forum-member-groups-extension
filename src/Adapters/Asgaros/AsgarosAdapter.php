@@ -81,6 +81,95 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 		}
 
 		/**
+		 * Verschiebt die bestehenden Asgaros-Abonnement-Controls nach oben.
+		 *
+		 * Asgaros erzeugt die Links inklusive aktuellem Zustand, Ziel-URL und
+		 * Nonce in `AsgarosForumNotifications`. AFSpaces rendert deshalb kein
+		 * eigenes Abonnement-Control, sondern verwendet genau diese bestehende
+		 * Ausgabe einmalig an den dokumentierten Top-Hooks.
+		 *
+		 * @return void
+		 */
+		public function relocate_subscription_navigation(): void {
+			$forum = $this->forum();
+			if ( null === $forum || ! isset( $forum->notifications ) || ! is_object( $forum->notifications ) ) {
+				return;
+			}
+
+			if ( ! method_exists( $forum->notifications, 'show_subscription_navigation' )
+				|| ! method_exists( $forum->notifications, 'show_forum_subscription_link' )
+				|| ! method_exists( $forum->notifications, 'show_topic_subscription_link' ) ) {
+				return;
+			}
+
+			// Das bestehende Control wird nicht dupliziert, sondern nur an einen
+			// früheren dokumentierten Hook verschoben.
+			remove_action(
+				'asgarosforum_bottom_navigation',
+				array( $forum->notifications, 'show_subscription_navigation' ),
+				10
+			);
+			add_action(
+				'asgarosforum_forum_custom_content_top',
+				array( $this, 'render_forum_subscription_navigation' )
+			);
+			add_action(
+				'asgarosforum_topic_custom_content_top',
+				array( $this, 'render_topic_subscription_navigation' )
+			);
+		}
+
+		/**
+		 * Rendert das bestehende Asgaros-Forum-Abonnement oben im Forum.
+		 *
+		 * @return void
+		 */
+		public function render_forum_subscription_navigation(): void {
+			$this->render_subscription_navigation( 'forum' );
+		}
+
+		/**
+		 * Rendert das bestehende Asgaros-Themen-Abonnement oben im Thema.
+		 *
+		 * @return void
+		 */
+		public function render_topic_subscription_navigation(): void {
+			$this->render_subscription_navigation( 'topic' );
+		}
+
+		/**
+		 * Kapselt die Ausgabe des Asgaros-Controls in einen AFSpaces-Wrapper.
+		 *
+		 * @param string $view Asgaros-Ansicht (`forum` oder `topic`).
+		 * @return void
+		 */
+		private function render_subscription_navigation( string $view ): void {
+			$forum = $this->forum();
+			if ( null === $forum || ! isset( $forum->notifications ) || ! is_object( $forum->notifications ) ) {
+				return;
+			}
+
+			if ( ! isset( $forum->options )
+				|| ! is_array( $forum->options )
+				|| empty( $forum->options['allow_subscriptions'] )
+				|| ! is_user_logged_in() ) {
+				return;
+			}
+
+			ob_start();
+			$forum->notifications->show_subscription_navigation( $view );
+			$control = (string) ob_get_clean();
+
+			if ( '' === trim( $control ) ) {
+				return;
+			}
+
+			echo '<div class="afspaces-subscription-action" role="group" aria-label="';
+			echo esc_attr__( 'Abonnement', 'afspaces' );
+			echo '">' . $control . '</div>';
+		}
+
+		/**
 		 * Gibt die globale Asgaros-Forum-Instanz zurück.
 		 *
 		 * @return object|null

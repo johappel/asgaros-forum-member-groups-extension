@@ -78,6 +78,9 @@ final class StubSpaceRegistrationAdapter implements AsgarosAdapterInterface {
 		return '3.4.0';
 	}
 
+	public function relocate_subscription_navigation(): void {
+	}
+
 	public function list_manageable_forums( int $actor_user_id ): array {
 		return array_values( $this->forums );
 	}

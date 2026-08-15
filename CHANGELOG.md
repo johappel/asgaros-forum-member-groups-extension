@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Issue #9: Das bestehende Asgaros-Control für „Forum abonnieren“ bzw.
+  „Thema abonnieren“ wird einmalig oben rechts in der jeweiligen Ansicht als
+  sichtbare Schaltfläche ausgegeben; die zentrale Abonnementverwaltung bleibt
+  unverändert.
+- Plugin-Version auf 0.4.15 angehoben.
+
 - Arbeitsgruppen-Farbwahl in `working-group-settings` als sichtbare,
   zugängliche Auswahlkacheln mit Farbfeld, Bezeichnung, Hexwert und klarer
   Markierung der aktuell gewählten Farbe gestaltet.

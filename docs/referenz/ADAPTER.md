@@ -17,6 +17,14 @@ Der Asgaros-Adapter ist die einzige Stelle, die Asgaros-Interna kennen darf. Ver
 | `is_user_in_group(int $user_id, int $group_id)` | WordPress-/Gruppen-ID | `bool` |
 | `is_search_request()` | — | `bool`; erkennt die aktuelle Asgaros-Suchansicht |
 
+### Abonnement-Navigation
+
+`relocate_subscription_navigation()` verschiebt die bestehenden Asgaros-
+Abonnement-Controls einmalig aus `asgarosforum_bottom_navigation` in die
+dokumentierten Top-Hooks für `forum` und `topic`. Die Implementierung delegiert
+die Ausgabe an `AsgarosForumNotifications::show_subscription_navigation()`;
+AFSpaces erzeugt weder eigene Subscription-URLs noch Nonces.
+
 ### Gruppenmitglieder
 
 `list_group_members(int $group_id, array $args = [])` akzeptiert:

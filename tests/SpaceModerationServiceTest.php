@@ -69,6 +69,7 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 
 	public function is_available(): bool { return true; }
 	public function get_version(): ?string { return '3.4.0'; }
+	public function relocate_subscription_navigation(): void {}
 	public function list_manageable_forums( int $actor_user_id ): array { return array(); }
 	public function get_forum( int $forum_id ): ?array { return array( 'id' => $forum_id, 'name' => 'F' . $forum_id, 'category_id' => 1 ); }
 	public function get_forum_group_ids( int $forum_id ): array { return array(); }

@@ -31,6 +31,10 @@ Serverseitig gerenderte Formulare sind die Basis. REST und JavaScript verbessern
 
 ## Forum-Integration und Hub-Seite
 
+Das eingebaute Asgaros-Abonnement-Control wird über den Adapter einmalig in
+die jeweilige Forum- bzw. Themenansicht oben verlagert. URLs, Nonces und der
+Abonnementzustand werden nicht dupliziert.
+
 Die gesamte Frontend-Verwaltung ist unter einer einzigen WordPress-Hub-Seite (Slug `afspaces`, Shortcode `[afspaces]`) gebündelt. Ein Router (`SpacesHubController`) wählt anhand des Query-Parameters `afspaces_view` die passende Unteransicht (Dashboard, Mitglieder, Einladungen, Beitrittsanfragen, meine Einladungen, später Raumgründung) und rendert Brotkrümel plus zweistufige Navigation.
 
 - `SpacesUrls` ist der zentrale URL- und View-Namensraum; alle internen Links und Redirects laufen darüber.

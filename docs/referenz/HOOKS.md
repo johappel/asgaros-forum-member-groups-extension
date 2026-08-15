@@ -23,6 +23,12 @@ Diese Referenz ist aus den `add_action()`, `add_filter()`, `do_action()` und `ap
 
 ## Asgaros-Hooks
 
+Issue #9 nutzt zusätzlich die dokumentierten Top-Hooks
+`asgarosforum_forum_custom_content_top` und
+`asgarosforum_topic_custom_content_top`. Der Asgaros-Adapter registriert dort
+die bestehende Ausgabe der Subscription-Controls, nachdem deren ursprüngliche
+Registrierung im unteren Navigationsbereich entfernt wurde.
+
 | Hook | Ort / Argumente | Rückgabe / Default | Status |
 | --- | --- | --- | --- |
 | `asgarosforum_filter_header_menu` | `ForumNavigation::init`; Menü-Array | Menü-Array | öffentliche Asgaros-Integration |

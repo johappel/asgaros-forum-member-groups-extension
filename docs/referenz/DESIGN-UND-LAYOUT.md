@@ -120,6 +120,14 @@ sichtbare Markierung beim Wechsel unmittelbar.
 
 ## Asgaros-Forum-Override-Layer
 
+### Abonnement-Schaltfläche (Issue #9)
+
+`AsgarosAdapter::relocate_subscription_navigation()` gibt das vorhandene
+Asgaros-Control für Forum- und Themenabonnements oben rechts aus. Der Wrapper
+`.afspaces-subscription-action` liegt im AFSpaces-eigenen Override-Layer und
+erhält ein sichtbares Button-Styling mit sichtbarem Tastaturfokus. Die
+Abonnementverwaltung im Forum-Menü bleibt als zentrale Übersicht bestehen.
+
 Die dynamischen Arbeitsgruppenfarben werden in
 ForumNavigation::render_category_colors() mit #af-wrapper und der
 Kategorie-ID ausgegeben. Diese höhere Spezifität ist erforderlich, weil

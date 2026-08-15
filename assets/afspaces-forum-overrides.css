@@ -90,6 +90,42 @@
   color: var(--afspaces-color-blue)!important;
 }
 
+/* Issue #9: Das bestehende Asgaros-Abonnement-Control steht oben rechts. */
+#af-wrapper .afspaces-subscription-action {
+	display: flex;
+	justify-content: flex-end;
+	margin: 0 0 1rem;
+}
+
+#af-wrapper .afspaces-subscription-action > span {
+	align-self: center;
+	margin-right: 0.45rem;
+	color: var(--afspaces-color-blue);
+}
+
+#af-wrapper .afspaces-subscription-action > a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.75rem;
+	padding: 0.55rem 1rem;
+	border-radius: 0.25rem;
+	background-color: var(--afspaces-color-blue);
+	color: #fff !important;
+	font-weight: 600;
+	line-height: 1.3;
+	text-decoration: none;
+}
+
+#af-wrapper .afspaces-subscription-action > a:hover {
+	background-color: var(--afspaces-color-yellow);
+	color: var(--afspaces-color-text) !important;
+}
+
+#af-wrapper .afspaces-subscription-action > a:focus-visible {
+	outline: 3px solid var(--afspaces-color-yellow);
+	outline-offset: 3px;
+}
+
 #af-wrapper .post-author-blocks .mention-nice-name ,
 #af-wrapper .post-author-blocks .post-author-block-meta ,
 #af-wrapper .post-author-blocks .post-author-block-group ,

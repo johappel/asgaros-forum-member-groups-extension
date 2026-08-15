@@ -31,6 +31,14 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function get_version(): ?string;
 
 		/**
+		 * Verschiebt die eingebauten Abonnement-Links vom unteren Forum-Menü
+		 * in die dokumentierten Top-Hooks für Forum und Thema.
+		 *
+		 * @return void
+		 */
+		public function relocate_subscription_navigation(): void;
+
+		/**
 		 * Listet die Foren auf, die der Akteur verwalten darf.
 		 *
 		 * @param int $actor_user_id WordPress-Benutzer-ID.

@@ -145,6 +145,10 @@ Bekannte Tabellennamen:
 
 ### Forum-integrierte UI
 
+Die Abonnement-Schaltflächen von Asgaros werden über den Adapter einmalig in
+die Top-Hooks der Forum- und Themenansicht verlagert; URLs, Nonces und Zustand
+bleiben vollständig bei Asgaros.
+
 1. ForumNavigation hängt Navigation und Panel in Asgaros ein und verwendet für die Anzeige der Gründungsoption `SpaceCreationService::can_user_create()`.
 2. ForumModerationControls hängt kontextabhängige Aktionen in die Forenansicht.
 3. SearchModal öffnet die AFSpaces-Suche über Asgaros- und optional WordPress-Suchformulare.

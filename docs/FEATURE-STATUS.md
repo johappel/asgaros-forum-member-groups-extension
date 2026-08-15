@@ -26,6 +26,16 @@ Manueller Smoke-Test im Forum:
 
 Dieses Dokument konsolidiert die Arbeit aus den bisherigen TASKS-Dateien und beschreibt den tatsächlichen Umsetzungsstand als Entwicklerreferenz.
 
+## Abonnement-Schaltflächen (Issue #9)
+
+Status: umgesetzt.
+
+Das bestehende Asgaros-Control für Forum- und Themenabonnements wird über den
+Adapter einmalig aus dem unteren Navigationsbereich in die jeweilige
+`forum`-/`topic`-Top-Ansicht verlagert. Die zentrale Ansicht „Abonnements“
+bleibt unverändert; URLs, Nonces und der abonnierte Zustand stammen weiterhin
+aus Asgaros.
+
 ## Developer Reference Hardening (Issue #6)
 
 Status: umgesetzt.
