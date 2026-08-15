@@ -2978,6 +2978,10 @@ right: auto;
 	border-radius: 8px 8px 0 0;
 }
 
+#af-wrapper.afspaces-wrapper .afspaces-space-nav .afspaces-space-nav-view-link {
+	margin-left: auto;
+}
+
 #af-wrapper.afspaces-wrapper .afspaces-button:focus-visible,
 #af-wrapper.afspaces-wrapper .afspaces-search input:focus-visible,
 #af-wrapper.afspaces-wrapper .afspaces-inline-form button:focus-visible {

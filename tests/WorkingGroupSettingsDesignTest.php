@@ -31,7 +31,7 @@ final class WorkingGroupSettingsDesignTest extends TestCase {
 		self::assertStringContainsString( 'Darstellung', $source );
 		self::assertStringContainsString( 'Zugang und Mitgliedschaft', $source );
 		self::assertStringContainsString( 'Wer darf die Beiträge dieser Arbeitsgruppe lesen?', $source );
-		self::assertStringContainsString( 'Lesen', $source );
+		self::assertStringContainsString( 'Leserschaft', $source );
 		self::assertStringContainsString( 'visibility_label( $visibility )', $source );
 		self::assertStringContainsString( 'Nur Mitglieder der Arbeitsgruppe', $visibility_source );
 		self::assertStringContainsString( 'Alle angemeldeten Personen', $visibility_source );
@@ -48,6 +48,8 @@ final class WorkingGroupSettingsDesignTest extends TestCase {
 		self::assertStringContainsString( 'name="visibility"', $source );
 		self::assertStringContainsString( 'name="join_policy"', $source );
 		self::assertStringContainsString( 'aria-describedby', $source );
+		self::assertStringNotContainsString( 'Arbeitsgruppe ansehen', $source );
+		self::assertStringNotContainsString( 'afspaces-settings-header', $source );
 		self::assertStringNotContainsString( 'Wer kann das Forum sehen?', $source );
 		self::assertStringNotContainsString( 'Privat (nur Mitglieder)', $source );
 		self::assertStringNotContainsString( 'Geschützt (alle angemeldeten Personen)', $source );
@@ -59,7 +61,6 @@ final class WorkingGroupSettingsDesignTest extends TestCase {
 		self::assertStringNotContainsString( 'save_working_group_meta', $source );
 		self::assertStringNotContainsString( 'name="join_requests_enabled"', $source );
 		self::assertStringNotContainsString( 'Verantwortung und Moderation', $source );
-		self::assertLessThan( strpos( $source, '<form method="post" class="afspaces-working-group-form' ), strpos( $source, 'Arbeitsgruppe ansehen' ) );
 	}
 
 	public function test_combined_action_maps_join_mode_and_validates_before_writes(): void {

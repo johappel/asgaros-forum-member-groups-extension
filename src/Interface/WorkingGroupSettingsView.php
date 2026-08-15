@@ -87,9 +87,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 			?>
 			<section class="afspaces-working-group-settings" aria-label="<?php echo esc_attr__( 'Arbeitsgruppen-Details', 'afspaces' ); ?>">
 				<?php echo $this->render_message(); ?>
-				<header class="afspaces-settings-header">
-					<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ); ?>"><?php echo esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' ); ?></a>
-				</header>
 
 				<form method="post" class="afspaces-working-group-form afspaces-settings-form">
 					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>

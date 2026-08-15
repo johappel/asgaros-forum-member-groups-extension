@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- „Arbeitsgruppe ansehen“ aus der hervorgehobenen Schaltfläche der
+  Einstellungsansicht in einen rechtsbündigen Link der Tab-Leiste verschoben.
+- Plugin-Version auf 0.4.24 angehoben.
+
 - Beitrittsoptionen in den Arbeitsgruppen-Einstellungen klarer formuliert:
   Die Auswahl benennt jetzt ausdrücklich, wer Mitglied werden und Beiträge
   verfassen kann; Einladungslinks und die separate Vergabe von

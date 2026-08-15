@@ -466,6 +466,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					esc_html( (string) $tab['label'] )
 				);
 			}
+			$items .= sprintf(
+				'<li class="afspaces-space-nav-view-link"><a href="%1$s" class="afspaces-hub-tab">%2$s</a></li>',
+				esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => $space_id ) ) ),
+				esc_html__( 'Arbeitsgruppe ansehen', 'afspaces' )
+			);
 
 			$forum     = $this->asgaros->get_forum( $space->forum_id );
 			$room_name = trim( (string) ( $forum['name'] ?? '' ) );

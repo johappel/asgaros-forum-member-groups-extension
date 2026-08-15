@@ -144,6 +144,11 @@ Moderationsrechte an anderer Stelle vergeben werden. Die beiden Gruppen
 verwenden unterschiedliche `name`-Attribute; die Erläuterungen sind über
 `aria-describedby` den jeweiligen Eingaben zugeordnet.
 
+Am rechten Ende der raumbezogenen Tab-Leiste steht der Link „Arbeitsgruppe
+ansehen“. Er wird als letzter, eigener Tab gerendert und über
+`.afspaces-space-nav-view-link` rechtsbündig ausgerichtet; der hervorgehobene
+Button in der Einstellungsansicht entfällt.
+
 ## Hub-Layout
 
 - Eine Hub-Seite (`[afspaces]`) mit Router (`SpacesHubController`), Brotkrümel und zweistufiger Navigation.

@@ -19,7 +19,7 @@ final class Issue21DesignTest extends TestCase {
 		self::assertStringNotContainsString( 'directory_visibility', $source );
 		self::assertStringNotContainsString( 'Sichtbarkeit in Übersichten', $source );
 		self::assertStringContainsString( 'Wer darf die Beiträge dieser Arbeitsgruppe lesen?', $source );
-		self::assertStringContainsString( 'Arbeitsgruppe ansehen', $source );
+		self::assertStringNotContainsString( 'Arbeitsgruppe ansehen', $source );
 	}
 
 	public function test_detail_heading_is_rendered_above_space_navigation(): void {
@@ -32,6 +32,8 @@ final class Issue21DesignTest extends TestCase {
 			strpos( $source, 'class="afspaces-space-context-title"' )
 		);
 		self::assertStringNotContainsString( 'WorkingGroupTerminology::manage_context( $room_name )', $source );
+		self::assertStringContainsString( 'afspaces-space-nav-view-link', $source );
+		self::assertStringContainsString( 'Arbeitsgruppe ansehen', $source );
 	}
 
 	public function test_space_management_headings_do_not_repeat_the_group_name(): void {
@@ -65,6 +67,7 @@ final class Issue21DesignTest extends TestCase {
 		self::assertStringContainsString( 'border: 0 !important;', $source );
 		self::assertStringContainsString( 'border-bottom: 1px solid var(--afspaces-color-blue) !important;', $source );
 		self::assertStringContainsString( 'border-bottom: 3px solid var(--afspaces-color-blue);', $source );
+		self::assertStringContainsString( 'margin-left: auto;', $source );
 		self::assertStringNotContainsString( 'background: var(--afspaces-color-yellow) !important;\n\tcolor: var(--afspaces-color-text);', $source );
 		self::assertStringContainsString( 'border-radius: 16px;', $source );
 		self::assertStringContainsString( '.afspaces-invite-link-form > button[type="submit"]', $source );
