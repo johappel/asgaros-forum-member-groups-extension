@@ -2834,10 +2834,11 @@ display: none;
 margin-left: 0;
 }
 
-.afspaces-mod-move > .afspaces-mod-move-form {
-position: absolute;
+.afspaces-mod-move > .afspaces-mod-move-form,
+.afspaces-mod-move-form--portal {
+position: fixed;
 right: 0;
-z-index: 30;
+z-index: 100020;
 background: #fff;
 border: 1px solid #d5dde3;
 border-radius: 8px;
@@ -2847,6 +2848,16 @@ display: flex;
 flex-direction: column;
 gap: 0.4rem;
 min-width: 220px;
+max-width: calc(100vw - 1rem);
+box-sizing: border-box;
+}
+
+.afspaces-mod-move-form--portal[hidden] {
+display: none !important;
+}
+
+.afspaces-mod-move-form--portal {
+right: auto;
 }
 .afspaces-mod-confirm {
 	margin: 0 0 0.4rem;

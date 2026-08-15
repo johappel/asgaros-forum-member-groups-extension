@@ -100,6 +100,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumModerationControls' ) ) {
 			}
 
 			// Der Wrapper wird per JS in das Beitragsmenü (.forum-post-menu) verschoben.
+			// Die Formulare werden nach dem Einhaengen in das Beitragsmenue aus dem
+			// Asgaros-Post-Wrapper portaliert, damit dessen overflow-Regeln die
+			// Auswahl nicht abschneiden.
 			echo '<span class="afspaces-post-mod" data-afspaces-post-mod>';
 
 			if ( $is_first ) {

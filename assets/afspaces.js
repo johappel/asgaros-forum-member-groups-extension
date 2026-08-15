@@ -367,6 +367,61 @@
 		if (menu) {
 			menu.appendChild(node);
 			menu.classList.add('afspaces-has-mod');
+
+			node.querySelectorAll('.afspaces-mod-move').forEach(function (details) {
+				var form = details.querySelector('.afspaces-mod-move-form');
+				var summary = details.querySelector('summary');
+				if (!form || !summary || !document.body) {
+					return;
+				}
+
+				// Asgaros begrenzt den Post-Wrapper per overflow. Das Formular
+				// muss deshalb aus diesem Clipping-Kontext heraus in den Forum-Wrapper.
+				var formId = form.id || 'afspaces-mod-form-' + (document.querySelectorAll('.afspaces-mod-move-form--portal').length + 1) + '-' + Date.now();
+				var portalRoot = node.closest('#af-wrapper') || document.body;
+				form.id = formId;
+				form.classList.add('afspaces-mod-move-form--portal');
+				form.hidden = !details.open;
+				summary.setAttribute('aria-controls', formId);
+				summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+				portalRoot.appendChild(form);
+
+				var positionForm = function () {
+					if (form.hidden) {
+						return;
+					}
+
+					var anchor = summary.getBoundingClientRect();
+					var formWidth = form.offsetWidth;
+					var formHeight = form.offsetHeight;
+					var edge = 8;
+					var left = Math.min(
+						Math.max(anchor.right - formWidth, edge),
+						Math.max(edge, window.innerWidth - formWidth - edge)
+					);
+					var top = anchor.bottom + edge;
+
+					if (top + formHeight > window.innerHeight - edge && anchor.top - formHeight - edge >= edge) {
+						top = anchor.top - formHeight - edge;
+					}
+
+					form.style.left = Math.round(left) + 'px';
+					form.style.top = Math.round(Math.max(edge, top)) + 'px';
+				};
+
+				var updateFormVisibility = function () {
+					form.hidden = !details.open;
+					summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+					if (details.open) {
+						window.requestAnimationFrame(positionForm);
+					}
+				};
+
+				details.addEventListener('toggle', updateFormVisibility);
+				window.addEventListener('resize', positionForm);
+				window.addEventListener('scroll', positionForm, true);
+				updateFormVisibility();
+			});
 		}
 	});
 

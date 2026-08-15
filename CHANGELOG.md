@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Moderationsformulare zum Verschieben und Löschen aus dem begrenzenden
+  Asgaros-Post-Wrapper in den `body` portaliert, damit sie nicht mehr durch
+  `overflow` abgeschnitten werden; Ausrichtung und `details`-Bedienung bleiben
+  erhalten.
+- Plugin-Version auf 0.4.17 angehoben.
+
 - Issue #9 nach visuellem Review: „Forum abonnieren“ bzw. „Thema abonnieren“
   als kontextabhängigen Nav-Eintrag direkt vor „Abonnements“ eingeordnet; die
   separate Schaltfläche oberhalb des Forum-Headers entfernt. Bei einem globalen

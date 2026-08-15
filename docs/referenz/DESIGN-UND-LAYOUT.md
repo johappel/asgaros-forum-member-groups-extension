@@ -141,6 +141,17 @@ AFSpaces\Interface\ForumStyleLayer::enqueue() geladen. Der Layer ist auf
 [forum] eingebunden. Er wird nach den registrierten Asgaros-Styles in die
 WordPress-Styles-Warteschlange eingereiht.
 
+Die Inline-Moderationsaktionen werden von
+`ForumModerationControls::render_controls()` zunächst in das vorhandene
+`.forum-post-menu` eingehängt. `assets/afspaces.js` portaliert die zugehörigen
+`.afspaces-mod-move-form`-Formulare anschließend aus dem Post-Wrapper in den
+übergeordneten `#af-wrapper` (mit `document.body` als Fallback) und richtet sie
+per `position: fixed` am jeweiligen `summary` aus. So bleiben die Auslöser im
+Beitragsmenü, während Asgaros-`overflow`-Regeln im `.post-wrapper` die
+Formulare nicht mehr abschneiden. Die Sichtbarkeit und
+`aria-expanded` werden weiter durch das native `details`-Toggle gesteuert;
+die serverseitigen Nonces und POST-Aktionen bleiben unverändert.
+
 asgaros-forum/skin/custom.css darf niemals direkt geändert werden: Asgaros
 erzeugt diese Datei aus den Appearance-Einstellungen neu. Neue AFSpaces-Regeln
 werden stattdessen in diesem Layer ergänzt. Die CSS Custom Properties am

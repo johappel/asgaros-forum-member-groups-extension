@@ -80,4 +80,16 @@ final class Issue21DesignTest extends TestCase {
 		self::assertStringNotContainsString( "__( 'Owner', 'afspaces' )", $service );
 		self::assertStringNotContainsString( "__( 'Owner', 'afspaces' )", $members );
 	}
+
+	public function test_forum_moderation_forms_are_portaled_out_of_post_clipping_context(): void {
+		$script = (string) file_get_contents( dirname( __DIR__ ) . '/assets/afspaces.js' );
+		$styles = (string) file_get_contents( dirname( __DIR__ ) . '/assets/afspaces.css' );
+
+		self::assertStringContainsString( "var portalRoot = node.closest('#af-wrapper') || document.body;", $script );
+		self::assertStringContainsString( 'portalRoot.appendChild(form);', $script );
+		self::assertStringContainsString( "form.classList.add('afspaces-mod-move-form--portal');", $script );
+		self::assertStringContainsString( '.afspaces-mod-move-form--portal {', $styles );
+		self::assertStringContainsString( 'position: fixed;', $styles );
+		self::assertStringContainsString( '.afspaces-mod-move-form--portal[hidden]', $styles );
+	}
 }
