@@ -171,7 +171,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\CreateSpaceView' ) ) {
 				case SpaceCreationSettings::VISIBILITY_PUBLIC:
 					return __( 'Für alle Besucherinnen und Besucher lesbar.', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PROTECTED:
-					return __( 'Alle angemeldeten Personen auf dieser Plattform können die Beiträge und Themen lesen. Sie werden dadurch nicht automatisch Mitglieder der Arbeitsgruppe. Schreiben können nur Personen mit den dafür vorgesehenen Rechten.', 'afspaces' );
+					return __( 'Alle angemeldeten Personen auf dieser Plattform können die Beiträge und Themen lesen (aber nicht verfassen).', 'afspaces' );
 				case SpaceCreationSettings::VISIBILITY_PRIVATE:
 				default:
 					return __( 'Nur Mitglieder dieser Arbeitsgruppe können die Beiträge und Themen lesen.', 'afspaces' );

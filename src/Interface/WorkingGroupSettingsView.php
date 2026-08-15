@@ -246,7 +246,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					return __( 'Die Arbeitsgruppe nimmt derzeit keine weiteren Mitglieder auf.', 'afspaces' );
 				case WorkingGroupMeta::JOIN_POLICY_REQUEST:
 				default:
-					return __( 'Angemeldete Personen können eine Mitgliedschaft anfragen. Zusätzlich können berechtigte Personen Einladungslinks erstellen; je nach Link ist der Beitritt direkt möglich oder muss bestätigt werden.', 'afspaces' );
+					return __( 'Angemeldete Personen können eine Mitgliedschaft anfragen. Zusätzlich können berechtigte Personen Einladungslinks erstellen.', 'afspaces' );
 			}
 		}
 
