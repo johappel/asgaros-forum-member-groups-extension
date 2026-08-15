@@ -41,6 +41,8 @@ final class AppearanceHeadingColorTest extends TestCase {
 		$css = (string) file_get_contents( dirname( __DIR__ ) . '/assets/afspaces.css' );
 
 		self::assertStringContainsString( '--afspaces-color-blue: #2d5d7f;', $css );
+		self::assertStringContainsString( '--afspaces-heading-color: #2d5d7f;', $css );
+		self::assertStringContainsString( '--afspaces-link-color: #2d5d7f;', $css );
 		self::assertStringContainsString( '--afspaces-color-yellow: #f5ae35;', $css );
 		self::assertStringContainsString( '--afspaces-color-purple: #561188;', $css );
 		self::assertStringContainsString( '--afspaces-color-text: #3a4f66;', $css );
@@ -52,6 +54,9 @@ final class AppearanceHeadingColorTest extends TestCase {
 		$source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Interface/AppearanceSettingsPage.php' );
 
 		self::assertStringContainsString( '--afspaces-color-purple: %23$s;', $source );
+		self::assertStringContainsString( '--afspaces-heading-color: %7$s;', $source );
+		self::assertStringContainsString( '--afspaces-link-color: %19$s;', $source );
+		self::assertStringNotContainsString( '--afspaces-color-blue: %7$s;', $source );
 		self::assertStringContainsString( '.afspaces-button:hover, #af-wrapper.afspaces-wrapper .afspaces-button:focus', $source );
 		self::assertStringContainsString( 'background: %21$s !important;', $source );
 		self::assertStringContainsString( '.afspaces-button-secondary { background: %17$s !important;', $source );

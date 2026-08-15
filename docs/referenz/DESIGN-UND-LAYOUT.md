@@ -48,15 +48,19 @@ Properties auf `#af-wrapper`:
 
 | Variable | Wert | Verwendung |
 | --- | --- | --- |
-| `--afspaces-color-blue` | `#2d5d7f` | Navigation, Links und Überschriften |
+| `--afspaces-color-blue` | `#2d5d7f` | Feste Primärfarbe für Navigation und Primäraktionen |
 | `--afspaces-color-yellow` | `#f5ae35` | Hover, Primäraktionen und Akzent |
 | `--afspaces-color-purple` | `#561188` | Lila Akzent |
 | `--afspaces-color-text` | `#3a4f66` | Lauftext und Text auf gelben Primäraktionen |
 | `--afspaces-color-secondary-background` | `#364149` | Sekundäre Hintergründe |
 | `--afspaces-color-light-background` | `#d9d9d9` | Heller Oberflächenhintergrund |
+| `--afspaces-heading-color` | Einstellung `heading_color` | Überschriften |
+| `--afspaces-link-color` | Einstellung `link_color` | Textlinks |
 
-`AppearanceSettingsPage::build_inline_css()` setzt dieselben Variablen aus
-den Einstellungen, sodass individuelle Einstellungen weiterhin möglich sind.
+`AppearanceSettingsPage::build_inline_css()` setzt die konfigurierbaren Rollen
+`--afspaces-heading-color` und `--afspaces-link-color` aus den Einstellungen.
+Die feste Variable `--afspaces-color-blue` bleibt davon getrennt und kann nicht
+durch eine Überschriften- oder Linkfarbe umgebogen werden.
 Die Farbfelder der Settingspage akzeptieren Copy-and-paste-Hexwerte; die
 Darstellung wird client- und serverseitig auf sechsstellige `#RRGGBB`-Werte
 normalisiert.

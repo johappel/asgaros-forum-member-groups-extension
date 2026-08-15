@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Farbrollen semantisch getrennt: `--afspaces-color-blue` bleibt die feste
+  Primärfarbe; konfigurierbare Überschriften- und Linkfarben werden über
+  `--afspaces-heading-color` bzw. `--afspaces-link-color` gesetzt.
+- Plugin-Version auf 0.4.20 angehoben.
+
 - Moderationsaktionen im Asgaros-Topic-/Post-Menü werden aktionsbezogen
   gegen die native Asgaros-Berechtigung dedupliziert. Globale Moderatoren
   und Administratoren sehen dadurch keine semantisch identischen AFSpaces-

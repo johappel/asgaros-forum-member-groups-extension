@@ -57,6 +57,8 @@ final class Issue21DesignTest extends TestCase {
 		self::assertStringContainsString( '.afspaces-space-nav .afspaces-hub-tab:hover', $source );
 		self::assertStringContainsString( 'font-size: 16px;', $source );
 		self::assertStringContainsString( 'color: var(--afspaces-color-text);', $source );
+		self::assertStringContainsString( 'color: var(--afspaces-heading-color);', $source );
+		self::assertStringContainsString( 'color: var(--afspaces-link-color);', $source );
 		self::assertStringContainsString( 'text-decoration: underline;', $source );
 		self::assertStringContainsString( 'background: transparent !important;', $source );
 		self::assertStringContainsString( 'background: #ffffff !important;', $source );

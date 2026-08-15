@@ -216,8 +216,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 			$radius      = (int) $s['wrapper_border_radius'];
 
 			return sprintf(
-				'#af-wrapper.afspaces-wrapper { --afspaces-color-blue: %7$s; --afspaces-color-yellow: %21$s; --afspaces-color-purple: %23$s; --afspaces-color-text: %3$s; --afspaces-color-secondary-background: %17$s; --afspaces-color-light-background: %4$s; font-family: %1$s; font-size: %2$dpx; color: %3$s; background: %4$s; border-color: %5$s !important; border-radius: %6$dpx; }'
-				. '#af-wrapper.afspaces-wrapper .afspaces-dashboard h2, #af-wrapper.afspaces-wrapper .afspaces-members h2, #af-wrapper.afspaces-wrapper .afspaces-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-join-requests h2, #af-wrapper.afspaces-wrapper .afspaces-my-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-space-context-title { color: %7$s; font-family: %8$s; }'
+				'#af-wrapper.afspaces-wrapper { --afspaces-heading-color: %7$s; --afspaces-link-color: %19$s; --afspaces-color-yellow: %21$s; --afspaces-color-purple: %23$s; --afspaces-color-text: %3$s; --afspaces-color-secondary-background: %17$s; --afspaces-color-light-background: %4$s; font-family: %1$s; font-size: %2$dpx; color: %3$s; background: %4$s; border-color: %5$s !important; border-radius: %6$dpx; }'
+				. '#af-wrapper.afspaces-wrapper .afspaces-dashboard h2, #af-wrapper.afspaces-wrapper .afspaces-members h2, #af-wrapper.afspaces-wrapper .afspaces-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-join-requests h2, #af-wrapper.afspaces-wrapper .afspaces-my-invitations h2, #af-wrapper.afspaces-wrapper .afspaces-space-context-title { color: var(--afspaces-heading-color); font-family: %8$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-breadcrumb, #af-wrapper.afspaces-wrapper .afspaces-breadcrumb a { color: %9$s; }'
 				. '#af-wrapper.afspaces-wrapper #forum-header.afspaces-forum-header { background: %10$s; border-color: %10$s; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-hub-tab { color: %11$s; }'
@@ -228,7 +228,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AppearanceSettingsPage' ) ) {
 				. '#af-wrapper.afspaces-wrapper .afspaces-button:hover, #af-wrapper.afspaces-wrapper .afspaces-button:focus { background: %21$s !important; border-color: %21$s !important; color: %22$s !important; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-button-secondary { background: %17$s !important; border-color: %17$s !important; color: %20$s !important; }'
 				. '#af-wrapper.afspaces-wrapper .afspaces-button-secondary:hover, #af-wrapper.afspaces-wrapper .afspaces-button-secondary:focus { background: %21$s !important; border-color: %21$s !important; color: %22$s !important; }'
-				. '#af-wrapper.afspaces-wrapper a { color: %19$s; }',
+				. '#af-wrapper.afspaces-wrapper a { color: var(--afspaces-link-color); }',
 				$font_base,
 				$font_size,
 				(string) $s['text_color'],

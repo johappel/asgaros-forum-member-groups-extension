@@ -775,7 +775,7 @@
 }
 
 .afspaces-accent-option-text strong {
-	color: var(--afspaces-color-blue, #2d5d7f);
+	color: var(--afspaces-heading-color, #2d5d7f);
 }
 
 .afspaces-accent-option-text code {
@@ -2878,6 +2878,8 @@ right: auto;
 	--afspaces-color-text: #3a4f66;
 	--afspaces-color-secondary-background: #364149;
 	--afspaces-color-light-background: #d9d9d9;
+	--afspaces-heading-color: #2d5d7f;
+	--afspaces-link-color: #2d5d7f;
 }
 
 #af-wrapper.afspaces-wrapper {
@@ -2915,11 +2917,11 @@ right: auto;
 #af-wrapper.afspaces-wrapper .afspaces-join-requests h2,
 #af-wrapper.afspaces-wrapper .afspaces-my-invitations h2,
 #af-wrapper.afspaces-wrapper .afspaces-space-context-title {
-	color: var(--afspaces-color-blue);
+	color: var(--afspaces-heading-color);
 }
 
 #af-wrapper.afspaces-wrapper a {
-	color: var(--afspaces-color-blue);
+	color: var(--afspaces-link-color);
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-button {

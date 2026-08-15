@@ -14,6 +14,8 @@
 	--afspaces-color-secondary-background: #4b5563;
 	--afspaces-color-light-background: #d9d9d9;
 	--afspaces-color-danger: #f91111;
+	--afspaces-heading-color: #2d5d7f;
+	--afspaces-link-color: #2d5d7f;
 	--afspaces-forum-button-hover: var(--afspaces-color-yellow);
 	--afspaces-forum-metadata-color: var(--afspaces-color-text);
 	--afspaces-forum-metadata-size: 0.875rem;
@@ -87,7 +89,7 @@
 
 }
 #af-wrapper a:not(a.button):not(a.highlight-admin):not(a.highlight-moderator){
-  color: var(--afspaces-color-blue)!important;
+  color: var(--afspaces-link-color)!important;
 }
 
 #af-wrapper .post-author-blocks .mention-nice-name ,
