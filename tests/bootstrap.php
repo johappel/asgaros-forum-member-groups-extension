@@ -93,6 +93,13 @@ if ( ! function_exists( 'user_can' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_user_logged_in' ) ) {
+	function is_user_logged_in(): bool {
+		global $afspaces_test_is_user_logged_in;
+		return ! isset( $afspaces_test_is_user_logged_in ) || (bool) $afspaces_test_is_user_logged_in;
+	}
+}
+
 // sanitize_text_field-Stub.
 if ( ! function_exists( 'sanitize_text_field' ) ) {
 	/**

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Issue #9 nach visuellem Review: „Forum abonnieren“ bzw. „Thema abonnieren“
+  als kontextabhängigen Nav-Eintrag direkt vor „Abonnements“ eingeordnet; die
+  separate Schaltfläche oberhalb des Forum-Headers entfernt. Bei einem globalen
+  Abonnement bleibt nur die vorhandene zentrale Abonnementverwaltung sichtbar.
+- Plugin-Version auf 0.4.16 angehoben.
+
 - Issue #9: Das bestehende Asgaros-Control für „Forum abonnieren“ bzw.
   „Thema abonnieren“ wird einmalig oben rechts in der jeweiligen Ansicht als
   sichtbare Schaltfläche ausgegeben; die zentrale Abonnementverwaltung bleibt

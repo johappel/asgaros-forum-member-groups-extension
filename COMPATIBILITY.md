@@ -56,16 +56,13 @@ Vor MVP 1 sind zu dokumentieren:
 
 ## Forum-Navigation (UX-Integration)
 
-Für Issue #9 werden zusätzlich die dokumentierten Actions
-`asgarosforum_forum_custom_content_top` und
-`asgarosforum_topic_custom_content_top` verwendet. Der Adapter entfernt dafür
-bei Asgaros 3.4.0 den registrierten Callback
+Für Issue #9 entfernt der Adapter bei Asgaros 3.4.0 den registrierten Callback
 `AsgarosForumNotifications::show_subscription_navigation()` aus
-`asgarosforum_bottom_navigation` und ruft ihn an den beiden Top-Hooks genau
-einmal auf. Die Ausgabe bleibt dadurch inklusive Asgaros-Zustand, URL und
-Nonce unverändert. Die dafür verwendeten internen Methoden und Eigenschaften
-liegen ausschließlich in `AsgarosAdapter` und werden bei fehlender API
-defensiv nicht registriert.
+`asgarosforum_bottom_navigation`. Über den dokumentierten Filter
+`asgarosforum_filter_header_menu` wird daraus ein kontextabhängiger Nav-Eintrag
+direkt vor `subscription` erzeugt. URL, Nonce und Zustand stammen weiterhin aus
+Asgaros; die intern verwendete Notifications-Methode bleibt ausschließlich im
+`AsgarosAdapter` gekapselt und degradiert bei fehlender API defensiv.
 
 Die Frontend-Verwaltung ist über die Asgaros-Forum-Navigation erreichbar. Dafür werden ausschließlich **dokumentierte, öffentliche Asgaros-Hooks** genutzt (keine internen Klassen):
 

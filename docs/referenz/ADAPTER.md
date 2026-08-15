@@ -19,11 +19,13 @@ Der Asgaros-Adapter ist die einzige Stelle, die Asgaros-Interna kennen darf. Ver
 
 ### Abonnement-Navigation
 
-`relocate_subscription_navigation()` verschiebt die bestehenden Asgaros-
-Abonnement-Controls einmalig aus `asgarosforum_bottom_navigation` in die
-dokumentierten Top-Hooks für `forum` und `topic`. Die Implementierung delegiert
-die Ausgabe an `AsgarosForumNotifications::show_subscription_navigation()`;
-AFSpaces erzeugt weder eigene Subscription-URLs noch Nonces.
+`relocate_subscription_navigation()` entfernt die bestehende Asgaros-Ausgabe
+aus `asgarosforum_bottom_navigation` und registriert
+`add_subscription_menu_entry()` mit Priorität 9 am dokumentierten Filter
+`asgarosforum_filter_header_menu`. Die Methode liest URL, Nonce und Zustand aus
+`AsgarosForumNotifications::show_subscription_navigation()` und ordnet die
+kontextabhängige Aktion direkt vor dem Standardpunkt `subscription` ein.
+AFSpaces erzeugt keine eigene Subscription-URL.
 
 ### Gruppenmitglieder
 

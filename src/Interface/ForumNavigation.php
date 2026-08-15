@@ -59,7 +59,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumNavigation' ) ) {
 		public function init(): void {
 			add_filter( 'asgarosforum_filter_header_menu', array( $this, 'add_menu_entry' ) );
 			// Issue #9: Das bestehende Asgaros-Control bleibt einmalig und wird
-			// vom unteren Menü in die jeweilige Forum-/Themenansicht verschoben.
+			// als kontextabhängiger Eintrag in die Forum-Navigation verschoben.
 			$this->asgaros->relocate_subscription_navigation();
 			// Rendert innerhalb von #af-wrapper direkt unterhalb der Forum-Navigation.
 			add_action( 'asgarosforum_content_header', array( $this, 'render_overview_panel' ) );

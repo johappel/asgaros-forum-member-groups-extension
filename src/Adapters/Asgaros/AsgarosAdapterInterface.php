@@ -31,8 +31,8 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function get_version(): ?string;
 
 		/**
-		 * Verschiebt die eingebauten Abonnement-Links vom unteren Forum-Menü
-		 * in die dokumentierten Top-Hooks für Forum und Thema.
+		 * Verschiebt die eingebauten Abonnement-Links vom unteren Bereich als
+		 * kontextabhängigen Eintrag vor „Abonnements“ in die Forum-Navigation.
 		 *
 		 * @return void
 		 */

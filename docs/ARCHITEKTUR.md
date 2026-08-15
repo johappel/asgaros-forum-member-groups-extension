@@ -145,9 +145,9 @@ Bekannte Tabellennamen:
 
 ### Forum-integrierte UI
 
-Die Abonnement-Schaltflächen von Asgaros werden über den Adapter einmalig in
-die Top-Hooks der Forum- und Themenansicht verlagert; URLs, Nonces und Zustand
-bleiben vollständig bei Asgaros.
+Die Abonnement-Aktion von Asgaros wird über den Adapter einmalig als
+kontextabhängiger Eintrag in die Forum-Navigation verlagert; URLs, Nonces und
+Zustand bleiben vollständig bei Asgaros.
 
 1. ForumNavigation hängt Navigation und Panel in Asgaros ein und verwendet für die Anzeige der Gründungsoption `SpaceCreationService::can_user_create()`.
 2. ForumModerationControls hängt kontextabhängige Aktionen in die Forenansicht.
