@@ -134,11 +134,14 @@ Mitgliederverwaltung.
 
 Der Abschnitt „Zugang und Mitgliedschaft“ enthält zwei semantisch getrennte
 `fieldset`-Radio-Gruppen: „Wer darf die Beiträge dieser Arbeitsgruppe lesen?“
-und „Wer kann Mitglied werden?“. Die Leseoptionen heißen „Nur Mitglieder der
-Arbeitsgruppe“ und „Alle angemeldeten Personen“ und erklären ausdrücklich,
-dass Lesen keine Mitgliedschaft erzeugt. Die drei Beitrittsoptionen tragen
-jeweils einen eigenen Hilfetext. Die beiden Gruppen verwenden
-unterschiedliche `name`-Attribute; die Erläuterungen sind über
+und „Wer kann Mitglied werden und Beiträge verfassen?“. Die Leseoptionen heißen
+„Nur Mitglieder der Arbeitsgruppe“ und „Alle angemeldeten Personen“ und
+erklären ausdrücklich, dass Lesen keine Mitgliedschaft oder Schreibberechtigung
+erzeugt. Die drei Beitrittsoptionen heißen „Beitritt auf Anfrage oder mit einem
+Einladungslink“, „Nur über Einladungslink“ und „Keine neuen Mitglieder“ und
+tragen jeweils einen eigenen Hilfetext. Ein Hinweis stellt klar, dass
+Moderationsrechte an anderer Stelle vergeben werden. Die beiden Gruppen
+verwenden unterschiedliche `name`-Attribute; die Erläuterungen sind über
 `aria-describedby` den jeweiligen Eingaben zugeordnet.
 
 ## Hub-Layout

@@ -207,7 +207,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 
 			switch ( $meta->join_policy ) {
 				case WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY:
-					return __( 'Nur auf Einladung', 'afspaces' );
+					return __( 'Nur über Einladungslink', 'afspaces' );
 				case WorkingGroupMeta::JOIN_POLICY_CLOSED:
 					return __( 'Geschlossen', 'afspaces' );
 				default:

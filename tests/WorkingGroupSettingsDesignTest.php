@@ -40,7 +40,10 @@ final class WorkingGroupSettingsDesignTest extends TestCase {
 		self::assertStringContainsString( 'Neue Mitglieder können nur von berechtigten Personen eingeladen werden.', $source );
 		self::assertStringContainsString( 'Die Arbeitsgruppe nimmt derzeit keine weiteren Mitglieder auf.', $source );
 		self::assertStringContainsString( 'Angemeldete Personen können eine Mitgliedschaft anfragen.', $source );
-		self::assertStringContainsString( 'Wer kann Mitglied werden?', $source );
+		self::assertStringContainsString( 'Wer kann Mitglied werden und Beiträge verfassen?', $source );
+		self::assertStringContainsString( 'Beitritt auf Anfrage oder mit einem Einladungslink', $source );
+		self::assertStringContainsString( 'Nur über Einladungslink', $source );
+		self::assertStringContainsString( 'Moderationsrechte werden an anderer Stelle vergeben.', $source );
 		self::assertStringContainsString( 'Mitgliedschaft', $source );
 		self::assertStringContainsString( 'name="visibility"', $source );
 		self::assertStringContainsString( 'name="join_policy"', $source );

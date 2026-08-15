@@ -169,15 +169,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 							</fieldset>
 							<h4 class="afspaces-membership-subheading"><?php echo esc_html__( 'Mitgliedschaft', 'afspaces' ); ?></h4>
 							<fieldset class="afspaces-membership-options afspaces-settings-field">
-								<legend><?php echo esc_html__( 'Wer kann Mitglied werden?', 'afspaces' ); ?></legend>
+								<legend><?php echo esc_html__( 'Wer kann Mitglied werden und Beiträge verfassen?', 'afspaces' ); ?></legend>
 								<label class="afspaces-radio-option">
 									<input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?>" aria-describedby="afspaces-membership-help-request" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_REQUEST ); ?> />
-									<span><?php echo esc_html__( 'Beitritt auf Anfrage', 'afspaces' ); ?></span>
+									<span><?php echo esc_html__( 'Beitritt auf Anfrage oder mit einem Einladungslink', 'afspaces' ); ?></span>
 								</label>
 								<p id="afspaces-membership-help-request" class="description"><?php echo esc_html( self::join_policy_description( WorkingGroupMeta::JOIN_POLICY_REQUEST ) ); ?></p>
 								<label class="afspaces-radio-option">
 									<input type="radio" name="join_policy" value="<?php echo esc_attr( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?>" aria-describedby="afspaces-membership-help-invite-only" <?php checked( $join_mode, WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ); ?> />
-									<span><?php echo esc_html__( 'Nur auf Einladung', 'afspaces' ); ?></span>
+									<span><?php echo esc_html__( 'Nur über Einladungslink', 'afspaces' ); ?></span>
 								</label>
 								<p id="afspaces-membership-help-invite-only" class="description"><?php echo esc_html( self::join_policy_description( WorkingGroupMeta::JOIN_POLICY_INVITE_ONLY ) ); ?></p>
 								<label class="afspaces-radio-option">
@@ -186,6 +186,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 								</label>
 								<p id="afspaces-membership-help-closed" class="description"><?php echo esc_html( self::join_policy_description( WorkingGroupMeta::JOIN_POLICY_CLOSED ) ); ?></p>
 							</fieldset>
+							<p class="afspaces-inline-hint"><?php echo esc_html__( 'Moderationsrechte werden an anderer Stelle vergeben.', 'afspaces' ); ?></p>
 						</div>
 					</section>
 
@@ -248,7 +249,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					return __( 'Die Arbeitsgruppe nimmt derzeit keine weiteren Mitglieder auf.', 'afspaces' );
 				case WorkingGroupMeta::JOIN_POLICY_REQUEST:
 				default:
-					return __( 'Angemeldete Personen können eine Mitgliedschaft anfragen. Die Anfrage muss von den Verantwortlichen der Arbeitsgruppe bestätigt werden.', 'afspaces' );
+					return __( 'Angemeldete Personen können eine Mitgliedschaft anfragen. Zusätzlich können berechtigte Personen Einladungslinks erstellen; je nach Link ist der Beitritt direkt möglich oder muss bestätigt werden.', 'afspaces' );
 			}
 		}
 

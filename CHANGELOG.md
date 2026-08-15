@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Beitrittsoptionen in den Arbeitsgruppen-Einstellungen klarer formuliert:
+  Die Auswahl benennt jetzt ausdrücklich, wer Mitglied werden und Beiträge
+  verfassen kann; Einladungslinks und die separate Vergabe von
+  Moderationsrechten werden verständlich erklärt.
+- Plugin-Version auf 0.4.23 angehoben.
+
 - Zugang und Mitgliedschaft in den Arbeitsgruppen-Einstellungen fachlich
   getrennt: Das Leserecht wird als „Wer darf die Beiträge dieser Arbeitsgruppe
   lesen?“ mit verständlichen Radio-Optionen und Hilfetexten dargestellt; die
