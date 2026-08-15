@@ -151,6 +151,16 @@ Button in der Einstellungsansicht entfällt.
 
 ## Hub-Layout
 
+### Link zum Mitgliederprofil
+
+`ProfileView::render()` zeigt nach Ueberschrift und Einleitung, aber vor der
+Arbeitsgruppenliste, den optionalen Link `.afspaces-profile-member-link`.
+Dieser Link ist ein normaler, tastaturbedienbarer Textlink und bleibt auch bei
+einer leeren Gruppenliste sichtbar. Er verwendet `--afspaces-link-color`, ist
+unterstrichen und bewusst kein primaerer Aktionsbutton. Ohne eine vom
+`UserIdentityService` gelieferte externe Profil-URL wird kein Platzhalterlink
+gerendert.
+
 - Eine Hub-Seite (`[afspaces]`) mit Router (`SpacesHubController`), Brotkrümel und zweistufiger Navigation.
 - Top-Navigation: hubweite Ansichten. Space-Kontext-Navigation nur beim Verwalten einer konkreten Arbeitsgruppe (Details/Mitglieder/Einladungen/Beitrittsanfragen/Moderation).
 - Wrapper-ID `#af-wrapper`; CSS in `assets/afspaces.css`. Einige Regeln sind bewusst unscoped, damit sie auch im site-weiten Such-Overlay greifen.

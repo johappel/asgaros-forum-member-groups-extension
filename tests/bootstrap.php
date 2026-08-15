@@ -62,6 +62,18 @@ if ( ! function_exists( 'esc_url_raw' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_url' ) ) {
+	function esc_url( string $url ): string {
+		return htmlspecialchars( $url, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'esc_html' ) ) {
+	function esc_html( string $text ): string {
+		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
 if ( ! function_exists( 'esc_html__' ) ) {
 	/**
 	 * @param string $text
@@ -97,6 +109,13 @@ if ( ! function_exists( 'is_user_logged_in' ) ) {
 	function is_user_logged_in(): bool {
 		global $afspaces_test_is_user_logged_in;
 		return ! isset( $afspaces_test_is_user_logged_in ) || (bool) $afspaces_test_is_user_logged_in;
+	}
+}
+
+if ( ! function_exists( 'get_current_user_id' ) ) {
+	function get_current_user_id(): int {
+		global $afspaces_test_current_user_id;
+		return (int) ( $afspaces_test_current_user_id ?? 7 );
 	}
 }
 
@@ -192,11 +211,7 @@ if ( ! function_exists( 'get_userdata' ) ) {
 		if ( $user_id < 1 ) {
 			return false;
 		}
-		$user = new \stdClass();
-		$user->ID = $user_id;
-		$user->roles = array();
-		$user->display_name = 'User ' . $user_id;
-		return $user;
+		return false;
 	}
 }
 

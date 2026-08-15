@@ -834,6 +834,17 @@
 	color: #4f5f6f;
 }
 
+.afspaces-profile-member-link {
+	margin: 1rem 0 1.5rem;
+}
+
+.afspaces-profile-member-link a {
+	color: var(--afspaces-link-color, #2d5d7f);
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	* {
 		transition: none !important;

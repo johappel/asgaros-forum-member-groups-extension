@@ -44,6 +44,33 @@ if ( ! class_exists( 'AFSpaces\\Application\\UserIdentityService' ) ) {
 		}
 
 		/**
+		 * Gibt die kanonische externe Profil-URL eines Benutzers zurück.
+		 *
+		 * AFSpaces kennt weder das externe Profilsystem noch dessen URL-Struktur.
+		 * Externe Integrationen liefern die URL über den Filter; ohne Provider
+		 * bleibt der Rückgabewert bewusst leer.
+		 *
+		 * Filter: `afspaces_user_profile_url`
+		 *
+		 * @param int $user_id WordPress-Benutzer-ID.
+		 * @return string URL oder leerer String.
+		 */
+		public function get_profile_url( int $user_id ): string {
+			$user = $this->get_user( $user_id );
+			if ( ! $user ) {
+				return '';
+			}
+
+			$url = '';
+			if ( function_exists( 'apply_filters' ) ) {
+				$url = apply_filters( 'afspaces_user_profile_url', $url, $user_id, $user );
+			}
+
+			$url = is_string( $url ) ? trim( $url ) : '';
+			return function_exists( 'esc_url_raw' ) ? (string) esc_url_raw( $url ) : $url;
+		}
+
+		/**
 		 * Prüft die technische Existenz eines WordPress-Benutzers, ohne eine
 		 * sichtbare Identität oder einen Avatar aufzulösen.
 		 *

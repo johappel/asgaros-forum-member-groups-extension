@@ -64,6 +64,34 @@ final class UserIdentityServiceTest extends TestCase {
 		$this->assertStringContainsString( 'class="avatar"', $html );
 	}
 
+	public function test_profile_url_is_empty_without_external_provider(): void {
+		$this->assertSame( '', ( new UserIdentityService() )->get_profile_url( 7 ) );
+	}
+
+	public function test_profile_url_uses_external_provider_and_passes_user_context(): void {
+		global $afspaces_test_filters;
+		$received_user_id = 0;
+		$received_user    = null;
+		$afspaces_test_filters['afspaces_user_profile_url'][] = static function ( string $url, int $user_id, object $user ) use ( &$received_user_id, &$received_user ): string {
+			$received_user_id = $user_id;
+			$received_user    = $user;
+			return 'https://example.test/profil/simone-wustrack/';
+		};
+
+		$this->assertSame( 'https://example.test/profil/simone-wustrack/', ( new UserIdentityService() )->get_profile_url( 7 ) );
+		$this->assertSame( 7, $received_user_id );
+		$this->assertSame( 7, $received_user->ID );
+	}
+
+	public function test_profile_url_is_empty_for_unknown_user(): void {
+		global $afspaces_test_filters;
+		$afspaces_test_filters['afspaces_user_profile_url'][] = static function (): string {
+			return 'https://example.test/should-not-be-used/';
+		};
+
+		$this->assertSame( '', ( new UserIdentityService() )->get_profile_url( 999 ) );
+	}
+
 	public function test_external_search_results_are_deduplicated_and_keep_user_ids(): void {
 		global $afspaces_test_filters;
 		$afspaces_test_filters['afspaces_user_search_results'][] = static function ( array $result ): array {

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Arbeitsgruppenprofile verlinken über `UserIdentityService` und den neuen
+  Filter `afspaces_user_profile_url` auf das kanonische Mitgliederprofil.
+  Ohne externen Provider wird kein irreführender Ersatzlink ausgegeben.
+- Plugin-Version auf 0.4.25 angehoben.
+
 - „Arbeitsgruppe ansehen“ aus der hervorgehobenen Schaltfläche der
   Einstellungsansicht in einen rechtsbündigen Link der Tab-Leiste verschoben.
 - Plugin-Version auf 0.4.24 angehoben.

@@ -90,6 +90,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 			}
 
 			$is_own = $viewer === $profile_user_id;
+			$profile_url = $this->identity->get_profile_url( $profile_user_id );
 			$heading = $is_own
 				? __( 'Mein Arbeitsgruppenprofil', 'afspaces' )
 				: sprintf( __( 'Arbeitsgruppen von %s', 'afspaces' ), $this->identity->get_display_name( $profile_user_id ) );
@@ -102,6 +103,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ProfileView' ) ) {
 					<p><?php echo esc_html__( 'Hier siehst du Mitgliedschaften und Verantwortlichkeiten im Arbeitsgruppenmodell.', 'afspaces' ); ?></p>
 				<?php else : ?>
 					<h3 id="afspaces-profile-view-heading" class="screen-reader-text"><?php echo esc_html( $heading ); ?></h3>
+				<?php endif; ?>
+				<?php if ( '' !== $profile_url ) : ?>
+					<p class="afspaces-profile-member-link">
+						<a href="<?php echo esc_url( $profile_url ); ?>">
+							<?php echo esc_html( $is_own ? __( 'Zu meinem Mitgliederprofil', 'afspaces' ) : sprintf( __( 'Zum Mitgliederprofil von %s', 'afspaces' ), $this->identity->get_display_name( $profile_user_id ) ) ); ?>
+						</a>
+					</p>
 				<?php endif; ?>
 				<?php if ( empty( $items ) ) : ?>
 					<p class="afspaces-empty"><?php echo esc_html( $is_own ? __( 'Für dein Profil sind aktuell keine Arbeitsgruppen hinterlegt.', 'afspaces' ) : __( 'Für dieses Profil sind keine Arbeitsgruppen freigegeben.', 'afspaces' ) ); ?></p>

@@ -65,6 +65,7 @@ Alle folgenden Filter sind im aktuellen Code öffentliche Erweiterungspunkte. Fi
 | `afspaces_wp_search_args` | `array<string,mixed> $args`, `string $keywords` | WP_Query-Argument-Array | WordPress-Suchabfrage erweitern |
 | `afspaces_user_display_name` | `string $name`, `int $user_id`, `WP_User $user` | string; Ergebnis von `asgarosforum_filter_username` | sichtbaren Benutzernamen weiter anpassen |
 | `afspaces_user_avatar_url` | `string $url`, `int $user_id`, `int $size` | string; WordPress-Avatar-URL | externe Avatar-URL für AFSpaces liefern |
+| `afspaces_user_profile_url` | `string $url`, `int $user_id`, `WP_User $user` | string; Default leer, nach `esc_url_raw()` | kanonische Profil-URL eines externen Mitglieder-/Community-Systems liefern |
 | `afspaces_user_search_results` | `array{user_ids:int[],total:int} $result`, `string $search`, `int $page`, `int $per_page`, `int $candidate_limit` | gleicher Shape; WP-Suche als Default | externe Suchanbieter liefern zusätzliche User-IDs für das gemeinsame Kandidatenfenster |
 
 Tab-Definitionen für die beiden Hub-Filter verwenden die vom Renderer gelesenen Schlüssel `view`, `label`, `url` und `active`. Zusätzliche Schlüssel dürfen transportiert werden, werden aber vom AFSpaces-Renderer nicht automatisch ausgegeben.

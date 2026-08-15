@@ -59,6 +59,10 @@ Status: umgesetzt.
 
 ## MVP 1: Frontend-Mitgliederverwaltung
 
+Die User-Identity-Integration umfasst neben Anzeigename, Avatar und Suche
+auch optionale kanonische Profil-URLs. `ProfileView` verlinkt diese URL im
+Profilkopf; ohne externen Provider bleibt die Ansicht linkfrei.
+
 Status: im Kern umgesetzt und laut Task-Dokument abgeschlossen.
 
 Abdeckung nach Task-Blöcken:
