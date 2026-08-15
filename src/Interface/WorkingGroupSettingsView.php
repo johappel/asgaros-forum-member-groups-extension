@@ -155,7 +155,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 					<section class="afspaces-settings-section" aria-labelledby="afspaces-access-heading">
 						<h3 id="afspaces-access-heading"><?php echo esc_html__( 'Zugang und Mitgliedschaft', 'afspaces' ); ?></h3>
 						<div class="afspaces-settings-fields">
-							<h4 class="afspaces-access-subheading"><?php echo esc_html__( 'Lesen', 'afspaces' ); ?></h4>
+							<h4 class="afspaces-access-subheading"><?php echo esc_html__( 'Leserschaft', 'afspaces' ); ?></h4>
 							<fieldset class="afspaces-access-options afspaces-settings-field">
 								<legend><?php echo esc_html__( 'Wer darf die Beiträge dieser Arbeitsgruppe lesen?', 'afspaces' ); ?></legend>
 								<?php foreach ( $visibility_options as $visibility ) : ?>
