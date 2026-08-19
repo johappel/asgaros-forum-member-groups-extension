@@ -236,7 +236,8 @@
 
 .afspaces-member-table th,
 .afspaces-member-table td {
-	border: 1px solid #c3c4c7;
+	border: 0;
+	border-bottom: 1px solid #e1e8ed;
 	padding: 0.5rem 0.75rem;
 	text-align: left;
 }
@@ -1457,7 +1458,7 @@ a.afspaces-link.is-active {
 #af-wrapper.afspaces-wrapper .afspaces-created-invite-link,
 #af-wrapper.afspaces-wrapper .afspaces-search-results li {
 	background: #fff;
-	border: 1px solid #eee;
+	border: 0;
 	border-radius: 9px;
 	box-shadow: none;
 	box-sizing: border-box;
@@ -1468,7 +1469,7 @@ a.afspaces-link.is-active {
   margin: 0 0 19px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid #999;
+  border: 0;
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-section-title {
@@ -1531,7 +1532,7 @@ a.afspaces-link.is-active {
 #af-wrapper.afspaces-wrapper .afspaces-space-item,
 #af-wrapper.afspaces-wrapper .afspaces-member-table {
 	background: #fff;
-	border: 1px solid #eee;
+	border: 0;
 	border-radius: 9px;
 	box-shadow: none;
 }
@@ -2730,6 +2731,7 @@ margin: 0.5rem 0 1rem;
 .afspaces-moderation-table td {
 text-align: left;
 padding: 0.5rem 0.6rem;
+border: 0;
 border-bottom: 1px solid #e1e8ed;
 vertical-align: middle;
 }
