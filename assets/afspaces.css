@@ -1490,7 +1490,8 @@ a.afspaces-link.is-active {
   margin: 0 0 19px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid #999;
+  border: 0px solid #999;
+  background: #efefef;
 }
 
 #af-wrapper.afspaces-wrapper .afspaces-section-title {
