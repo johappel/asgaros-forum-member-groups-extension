@@ -54,8 +54,8 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function can_perform_moderation_action( string $action, int $user_id, int $topic_id = 0, int $post_id = 0 ): bool;
 
 		/**
-		 * Verschiebt die eingebauten Abonnement-Links vom unteren Bereich als
-		 * kontextabhängigen Eintrag vor „Abonnements“ in die Forum-Navigation.
+		 * Verschiebt die eingebauten Abonnement-Links vom unteren Bereich in das
+		 * kontextabhängige Asgaros-Forum-Menü.
 		 *
 		 * @return void
 		 */

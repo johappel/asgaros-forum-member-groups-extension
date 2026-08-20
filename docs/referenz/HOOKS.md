@@ -23,14 +23,16 @@ Diese Referenz ist aus den `add_action()`, `add_filter()`, `do_action()` und `ap
 
 ## Asgaros-Hooks
 
-Issue #9 nutzt ebenfalls `asgarosforum_filter_header_menu`: Der Asgaros-Adapter
-ordnet dort die kontextabhängige Aktion für Forum- oder Themenabonnements mit
-Priorität 9 direkt vor dem Standardpunkt `subscription` ein, nachdem deren
-ursprüngliche Registrierung im unteren Navigationsbereich entfernt wurde.
+Issue #9 nutzt `asgarosforum_filter_forum_menu` und
+`asgarosforum_filter_topic_menu`: Der Asgaros-Adapter ergänzt dort die
+kontextabhängige Aktion für Forum- oder Themenabonnements innerhalb des
+vorhandenen `.forum-menu`, nachdem deren ursprüngliche Registrierung im unteren
+Navigationsbereich entfernt wurde.
 
 | Hook | Ort / Argumente | Rückgabe / Default | Status |
 | --- | --- | --- | --- |
-| `asgarosforum_filter_header_menu` | `AsgarosAdapter::add_subscription_menu_entry` (Priorität 9), `ForumNavigation::init` (Priorität 10); Menü-Array | Menü-Array | kontextabhängige Abo-Aktion, Arbeitsgruppen-Einstieg |
+| `asgarosforum_filter_forum_menu` | `AsgarosAdapter::add_forum_subscription_menu_entry`; Asgaros-Forum-Menü-Markup | Menü-Markup | Forum-Abo-Aktion im `.forum-menu` |
+| `asgarosforum_filter_topic_menu` | `AsgarosAdapter::add_topic_subscription_menu_entry`; Asgaros-Themenmenü-Markup | Menü-Markup | Themen-Abo-Aktion im `.forum-menu` |
 | `asgarosforum_content_header` | `ForumNavigation::init`; keine Argumente | — | Einstiegs-Panel rendern |
 | `asgarosforum_content_top` | `ForumNavigation::init`; keine Argumente | — | Kategorie-Farbmarkierungen rendern |
 | `asgarosforum_after_post_message` | `ForumModerationControls::init`, Priorität 20, 2 Argumente: `int $author_id`, `int $post_id` | — | raumbezogene Moderationskontrollen rendern |

@@ -49,15 +49,14 @@ sichtbar, während ihre Nonce-, Policy- und Objektprüfungen unverändert greife
 
 `relocate_subscription_navigation()` entfernt die bestehende Asgaros-Ausgabe
 aus `asgarosforum_bottom_navigation` und registriert
-`add_subscription_menu_entry()` mit Priorität 9 am dokumentierten Filter
-`asgarosforum_filter_header_menu`. Die Methode liest URL, Nonce und Zustand aus
-`AsgarosForumNotifications::show_subscription_navigation()` und ordnet die
-kontextabhängige Aktion direkt vor dem Standardpunkt `subscription` ein. Das
-`href`-Attribut wird unabhängig von der Reihenfolge der HTML-Attribute im von
-Asgaros erzeugten Link gelesen. Wenn Asgaros den Header vor `current_topic`
-oder `current_forum` rendert, verwendet der Adapter `current_element` und ruft
-`show_topic_subscription_link()` beziehungsweise `show_forum_subscription_link()`
-direkt auf.
+`add_forum_subscription_menu_entry()` bzw.
+`add_topic_subscription_menu_entry()` an den dokumentierten Filtern
+`asgarosforum_filter_forum_menu` und `asgarosforum_filter_topic_menu`. Die
+Aktion wird innerhalb des vorhandenen `.forum-menu`-Markup direkt an die
+Asgaros-Forum-/Themenaktionen angehängt. URL, Nonce und Zustand werden mit
+`show_topic_subscription_link()` bzw. `show_forum_subscription_link()` aus
+Asgaros gelesen; AFSpaces erzeugt keine eigene Subscription-URL. Das
+`href`-Attribut wird unabhängig von der Reihenfolge der HTML-Attribute erkannt.
 AFSpaces erzeugt keine eigene Subscription-URL.
 
 ### Gruppenmitglieder

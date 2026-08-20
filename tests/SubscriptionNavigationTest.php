@@ -41,7 +41,7 @@ final class SubscriptionNavigationTest extends TestCase {
 		parent::tearDown();
 	}
 
-	public function test_forum_action_is_inserted_before_subscription_management(): void {
+	public function test_forum_action_is_inserted_into_existing_forum_menu(): void {
 		$notifications = new StubSubscriptionNotifications();
 		$notifications->html = '<span id="forum-subscription"></span><a class="button button-normal" href="https://example.test/forum/?subscribe_forum=42&amp;_wpnonce=abc"><b>Subscribe</b></a>';
 
@@ -54,17 +54,13 @@ final class SubscriptionNavigationTest extends TestCase {
 		);
 
 		$adapter = ( new ReflectionClass( AsgarosAdapter::class ) )->newInstanceWithoutConstructor();
-		$result  = $adapter->add_subscription_menu_entry(
-			array(
-				'home'         => array(),
-				'subscription' => array(),
-				'afspaces'     => array(),
-			)
+		$result = $adapter->add_forum_subscription_menu_entry(
+			'<div class="forum-menu"><a class="button button-normal" href="/forum/addtopic/42">New Topic</a></div>'
 		);
 
-		self::assertSame( array( 'home', 'afspaces_context_subscription', 'subscription', 'afspaces' ), array_keys( $result ) );
-		self::assertSame( 'Forum abonnieren', $result['afspaces_context_subscription']['menu_link_text'] );
-		self::assertSame( 'https://example.test/forum/?subscribe_forum=42&_wpnonce=abc', $result['afspaces_context_subscription']['menu_url'] );
+		self::assertStringContainsString( 'New Topic</a><a class="button button-normal afspaces-subscription-link"', $result );
+		self::assertStringContainsString( 'href="https://example.test/forum/?subscribe_forum=42&amp;_wpnonce=abc"', $result );
+		self::assertStringContainsString( '>Forum abonnieren</a>', $result );
 		self::assertSame( 'show_forum_subscription_link', $notifications->last_method );
 	}
 
@@ -81,9 +77,13 @@ final class SubscriptionNavigationTest extends TestCase {
 		);
 
 		$adapter = ( new ReflectionClass( AsgarosAdapter::class ) )->newInstanceWithoutConstructor();
-		$result  = $adapter->add_subscription_menu_entry( array( 'subscription' => array() ) );
+		$result = $adapter->add_topic_subscription_menu_entry(
+			'<div class="forum-menu"><a class="button button-normal" href="/forum/addpost/7">Antworten</a></div>'
+		);
 
-		self::assertSame( 'Themen-Abo beenden', $result['afspaces_context_subscription']['menu_link_text'] );
+		self::assertStringContainsString( 'Antworten</a><a class="button button-normal afspaces-subscription-link"', $result );
+		self::assertStringContainsString( 'href="https://example.test/topic/?unsubscribe_topic=7&amp;_wpnonce=abc"', $result );
+		self::assertStringContainsString( '>Themen-Abo beenden</a>', $result );
 		self::assertSame( 'show_topic_subscription_link', $notifications->last_method );
 	}
 
@@ -99,9 +99,9 @@ final class SubscriptionNavigationTest extends TestCase {
 		);
 
 		$adapter = ( new ReflectionClass( AsgarosAdapter::class ) )->newInstanceWithoutConstructor();
-		$menu    = array( 'home' => array(), 'subscription' => array() );
+		$menu = '<div class="forum-menu"><a href="/forum/addtopic/42">New Topic</a></div>';
 
-		self::assertSame( $menu, $adapter->add_subscription_menu_entry( $menu ) );
+		self::assertSame( $menu, $adapter->add_forum_subscription_menu_entry( $menu ) );
 	}
 
 	public function test_subscription_control_is_relocated_without_duplicate_output(): void {
@@ -109,13 +109,12 @@ final class SubscriptionNavigationTest extends TestCase {
 		$navigation_source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Interface/ForumNavigation.php' );
 
 		self::assertStringContainsString( "remove_action(\n\t\t\t\t'asgarosforum_bottom_navigation'", $adapter_source );
-		self::assertStringContainsString( "'asgarosforum_filter_header_menu'", $adapter_source );
-		self::assertStringContainsString( "'afspaces_context_subscription'", $adapter_source );
-		self::assertStringContainsString( "'subscription' === (string) \$key", $adapter_source );
+		self::assertStringContainsString( "'asgarosforum_filter_forum_menu'", $adapter_source );
+		self::assertStringContainsString( "'asgarosforum_filter_topic_menu'", $adapter_source );
+		self::assertStringContainsString( '`.forum-menu`', $adapter_source );
 		self::assertStringContainsString( 'show_subscription_navigation( $view )', $adapter_source );
-		self::assertStringNotContainsString( 'afspaces-subscription-action', $adapter_source );
-		self::assertStringNotContainsString( 'asgarosforum_forum_custom_content_top', $adapter_source );
-		self::assertStringNotContainsString( 'asgarosforum_topic_custom_content_top', $adapter_source );
+		self::assertStringNotContainsString( "'asgarosforum_filter_header_menu'", $adapter_source );
+		self::assertStringNotContainsString( 'afspaces_context_subscription', $adapter_source );
 		self::assertStringContainsString( 'relocate_subscription_navigation()', $navigation_source );
 	}
 }

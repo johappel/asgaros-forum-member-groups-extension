@@ -169,11 +169,11 @@ gerendert.
 
 ### Abonnement-Navigation (Issue #9)
 
-`AsgarosAdapter::relocate_subscription_navigation()` ordnet die Aktion
-„Forum abonnieren“ bzw. „Thema abonnieren“ als normales Nav-Item direkt vor
-„Abonnements“ ein. Dadurch gelten dieselben lesbaren Farben, Fokuszustände und
-das mobile Verhalten wie für die übrige Asgaros-Navigation. Ein zusätzlicher
-Button oberhalb des Headers wird nicht gerendert. Bei globalem Abonnement
+`AsgarosAdapter::relocate_subscription_navigation()` ergänzt die Aktion
+„Forum abonnieren“ bzw. „Thema abonnieren“ innerhalb des vorhandenen
+`.forum-menu` bei den jeweiligen Forum-/Themenaktionen. Die Buttons verwenden
+das bestehende Asgaros-Button- und Fokusverhalten. Ein zusätzlicher Eintrag in
+der oberen Forum-Navigation wird nicht gerendert. Bei globalem Abonnement
 bleibt ausschließlich die zentrale Abonnementverwaltung sichtbar.
 
 Die dynamischen Arbeitsgruppenfarben werden in

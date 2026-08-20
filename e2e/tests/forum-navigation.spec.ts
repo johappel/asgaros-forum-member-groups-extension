@@ -40,7 +40,7 @@ async function getManagedSpaceId(page: Page): Promise<number> {
 }
 
 test.describe('Forum-integrierte Navigation', () => {
-  test('Forum- und Themenabo stehen als Nav-Item direkt vor Abonnements', async ({ page }) => {
+  test('Forum- und Themenabo stehen im jeweiligen Forum-Menü', async ({ page }) => {
     await login(page, MANAGER);
     await page.goto(`${BASE}/forum/`, { waitUntil: 'domcontentloaded' }).catch(() => {});
 
@@ -48,25 +48,22 @@ test.describe('Forum-integrierte Navigation', () => {
     await expect(forumLink).toBeVisible({ timeout: 15000 });
     await page.goto((await forumLink.getAttribute('href')) || `${BASE}/forum/`, { waitUntil: 'domcontentloaded' }).catch(() => {});
 
-    const forumNav = page.locator('#forum-navigation');
-    const forumAction = forumNav.getByRole('link', { name: /^(Forum abonnieren|Forum-Abo beenden)$/ });
+    const forumMenu = page.locator('#af-wrapper .forum-menu').first();
+    const forumAction = forumMenu.getByRole('link', { name: /^(Forum abonnieren|Forum-Abo beenden)$/ });
     await expect(forumAction).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('.afspaces-subscription-action')).toHaveCount(0);
+    await expect(page.locator('#forum-navigation').getByRole('link', { name: /^(Forum abonnieren|Forum-Abo beenden)$/ })).toHaveCount(0);
 
-    let labels = (await forumNav.locator('a').allTextContents()).map((label) => label.trim());
-    expect(labels.indexOf((await forumAction.textContent())?.trim() || '')).toBe(labels.indexOf('Abonnements') - 1);
+    await expect(forumAction).toHaveClass(/afspaces-subscription-link/);
 
     const topicLink = page.locator('#af-wrapper .topic-name > a').first();
     await expect(topicLink).toBeVisible({ timeout: 15000 });
     await page.goto((await topicLink.getAttribute('href')) || '', { waitUntil: 'domcontentloaded' }).catch(() => {});
 
-    const topicNav = page.locator('#forum-navigation');
-    const topicAction = topicNav.getByRole('link', { name: /^(Thema abonnieren|Themen-Abo beenden)$/ });
+    const topicMenu = page.locator('#af-wrapper .forum-menu').first();
+    const topicAction = topicMenu.getByRole('link', { name: /^(Thema abonnieren|Themen-Abo beenden)$/ });
     await expect(topicAction).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('.afspaces-subscription-action')).toHaveCount(0);
-
-    labels = (await topicNav.locator('a').allTextContents()).map((label) => label.trim());
-    expect(labels.indexOf((await topicAction.textContent())?.trim() || '')).toBe(labels.indexOf('Abonnements') - 1);
+    await expect(page.locator('#forum-navigation').getByRole('link', { name: /^(Thema abonnieren|Themen-Abo beenden)$/ })).toHaveCount(0);
+    await expect(topicAction).toHaveClass(/afspaces-subscription-link/);
   });
 
   test('Hub zeigt globale Unternavigation mit Dashboard und Einladungen', async ({ page }) => {

@@ -180,7 +180,8 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 		}
 
 		/**
-		 * Verschiebt die bestehenden Asgaros-Abonnement-Controls in die Navigation.
+		 * Verschiebt die bestehenden Asgaros-Abonnement-Controls in das
+		 * kontextabhängige Asgaros-Forum-Menü.
 		 *
 		 * Asgaros erzeugt die Links inklusive aktuellem Zustand, Ziel-URL und
 		 * Nonce in `AsgarosForumNotifications`. AFSpaces liest aus dieser Ausgabe
@@ -205,81 +206,79 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				array( $forum->notifications, 'show_subscription_navigation' ),
 				10
 			);
-			add_filter(
-				'asgarosforum_filter_header_menu',
-				array( $this, 'add_subscription_menu_entry' ),
-				9
-			);
+			add_filter( 'asgarosforum_filter_forum_menu', array( $this, 'add_forum_subscription_menu_entry' ) );
+			add_filter( 'asgarosforum_filter_topic_menu', array( $this, 'add_topic_subscription_menu_entry' ) );
 		}
 
 		/**
-		 * Ergänzt die kontextabhängige Aktion direkt vor „Abonnements“.
+		 * Ergänzt „Forum abonnieren“ im vorhandenen Asgaros-Forum-Menü.
 		 *
-		 * @param mixed $menu_entries Asgaros-Menüeinträge.
+		 * @param mixed $menu Asgaros-Menü-Markup.
 		 * @return mixed
 		 */
-		public function add_subscription_menu_entry( $menu_entries ) {
-			if ( ! is_array( $menu_entries ) ) {
-				return $menu_entries;
+		public function add_forum_subscription_menu_entry( $menu ) {
+			return $this->add_subscription_menu_entry_to_content( $menu, 'forum' );
+		}
+
+		/**
+		 * Ergänzt „Thema abonnieren“ im vorhandenen Asgaros-Themenmenü.
+		 *
+		 * @param mixed $menu Asgaros-Menü-Markup.
+		 * @return mixed
+		 */
+		public function add_topic_subscription_menu_entry( $menu ) {
+			return $this->add_subscription_menu_entry_to_content( $menu, 'topic' );
+		}
+
+		/**
+		 * Ergänzt einen Abo-Button innerhalb des von Asgaros erzeugten
+		 * `.forum-menu`-Containers.
+		 *
+		 * @param mixed  $menu Asgaros-Menü-Markup.
+		 * @param string $view Asgaros-Ansicht (`forum` oder `topic`).
+		 * @return mixed
+		 */
+		private function add_subscription_menu_entry_to_content( $menu, string $view ) {
+			if ( ! is_string( $menu ) ) {
+				return $menu;
 			}
 
 			$forum = $this->forum();
 			if ( null === $forum || ! isset( $forum->notifications ) || ! is_object( $forum->notifications ) ) {
-				return $menu_entries;
+				return $menu;
 			}
 
 			if ( ! isset( $forum->options )
 				|| ! is_array( $forum->options )
 				|| empty( $forum->options['allow_subscriptions'] )
 				|| ! is_user_logged_in() ) {
-				return $menu_entries;
-			}
-
-			$view = isset( $forum->current_view ) ? (string) $forum->current_view : '';
-			if ( ! in_array( $view, array( 'forum', 'topic' ), true ) ) {
-				return $menu_entries;
+				return $menu;
 			}
 
 			$control = $this->render_subscription_control( $forum, $view );
-
 			if ( '' === trim( $control )
 				|| ! preg_match( '/<a\b[^>]*\s+href\s*=\s*(["\'])(.*?)\1[^>]*>/is', $control, $matches ) ) {
-				return $menu_entries;
+				return $menu;
 			}
 
 			$url = esc_url_raw( html_entity_decode( (string) $matches[2], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-			if ( '' === $url ) {
-				return $menu_entries;
-			}
-
-			$label = $this->subscription_menu_label( $view, $url );
+			$label = '' === $url ? null : $this->subscription_menu_label( $view, $url );
 			if ( null === $label ) {
-				return $menu_entries;
+				return $menu;
 			}
 
-			$entry = array(
-				'menu_class'        => 'afspaces-subscription-link',
-				'menu_link_text'    => $label,
-				'menu_url'          => $url,
-				'menu_login_status' => 1,
-				'menu_new_tab'      => false,
+			$entry = sprintf(
+				'<a class="button button-normal afspaces-subscription-link" href="%1$s"><span class="menu-icon fas fa-envelope" aria-hidden="true"></span>%2$s</a>',
+				esc_url( $url ),
+				esc_html( $label )
 			);
 
-			$positioned = array();
-			$inserted   = false;
-			foreach ( $menu_entries as $key => $menu_entry ) {
-				if ( 'subscription' === (string) $key ) {
-					$positioned['afspaces_context_subscription'] = $entry;
-					$inserted = true;
-				}
-				$positioned[ $key ] = $menu_entry;
+			$closing_tag = strripos( $menu, '</div>' );
+			if ( false === $closing_tag ) {
+				return '<div class="forum-menu">' . $entry . '</div>';
 			}
 
-			if ( ! $inserted ) {
-				$positioned['afspaces_context_subscription'] = $entry;
-			}
-
-			return $positioned;
+			return substr( $menu, 0, $closing_tag ) . $entry . substr( $menu, $closing_tag );
 		}
 
 		/**

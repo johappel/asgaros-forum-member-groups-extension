@@ -31,10 +31,11 @@ Dieses Dokument konsolidiert die Arbeit aus den bisherigen TASKS-Dateien und bes
 Status: umgesetzt.
 
 Das bestehende Asgaros-Control für Forum- und Themenabonnements wird über den
-Adapter einmalig aus dem unteren Navigationsbereich als kontextabhängiger
-Nav-Eintrag direkt vor „Abonnements“ verlagert. Die zentrale Ansicht bleibt
-unverändert; URLs, Nonces und der abonnierte Zustand stammen weiterhin aus
-Asgaros. Bei globalem Abonnement wird kein redundanter Kontextlink ergänzt.
+Adapter einmalig aus dem unteren Navigationsbereich in das vorhandene
+`.forum-menu` der jeweiligen Forum-/Themenansicht verlagert. Die zentrale
+Ansicht bleibt unverändert; URLs, Nonces und der abonnierte Zustand stammen
+weiterhin aus Asgaros. Bei globalem Abonnement wird kein redundanter
+Kontextlink ergänzt.
 
 ## Developer Reference Hardening (Issue #6)
 

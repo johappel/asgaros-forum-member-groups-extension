@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Issue #9 nach dem lokalen visuellen Abgleich korrigiert: „Forum abonnieren“
+  und „Thema abonnieren“ werden innerhalb des vorhandenen Asgaros-Containers
+  `.forum-menu` bei den jeweiligen Forum-/Themenaktionen ausgegeben, nicht in
+  der oberen Forum-Navigation.
+- Plugin-Version auf 0.4.28 angehoben.
+
 - Abo-Aktionen im Forum-Menü auch bei frühem Asgaros-Header-Kontext korrekt
   erzeugen; dafür werden die vom Rewrite ermittelte Forum-/Themen-ID und die
   nativen Asgaros-Notifications-Methoden verwendet.
