@@ -52,7 +52,9 @@ aus `asgarosforum_bottom_navigation` und registriert
 `add_subscription_menu_entry()` mit Priorität 9 am dokumentierten Filter
 `asgarosforum_filter_header_menu`. Die Methode liest URL, Nonce und Zustand aus
 `AsgarosForumNotifications::show_subscription_navigation()` und ordnet die
-kontextabhängige Aktion direkt vor dem Standardpunkt `subscription` ein.
+kontextabhängige Aktion direkt vor dem Standardpunkt `subscription` ein. Das
+`href`-Attribut wird unabhängig von der Reihenfolge der HTML-Attribute im von
+Asgaros erzeugten Link gelesen.
 AFSpaces erzeugt keine eigene Subscription-URL.
 
 ### Gruppenmitglieder

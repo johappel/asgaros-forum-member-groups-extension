@@ -31,7 +31,7 @@ final class SubscriptionNavigationTest extends TestCase {
 
 	public function test_forum_action_is_inserted_before_subscription_management(): void {
 		$notifications = new StubSubscriptionNotifications();
-		$notifications->html = '<span id="forum-subscription"></span><a href="https://example.test/forum/?subscribe_forum=42&amp;_wpnonce=abc"><b>Subscribe</b></a>';
+		$notifications->html = '<span id="forum-subscription"></span><a class="button button-normal" href="https://example.test/forum/?subscribe_forum=42&amp;_wpnonce=abc"><b>Subscribe</b></a>';
 
 		global $asgarosforum;
 		$asgarosforum = (object) array(
@@ -56,7 +56,7 @@ final class SubscriptionNavigationTest extends TestCase {
 
 	public function test_topic_unsubscribe_action_uses_clear_label(): void {
 		$notifications = new StubSubscriptionNotifications();
-		$notifications->html = '<span id="topic-subscription"></span><a href="https://example.test/topic/?unsubscribe_topic=7&amp;_wpnonce=abc"><b>Unsubscribe</b></a>';
+		$notifications->html = '<span id="topic-subscription"></span><a class="button button-normal" href="https://example.test/topic/?unsubscribe_topic=7&amp;_wpnonce=abc"><b>Unsubscribe</b></a>';
 
 		global $asgarosforum;
 		$asgarosforum = (object) array(

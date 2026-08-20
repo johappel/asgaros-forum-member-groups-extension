@@ -241,7 +241,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$control = (string) ob_get_clean();
 
 			if ( '' === trim( $control )
-				|| ! preg_match( '/<a\s+href=(["\'])(.*?)\1[^>]*>/is', $control, $matches ) ) {
+				|| ! preg_match( '/<a\b[^>]*\s+href\s*=\s*(["\'])(.*?)\1[^>]*>/is', $control, $matches ) ) {
 				return $menu_entries;
 			}
 

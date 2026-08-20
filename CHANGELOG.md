@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fehler bei der Übernahme von Asgaros-Abonnementlinks behoben: Das `href`-
+  Attribut wird jetzt auch erkannt, wenn Asgaros vorher Klassen am `<a>`-
+  Element ausgibt.
+- Plugin-Version auf 0.4.26 angehoben.
+
 - Arbeitsgruppenprofile verlinken über `UserIdentityService` und den neuen
   Filter `afspaces_user_profile_url` auf das kanonische Mitgliederprofil.
   Ohne externen Provider wird kein irreführender Ersatzlink ausgegeben.
