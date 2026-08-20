@@ -72,7 +72,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 			<section class="afspaces-moderation" aria-labelledby="afspaces-moderation-heading">
 				<h2 id="afspaces-moderation-heading"><?php echo esc_html__( 'Moderation', 'afspaces' ); ?></h2>
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier findest du die Themen der Foren deiner Arbeitsgruppe. Du kannst Themen anpinnen, schließen, wieder öffnen oder löschen. Über „Im Forum moderieren“ gelangst du direkt zum Thema in der normalen Forenansicht.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Moderiert wird direkt im Forum: Bei Themen und Beiträgen findest du dort die jeweiligen Moderationsfunktionen. Diese Seite bietet dir eine schnelle Übersicht über die Themen deiner Arbeitsgruppe und führt dich direkt zur Moderation im Forum.', 'afspaces' ); ?></p>
 				<details class="afspaces-moderation-help">
 					<summary><?php echo esc_html__( 'Deine Moderationsmöglichkeiten', 'afspaces' ); ?></summary>
 					<ul>
