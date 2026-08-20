@@ -364,6 +364,61 @@
 	margin-right: 0.5rem;
 }
 
+.afspaces-invite-links-table {
+	table-layout: fixed;
+	min-width: 760px;
+}
+
+.afspaces-invite-links-table th,
+.afspaces-invite-links-table td {
+	white-space: nowrap;
+}
+
+.afspaces-invite-links-table th:nth-child(1),
+.afspaces-invite-links-table td:nth-child(1) {
+	width: 11%;
+}
+
+.afspaces-invite-links-table th:nth-child(2),
+.afspaces-invite-links-table td:nth-child(2) {
+	width: 22%;
+}
+
+.afspaces-invite-links-table th:nth-child(3),
+.afspaces-invite-links-table td:nth-child(3) {
+	width: 23%;
+}
+
+.afspaces-invite-links-table th:nth-child(4),
+.afspaces-invite-links-table td:nth-child(4) {
+	width: 12%;
+}
+
+.afspaces-invite-links-table th:nth-child(5),
+.afspaces-invite-links-table td:nth-child(5) {
+	width: 32%;
+}
+
+.afspaces-invite-links-table .afspaces-table__actions {
+	align-items: flex-start;
+	flex-direction: column;
+	flex-wrap: nowrap;
+}
+
+.afspaces-invite-links-table .afspaces-table__actions .afspaces-inline-form {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.4rem;
+	margin: 0;
+}
+
+.afspaces-invite-links-table .afspaces-table__actions .afspaces-button,
+.afspaces-invite-links-table .afspaces-table__actions input[type="datetime-local"] {
+	white-space: nowrap;
+	box-sizing: border-box;
+}
+
 .afspaces-my-invitations .afspaces-inline-form {
 	display: inline-flex;
 	gap: 0.5rem;

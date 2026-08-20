@@ -126,7 +126,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 								<tr>
 									<th scope="col"><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
 									<th scope="col"><?php echo esc_html__( 'Freigabe', 'afspaces' ); ?></th>
-									<th scope="col"><?php echo esc_html__( 'Nutzungen', 'afspaces' ); ?></th>
 									<th scope="col"><?php echo esc_html__( 'Ablauf', 'afspaces' ); ?></th>
 									<th scope="col"><?php echo esc_html__( 'Registrierung', 'afspaces' ); ?></th>
 									<th scope="col"><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
@@ -137,7 +136,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 									<tr>
 										<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( $link->effective_status() ); ?></span></td>
 										<td><?php echo esc_html( 'approval_required' === $link->approval_mode ? __( 'Manuelle Freigabe', 'afspaces' ) : __( 'Automatisch', 'afspaces' ) ); ?></td>
-										<td><?php echo esc_html( 0 === $link->max_uses ? __( 'unbegrenzt', 'afspaces' ) : sprintf( '%1$d / %2$d', $link->use_count, $link->max_uses ) ); ?></td>
 										<td><?php echo esc_html( $link->expires_at ); ?></td>
 										<td><?php echo esc_html( $link->allows_registration() ? __( 'Ja', 'afspaces' ) : __( 'Nein', 'afspaces' ) ); ?></td>
 										<td>

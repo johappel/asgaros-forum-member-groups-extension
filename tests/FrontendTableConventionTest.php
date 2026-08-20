@@ -50,6 +50,17 @@ final class FrontendTableConventionTest extends TestCase {
 		self::assertStringNotContainsString( 'Im Forum öffnen', $source );
 	}
 
+	public function test_invite_link_table_avoids_wrapping_and_omits_usage_column(): void {
+		$source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Interface/InvitationsView.php' );
+		$styles = (string) file_get_contents( dirname( __DIR__ ) . '/assets/afspaces.css' );
+
+		self::assertStringContainsString( 'afspaces-invite-links-table', $source );
+		self::assertStringNotContainsString( "__( 'Nutzungen', 'afspaces' )", $source );
+		self::assertStringContainsString( '.afspaces-invite-links-table th', $styles );
+		self::assertStringContainsString( 'white-space: nowrap;', $styles );
+		self::assertStringContainsString( 'flex-direction: column;', $styles );
+	}
+
 	public function test_legacy_escaped_quotes_are_normalized_without_dropping_normal_backslashes(): void {
 		$adapter = (new \ReflectionClass( AsgarosAdapter::class ))->newInstanceWithoutConstructor();
 		$method  = new \ReflectionMethod( AsgarosAdapter::class, 'normalize_topic_title' );

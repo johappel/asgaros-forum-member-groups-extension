@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Einladungslink-Tabelle im Frontend verbessert: Nutzungs-Spalte entfernt,
+  Umbrüche in den verbleibenden Inhalten verhindert und die Aktionen kompakt
+  untereinander angeordnet.
+- Plugin-Version auf 0.4.32 angehoben.
+
 - AFSpaces-Frontendtabellen auf die gemeinsame `.afspaces-table`-,
   `.afspaces-table__actions`- und `.afspaces-badge`-Konvention umgestellt.
   Die Moderationsansicht zeigt jetzt ausschließlich nutzbare Aktionen,
