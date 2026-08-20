@@ -70,6 +70,24 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		}
 
 		/**
+		 * Prüft, ob ein zusätzliches Forum aus der Moderationsansicht gelöscht
+		 * werden darf.
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @param int $forum_id      Forum-ID.
+		 * @return bool
+		 */
+		public function can_delete_forum( int $space_id, int $actor_user_id, int $forum_id ): bool {
+			$space = $this->spaces->get_space( $space_id );
+			return null !== $space
+				&& $this->policy->can_moderate( $space_id, $actor_user_id )
+				&& $forum_id > 0
+				&& $forum_id !== $space->forum_id
+				&& in_array( $forum_id, $this->forum_ids_for_space( $space ), true );
+		}
+
+		/**
 		 * Listet die Themen des Space-Forums für die Moderation.
 		 *
 		 * @param int                 $space_id      Space-ID.
@@ -170,6 +188,33 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 
 			$this->audit->log( $space_id, $actor_user_id, $forum_id, 'forum_created', 'forum' );
 			return $forum_id;
+		}
+
+		/**
+		 * Löscht ein zusätzliches, dem eigenen Space zugeordnetes Forum inklusive
+		 * seiner Asgaros-Themen und Beiträge.
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @param int $forum_id      Forum-ID.
+		 * @return void
+		 * @throws DomainException Bei fehlender Berechtigung oder Primärforum.
+		 */
+		public function delete_forum( int $space_id, int $actor_user_id, int $forum_id ): void {
+			$space = $this->require_moderatable_space( $space_id, $actor_user_id );
+			if ( $forum_id === $space->forum_id ) {
+				throw new DomainException( __( 'Das Primärforum kann hier nicht gelöscht werden. Lösche dafür die gesamte Arbeitsgruppe über ihre Verwaltung.', 'afspaces' ) );
+			}
+			if ( ! in_array( $forum_id, $this->forum_ids_for_space( $space ), true ) ) {
+				throw new DomainException( __( 'Dieses Forum gehört nicht zu deiner Arbeitsgruppe.', 'afspaces' ) );
+			}
+			if ( ! $this->asgaros->get_forum( $forum_id ) ) {
+				throw new DomainException( __( 'Das Forum wurde nicht gefunden oder bereits gelöscht.', 'afspaces' ) );
+			}
+
+			$this->asgaros->delete_forum( $forum_id );
+			$this->spaces->remove_forum_from_space( $space_id, $forum_id );
+			$this->audit->log( $space_id, $actor_user_id, $forum_id, 'forum_deleted', 'forum' );
 		}
 
 		/**

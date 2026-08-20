@@ -237,6 +237,24 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 		}
 
 		/**
+		 * Entfernt eine zusätzliche Forum-Zuordnung aus einem Space.
+		 * Das Primärforum wird absichtlich nicht über diese Methode entfernt.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $forum_id Forum-ID.
+		 * @return void
+		 */
+		public function remove_forum_from_space( int $space_id, int $forum_id ): void {
+			$this->db->query(
+				$this->db->prepare(
+					"DELETE FROM {$this->forums_table} WHERE space_id = %d AND forum_id = %d AND is_primary = 0;",
+					$space_id,
+					$forum_id
+				)
+			);
+		}
+
+		/**
 		 * Listet alle Spaces.
 		 *
 		 * @return Space[]

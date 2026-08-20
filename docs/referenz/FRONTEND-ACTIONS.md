@@ -97,6 +97,7 @@ Zusätzliche Topic-Aktionen:
 | `moderate_reopen_topic` | `topic_id` | Thema öffnen |
 | `moderate_delete_topic` | `topic_id` | Thema löschen |
 | `moderate_create_forum` | `forum_name`, optional `forum_description` | Zusätzliches Forum im eigenen Space anlegen |
+| `moderate_delete_forum` | `forum_id` | Zusätzliches gemapptes Forum samt Themen und Beiträgen löschen |
 | `moderate_delete_post` | `post_id` | Beitrag löschen |
 | `moderate_move_topic` | `topic_id`, `target_space_id` | Thema verschieben |
 | `moderate_move_post` | `post_id`, `target_topic_id` | Beitrag verschieben |
@@ -109,6 +110,12 @@ der Kategorie des Primärforums an, ordnet die primäre Arbeitsgruppengruppe zu
 und speichert die Space-Forum-Zuordnung. Die Nonce-, Manager- und
 Objektprüfungen bleiben serverseitig; ein fremder `space_id` kann die Prüfung
 nicht umgehen.
+
+`moderate_delete_forum` ist nur für ein zusätzliches, dem eigenen Space
+zugeordnetes Forum zulässig. Das Primärforum wird als technische Basis des
+Spaces geschützt; seine Löschung erfolgt ausschließlich über den separaten
+Arbeitsgruppen-Lifecycle. Die Aktion löscht das Asgaros-Forum inklusive seiner
+Inhalte und entfernt danach die Space-Forum-Zuordnung.
 
 ## Neue Aktion hinzufügen
 

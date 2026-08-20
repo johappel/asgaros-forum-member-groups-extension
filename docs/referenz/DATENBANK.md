@@ -41,7 +41,10 @@ Fachliche Rollenwerte sind `owner` und `manager`; dies ist keine WordPress-Rolle
 Die Tabelle bildet ein Forum eindeutig auf genau eine Arbeitsgruppe ab. Beim
 Upgrade werden die bisherigen `afspaces_spaces.forum_id`-Werte als
 Primärzuordnungen übernommen. Zusätzliche Foren werden in derselben
-Arbeitsgruppe gespeichert; Asgaros-Daten bleiben davon unabhängig.
+Arbeitsgruppe gespeichert. Beim Löschen eines zusätzlichen Forums entfernt
+`SpaceModerationService::delete_forum()` zuerst das zugehörige Asgaros-Forum
+inklusive seiner Inhalte und danach diese Zuordnung. Die Primärzuordnung kann
+über diesen Moderationspfad nicht gelöscht werden.
 
 ## `afspaces_space_meta` — `SpaceMetaRepository::install()`
 

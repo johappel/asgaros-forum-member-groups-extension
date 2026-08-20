@@ -36,6 +36,9 @@ zusätzlich erforderlich.
 - Schließen, Wiederöffnen, Löschen sowie die bestehende lokale Pin-/Löse-Logik
   laufen über `SpaceModerationService` und bleiben auf die der Arbeitsgruppe
   zugeordneten Foren und Themen begrenzt.
+- Die Moderationsansicht listet alle zugeordneten Foren. Zusätzliche Foren
+  können dort nach ausdrücklicher Bestätigung samt ihren Themen und Beiträgen
+  gelöscht werden; das Primärforum bleibt geschützt.
 - Die globale Option
   `afspaces_group_managers_can_create_forums` ist standardmäßig `false`.
   Bei Aktivierung können Verantwortliche zusätzliche Foren nur in der eigenen

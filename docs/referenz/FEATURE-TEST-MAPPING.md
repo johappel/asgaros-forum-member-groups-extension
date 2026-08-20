@@ -43,7 +43,7 @@ Issue #15 (Topic pinnen/lösen) ist durch `SpaceModerationServiceTest` abgedeckt
 | --- | --- | --- |
 | Space-Erstellung mit Transaktions-Rollback | `Application/SpaceCreationService.php` | `tests/SpaceCreationServiceTest.php` |
 | Moderation (Schließen, Löschen, Verschieben) | `Application/SpaceModerationService.php` | `tests/SpaceModerationServiceTest.php` |
-| Lokale Topic-Moderation und zusätzliche Space-Foren | `Application/SpaceModerationService.php`, `Interface/ModerationView.php` | `tests/SpaceModerationServiceTest.php`, `tests/AFSpacesSettingsPageTest.php`, `tests/InstallationSettingsTest.php` |
+| Lokale Topic-Moderation, zusätzliche Space-Foren und Forum-Löschung | `Application/SpaceModerationService.php`, `Interface/ModerationView.php` | `tests/SpaceModerationServiceTest.php`, `tests/AFSpacesSettingsPageTest.php`, `tests/InstallationSettingsTest.php` |
 | Bestehende Asgaros-Foren als Spaces registrieren | `Application/SpaceRegistrationService.php` | `tests/SpaceRegistrationServiceTest.php` |
 | Mitglieder hinzufügen/entfernen, Manager zuweisen | `Application/MemberService.php` | `tests/Integration/MemberManagementTest.php` |
 | Arbeitsgruppen-Metadaten speichern/validieren | `Application/WorkingGroupService.php` | `tests/Integration/WorkingGroupMetaFlowTest.php` |

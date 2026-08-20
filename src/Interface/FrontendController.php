@@ -437,6 +437,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$description = isset( $_POST['forum_description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['forum_description'] ) ) : '';
 					$this->space_moderation->create_forum( $space_id, $actor, $name, $description );
 					$this->set_message( 'success', __( 'Das zusätzliche Forum wurde angelegt.', 'afspaces' ) );
+				} elseif ( 'moderate_delete_forum' === $action ) {
+					$forum_id = isset( $_POST['forum_id'] ) ? (int) $_POST['forum_id'] : 0;
+					$this->space_moderation->delete_forum( $space_id, $actor, $forum_id );
+					$this->set_message( 'success', __( 'Das Forum und seine Inhalte wurden gelöscht.', 'afspaces' ) );
 				} elseif ( 'moderate_delete_post' === $action ) {
 					$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 					$this->space_moderation->delete_post( $space_id, $actor, $post_id );
@@ -495,7 +499,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				exit;
 			}
 
-			if ( in_array( $action, array( 'moderate_close_topic', 'moderate_reopen_topic', 'moderate_pin_topic', 'moderate_unpin_topic', 'moderate_delete_topic', 'moderate_create_forum', 'moderate_delete_post', 'moderate_move_topic', 'moderate_move_post' ), true ) ) {
+			if ( in_array( $action, array( 'moderate_close_topic', 'moderate_reopen_topic', 'moderate_pin_topic', 'moderate_unpin_topic', 'moderate_delete_topic', 'moderate_create_forum', 'moderate_delete_forum', 'moderate_delete_post', 'moderate_move_topic', 'moderate_move_post' ), true ) ) {
 				// Wurde die Aktion aus dem Forum ausgelöst, kehren wir dorthin zurück.
 				$default = SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id ) );
 				$return  = isset( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : '';

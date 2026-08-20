@@ -57,6 +57,15 @@ final class StubModerationRepository extends SpaceRepository {
 	public function add_forum_to_space( int $space_id, int $forum_id, bool $is_primary = false ): void {
 		$this->forum_ids[ $space_id ][] = $forum_id;
 	}
+
+	public function remove_forum_from_space( int $space_id, int $forum_id ): void {
+		$this->forum_ids[ $space_id ] = array_values(
+			array_filter(
+				$this->forum_ids[ $space_id ] ?? array(),
+				static fn ( int $mapped_forum_id ): bool => $mapped_forum_id !== $forum_id
+			)
+		);
+	}
 }
 
 final class StubModerationAudit extends AuditRepository {
@@ -112,7 +121,7 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 	public function assign_group_to_forum( int $forum_id, int $group_id ): void { $this->calls[] = 'assign_group_to_forum:' . $forum_id . ':' . $group_id; }
 	public function set_forum_visibility( int $forum_id, array $data ): void {}
 	public function update_forum( int $forum_id, array $data ): void {}
-	public function delete_forum( int $forum_id ): void {}
+	public function delete_forum( int $forum_id ): void { $this->calls[] = 'delete_forum:' . $forum_id; }
 	public function delete_forum_category( int $category_id ): void {}
 	public function delete_group( int $group_id ): void {}
 
@@ -222,6 +231,38 @@ final class SpaceModerationServiceTest extends TestCase {
 
 		$this->expectException( DomainException::class );
 		$this->service->create_forum( 10, 8, 'Fremdes Forum' );
+	}
+
+	public function test_manager_can_delete_additional_own_forum(): void {
+		$this->repo->forum_ids[10] = array( 500, 800 );
+
+		$this->service->delete_forum( 10, 7, 800 );
+
+		$this->assertContains( 'delete_forum:800', $this->adapter->calls );
+		$this->assertSame( array( 500 ), $this->repo->forum_ids[10] );
+		$this->assertSame( 'forum_deleted', $this->audit->entries[0]['action'] );
+		$this->assertSame( 'forum', $this->audit->entries[0]['object_type'] );
+	}
+
+	public function test_primary_forum_cannot_be_deleted_in_moderation(): void {
+		$this->repo->forum_ids[10] = array( 500, 800 );
+		$this->expectException( DomainException::class );
+
+		$this->service->delete_forum( 10, 7, 500 );
+	}
+
+	public function test_unmapped_forum_cannot_be_deleted(): void {
+		$this->repo->forum_ids[10] = array( 500, 800 );
+		$this->expectException( DomainException::class );
+
+		$this->service->delete_forum( 10, 7, 999 );
+	}
+
+	public function test_normal_user_cannot_delete_additional_forum(): void {
+		$this->repo->forum_ids[10] = array( 500, 800 );
+		$this->expectException( DomainException::class );
+
+		$this->service->delete_forum( 10, 42, 800 );
 	}
 
 	public function test_additional_space_forum_is_accepted_for_topic_moderation(): void {

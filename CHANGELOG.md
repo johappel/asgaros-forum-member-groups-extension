@@ -8,9 +8,11 @@
 - Zusätzliche Foren können über die globale Option
   `afspaces_group_managers_can_create_forums` ausschließlich im eigenen Space
   angelegt und über ein dauerhaftes Space-Forum-Mapping abgesichert werden.
+  Die Moderationsansicht kann zusätzliche Foren nach Bestätigung samt allen
+  Themen und Beiträgen löschen; das Primärforum bleibt geschützt.
 - Der Settings-Tab „Installation“ heißt jetzt „Extras“; der alte Tab-Parameter
   und die Legacy-Seite bleiben rückwärtskompatibel.
-- Plugin-Version auf 0.4.29 angehoben.
+- Plugin-Version auf 0.4.30 angehoben.
 
 - Issue #9 nach dem lokalen visuellen Abgleich korrigiert: „Forum abonnieren“
   und „Thema abonnieren“ werden innerhalb des vorhandenen Asgaros-Containers

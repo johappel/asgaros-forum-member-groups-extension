@@ -283,7 +283,8 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		public function update_forum( int $forum_id, array $data ): void;
 
 		/**
-		 * Löscht ein Asgaros-Forum (für Rollback und endgültige Löschung).
+		 * Löscht ein Asgaros-Forum inklusive seiner Themen und Beiträge
+		 * (für Rollback und endgültige Löschung).
 		 *
 		 * @param int $forum_id Forum-ID.
 		 * @return void

@@ -72,7 +72,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 			<section class="afspaces-moderation" aria-labelledby="afspaces-moderation-heading">
 				<!-- <h2 id="afspaces-moderation-heading"><?php echo esc_html__( 'Moderation der Themen meiner Arbeitsgruppe', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier moderierst du ausschließlich die Themen deines eigenen Forums. Du kannst Themen oben halten, schließen, wieder öffnen oder löschen. Diese Rechte gelten nur für dieses Forum und geben keine globalen Asgaros-Moderatorrechte.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier moderierst du ausschließlich die Themen der Foren deiner eigenen Arbeitsgruppe. Du kannst Themen oben halten, schließen, wieder öffnen oder löschen. Diese Rechte gelten nur für diese Arbeitsgruppe und geben keine globalen Asgaros-Moderatorrechte.', 'afspaces' ); ?></p>
+				<?php echo $this->render_forum_management( $space_id, (int) $space->forum_id, $actor ); ?>
 				<?php if ( $can_create_forum ) : ?>
 					<details class="afspaces-create-forum">
 						<summary class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( '+ Forum erstellen', 'afspaces' ); ?></summary>
@@ -194,6 +195,67 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 
 					<?php echo $this->render_pagination( $space_id, $page, $total, 20 ); ?>
 				<?php endif; ?>
+			</section>
+			<?php
+			return (string) ob_get_clean();
+		}
+
+		/**
+		 * Rendert die Verwaltung der diesem Space zugeordneten Foren.
+		 *
+		 * Das Primärforum bleibt als technische Basis des Spaces erhalten. Nur
+		 * zusätzliche, tatsächlich gemappte Foren erhalten die Löschaktion.
+		 *
+		 * @param int $space_id   Space-ID.
+		 * @param int $primary_id Primärforum-ID.
+		 * @param int $actor      Akteur.
+		 * @return string
+		 */
+		private function render_forum_management( int $space_id, int $primary_id, int $actor ): string {
+			$forum_ids = $this->spaces->list_forum_ids( $space_id );
+			if ( empty( $forum_ids ) && $primary_id > 0 ) {
+				$forum_ids = array( $primary_id );
+			}
+
+			$forum_ids = array_values( array_unique( array_filter( array_map( 'intval', $forum_ids ) ) ) );
+			if ( empty( $forum_ids ) ) {
+				return '';
+			}
+
+			ob_start();
+			?>
+			<section class="afspaces-forum-management" aria-labelledby="afspaces-forum-management-heading">
+				<h2 id="afspaces-forum-management-heading"><?php echo esc_html__( 'Forumverwaltung', 'afspaces' ); ?></h2>
+				<p><?php echo esc_html__( 'Hier siehst du alle Foren dieser Arbeitsgruppe. Das Primärforum kann nicht einzeln gelöscht werden. Beim Löschen eines zusätzlichen Forums werden auch alle darin enthaltenen Themen und Beiträge entfernt.', 'afspaces' ); ?></p>
+				<ul class="afspaces-forum-management-list">
+					<?php foreach ( $forum_ids as $forum_id ) : ?>
+						<?php
+						$forum      = $this->asgaros->get_forum( $forum_id );
+						$forum_name = (string) ( $forum['name'] ?? sprintf( __( 'Forum #%d', 'afspaces' ), $forum_id ) );
+						$is_primary = $forum_id === $primary_id;
+						$can_delete = null !== $forum && ! $is_primary && $this->moderation->can_delete_forum( $space_id, $actor, $forum_id );
+						?>
+						<li class="afspaces-forum-management-item">
+							<div>
+								<strong><?php echo esc_html( $forum_name ); ?></strong>
+								<?php if ( $is_primary ) : ?>
+									<span class="afspaces-tag"><?php echo esc_html__( 'Primärforum', 'afspaces' ); ?></span>
+								<?php endif; ?>
+							</div>
+							<?php if ( $is_primary ) : ?>
+								<span class="afspaces-forum-management-note"><?php echo esc_html__( 'Das Primärforum kann hier nicht gelöscht werden.', 'afspaces' ); ?></span>
+							<?php elseif ( $can_delete ) : ?>
+								<form method="post">
+									<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+									<input type="hidden" name="afspaces_action" value="moderate_delete_forum" />
+									<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+									<input type="hidden" name="forum_id" value="<?php echo esc_attr( (string) $forum_id ); ?>" />
+									<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr__( 'Dieses Forum wirklich vollständig löschen? Alle Themen und Beiträge darin werden unwiderruflich entfernt.', 'afspaces' ); ?>"><?php echo esc_html__( 'Forum löschen', 'afspaces' ); ?></button>
+								</form>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
 			</section>
 			<?php
 			return (string) ob_get_clean();

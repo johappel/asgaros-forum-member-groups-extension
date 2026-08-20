@@ -1273,11 +1273,36 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 		 * {@inheritDoc}
 		 */
 		public function delete_forum( int $forum_id ): void {
+			$this->assert_writable();
+
 			$forum = $this->forum();
 			if ( null === $forum || $forum_id < 1 ) {
 				return;
 			}
-			$forum->db->delete( $forum->tables->forums, array( 'id' => $forum_id ), array( '%d' ) );
+
+			// Asgaros 3.4.0 has no cascade from forums to topics/posts. Delete
+			// dependent rows first so a forum deletion cannot leave orphaned
+			// content behind.
+			$posts_deleted = $forum->db->query(
+				$forum->db->prepare(
+					"DELETE FROM {$forum->tables->posts} WHERE forum_id = %d;",
+					$forum_id
+				)
+			);
+			$topics_deleted = $forum->db->query(
+				$forum->db->prepare(
+					"DELETE FROM {$forum->tables->topics} WHERE parent_id = %d;",
+					$forum_id
+				)
+			);
+			if ( false === $posts_deleted || false === $topics_deleted ) {
+				throw new DomainException( __( 'Die Inhalte des Forums konnten nicht vollständig gelöscht werden.', 'afspaces' ) );
+			}
+
+			$forum_deleted = $forum->db->delete( $forum->tables->forums, array( 'id' => $forum_id ), array( '%d' ) );
+			if ( false === $forum_deleted ) {
+				throw new DomainException( __( 'Das Forum konnte nicht gelöscht werden.', 'afspaces' ) );
+			}
 		}
 
 		/**

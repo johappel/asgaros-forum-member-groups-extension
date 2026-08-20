@@ -262,6 +262,13 @@ dargestellt. Status-Badges verwenden zusätzlich immer ihren sichtbaren Text; Fa
 nicht der alleinige Informationsträger. Die serverseitigen Formulare, Nonces und
 Berechtigungsprüfungen bleiben unverändert.
 
+Die Moderationsansicht gruppiert die zugeordneten Foren in
+`.afspaces-forum-management`. Das Primärforum erhält einen sichtbaren
+`Primärforum`-Hinweis ohne Löschaktion; zusätzliche Foren zeigen bei vorhandener
+Space-Berechtigung ein serverseitiges Löschformular mit
+`data-afspaces-confirm`. Die Liste bleibt ohne JavaScript bedienbar und kann
+auf schmalen Viewports umbrechen.
+
 ## Layout ändern
 
 1. Globale Optik über `AppearanceSettingsPage`/Option erweitern, nicht über verstreute Inline-Styles.

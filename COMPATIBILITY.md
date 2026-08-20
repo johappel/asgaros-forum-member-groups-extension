@@ -81,7 +81,8 @@ steuert das optionale vollständige Cleanup und die Einstellung
 `afspaces_group_managers_can_create_forums`; beide Defaults sind AUS.
 
 Die lokale Moderation nutzt gegen Asgaros 3.4.0 die geprüften Adapterpfade
-`AsgarosForum::delete_topic()`, `AsgarosForum::content->insert_forum()` und
+`AsgarosForum::delete_topic()`, die direkten Tabellen `posts`, `topics` und
+`forums` für die vollständige Forenlöschung, `AsgarosForum::content->insert_forum()` und
 `AsgarosForumUserGroups::insertUserGroupsOfForumCategory()`. Die Aufrufe
 bleiben ausschließlich in `AsgarosAdapter`; die vorherige
 `SpacePolicy`-/Objektprüfung wird nicht durch native globale
@@ -149,8 +150,9 @@ Die Raumgründung nutzt folgende interne Asgaros-Funktionen (Quellcode geprüft 
   `asgarosforum_filter_user_groups_taxonomy_name` aufgelöst. Fehlt der Term, degradieren
   Adapter und Registrierungsansicht defensiv.
 - Löschung: `wp_delete_term($group_id, $usergroup_taxonomy)`,
-  `wp_delete_term($category_id, 'asgarosforum-category')` und direktes Löschen der
-  Forum-Zeile aus `tables->forums`.
+  `wp_delete_term($category_id, 'asgarosforum-category')` und beim Löschen eines
+  zusätzlichen Forums das direkte Löschen der zugehörigen Zeilen aus
+  `tables->posts`, `tables->topics` und `tables->forums`.
 
 ### Zugriffsmodell und Isolationsentscheidung
 

@@ -109,7 +109,7 @@ Alle Methoden schreiben über Asgaros-interne APIs und werfen bei fehlender Komp
 | `assign_group_to_forum(int $forum_id, int $group_id)` | keine Array-Parameter | ordnet die Gruppe der Forum-Kategorie zu; erhält bestehende Gruppen |
 | `set_forum_visibility(int $forum_id, array $data)` | `access` `everyone|loggedin|moderator`, Default `loggedin`; `restrict` bool, Default false; `group_id` int optional | `void`; setzt Kategorie-Zugriff und Gruppenrestriktion |
 | `update_forum(int $forum_id, array $data)` | beliebige Teilmenge aus `name` string, `description` string, `forum_status` string | `void`; leeres Array ist No-op |
-| `delete_forum(int $forum_id)` | — | `void`; Rollback-/Cleanup-Hilfe |
+| `delete_forum(int $forum_id)` | — | `void`; löscht Forum sowie zugehörige Themen und Beiträge; Rollback-/Cleanup-Hilfe |
 | `delete_forum_category(int $category_id)` | — | `void`; löscht den Asgaros-Term |
 | `delete_group(int $group_id)` | — | `void`; löscht die Asgaros-Gruppe |
 
