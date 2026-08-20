@@ -140,6 +140,12 @@ und `set_topic_pinned(int $topic_id, bool $pinned): void`.
 | `list_topic_posts(int $topic_id, array $args = [])` | Args `page`, `per_page`; `array{posts:array<int,array<string,mixed>>,total:int}` |
 | `move_post(int $post_id, int $target_topic_id, int $target_forum_id)` | `void` |
 
+`list_forum_topics()` normalisiert an der Adaptergrenze legacy-escaped
+Topic-Titel, bei denen ein Backslash direkt vor einem Anführungszeichen
+gespeichert wurde. Die Frontend-Views escapen den normalisierten Titel danach
+weiterhin mit `esc_html()`; dadurch werden weder Backslashes doppelt angezeigt
+noch HTML-Tags ausführbar.
+
 ### Pinstatus gegen Asgaros 3.4.0
 
 Asgaros speichert den lokalen Sticky-Status in `{$forum->tables->topics}.sticky`.

@@ -120,26 +120,28 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 					<?php if ( empty( $link_list ) ) : ?>
 						<p><?php echo esc_html__( 'Es sind noch keine Einladungslinks vorhanden.', 'afspaces' ); ?></p>
 					<?php else : ?>
-						<table class="afspaces-member-table afspaces-invitations-table afspaces-invite-links-table">
+						<div class="afspaces-table-wrap">
+						<table class="afspaces-table afspaces-table--responsive afspaces-member-table afspaces-invitations-table afspaces-invite-links-table">
 							<thead>
 								<tr>
-									<th><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
-									<th><?php echo esc_html__( 'Freigabe', 'afspaces' ); ?></th>
-									<th><?php echo esc_html__( 'Nutzungen', 'afspaces' ); ?></th>
-									<th><?php echo esc_html__( 'Ablauf', 'afspaces' ); ?></th>
-									<th><?php echo esc_html__( 'Registrierung', 'afspaces' ); ?></th>
-									<th><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
+									<th scope="col"><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
+									<th scope="col"><?php echo esc_html__( 'Freigabe', 'afspaces' ); ?></th>
+									<th scope="col"><?php echo esc_html__( 'Nutzungen', 'afspaces' ); ?></th>
+									<th scope="col"><?php echo esc_html__( 'Ablauf', 'afspaces' ); ?></th>
+									<th scope="col"><?php echo esc_html__( 'Registrierung', 'afspaces' ); ?></th>
+									<th scope="col"><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php foreach ( $link_list as $link ) : ?>
 									<tr>
-										<td><?php echo esc_html( $link->effective_status() ); ?></td>
+										<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( $link->effective_status() ); ?></span></td>
 										<td><?php echo esc_html( 'approval_required' === $link->approval_mode ? __( 'Manuelle Freigabe', 'afspaces' ) : __( 'Automatisch', 'afspaces' ) ); ?></td>
 										<td><?php echo esc_html( 0 === $link->max_uses ? __( 'unbegrenzt', 'afspaces' ) : sprintf( '%1$d / %2$d', $link->use_count, $link->max_uses ) ); ?></td>
 										<td><?php echo esc_html( $link->expires_at ); ?></td>
 										<td><?php echo esc_html( $link->allows_registration() ? __( 'Ja', 'afspaces' ) : __( 'Nein', 'afspaces' ) ); ?></td>
 										<td>
+											<div class="afspaces-table__actions">
 											<?php if ( 'active' === $link->effective_status() ) : ?>
 												<form method="post" class="afspaces-inline-form">
 													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
@@ -162,11 +164,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 											<?php else : ?>
 												<span><?php echo esc_html__( 'Keine Aktion', 'afspaces' ); ?></span>
 											<?php endif; ?>
+											</div>
 										</td>
 									</tr>
 								<?php endforeach; ?>
 							</tbody>
 						</table>
+						</div>
 					<?php endif; ?>
 				</section>
 
@@ -231,14 +235,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 				<?php if ( empty( $list ) ) : ?>
 					<p><?php echo esc_html__( 'Keine Einladungen vorhanden.', 'afspaces' ); ?></p>
 				<?php else : ?>
-					<table class="afspaces-member-table afspaces-invitations-table">
+					<div class="afspaces-table-wrap">
+					<table class="afspaces-table afspaces-table--responsive afspaces-member-table afspaces-invitations-table">
 						<thead>
 							<tr>
-								<th><?php echo esc_html__( 'Person', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Ablauf', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Nachricht', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Person', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Ablauf', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Nachricht', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -246,10 +251,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 								<?php $user_exists = $this->identity->user_exists( (int) $inv->invitee_user_id ); ?>
 								<tr>
 									<td><?php echo esc_html( $user_exists ? $this->identity->get_display_name( $inv->invitee_user_id ) : (string) $inv->invitee_user_id ); ?></td>
-									<td><span><?php echo esc_html( $inv->effective_status() ); ?></span></td>
+									<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( $inv->effective_status() ); ?></span></td>
 									<td><?php echo esc_html( $inv->expires_at ); ?></td>
 									<td><?php echo esc_html( $inv->message ); ?></td>
 									<td>
+										<div class="afspaces-table__actions">
 										<?php if ( 'pending' === $inv->effective_status() ) : ?>
 											<form method="post" class="afspaces-inline-form">
 												<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
@@ -268,11 +274,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 										<?php else : ?>
 											<span><?php echo esc_html__( 'Keine Aktion', 'afspaces' ); ?></span>
 										<?php endif; ?>
+										</div>
 									</td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
 					</table>
+					</div>
 				<?php endif; ?>
 				</section>
 			</section>

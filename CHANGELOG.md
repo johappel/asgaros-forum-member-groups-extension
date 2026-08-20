@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- AFSpaces-Frontendtabellen auf die gemeinsame `.afspaces-table`-,
+  `.afspaces-table__actions`- und `.afspaces-badge`-Konvention umgestellt.
+  Die Moderationsansicht zeigt jetzt ausschließlich nutzbare Aktionen,
+  beschriftet die Forennavigation als „Im Forum moderieren“ und blendet die
+  Forenverwaltung ohne zusätzlichen Handlungsspielraum aus.
+- Legacy-escaped Topic-Titel werden an der Asgaros-Adaptergrenze normalisiert;
+  HTML-Escaping bleibt beim Frontend-Output erhalten.
+- Plugin-Version auf 0.4.31 angehoben.
+
 - Lokale Arbeitsgruppenmoderation erweitert: Die Moderationsansicht verlinkt
   Themen direkt ins Asgaros-Forum und bietet kontextabhängig Schließen,
   Wiederöffnen und Löschen; die Zwischenaktion „Beiträge“ entfällt.

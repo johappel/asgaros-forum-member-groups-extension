@@ -167,7 +167,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 						<p><?php echo esc_html__( 'Auf dieser Seite wurden keine Mitglieder gefunden.', 'afspaces' ); ?></p>
 					<?php endif; ?>
 				<?php else : ?>
-					<table class="afspaces-member-table">
+					<div class="afspaces-table-wrap">
+					<table class="afspaces-table afspaces-table--responsive afspaces-member-table">
 						<caption class="screen-reader-text"><?php echo esc_html__( 'Liste der Arbeitsgruppenmitglieder', 'afspaces' ); ?></caption>
 						<thead>
 							<tr>
@@ -188,15 +189,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 									<td><a href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_PROFILE, array( 'user_id' => $user_id ) ) ); ?>"><?php echo esc_html( $member['display_name'] ); ?></a></td>
 									<td>
 										<?php if ( $is_owner ) : ?>
-										<span class="afspaces-tag"><?php echo esc_html__( 'Besitzer:in', 'afspaces' ); ?></span>
+										<span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html__( 'Besitzer:in', 'afspaces' ); ?></span>
 										<?php elseif ( $is_manager ) : ?>
-											<span class="afspaces-tag"><?php echo esc_html__( 'Arbeitsgruppenverantwortlich', 'afspaces' ); ?></span>
+											<span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html__( 'Arbeitsgruppenverantwortlich', 'afspaces' ); ?></span>
 										<?php else : ?>
-											<span class="afspaces-tag"><?php echo esc_html__( 'Mitglied', 'afspaces' ); ?></span>
+											<span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html__( 'Mitglied', 'afspaces' ); ?></span>
 										<?php endif; ?>
 									</td>
 									<td>
-										<div class="afspaces-inline-form" role="group" aria-label="<?php echo esc_attr__( 'Mitgliedsaktionen', 'afspaces' ); ?>">
+										<div class="afspaces-table__actions" role="group" aria-label="<?php echo esc_attr__( 'Mitgliedsaktionen', 'afspaces' ); ?>">
 											<?php if ( ! $is_owner && ! $is_manager ) : ?>
 												<form method="post" class="afspaces-inline-form">
 													<?php echo wp_nonce_field( $this->nonce_action, '_wpnonce', true, false ); ?>
@@ -228,6 +229,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 							<?php endforeach; ?>
 						</tbody>
 					</table>
+					</div>
 
 					<?php echo $this->pagination( $space_id, $page, (int) ceil( ( $members['total'] ?? 0 ) / $per_page ), $search ); ?>
 				<?php endif; ?>

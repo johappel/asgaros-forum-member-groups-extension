@@ -73,14 +73,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 				<?php if ( empty( $requests ) ) : ?>
 					<p><?php echo esc_html__( 'Es sind derzeit keine Beitrittsanfragen vorhanden.', 'afspaces' ); ?></p>
 				<?php else : ?>
-					<table class="afspaces-member-table afspaces-invitations-table">
+					<div class="afspaces-table-wrap">
+					<table class="afspaces-table afspaces-table--responsive afspaces-member-table afspaces-invitations-table">
 						<thead>
 							<tr>
-								<th><?php echo esc_html__( 'Person', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Anfrage', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Entscheidung', 'afspaces' ); ?></th>
-								<th><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Person', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Status', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Anfrage', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Entscheidung', 'afspaces' ); ?></th>
+								<th scope="col"><?php echo esc_html__( 'Aktion', 'afspaces' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -88,10 +89,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 								<?php $requester_exists = $this->identity->user_exists( (int) $request->requester_user_id ); ?>
 								<tr>
 									<td><?php echo esc_html( $requester_exists ? $this->identity->get_display_name( $request->requester_user_id ) : (string) $request->requester_user_id ); ?></td>
-									<td><?php echo esc_html( $request->status ); ?></td>
+									<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( $request->status ); ?></span></td>
 									<td><?php echo esc_html( $request->request_message ); ?></td>
 									<td><?php echo esc_html( $request->decision_message ); ?></td>
 									<td>
+										<div class="afspaces-table__actions">
 										<?php if ( 'pending' === $request->status ) : ?>
 											<form method="post" class="afspaces-inline-form">
 												<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
@@ -118,11 +120,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 										<?php else : ?>
 											<span><?php echo esc_html__( 'Bereits entschieden', 'afspaces' ); ?></span>
 										<?php endif; ?>
+										</div>
 									</td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
 					</table>
+					</div>
 				<?php endif; ?>
 				</section>
 			</section>

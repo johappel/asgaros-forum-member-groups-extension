@@ -43,6 +43,12 @@ zusätzlich erforderlich.
   `afspaces_group_managers_can_create_forums` ist standardmäßig `false`.
   Bei Aktivierung können Verantwortliche zusätzliche Foren nur in der eigenen
   Arbeitsgruppe anlegen; globale Asgaros-Rechte werden nicht vergeben.
+- Mitglieder-, Einladungs-, Beitrittsanfragen-, Registrierungs- und
+  Moderationstabellen verwenden die gemeinsame Frontend-Konvention
+  `.afspaces-table`, `.afspaces-table__actions` und `.afspaces-badge`.
+- Die Forenverwaltung erscheint nur bei zusätzlichem Forum oder aktivierter
+  Erstellungsoption; bei ausschließlich vorhandenem Primärforum ohne diese
+  Option bleibt die Moderationsansicht auf ihre nutzbaren Funktionen reduziert.
 - `InstallationSettingsPage` bleibt der technische Klassenname, der zentrale
   Tab heißt jetzt `extras`. `tab=installation` und
   `afspaces-installation` bleiben rückwärtskompatibel.

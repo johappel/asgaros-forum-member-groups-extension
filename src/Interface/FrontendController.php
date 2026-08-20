@@ -757,7 +757,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 							<?php if ( count( array_filter( $registrable_forums, static fn ( array $forum ): bool => ! empty( $forum['is_registered'] ) ) ) === count( $registrable_forums ) ) : ?>
 								<p class="afspaces-message afspaces-message-success" role="status"><?php echo esc_html__( 'Alle geeigneten Foren sind bereits als Arbeitsgruppen registriert.', 'afspaces' ); ?></p>
 							<?php endif; ?>
-							<table class="afspaces-member-table afspaces-space-registration-table">
+							<div class="afspaces-table-wrap">
+							<table class="afspaces-table afspaces-table--responsive afspaces-member-table afspaces-space-registration-table">
 								<thead>
 									<tr>
 										<th scope="col"><?php echo esc_html__( 'Forum', 'afspaces' ); ?></th>
@@ -797,9 +798,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 												<?php endif; ?>
 											</td>
 											<td data-label="<?php echo esc_attr__( 'AFSpaces-Status', 'afspaces' ); ?>">
-												<span class="afspaces-status afspaces-status-<?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span>
+														<span class="afspaces-badge afspaces-status afspaces-status-<?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span>
 											</td>
-											<td data-label="<?php echo esc_attr__( 'Aktion', 'afspaces' ); ?>">
+										<td data-label="<?php echo esc_attr__( 'Aktion', 'afspaces' ); ?>">
+											<div class="afspaces-table__actions">
 												<?php if ( $forum['is_registered'] ) : ?>
 													<?php
 													$group_url = SpacesUrls::hub_url( SpacesUrls::VIEW_GROUP, array( 'space_id' => (int) $forum['space_id'] ) );
@@ -815,11 +817,13 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 														<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Als Arbeitsgruppe registrieren', 'afspaces' ); ?></button>
 													</form>
 												<?php endif; ?>
-											</td>
+											</div>
+										</td>
 										</tr>
 									<?php endforeach; ?>
 								</tbody>
 							</table>
+							</div>
 						<?php endif; ?>
 					</section>
 				<?php endif; ?>

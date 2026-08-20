@@ -1375,7 +1375,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				$author_id = (int) ( $row['author_id'] ?? 0 );
 				$topics_out[] = array(
 					'id'          => (int) ( $row['id'] ?? 0 ),
-					'name'        => (string) ( $row['name'] ?? '' ),
+					'name'        => $this->normalize_topic_title( (string) ( $row['name'] ?? '' ) ),
 					'closed'      => 1 === (int) ( $row['closed'] ?? 0 ),
 					'sticky'      => (int) ( $row['sticky'] ?? 0 ) > 0,
 					'approved'    => 1 === (int) ( $row['approved'] ?? 1 ),
@@ -1391,6 +1391,22 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				'topics' => $topics_out,
 				'total'  => $total,
 			);
+		}
+
+		/**
+		 * Normalisiert legacy-escaped Topic-Titel an der Asgaros-Datengrenze.
+		 *
+		 * Die Ausgabe bleibt anschließend ausschließlich für HTML zuständig;
+		 * insbesondere werden hier keine HTML-Tags zugelassen oder erzeugt.
+		 * Gewöhnliche Backslashes bleiben erhalten, nur vorangehende Anführungs-
+		 * zeichen werden aus doppelt escaped gespeicherten Titeln entfernt.
+		 *
+		 * @param string $title Rohwert aus der Topics-Tabelle.
+		 * @return string
+		 */
+		private function normalize_topic_title( string $title ): string {
+			$normalized = preg_replace( '/\\\\(["\'])/', '$1', $title );
+			return is_string( $normalized ) ? $normalized : $title;
 		}
 
 		/**

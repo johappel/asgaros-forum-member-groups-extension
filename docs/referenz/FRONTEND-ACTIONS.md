@@ -94,7 +94,7 @@ Zusätzliche Topic-Aktionen:
 | `afspaces_action` | Felder | Effekt |
 | --- | --- | --- |
 | `moderate_close_topic` | `topic_id` | Thema schließen |
-| `moderate_reopen_topic` | `topic_id` | Thema öffnen |
+| `moderate_reopen_topic` | `topic_id` | Thema wieder öffnen |
 | `moderate_delete_topic` | `topic_id` | Thema löschen |
 | `moderate_create_forum` | `forum_name`, optional `forum_description` | Zusätzliches Forum im eigenen Space anlegen |
 | `moderate_delete_forum` | `forum_id` | Zusätzliches gemapptes Forum samt Themen und Beiträgen löschen |

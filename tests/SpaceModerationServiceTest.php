@@ -203,6 +203,11 @@ final class SpaceModerationServiceTest extends TestCase {
 		$this->assertContains( 'close:99', $this->adapter->calls );
 	}
 
+	public function test_manager_can_reopen_own_topic(): void {
+		$this->service->reopen_topic( 10, 7, 99 );
+		$this->assertContains( 'open:99', $this->adapter->calls );
+	}
+
 	public function test_admin_can_delete_own_topic(): void {
 		$this->service->delete_topic( 10, 1, 99 );
 		$this->assertContains( 'delete_topic:99', $this->adapter->calls );

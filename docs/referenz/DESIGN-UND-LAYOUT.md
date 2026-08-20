@@ -248,6 +248,22 @@ Verbindliche Regeln in [ACCESSIBILITY.md](../../ACCESSIBILITY.md). Für Layoutar
 - Bestätigungen nicht nur als Toast; destruktive Aktionen mit expliziter Bestätigung (`data-afspaces-confirm`).
 - Keine unbeschrifteten Icon-Buttons.
 
+### Gemeinsame AFSpaces-Frontendtabellen
+
+Alle Verwaltungs- und Registrierungstabellen im Frontend verwenden die
+gemeinsame Basis `.afspaces-table`. Für kontrolliertes Verhalten auf schmalen
+Viewports liegt die Tabelle in `.afspaces-table-wrap` und erhält zusätzlich
+`.afspaces-table--responsive`. Aktionszellen und ihre Formulare werden mit
+`.afspaces-table__actions` gruppiert; Statusanzeigen verwenden `.afspaces-badge`
+mit den Varianten `--success`, `--warning` oder `--neutral`.
+
+Die Tabellen bleiben echte Tabellen mit `thead`, `tbody` und `scope` an den
+Spaltenüberschriften. View-spezifische Klassen dürfen nur Inhalte oder kleine
+Sonderfälle ergänzen; eigene Rahmen-, Kopf-, Padding- oder Aktionsgrundregeln
+für einzelne Tabellen sind nicht vorgesehen. Auf schmalen Bildschirmen wird
+die gemeinsame Tabelle innerhalb ihres Wrappers horizontal scrollbar, damit
+semantische Spalten und Tastaturbedienung erhalten bleiben.
+
 ## Registrierung bestehender Foren
 
 Die Ansicht `FrontendController::render_dashboard()` führt Administrator:innen bei der
@@ -263,11 +279,12 @@ nicht der alleinige Informationsträger. Die serverseitigen Formulare, Nonces un
 Berechtigungsprüfungen bleiben unverändert.
 
 Die Moderationsansicht gruppiert die zugeordneten Foren in
-`.afspaces-forum-management`. Das Primärforum erhält einen sichtbaren
-`Primärforum`-Hinweis ohne Löschaktion; zusätzliche Foren zeigen bei vorhandener
-Space-Berechtigung ein serverseitiges Löschformular mit
-`data-afspaces-confirm`. Die Liste bleibt ohne JavaScript bedienbar und kann
-auf schmalen Viewports umbrechen.
+`.afspaces-forum-management` als gemeinsame Tabelle. Der Abschnitt wird nur
+bei zusätzlichen Foren oder aktivierter Erstellungsoption angezeigt. Das
+Primärforum erhält einen sichtbaren `Primärforum`-Badge ohne Löschaktion;
+zusätzliche Foren zeigen bei vorhandener Space-Berechtigung ein serverseitiges
+Löschformular mit `data-afspaces-confirm`. Die Liste bleibt ohne JavaScript
+bedienbar.
 
 ## Layout ändern
 
