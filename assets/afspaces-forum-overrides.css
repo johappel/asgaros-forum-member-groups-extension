@@ -23,13 +23,17 @@
 	--afspaces-forum-title-size: 1.5rem;
 
 }
-#af-wrapper {
+/* #af-wrapper {
 	font-size: initial !important;
+}*/
+#af-wrapper .topic-name{
+	line-height: 1.5rem;
 }
+
 /* Issue #16: Standardbuttons erhalten beim Hover Efabi-Orange. */
 #af-wrapper .button-normal:hover {
 	background-color: var(--afspaces-forum-button-hover) !important;
-}
+} */
 
 /* Issue #12: Forum-Metadaten bleiben lesbar, ohne Asgaros-Datumsformatierung zu ersetzen. */
 #af-wrapper .forum-post-date,
@@ -41,10 +45,21 @@
 	line-height: 1.45;
 	color: var(--afspaces-forum-metadata-color) !important;
 }
+#af-wrapper .post-message	{
+	font-size: 1rem;
+	line-height: 1.45;
+	color: var(--afspaces-color-text) !important;
+}
+/* #af-wrapper .content-container {
+	background-color: #efefef;
+} */
+#statistics-elements{
+	opacity:.5;
+}
 
-#af-wrapper #statistics .title-element {
-  background-color: var(--afspaces-forum-metadata-color)!important;
-  font-size: var(--afspaces-forum-metadata-size);
+#af-wrapper #statistics .title-element{
+  background-color:#ddd!important;
+  color: black
 }
 
 #af-wrapper .button-normal, #af-wrapper .title-element, #af-wrapper #forum-header, #af-wrapper #profile-header .background-avatar, #af-wrapper #profile-navigation, #af-wrapper input[type="radio"]:checked::before {
@@ -54,14 +69,20 @@
 	color: var(--afspaces-color-purple) !important;
 }
 
+#af-wrapper .profile-link {
+	color: var(--afspaces-color-blue) !important;
+	font-size: var(--afspaces-forum-title-size) !important;
+	font-weight: 400 !important;
+}
+
+#af-wrapper .topic-name .profile-link{
+	font-size: var(--afspaces-forum-metadata-size) !important;
+}
 
 #af-wrapper .button {
   padding: 3px 12px;
 }
-#af-wrapper .button-normal:hover, #af-wrapper .button-neutral, #af-wrapper .button:hover,#af-wrapper a:hover  {
-  background-color: var(--afspaces-color-yellow);
-  color: #000;
-}
+
 #af-wrapper .button-red {
   background: var(--afspaces-color-secondary-background);
 
@@ -100,7 +121,7 @@
   font-size: var(--afspaces-forum-metadata-size)!important;
   font-weight: 400!important;
 }
-#af-wrapper .post-author-blocks  span.af-usergroup-tag{
+/* #af-wrapper .post-author-blocks  span.af-usergroup-tag{
   border: 1px solid #dddddd!important;
   border-radius: 16px;
 }
@@ -109,11 +130,11 @@
    border: 1px solid var(--afspaces-color-blue)!important;
    padding: 1px 7px!important;
            	
-}
+} */
 #af-wrapper small, #af-wrapper .forum-poster-summary a{
   font-size: var(--afspaces-forum-metadata-size)!important	;
   font-weight: 400!important;
-}
+} 
 
 #af-wrapper .forum-post-menu.afspaces-has-mod a ,.afspaces-post-mod .afspaces-mod-item{
   font-size: var(--afspaces-forum-mod-items-size)!important;
