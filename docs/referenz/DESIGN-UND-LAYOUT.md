@@ -260,9 +260,19 @@ mit den Varianten `--success`, `--warning` oder `--neutral`.
 Die Tabellen bleiben echte Tabellen mit `thead`, `tbody` und `scope` an den
 Spaltenüberschriften. View-spezifische Klassen dürfen nur Inhalte oder kleine
 Sonderfälle ergänzen; eigene Rahmen-, Kopf-, Padding- oder Aktionsgrundregeln
-für einzelne Tabellen sind nicht vorgesehen. Auf schmalen Bildschirmen wird
+für einzelne Tabellen sind grundsätzlich nicht vorgesehen. Die nachfolgend
+dokumentierten No-Wrap-Ausnahmen dienen ausschließlich der Lesbarkeit. Auf
+schmalen Bildschirmen wird
 die gemeinsame Tabelle innerhalb ihres Wrappers horizontal scrollbar, damit
 semantische Spalten und Tastaturbedienung erhalten bleiben.
+
+Die Tabellen für Einladungslinks (`.afspaces-invite-links-table`) und
+Beitrittsanfragen (`.afspaces-join-requests-table`) verwenden ergänzende
+Breitenregeln und `white-space: nowrap`, damit Status, Nachrichten und Aktionen
+nicht in schwer lesbare Zeilen umbrechen. Der gemeinsame Wrapper ermöglicht
+dafür auf schmalen Bildschirmen horizontales Scrollen. Technische Statuswerte
+werden in der Oberfläche über `AFSpaces\\Interface\\StatusLabels` ins Deutsche
+übersetzt; Persistenz und REST-API verwenden weiterhin die technischen Werte.
 
 ## Registrierung bestehender Foren
 

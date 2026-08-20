@@ -66,7 +66,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 				<!-- <h2 id="afspaces-join-requests-heading"><?php echo esc_html__( 'Beitrittsanfragen verwalten', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier entscheidest du über offene Beitrittsanfragen für diese Arbeitsgruppe.', 'afspaces' ); ?></p>
-				<p class="description"><?php echo esc_html__( 'Diese Verantwortung umfasst Mitgliedschaften, Einladungen und Anfragen.', 'afspaces' ); ?></p>
+				<!-- <p class="description"><?php echo esc_html__( 'Diese Verantwortung umfasst Mitgliedschaften, Einladungen und Anfragen.', 'afspaces' ); ?></p> -->
 
 				<section class="afspaces-section-card content-container" aria-labelledby="afspaces-space-join-requests-heading">
 					<div id="afspaces-space-join-requests-heading" class="title-element afspaces-section-title"><?php echo esc_html__( 'Anfragen dieser Arbeitsgruppe', 'afspaces' ); ?></div>
@@ -74,7 +74,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 					<p><?php echo esc_html__( 'Es sind derzeit keine Beitrittsanfragen vorhanden.', 'afspaces' ); ?></p>
 				<?php else : ?>
 					<div class="afspaces-table-wrap">
-					<table class="afspaces-table afspaces-table--responsive afspaces-member-table afspaces-invitations-table">
+					<table class="afspaces-table afspaces-table--responsive afspaces-member-table afspaces-invitations-table afspaces-join-requests-table">
 						<thead>
 							<tr>
 								<th scope="col"><?php echo esc_html__( 'Person', 'afspaces' ); ?></th>
@@ -89,7 +89,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 								<?php $requester_exists = $this->identity->user_exists( (int) $request->requester_user_id ); ?>
 								<tr>
 									<td><?php echo esc_html( $requester_exists ? $this->identity->get_display_name( $request->requester_user_id ) : (string) $request->requester_user_id ); ?></td>
-									<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( $request->status ); ?></span></td>
+									<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( StatusLabels::join_request( $request->status ) ); ?></span></td>
 									<td><?php echo esc_html( $request->request_message ); ?></td>
 									<td><?php echo esc_html( $request->decision_message ); ?></td>
 									<td>

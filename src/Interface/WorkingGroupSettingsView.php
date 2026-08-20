@@ -350,19 +350,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupSettingsView' ) ) {
 
 		/** @param string $status Status. @return string */
 		private static function status_label( string $status ): string {
-			switch ( $status ) {
-				case SpaceLifecycle::STATUS_PENDING:
-					return __( 'Wartet auf Freigabe', 'afspaces' );
-				case SpaceLifecycle::STATUS_ARCHIVED:
-					return __( 'Archiviert', 'afspaces' );
-				case SpaceLifecycle::STATUS_REJECTED:
-					return __( 'Abgelehnt', 'afspaces' );
-				case SpaceLifecycle::STATUS_DELETED:
-					return __( 'Gelöscht', 'afspaces' );
-				case SpaceLifecycle::STATUS_ACTIVE:
-				default:
-					return __( 'Aktiv', 'afspaces' );
-			}
+			return StatusLabels::space( $status );
 		}
 
 		private function notice( string $text ): string {

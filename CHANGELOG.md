@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Beitrittsanfragen-Tabelle verbessert: Nachrichten und Aktionen bleiben ohne
+  Umbruch lesbar und die Aktionsformulare werden kompakt untereinander angeordnet.
+  Technische Statuswerte werden in allen betroffenen Frontend-Ansichten zentral
+  auf Deutsch angezeigt; technische Werte der REST-API bleiben unverändert.
+- Plugin-Version auf 0.4.33 angehoben.
+
 - Einladungslink-Tabelle im Frontend verbessert: Nutzungs-Spalte entfernt,
   Umbrüche in den verbleibenden Inhalten verhindert und die Aktionen kompakt
   untereinander angeordnet.

@@ -134,7 +134,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 							<tbody>
 								<?php foreach ( $link_list as $link ) : ?>
 									<tr>
-										<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( $link->effective_status() ); ?></span></td>
+										<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( StatusLabels::invite_link( $link->effective_status() ) ); ?></span></td>
 										<td><?php echo esc_html( 'approval_required' === $link->approval_mode ? __( 'Manuelle Freigabe', 'afspaces' ) : __( 'Automatisch', 'afspaces' ) ); ?></td>
 										<td><?php echo esc_html( $link->expires_at ); ?></td>
 										<td><?php echo esc_html( $link->allows_registration() ? __( 'Ja', 'afspaces' ) : __( 'Nein', 'afspaces' ) ); ?></td>
@@ -224,7 +224,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 					<select id="inv_status" name="inv_status">
 						<option value=""><?php echo esc_html__( 'Alle', 'afspaces' ); ?></option>
 						<?php foreach ( array( 'pending', 'accepted', 'declined', 'revoked', 'expired' ) as $status ) : ?>
-							<option value="<?php echo esc_attr( $status ); ?>" <?php selected( $status_filter, $status ); ?>><?php echo esc_html( $status ); ?></option>
+							<option value="<?php echo esc_attr( $status ); ?>" <?php selected( $status_filter, $status ); ?>><?php echo esc_html( StatusLabels::invitation( $status ) ); ?></option>
 						<?php endforeach; ?>
 					</select>
 					<button type="submit" class="afspaces-button"><?php echo esc_html__( 'Filtern', 'afspaces' ); ?></button>
@@ -249,7 +249,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 								<?php $user_exists = $this->identity->user_exists( (int) $inv->invitee_user_id ); ?>
 								<tr>
 									<td><?php echo esc_html( $user_exists ? $this->identity->get_display_name( $inv->invitee_user_id ) : (string) $inv->invitee_user_id ); ?></td>
-									<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( $inv->effective_status() ); ?></span></td>
+									<td><span class="afspaces-badge afspaces-badge--neutral"><?php echo esc_html( StatusLabels::invitation( $inv->effective_status() ) ); ?></span></td>
 									<td><?php echo esc_html( $inv->expires_at ); ?></td>
 									<td><?php echo esc_html( $inv->message ); ?></td>
 									<td>

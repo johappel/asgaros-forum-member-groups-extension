@@ -61,6 +61,18 @@ final class FrontendTableConventionTest extends TestCase {
 		self::assertStringContainsString( 'flex-direction: column;', $styles );
 	}
 
+	public function test_join_request_table_avoids_wrapping_and_uses_translated_statuses(): void {
+		$root   = dirname( __DIR__ );
+		$source = (string) file_get_contents( $root . '/src/Interface/JoinRequestsView.php' );
+		$styles = (string) file_get_contents( $root . '/assets/afspaces.css' );
+
+		self::assertStringContainsString( 'afspaces-join-requests-table', $source );
+		self::assertStringContainsString( 'StatusLabels::join_request( $request->status )', $source );
+		self::assertStringContainsString( '.afspaces-join-requests-table th', $styles );
+		self::assertStringContainsString( 'min-width: 1100px;', $styles );
+		self::assertStringContainsString( 'word-break: normal;', $styles );
+	}
+
 	public function test_legacy_escaped_quotes_are_normalized_without_dropping_normal_backslashes(): void {
 		$adapter = (new \ReflectionClass( AsgarosAdapter::class ))->newInstanceWithoutConstructor();
 		$method  = new \ReflectionMethod( AsgarosAdapter::class, 'normalize_topic_title' );

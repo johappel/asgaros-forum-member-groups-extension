@@ -85,7 +85,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 									<div class="forum-name">
 										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $inv->space_id ) ); ?></span>
 										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Absender: %s', 'afspaces' ), $sender_exists ? $this->identity->get_display_name( $inv->inviter_user_id ) : '-' ) ); ?></small>
-										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), $inv->effective_status() ) ); ?></small>
+										<small class="forum-description"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), StatusLabels::invitation( $inv->effective_status() ) ) ); ?></small>
 										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Ablauf: %s', 'afspaces' ), $inv->expires_at ) ); ?></small>
 										<?php if ( '' !== $inv->message ) : ?>
 											<small class="forum-description"><?php echo esc_html( sprintf( __( 'Nachricht: %s', 'afspaces' ), $inv->message ) ); ?></small>
@@ -132,7 +132,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 									<div class="forum-status read" aria-hidden="true"><i class="fas fa-user-clock"></i></div>
 									<div class="forum-name">
 										<span class="forum-title"><?php echo esc_html( $forum['name'] ?? sprintf( 'Arbeitsgruppe #%d', $request->space_id ) ); ?></span>
-										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), $request->status ) ); ?></small>
+										<small class="forum-stats"><?php echo esc_html( sprintf( __( 'Status: %s', 'afspaces' ), StatusLabels::join_request( $request->status ) ) ); ?></small>
 										<?php if ( '' !== $request->request_message ) : ?>
 											<small class="forum-description"><?php echo esc_html( sprintf( __( 'Deine Nachricht: %s', 'afspaces' ), $request->request_message ) ); ?></small>
 										<?php endif; ?>
