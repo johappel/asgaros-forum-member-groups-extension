@@ -65,6 +65,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 			$topics  = $result['topics'] ?? array();
 			$total   = (int) ( $result['total'] ?? 0 );
 			$targets = $this->moderation->list_move_targets( $actor, $space_id );
+			$can_create_forum = $this->moderation->can_create_forum( $space_id, $actor );
 
 			ob_start();
 			?>
@@ -72,6 +73,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 				<!-- <h2 id="afspaces-moderation-heading"><?php echo esc_html__( 'Moderation der Themen meiner Arbeitsgruppe', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier moderierst du ausschließlich die Themen deines eigenen Forums. Du kannst Themen oben halten, schließen, wieder öffnen oder löschen. Diese Rechte gelten nur für dieses Forum und geben keine globalen Asgaros-Moderatorrechte.', 'afspaces' ); ?></p>
+				<?php if ( $can_create_forum ) : ?>
+					<details class="afspaces-create-forum">
+						<summary class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( '+ Forum erstellen', 'afspaces' ); ?></summary>
+						<form method="post">
+							<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
+							<input type="hidden" name="afspaces_action" value="moderate_create_forum" />
+							<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
+							<p><label for="afspaces-new-forum-name-<?php echo esc_attr( (string) $space_id ); ?>"><?php echo esc_html__( 'Forumname', 'afspaces' ); ?></label>
+							<input required maxlength="120" type="text" id="afspaces-new-forum-name-<?php echo esc_attr( (string) $space_id ); ?>" name="forum_name" /></p>
+							<p><label for="afspaces-new-forum-description-<?php echo esc_attr( (string) $space_id ); ?>"><?php echo esc_html__( 'Beschreibung (optional)', 'afspaces' ); ?></label>
+							<textarea id="afspaces-new-forum-description-<?php echo esc_attr( (string) $space_id ); ?>" name="forum_description" rows="3"></textarea></p>
+							<button type="submit" class="afspaces-button afspaces-button-primary"><?php echo esc_html__( 'Forum erstellen', 'afspaces' ); ?></button>
+						</form>
+					</details>
+				<?php endif; ?>
 
 				<?php if ( empty( $topics ) ) : ?>
 					<p role="status"><?php echo esc_html__( 'In diesem Forum gibt es noch keine Themen.', 'afspaces' ); ?></p>
@@ -90,6 +106,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 						<tbody>
 			<?php foreach ( $topics as $topic ) : ?>
 				<?php $topic_id = (int) $topic['id']; ?>
+				<?php $topic_url = $this->topic_url( $topic_id, $topic ); ?>
 				<?php $pin_action = AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_PIN; ?>
 				<tr>
 									<th scope="row"><?php echo esc_html( (string) $topic['name'] ); ?></th>
@@ -104,6 +121,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 									</td>
 					<td>
 						<div class="afspaces-moderation-actions">
+							<a class="afspaces-button afspaces-button-primary" href="<?php echo esc_url( $topic_url ); ?>"><?php echo esc_html__( 'Im Forum öffnen', 'afspaces' ); ?></a>
 							<?php if ( $this->should_render_local_action( $pin_action, $actor, $topic_id ) ) : ?>
 							<?php if ( ! empty( $topic['sticky'] ) ) : ?>
 								<form method="post">
@@ -152,7 +170,6 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 								<button type="submit" class="afspaces-button afspaces-button-danger" data-afspaces-confirm="<?php echo esc_attr__( 'Dieses Thema mit allen Beiträgen wirklich löschen?', 'afspaces' ); ?>"><?php echo esc_html__( 'Thema löschen', 'afspaces' ); ?></button>
 							</form>
 							<?php endif; ?>
-							<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( SpacesUrls::hub_url( SpacesUrls::VIEW_MODERATION, array( 'space_id' => $space_id, 'mod_topic' => $topic_id ) ) ); ?>"><?php echo esc_html__( 'Beiträge', 'afspaces' ); ?></a>
 							<?php if ( ! empty( $targets ) && $this->should_render_local_action( AsgarosAdapterInterface::MODERATION_ACTION_TOPIC_MOVE, $actor, $topic_id ) ) : ?>
 												<form method="post" class="afspaces-moderation-move">
 													<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
@@ -313,6 +330,27 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 		 */
 		private function notice( string $text ): string {
 			return sprintf( '<p class="afspaces-notice" role="status">%s</p>', esc_html( $text ) );
+		}
+
+		/**
+		 * Baut möglichst direkt den Asgaros-Link zum Thema.
+		 *
+		 * @param int                 $topic_id Thema.
+		 * @param array<string,mixed> $topic    Topic-Daten.
+		 * @return string
+		 */
+		private function topic_url( int $topic_id, array $topic ): string {
+			$first_post_id = (int) ( $topic['first_post_id'] ?? 0 );
+			if ( $first_post_id > 0 ) {
+				$url = $this->asgaros->get_post_link( $first_post_id, $topic_id );
+				if ( '' !== $url ) {
+					return $url;
+				}
+			}
+
+			$forum = $this->asgaros->get_forum( (int) ( $topic['forum_id'] ?? 0 ) );
+			$slug = sanitize_title( (string) ( $forum['slug'] ?? '' ) );
+			return '' !== $slug ? home_url( '/forum/forum/' . $slug . '/' ) : home_url( '/forum/' );
 		}
 
 		/**

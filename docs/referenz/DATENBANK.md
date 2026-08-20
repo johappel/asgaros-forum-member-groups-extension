@@ -30,6 +30,19 @@ Es gibt bewusst keine SQL-Fremdschlüssel zu WordPress-, Asgaros- oder AFSpaces-
 
 Fachliche Rollenwerte sind `owner` und `manager`; dies ist keine WordPress-Rolle.
 
+## `afspaces_space_forums` — `SpaceRepository::install()`
+
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `space_id` | `int unsigned` | NOT NULL | PRIMARY KEY mit `forum_id`; `KEY space_id` |
+| `forum_id` | `int unsigned` | NOT NULL | PRIMARY KEY mit `space_id`; `UNIQUE KEY unique_forum_id` |
+| `is_primary` | `tinyint(1) unsigned` | NOT NULL, Default `0` | Primärforum ist `1` |
+
+Die Tabelle bildet ein Forum eindeutig auf genau eine Arbeitsgruppe ab. Beim
+Upgrade werden die bisherigen `afspaces_spaces.forum_id`-Werte als
+Primärzuordnungen übernommen. Zusätzliche Foren werden in derselben
+Arbeitsgruppe gespeichert; Asgaros-Daten bleiben davon unabhängig.
+
 ## `afspaces_space_meta` — `SpaceMetaRepository::install()`
 
 | Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
@@ -132,7 +145,7 @@ Audit-Einträge enthalten keine Tokens oder Nachrichtentexte.
 
 ## Installation, Upgrade und Löschung
 
-- `Activator::activate()` installiert alle acht Tabellen und registriert die Capabilities.
+- `Activator::activate()` installiert alle neun Tabellen und registriert die Capabilities.
 - `Plugin::maybe_upgrade()` stellt die Hub-Seite wieder her, ruft `SpaceRepository::install()` und `SearchIndexRepository::install()` erneut auf und plant den Reindex. `dbDelta()` ist dabei der vorhandene Upgrade-Mechanismus.
 - `SpaceRepository::install()` ergänzt den eindeutigen `forum_id`-Index nach der Dublettenbereinigung.
 - `Uninstaller::uninstall()` löscht Tabellen nur bei ausdrücklichem Opt-in über `afspaces_cleanup_on_uninstall`; ohne Opt-in bleiben sie bestehen.

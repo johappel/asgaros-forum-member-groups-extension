@@ -8,7 +8,7 @@ Die AFSpaces-Optionen liegen zentral als Untermenü von `Asgaros Forum` (`admin.
 - Parent-Menü: `asgarosforum-structure` (Asgaros-Seite „Struktur")
 - Seiten-Slug: `afspaces-settings`
 - URL-Muster: `admin.php?page=afspaces-settings&tab={tab}`
-- Tabs: `appearance`, `creation`, `search`, `installation`
+- Tabs: `appearance`, `creation`, `search`, `extras`
 - Standardtab: `appearance`
 - Capability: `manage_options`
 
@@ -55,16 +55,25 @@ Presets: `Asgaros-Nah`, `Neutral`, `Kontrastreich` plus Reset auf Standard.
 
 Konsumiert von `SpaceCreationPolicy` und `SpaceCreationService`.
 
-## Installation
+## Extras
 
 - Klasse: `src/Interface/InstallationSettingsPage.php`
-- Tab: `installation`
+- Tab: `extras`
 - Option: `afspaces_cleanup_on_uninstall`
+- Option: `afspaces_group_managers_can_create_forums` (`ForumManagementSettings::OPTION`)
 - Settings-Gruppe: `afspaces_installation_group`
 - Capability: `manage_options`
 - Default: `false`
 
 Das Kontrollkästchen aktiviert bewusst die vollständige Entfernung eigener AFSpaces-Tabellen, Optionen und der mit `_afspaces_managed_page=1` markierten Hub-Seite bei der Deinstallation. Asgaros-Daten werden nie entfernt. Ohne Opt-in bewahrt `Uninstaller::uninstall()` die AFSpaces-Daten.
+
+Der Bereich `Forumverwaltung` enthält den Opt-in-Schalter
+„Arbeitsgruppenverantwortliche dürfen neue Foren ihrer Arbeitsgruppe anlegen“.
+Er ist standardmäßig deaktiviert. Die Einstellung erlaubt ausschließlich
+Space-Verantwortlichen, ein weiteres Forum innerhalb des eigenen Space
+anzulegen; globale Asgaros-Moderations- oder Administrationsrechte werden
+nicht vergeben. `tab=installation` und die Legacy-Seite
+`afspaces-installation` bleiben als Alias bzw. Weiterleitung erhalten.
 
 ## Suche
 

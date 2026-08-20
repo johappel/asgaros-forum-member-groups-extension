@@ -75,7 +75,18 @@ Die eigentliche Verwaltung läuft über eine bei Aktivierung automatisch angeleg
 
 Alte Einzelseiten (`afspaces-dashboard`, `afspaces-members`, `afspaces-invitations`, `afspaces-my-invitations`) werden per 301 auf die entsprechende Hub-Unteransicht umgeleitet.
 
-Die Seiten `Einstellungen -> AFSpaces Look & Feel` und `Einstellungen -> AFSpaces Installation` nutzen ausschließlich WordPress-Settings-APIs. Die Installationsseite steuert das optionale vollständige Cleanup; der Default ist AUS.
+Die zentrale Seite `admin.php?page=afspaces-settings` nutzt ausschließlich
+die WordPress-Settings-API. Der Tab `extras` (Legacy-Alias `installation`)
+steuert das optionale vollständige Cleanup und die Einstellung
+`afspaces_group_managers_can_create_forums`; beide Defaults sind AUS.
+
+Die lokale Moderation nutzt gegen Asgaros 3.4.0 die geprüften Adapterpfade
+`AsgarosForum::delete_topic()`, `AsgarosForum::content->insert_forum()` und
+`AsgarosForumUserGroups::insertUserGroupsOfForumCategory()`. Die Aufrufe
+bleiben ausschließlich in `AsgarosAdapter`; die vorherige
+`SpacePolicy`-/Objektprüfung wird nicht durch native globale
+Asgaros-Moderatorrechte ersetzt. Bei unbekannter oder inkompatibler
+Asgaros-Version bleiben schreibende Adapterpfade defensiv gesperrt.
 
 Bei Aktivierung werden Voraussetzungen vor Tabellen- oder Seitenerstellung geprüft. AFSpaces initialisiert sich nur mit PHP 8.1+ und aktivem Asgaros Forum 3.4.0+. Die einmalige Admin-Meldung zeigt Hub-Status, erkannte Asgaros-Version und den sicheren Default der deaktivierten Selbstgründung.
 

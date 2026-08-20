@@ -178,7 +178,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 							</ul>
 							<p>
 								<a class="button button-primary" href="<?php echo esc_url( \AFSpaces\Interface\SpacesUrls::hub_url() ); ?>"><?php echo esc_html__( 'Arbeitsgruppen öffnen', 'afspaces' ); ?></a>
-								<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=afspaces-settings&tab=installation' ) ); ?>"><?php echo esc_html__( 'Einstellungen prüfen', 'afspaces' ); ?></a>
+								<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=afspaces-settings&tab=extras' ) ); ?>"><?php echo esc_html__( 'Einstellungen prüfen', 'afspaces' ); ?></a>
 							</p>
 						</div>
 						<?php

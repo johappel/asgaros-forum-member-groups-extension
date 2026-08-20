@@ -128,7 +128,7 @@ und `set_topic_pinned(int $topic_id, bool $pinned): void`.
 
 | Methode | Parameter / Rückgabe |
 | --- | --- |
-| `list_forum_topics(int $forum_id, array $args = [])` | Args `page`, `per_page`; `array{topics:array<int,array<string,mixed>>,total:int}` |
+| `list_forum_topics(int $forum_id, array $args = [])` | Args `page`, `per_page`; Topics enthalten `first_post_id` für den direkten Topic-Link |
 | `get_topic_forum(int $topic_id)` | `int` Forum-ID, `0` falls unbekannt |
 | `is_topic_pinned(int $topic_id)` | `bool`; liest den lokalen Pinstatus |
 | `set_topic_closed(int $topic_id, bool $closed)` | `void` |

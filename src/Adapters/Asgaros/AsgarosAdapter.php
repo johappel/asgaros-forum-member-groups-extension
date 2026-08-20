@@ -1332,7 +1332,8 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$rows = $db->get_results(
 				$db->prepare(
 					"SELECT t.id AS id, t.name AS name, t.closed AS closed, t.sticky AS sticky, "
-					. "t.author_id AS author_id, t.approved AS approved, "
+						. "t.author_id AS author_id, t.approved AS approved, "
+						. "(SELECT MIN(p0.id) FROM {$posts} p0 WHERE p0.parent_id = t.id) AS first_post_id, "
 					. "(SELECT COUNT(*) FROM {$posts} p WHERE p.parent_id = t.id) AS post_count, "
 					. "(SELECT MAX(p.date) FROM {$posts} p WHERE p.parent_id = t.id) AS last_date "
 					. "FROM {$topics} t WHERE t.parent_id = %d "
@@ -1353,8 +1354,9 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 					'closed'      => 1 === (int) ( $row['closed'] ?? 0 ),
 					'sticky'      => (int) ( $row['sticky'] ?? 0 ) > 0,
 					'approved'    => 1 === (int) ( $row['approved'] ?? 1 ),
-					'author_id'   => $author_id,
-					'author_name' => $author_id > 0 ? $this->identity->get_display_name( $author_id ) : '',
+						'author_id'   => $author_id,
+						'author_name' => $author_id > 0 ? $this->identity->get_display_name( $author_id ) : '',
+						'first_post_id' => (int) ( $row['first_post_id'] ?? 0 ),
 					'post_count'  => (int) ( $row['post_count'] ?? 0 ),
 					'last_date'   => (string) ( $row['last_date'] ?? '' ),
 				);

@@ -63,6 +63,7 @@ Nur die WordPress-Rolle `administrator` erhält diese Caps bei Aktivierung (`Cap
 | --- | --- | --- |
 | `afspaces_spaces` | `SpaceRepository` | `Activator::activate`, `Plugin::maybe_upgrade` |
 | `afspaces_space_managers` | `SpaceRepository` | dito |
+| `afspaces_space_forums` | `SpaceRepository` | dito |
 | `afspaces_space_meta` | `SpaceMetaRepository` | `Activator::activate` |
 | `afspaces_invitations` | `InvitationRepository` | `Activator::activate` |
 | `afspaces_invite_links` | `InviteLinkRepository` | `Activator::activate` |
@@ -79,6 +80,7 @@ Deinstallation bewahrt Tabellen und Optionen standardmäßig. Vollständiges Cle
 | `afspaces_hub_page_id` | `SpacesUrls::HUB_PAGE_OPTION` |
 | `afspaces_activation_notice` | `Activator::activate`, einmalige Admin-Einrichtungsmeldung |
 | `afspaces_cleanup_on_uninstall` | `InstallationSettingsPage::OPTION`, Opt-in für vollständiges Cleanup |
+| `afspaces_group_managers_can_create_forums` | `ForumManagementSettings::OPTION`, Opt-in für zusätzliche Space-Foren |
 | `afspaces_installed_version` | `Plugin::maybe_upgrade` |
 | `afspaces_appearance_options` | `AppearanceSettingsPage` |
 | `afspaces_creation_options` | `SpaceCreationSettings::OPTION` |

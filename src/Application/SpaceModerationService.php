@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\AuditRepository;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
+use AFSpaces\Core\ForumManagementSettings;
 use AFSpaces\Domain\Space;
 use AFSpaces\Domain\SpacePolicy;
 
@@ -57,6 +58,18 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		}
 
 		/**
+		 * Prüft die kombinierte Policy für zusätzliche Foren.
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Akteur.
+		 * @return bool
+		 */
+		public function can_create_forum( int $space_id, int $actor_user_id ): bool {
+			return ForumManagementSettings::group_managers_can_create_forums()
+				&& $this->policy->can_moderate( $space_id, $actor_user_id );
+		}
+
+		/**
 		 * Listet die Themen des Space-Forums für die Moderation.
 		 *
 		 * @param int                 $space_id      Space-ID.
@@ -67,7 +80,96 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		 */
 		public function list_topics( int $space_id, int $actor_user_id, array $args = array() ): array {
 			$space = $this->require_moderatable_space( $space_id, $actor_user_id );
-			return $this->asgaros->list_forum_topics( $space->forum_id, $args );
+			$forum_ids = $this->forum_ids_for_space( $space );
+			$all_topics = array();
+			foreach ( $forum_ids as $forum_id ) {
+				$page = 1;
+				do {
+					$result = $this->asgaros->list_forum_topics( $forum_id, array( 'page' => $page, 'per_page' => 100 ) );
+					foreach ( (array) ( $result['topics'] ?? array() ) as $topic ) {
+						$topic['forum_id'] = $forum_id;
+						$all_topics[] = $topic;
+					}
+					$total_forum = (int) ( $result['total'] ?? 0 );
+					$page++;
+				} while ( ! empty( $result['topics'] ) && count( $all_topics ) < 10000 && ( $page - 1 ) * 100 < $total_forum );
+			}
+
+			usort(
+				$all_topics,
+				static function ( array $left, array $right ): int {
+					$sticky = (int) ! empty( $right['sticky'] ) <=> (int) ! empty( $left['sticky'] );
+					if ( 0 !== $sticky ) {
+						return $sticky;
+					}
+					$date = strcmp( (string) ( $right['last_date'] ?? '' ), (string) ( $left['last_date'] ?? '' ) );
+					return 0 !== $date ? $date : ( (int) ( $right['id'] ?? 0 ) <=> (int) ( $left['id'] ?? 0 ) );
+				}
+			);
+
+			$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
+			$per_page = max( 1, min( 100, (int) ( $args['per_page'] ?? 20 ) ) );
+			return array(
+				'topics' => array_slice( $all_topics, ( $page - 1 ) * $per_page, $per_page ),
+				'total'  => count( $all_topics ),
+			);
+		}
+
+		/**
+		 * Legt ein zusätzliches Forum ausschließlich im eigenen Space an.
+		 *
+		 * @param int    $space_id      Space-ID.
+		 * @param int    $actor_user_id Akteur.
+		 * @param string $name          Forumname.
+		 * @param string $description   Optionale Beschreibung.
+		 * @return int Neue Forum-ID.
+		 * @throws DomainException Bei fehlender Berechtigung oder ungültigen Daten.
+		 */
+		public function create_forum( int $space_id, int $actor_user_id, string $name, string $description = '' ): int {
+			$space = $this->require_moderatable_space( $space_id, $actor_user_id );
+			if ( ! ForumManagementSettings::group_managers_can_create_forums() ) {
+				throw new DomainException( __( 'Das Anlegen zusätzlicher Foren ist derzeit nicht freigegeben.', 'afspaces' ) );
+			}
+
+			$name = trim( sanitize_text_field( $name ) );
+			if ( '' === $name || strlen( $name ) > 120 ) {
+				throw new DomainException( __( 'Bitte gib einen gültigen Forumname mit höchstens 120 Zeichen ein.', 'afspaces' ) );
+			}
+			$description = sanitize_textarea_field( $description );
+			$primary = $this->asgaros->get_forum( $space->forum_id );
+			$category_id = (int) ( $primary['category_id'] ?? 0 );
+			if ( $category_id < 1 || $space->primary_group_id < 1 ) {
+				throw new DomainException( __( 'Das Forum der Arbeitsgruppe ist nicht vollständig zugeordnet.', 'afspaces' ) );
+			}
+
+			$forum_id = 0;
+			try {
+				$forum_id = $this->asgaros->create_forum(
+					array(
+						'category_id' => $category_id,
+						'name'        => $name,
+						'description' => $description,
+						'icon'        => 'fas fa-comments',
+					)
+				);
+				$this->asgaros->assign_group_to_forum( $forum_id, $space->primary_group_id );
+				$this->spaces->add_forum_to_space( $space_id, $forum_id );
+			} catch ( \Throwable $e ) {
+				if ( $forum_id > 0 ) {
+					try {
+						$this->asgaros->delete_forum( $forum_id );
+					} catch ( \Throwable $ignored ) {
+						unset( $ignored );
+					}
+				}
+				if ( $e instanceof DomainException ) {
+					throw $e;
+				}
+				throw new DomainException( __( 'Das zusätzliche Forum konnte nicht angelegt werden.', 'afspaces' ) );
+			}
+
+			$this->audit->log( $space_id, $actor_user_id, $forum_id, 'forum_created', 'forum' );
+			return $forum_id;
 		}
 
 		/**
@@ -162,7 +264,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		public function delete_post( int $space_id, int $actor_user_id, int $post_id ): void {
 			$space    = $this->require_moderatable_space( $space_id, $actor_user_id );
 			$location = $this->asgaros->get_post_location( $post_id );
-			if ( null === $location || (int) $location['forum_id'] !== $space->forum_id ) {
+			if ( null === $location || ! in_array( (int) $location['forum_id'], $this->forum_ids_for_space( $space ), true ) ) {
 				throw new DomainException( __( 'Dieser Beitrag gehört nicht zu deinem Forum.', 'afspaces' ) );
 			}
 			$this->asgaros->delete_forum_post( $post_id );
@@ -224,7 +326,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		public function move_post( int $space_id, int $actor_user_id, int $post_id, int $target_topic_id ): void {
 			$space    = $this->require_moderatable_space( $space_id, $actor_user_id );
 			$location = $this->asgaros->get_post_location( $post_id );
-			if ( null === $location || (int) $location['forum_id'] !== $space->forum_id ) {
+			if ( null === $location || ! in_array( (int) $location['forum_id'], $this->forum_ids_for_space( $space ), true ) ) {
 				throw new DomainException( __( 'Dieser Beitrag gehört nicht zu deinem Forum.', 'afspaces' ) );
 			}
 			if ( ! empty( $location['is_first'] ) ) {
@@ -343,9 +445,21 @@ if ( ! class_exists( 'AFSpaces\\Application\\SpaceModerationService' ) ) {
 		 * @throws DomainException Wenn das Thema zu einem fremden Forum gehört.
 		 */
 		private function assert_topic_in_space( int $topic_id, Space $space ): void {
-			if ( $topic_id < 1 || $this->asgaros->get_topic_forum( $topic_id ) !== $space->forum_id ) {
+			if ( $topic_id < 1 || ! in_array( $this->asgaros->get_topic_forum( $topic_id ), $this->forum_ids_for_space( $space ), true ) ) {
 				throw new DomainException( __( 'Dieses Thema gehört nicht zu deinem Forum.', 'afspaces' ) );
 			}
+		}
+
+		/**
+		 * @param Space $space Space.
+		 * @return int[]
+		 */
+		private function forum_ids_for_space( Space $space ): array {
+			$ids = $this->spaces->list_forum_ids( $space->id );
+			if ( empty( $ids ) ) {
+				$ids = array( $space->forum_id );
+			}
+			return array_values( array_unique( array_map( 'intval', $ids ) ) );
 		}
 	}
 }

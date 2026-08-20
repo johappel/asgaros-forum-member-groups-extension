@@ -26,6 +26,24 @@ Manueller Smoke-Test im Forum:
 
 Dieses Dokument konsolidiert die Arbeit aus den bisherigen TASKS-Dateien und beschreibt den tatsächlichen Umsetzungsstand als Entwicklerreferenz.
 
+## Lokale Arbeitsgruppenmoderation und zusätzliche Foren
+
+Status: umgesetzt; reale WordPress-/Asgaros- und Browser-Abnahme bleibt
+zusätzlich erforderlich.
+
+- `ModerationView` entfernt die Zwischenaktion „Beiträge“ und verlinkt Themen
+  über den ersten Beitrag möglichst direkt in das Asgaros-Thema.
+- Schließen, Wiederöffnen, Löschen sowie die bestehende lokale Pin-/Löse-Logik
+  laufen über `SpaceModerationService` und bleiben auf die der Arbeitsgruppe
+  zugeordneten Foren und Themen begrenzt.
+- Die globale Option
+  `afspaces_group_managers_can_create_forums` ist standardmäßig `false`.
+  Bei Aktivierung können Verantwortliche zusätzliche Foren nur in der eigenen
+  Arbeitsgruppe anlegen; globale Asgaros-Rechte werden nicht vergeben.
+- `InstallationSettingsPage` bleibt der technische Klassenname, der zentrale
+  Tab heißt jetzt `extras`. `tab=installation` und
+  `afspaces-installation` bleiben rückwärtskompatibel.
+
 ## Abonnement-Schaltflächen (Issue #9)
 
 Status: umgesetzt.

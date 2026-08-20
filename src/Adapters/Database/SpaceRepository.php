@@ -35,6 +35,11 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 		private $managers_table;
 
 		/**
+		 * @var string
+		 */
+		private $forums_table;
+
+		/**
 		 * Konstruktor.
 		 */
 		public function __construct() {
@@ -43,6 +48,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 			$prefix   = $wpdb ? $wpdb->prefix : 'wp_';
 			$this->spaces_table   = $prefix . 'afspaces_spaces';
 			$this->managers_table = $prefix . 'afspaces_space_managers';
+			$this->forums_table   = $prefix . 'afspaces_space_forums';
 		}
 
 		/**
@@ -77,12 +83,23 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 				KEY user_id (user_id)
 			) {$charset};";
 
+			$sql_forums = "CREATE TABLE {$this->forums_table} (
+				space_id int unsigned NOT NULL,
+				forum_id int unsigned NOT NULL,
+				is_primary tinyint(1) unsigned NOT NULL DEFAULT 0,
+				PRIMARY KEY (space_id, forum_id),
+				UNIQUE KEY unique_forum_id (forum_id),
+				KEY space_id (space_id)
+			) {$charset};";
+
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 			dbDelta( $sql_spaces );
 			dbDelta( $sql_managers );
+			dbDelta( $sql_forums );
 
 			// Bestehende Duplikate bereinigen, bevor ein Unique-Index auf forum_id gesetzt wird.
 			$this->normalize_duplicate_forums();
+			$this->backfill_primary_forum_mappings();
 			$this->ensure_forum_unique_index();
 		}
 
@@ -108,6 +125,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 					array( '%d', '%d', '%s', '%s', '%s' ),
 					array( '%d' )
 				);
+				$this->add_forum_to_space( (int) $existing->id, $space->forum_id, true );
 				return (int) $existing->id;
 			}
 
@@ -126,7 +144,9 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 				),
 				array( '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s' )
 			);
-			return (int) $this->db->insert_id;
+			$space_id = (int) $this->db->insert_id;
+			$this->add_forum_to_space( $space_id, $space->forum_id, true );
+			return $space_id;
 		}
 
 		/**
@@ -154,7 +174,66 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 				$this->db->prepare( "SELECT * FROM {$this->spaces_table} WHERE forum_id = %d;", $forum_id ),
 				ARRAY_A
 			);
+			if ( ! $row ) {
+				$row = $this->db->get_row(
+					$this->db->prepare(
+						"SELECT s.* FROM {$this->spaces_table} s INNER JOIN {$this->forums_table} f ON f.space_id = s.id WHERE f.forum_id = %d;",
+						$forum_id
+					),
+					ARRAY_A
+				);
+			}
 			return $row ? new Space( $row ) : null;
+		}
+
+		/**
+		 * Gibt alle eindeutig dieser Arbeitsgruppe zugeordneten Foren zurück.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @return int[]
+		 */
+		public function list_forum_ids( int $space_id ): array {
+			$rows = $this->db->get_col(
+				$this->db->prepare( "SELECT forum_id FROM {$this->forums_table} WHERE space_id = %d ORDER BY is_primary DESC, forum_id ASC;", $space_id )
+			);
+			return array_values( array_map( 'intval', (array) $rows ) );
+		}
+
+		/**
+		 * Ordnet ein Forum einer Arbeitsgruppe zu.
+		 *
+		 * @param int  $space_id   Space-ID.
+		 * @param int  $forum_id   Asgaros-Forum-ID.
+		 * @param bool $is_primary Primärforum markieren.
+		 * @return void
+		 */
+		public function add_forum_to_space( int $space_id, int $forum_id, bool $is_primary = false ): void {
+			if ( $space_id < 1 || $forum_id < 1 ) {
+				return;
+			}
+			$this->db->replace(
+				$this->forums_table,
+				array(
+					'space_id'   => $space_id,
+					'forum_id'   => $forum_id,
+					'is_primary' => $is_primary ? 1 : 0,
+				),
+				array( '%d', '%d', '%d' )
+			);
+		}
+
+		/**
+		 * Prüft die Forum-Zuordnung ohne Vertrauen in vom Client gelieferte IDs.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $forum_id Forum-ID.
+		 * @return bool
+		 */
+		public function is_forum_in_space( int $space_id, int $forum_id ): bool {
+			$count = (int) $this->db->get_var(
+				$this->db->prepare( "SELECT COUNT(*) FROM {$this->forums_table} WHERE space_id = %d AND forum_id = %d;", $space_id, $forum_id )
+			);
+			return $count > 0;
 		}
 
 		/**
@@ -557,6 +636,18 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Database\\SpaceRepository' ) ) {
 			}
 
 			$this->db->query( "ALTER TABLE {$this->spaces_table} ADD UNIQUE KEY unique_forum_id (forum_id);" );
+		}
+
+		/**
+		 * Übernimmt bestehende Primärforen in die neue Zuordnungstabelle.
+		 *
+		 * @return void
+		 */
+		private function backfill_primary_forum_mappings(): void {
+			$this->db->query(
+				"INSERT IGNORE INTO {$this->forums_table} (space_id, forum_id, is_primary)
+				 SELECT id, forum_id, 1 FROM {$this->spaces_table};"
+			);
 		}
 
 		/**

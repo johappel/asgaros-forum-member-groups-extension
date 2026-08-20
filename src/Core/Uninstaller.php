@@ -50,6 +50,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 			delete_option( 'afspaces_appearance_options' );
 			delete_option( 'afspaces_creation_options' );
 			delete_option( 'afspaces_cleanup_on_uninstall' );
+			delete_option( ForumManagementSettings::OPTION );
 			delete_option( 'afspaces_activation_notice' );
 
 			// Geplanten Reindex-Lauf entfernen.
@@ -61,6 +62,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 			global $wpdb;
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_spaces" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_space_managers" );
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_space_forums" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_audit" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_invitations" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_invite_links" );

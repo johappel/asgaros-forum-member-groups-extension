@@ -96,11 +96,19 @@ Zusätzliche Topic-Aktionen:
 | `moderate_close_topic` | `topic_id` | Thema schließen |
 | `moderate_reopen_topic` | `topic_id` | Thema öffnen |
 | `moderate_delete_topic` | `topic_id` | Thema löschen |
+| `moderate_create_forum` | `forum_name`, optional `forum_description` | Zusätzliches Forum im eigenen Space anlegen |
 | `moderate_delete_post` | `post_id` | Beitrag löschen |
 | `moderate_move_topic` | `topic_id`, `target_space_id` | Thema verschieben |
 | `moderate_move_post` | `post_id`, `target_topic_id` | Beitrag verschieben |
 
 Moderations-Redirect: Standard `moderation`-View; wurde die Aktion aus dem Forum ausgelöst, kehrt `redirect_to` (validiert via `wp_validate_redirect`) ins Forum zurück.
+
+`moderate_create_forum` prüft zusätzlich die globale Option
+`afspaces_group_managers_can_create_forums`. Der Service legt das Forum in
+der Kategorie des Primärforums an, ordnet die primäre Arbeitsgruppengruppe zu
+und speichert die Space-Forum-Zuordnung. Die Nonce-, Manager- und
+Objektprüfungen bleiben serverseitig; ein fremder `space_id` kann die Prüfung
+nicht umgehen.
 
 ## Neue Aktion hinzufügen
 

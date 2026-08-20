@@ -15,6 +15,7 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\SpaceModerationService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
+use AFSpaces\Core\ForumManagementSettings;
 use AFSpaces\Domain\Space;
 use AFSpaces\Domain\SpacePolicy;
 use PHPUnit\Framework\TestCase;
@@ -26,6 +27,9 @@ final class StubModerationRepository extends SpaceRepository {
 
 	/** @var array<int,int[]> space_id => manager user ids */
 	public array $managers = array();
+
+	/** @var array<int,int[]> */
+	public array $forum_ids = array();
 
 	public function __construct() {}
 
@@ -44,6 +48,14 @@ final class StubModerationRepository extends SpaceRepository {
 
 	public function is_manager( int $space_id, int $user_id ): bool {
 		return in_array( $user_id, $this->managers[ $space_id ] ?? array(), true );
+	}
+
+	public function list_forum_ids( int $space_id ): array {
+		return $this->forum_ids[ $space_id ] ?? ( isset( $this->spaces[ $space_id ] ) ? array( $this->spaces[ $space_id ]->forum_id ) : array() );
+	}
+
+	public function add_forum_to_space( int $space_id, int $forum_id, bool $is_primary = false ): void {
+		$this->forum_ids[ $space_id ][] = $forum_id;
 	}
 }
 
@@ -66,6 +78,8 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 
 	/** @var array<int,string> */
 	public array $calls = array();
+
+	public int $next_forum = 800;
 
 	public function is_available(): bool { return true; }
 	public function get_version(): ?string { return '3.4.0'; }
@@ -90,9 +104,12 @@ final class StubModerationAdapter implements AsgarosAdapterInterface {
 	public function list_posts_for_index( int $limit, int $offset ): array { return array(); }
 	public function is_search_request(): bool { return false; }
 	public function create_forum_category( array $data ): int { return 0; }
-	public function create_forum( array $data ): int { return 0; }
+	public function create_forum( array $data ): int {
+		$this->calls[] = 'create_forum';
+		return $this->next_forum++;
+	}
 	public function create_group( array $data ): int { return 0; }
-	public function assign_group_to_forum( int $forum_id, int $group_id ): void {}
+	public function assign_group_to_forum( int $forum_id, int $group_id ): void { $this->calls[] = 'assign_group_to_forum:' . $forum_id . ':' . $group_id; }
 	public function set_forum_visibility( int $forum_id, array $data ): void {}
 	public function update_forum( int $forum_id, array $data ): void {}
 	public function delete_forum( int $forum_id ): void {}
@@ -165,6 +182,8 @@ final class SpaceModerationServiceTest extends TestCase {
 		$this->service = new SpaceModerationService( $this->repo, $this->adapter, $policy, $this->audit );
 
 		global $afspaces_user_can_callback;
+		global $afspaces_test_options;
+		$afspaces_test_options[ ForumManagementSettings::OPTION ] = false;
 		$afspaces_user_can_callback = static function ( int $user_id, string $cap ): bool {
 			return 1 === $user_id && Capabilities::MANAGE_ALL_SPACES === $cap;
 		};
@@ -178,6 +197,39 @@ final class SpaceModerationServiceTest extends TestCase {
 	public function test_admin_can_delete_own_topic(): void {
 		$this->service->delete_topic( 10, 1, 99 );
 		$this->assertContains( 'delete_topic:99', $this->adapter->calls );
+	}
+
+	public function test_forum_creation_is_disabled_by_default(): void {
+		$this->expectException( DomainException::class );
+		$this->service->create_forum( 10, 7, 'Neues Forum' );
+	}
+
+	public function test_manager_can_create_forum_only_when_global_option_is_enabled(): void {
+		global $afspaces_test_options;
+		$afspaces_test_options[ ForumManagementSettings::OPTION ] = true;
+
+		$forum_id = $this->service->create_forum( 10, 7, 'Neues Forum', 'Beschreibung' );
+
+		$this->assertSame( 800, $forum_id );
+		$this->assertContains( 'create_forum', $this->adapter->calls );
+		$this->assertContains( 'assign_group_to_forum:800:1', $this->adapter->calls );
+		$this->assertSame( array( 800 ), $this->repo->forum_ids[10] );
+	}
+
+	public function test_foreign_manager_cannot_create_forum(): void {
+		global $afspaces_test_options;
+		$afspaces_test_options[ ForumManagementSettings::OPTION ] = true;
+
+		$this->expectException( DomainException::class );
+		$this->service->create_forum( 10, 8, 'Fremdes Forum' );
+	}
+
+	public function test_additional_space_forum_is_accepted_for_topic_moderation(): void {
+		$this->repo->forum_ids[10] = array( 500, 800 );
+		$this->adapter->topic_forum[88] = 800;
+
+		$this->service->close_topic( 10, 7, 88 );
+		$this->assertContains( 'close:88', $this->adapter->calls );
 	}
 
 	public function test_manager_can_pin_own_topic(): void {

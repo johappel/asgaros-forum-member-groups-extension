@@ -2749,6 +2749,22 @@ gap: 0.4rem;
 margin: 0;
 }
 
+.afspaces-create-forum {
+margin: 0.75rem 0 1rem;
+}
+
+.afspaces-create-forum summary {
+display: inline-block;
+cursor: pointer;
+}
+
+.afspaces-create-forum form {
+max-width: 38rem;
+margin-top: 0.75rem;
+padding: 0.75rem;
+border: 1px solid #d5dde3;
+}
+
 /* MVP 4: Moderationsknoepfe direkt im Forum + Beitragsebene. */
 .afspaces-forum-moderation {
 display: flex;

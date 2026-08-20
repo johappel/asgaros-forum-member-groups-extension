@@ -311,7 +311,7 @@ if ( ! interface_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapterInterface' 
 		 *
 		 * @param int                 $forum_id Forum-ID.
 		 * @param array<string,mixed> $args     Optionen: page, per_page.
-		 * @return array{topics: array<int,array<string,mixed>>, total: int}
+		 * @return array{topics: array<int,array{id:int,name:string,first_post_id?:int,forum_id?:int,closed?:bool,sticky?:bool,author_name?:string,post_count?:int,last_date?:string}>, total: int}
 		 */
 		public function list_forum_topics( int $forum_id, array $args = [] ): array;
 

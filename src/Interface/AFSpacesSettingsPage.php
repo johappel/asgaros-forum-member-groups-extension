@@ -30,7 +30,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AFSpacesSettingsPage' ) ) {
 			'afspaces-look-and-feel' => 'appearance',
 			'afspaces-creation'      => 'creation',
 			'afspaces-search'        => 'search',
-			'afspaces-installation'  => 'installation',
+			'afspaces-installation'  => 'extras',
 		);
 
 		private AppearanceSettingsPage $appearance;
@@ -146,7 +146,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AFSpacesSettingsPage' ) ) {
 				'appearance'   => __( 'Darstellung', 'afspaces' ),
 				'creation'     => __( 'Raumgründung', 'afspaces' ),
 				'search'       => __( 'Suche', 'afspaces' ),
-				'installation' => __( 'Installation', 'afspaces' ),
+				'extras'       => __( 'Extras', 'afspaces' ),
 			);
 		}
 
@@ -155,6 +155,9 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AFSpacesSettingsPage' ) ) {
 		 */
 		private function current_tab(): string {
 			$tab = isset( $_GET[ self::TAB_PARAM ] ) ? sanitize_key( (string) $_GET[ self::TAB_PARAM ] ) : 'appearance';
+			if ( 'installation' === $tab ) {
+				$tab = 'extras';
+			}
 			return array_key_exists( $tab, $this->tabs() ) ? $tab : 'appearance';
 		}
 
@@ -184,7 +187,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\AFSpacesSettingsPage' ) ) {
 				case 'search':
 					$this->search->render_page( true );
 					break;
-				case 'installation':
+				case 'extras':
 					$this->installation->render_page( true );
 					break;
 				case 'appearance':
