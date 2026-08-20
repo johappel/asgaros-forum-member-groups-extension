@@ -116,7 +116,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MembersView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-members" aria-labelledby="afspaces-members-heading">
-				<h2 id="afspaces-members-heading"><?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?></h2>
+				<!-- <h2 id="afspaces-members-heading"><?php echo esc_html__( 'Mitglieder verwalten', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Arbeitsgruppenverantwortliche verwalten hier Mitgliedschaften.', 'afspaces' ); ?></p>
 

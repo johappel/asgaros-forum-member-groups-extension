@@ -63,7 +63,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\JoinRequestsView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-join-requests" id="afspaces-join-requests-view" aria-labelledby="afspaces-join-requests-heading">
-				<h2 id="afspaces-join-requests-heading"><?php echo esc_html__( 'Beitrittsanfragen verwalten', 'afspaces' ); ?></h2>
+				<!-- <h2 id="afspaces-join-requests-heading"><?php echo esc_html__( 'Beitrittsanfragen verwalten', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier entscheidest du über offene Beitrittsanfragen für diese Arbeitsgruppe.', 'afspaces' ); ?></p>
 				<p class="description"><?php echo esc_html__( 'Diese Verantwortung umfasst Mitgliedschaften, Einladungen und Anfragen.', 'afspaces' ); ?></p>

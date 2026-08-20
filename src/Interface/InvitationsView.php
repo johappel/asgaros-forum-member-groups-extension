@@ -80,7 +80,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-invitations" id="afspaces-invitations-view" aria-labelledby="afspaces-invitations-heading">
-				<h2 id="afspaces-invitations-heading"><?php echo esc_html__( 'Einladungen zur Arbeitsgruppe', 'afspaces' ); ?></h2>
+				<!-- <h2 id="afspaces-invitations-heading"><?php echo esc_html__( 'Einladungen zur Arbeitsgruppe', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich in diese Arbeitsgruppe einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
 				<?php echo $this->render_created_invite_link(); ?>

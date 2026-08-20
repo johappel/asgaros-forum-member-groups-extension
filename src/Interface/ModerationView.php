@@ -69,7 +69,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ModerationView' ) ) {
 			ob_start();
 			?>
 			<section class="afspaces-moderation" aria-labelledby="afspaces-moderation-heading">
-				<h2 id="afspaces-moderation-heading"><?php echo esc_html__( 'Moderation der Themen meiner Arbeitsgruppe', 'afspaces' ); ?></h2>
+				<!-- <h2 id="afspaces-moderation-heading"><?php echo esc_html__( 'Moderation der Themen meiner Arbeitsgruppe', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
 				<p><?php echo esc_html__( 'Hier moderierst du ausschließlich die Themen deines eigenen Forums. Du kannst Themen oben halten, schließen, wieder öffnen oder löschen. Diese Rechte gelten nur für dieses Forum und geben keine globalen Asgaros-Moderatorrechte.', 'afspaces' ); ?></p>
 
