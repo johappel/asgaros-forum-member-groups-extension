@@ -33,6 +33,8 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 	 * - `AsgarosForum::content->get_categories()` (liefert zugängliche Kategorien)
 	 * - `AsgarosForum::rewrite->get_post_link( $post_id, $topic_id )` (Deep-Link mit `?part=N#postid-ID`)
 	 * - `AsgarosForumNotifications::show_subscription_navigation( $current_view )`
+	 * - `AsgarosForumNotifications::show_forum_subscription_link( $forum_id )` und
+	 *   `show_topic_subscription_link( $topic_id )`
 	 *   (Abonnementzustand, URL und Nonce für Forum bzw. Thema)
 	 * - Tabellen `$forum->tables->{posts,topics,forums}` mit FULLTEXT auf `posts.text` und `topics.name`
 	 *   (Volltextsuche via `MATCH ... AGAINST ( ... IN BOOLEAN MODE )`).
@@ -192,7 +194,9 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				return;
 			}
 
-			if ( ! method_exists( $forum->notifications, 'show_subscription_navigation' ) ) {
+			if ( ! method_exists( $forum->notifications, 'show_subscription_navigation' )
+				&& ! method_exists( $forum->notifications, 'show_forum_subscription_link' )
+				&& ! method_exists( $forum->notifications, 'show_topic_subscription_link' ) ) {
 				return;
 			}
 
@@ -236,9 +240,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				return $menu_entries;
 			}
 
-			ob_start();
-			$forum->notifications->show_subscription_navigation( $view );
-			$control = (string) ob_get_clean();
+			$control = $this->render_subscription_control( $forum, $view );
 
 			if ( '' === trim( $control )
 				|| ! preg_match( '/<a\b[^>]*\s+href\s*=\s*(["\'])(.*?)\1[^>]*>/is', $control, $matches ) ) {
@@ -278,6 +280,37 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			}
 
 			return $positioned;
+		}
+
+		/**
+		 * Liest die Abo-Ausgabe aus dem aktuellen Asgaros-Kontext.
+		 *
+		 * Der Header-Menü-Filter wird in Asgaros vor dem Aufbau von
+		 * `current_topic` bzw. `current_forum` ausgeführt. `current_element` ist
+		 * zu diesem Zeitpunkt bereits die vom Rewrite ermittelte Topic- oder
+		 * Forum-ID. Die direkten Notifications-Methoden akzeptieren diese ID und
+		 * erzeugen weiterhin Zustand, URL und Nonce ausschließlich in Asgaros.
+		 *
+		 * @param object $forum Asgaros-Instanz.
+		 * @param string $view Asgaros-Ansicht (`forum` oder `topic`).
+		 * @return string
+		 */
+		private function render_subscription_control( object $forum, string $view ): string {
+			$property = 'topic' === $view ? 'current_topic' : 'current_forum';
+			$method   = 'topic' === $view ? 'show_topic_subscription_link' : 'show_forum_subscription_link';
+			$element  = isset( $forum->{$property} ) ? (int) $forum->{$property} : 0;
+
+			if ( $element < 1 && isset( $forum->current_element ) ) {
+				$element = (int) $forum->current_element;
+			}
+
+			ob_start();
+			if ( $element > 0 && method_exists( $forum->notifications, $method ) ) {
+				$forum->notifications->{$method}( $element );
+			} elseif ( method_exists( $forum->notifications, 'show_subscription_navigation' ) ) {
+				$forum->notifications->show_subscription_navigation( $view );
+			}
+			return (string) ob_get_clean();
 		}
 
 		/**

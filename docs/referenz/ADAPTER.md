@@ -54,7 +54,10 @@ aus `asgarosforum_bottom_navigation` und registriert
 `AsgarosForumNotifications::show_subscription_navigation()` und ordnet die
 kontextabhängige Aktion direkt vor dem Standardpunkt `subscription` ein. Das
 `href`-Attribut wird unabhängig von der Reihenfolge der HTML-Attribute im von
-Asgaros erzeugten Link gelesen.
+Asgaros erzeugten Link gelesen. Wenn Asgaros den Header vor `current_topic`
+oder `current_forum` rendert, verwendet der Adapter `current_element` und ruft
+`show_topic_subscription_link()` beziehungsweise `show_forum_subscription_link()`
+direkt auf.
 AFSpaces erzeugt keine eigene Subscription-URL.
 
 ### Gruppenmitglieder

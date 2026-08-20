@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Abo-Aktionen im Forum-Menü auch bei frühem Asgaros-Header-Kontext korrekt
+  erzeugen; dafür werden die vom Rewrite ermittelte Forum-/Themen-ID und die
+  nativen Asgaros-Notifications-Methoden verwendet.
+- Plugin-Version auf 0.4.27 angehoben.
+
 - Fehler bei der Übernahme von Asgaros-Abonnementlinks behoben: Das `href`-
   Attribut wird jetzt auch erkannt, wenn Asgaros vorher Klassen am `<a>`-
   Element ausgibt.

@@ -62,7 +62,11 @@ Für Issue #9 entfernt der Adapter bei Asgaros 3.4.0 den registrierten Callback
 `asgarosforum_filter_header_menu` wird daraus ein kontextabhängiger Nav-Eintrag
 direkt vor `subscription` erzeugt. URL, Nonce und Zustand stammen weiterhin aus
 Asgaros; die intern verwendete Notifications-Methode bleibt ausschließlich im
-`AsgarosAdapter` gekapselt und degradiert bei fehlender API defensiv.
+`AsgarosAdapter` gekapselt und degradiert bei fehlender API defensiv. Wenn der
+Header vor `current_topic` oder `current_forum` gerendert wird, verwendet der
+Adapter die gegen Asgaros 3.4.0 geprüften Methoden
+`show_topic_subscription_link()` bzw. `show_forum_subscription_link()` mit
+`current_element`.
 
 Die Frontend-Verwaltung ist über die Asgaros-Forum-Navigation erreichbar. Dafür werden ausschließlich **dokumentierte, öffentliche Asgaros-Hooks** genutzt (keine internen Klassen):
 

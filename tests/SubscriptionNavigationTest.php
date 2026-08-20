@@ -15,8 +15,20 @@ use ReflectionClass;
 
 final class StubSubscriptionNotifications {
 	public string $html = '';
+	public string $last_method = '';
 
 	public function show_subscription_navigation( string $view ): void {
+		$this->last_method = 'show_subscription_navigation';
+		echo $this->html;
+	}
+
+	public function show_forum_subscription_link( int $forum_id ): void {
+		$this->last_method = 'show_forum_subscription_link';
+		echo $this->html;
+	}
+
+	public function show_topic_subscription_link( int $topic_id ): void {
+		$this->last_method = 'show_topic_subscription_link';
 		echo $this->html;
 	}
 }
@@ -38,6 +50,7 @@ final class SubscriptionNavigationTest extends TestCase {
 			'notifications' => $notifications,
 			'options'       => array( 'allow_subscriptions' => true ),
 			'current_view'  => 'forum',
+			'current_element' => 42,
 		);
 
 		$adapter = ( new ReflectionClass( AsgarosAdapter::class ) )->newInstanceWithoutConstructor();
@@ -52,6 +65,7 @@ final class SubscriptionNavigationTest extends TestCase {
 		self::assertSame( array( 'home', 'afspaces_context_subscription', 'subscription', 'afspaces' ), array_keys( $result ) );
 		self::assertSame( 'Forum abonnieren', $result['afspaces_context_subscription']['menu_link_text'] );
 		self::assertSame( 'https://example.test/forum/?subscribe_forum=42&_wpnonce=abc', $result['afspaces_context_subscription']['menu_url'] );
+		self::assertSame( 'show_forum_subscription_link', $notifications->last_method );
 	}
 
 	public function test_topic_unsubscribe_action_uses_clear_label(): void {
@@ -63,12 +77,14 @@ final class SubscriptionNavigationTest extends TestCase {
 			'notifications' => $notifications,
 			'options'       => array( 'allow_subscriptions' => true ),
 			'current_view'  => 'topic',
+			'current_element' => 7,
 		);
 
 		$adapter = ( new ReflectionClass( AsgarosAdapter::class ) )->newInstanceWithoutConstructor();
 		$result  = $adapter->add_subscription_menu_entry( array( 'subscription' => array() ) );
 
 		self::assertSame( 'Themen-Abo beenden', $result['afspaces_context_subscription']['menu_link_text'] );
+		self::assertSame( 'show_topic_subscription_link', $notifications->last_method );
 	}
 
 	public function test_global_subscription_does_not_duplicate_management_link(): void {
