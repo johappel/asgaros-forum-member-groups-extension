@@ -7,6 +7,7 @@ Diese Referenz ist aus den `add_action()`, `add_filter()`, `do_action()` und `ap
 | Hook | Ort / Argumente | Rückgabe / Default | Zweck |
 | --- | --- | --- | --- |
 | `init` | `FrontendController::init`; keine Argumente | — | serverseitige Frontend-Actions verarbeiten |
+| `init` (Priorität 5) | `FileUploadSettings::extend_asgaros_filetypes`; keine Argumente | — | Asgaros-Option `allowed_filetypes` erweitern, bevor `AsgarosForumUploads::initialize()` (init/10) die Liste cached |
 | `wp_ajax_afspaces_action` | `FrontendController::init`; keine Argumente | — | AJAX-Variante derselben Frontend-Actions |
 | `rest_api_init` | `Plugin::init`; keine Argumente | — | REST-Routen registrieren |
 | `wp_enqueue_scripts` | `FrontendController`, `ForumNavigation`, `ForumStyleLayer` (Priorität 999), `SearchModal`, `ForumToolbox`; keine Argumente | — | Frontend-Assets laden; ForumStyleLayer lädt den Asgaros-Override nur auf `[forum]`-Seiten; `ForumToolbox` lädt Assets nur auf Forumseiten einer Arbeitsgruppe |
@@ -73,6 +74,7 @@ Alle folgenden Filter sind im aktuellen Code öffentliche Erweiterungspunkte. Fi
 | `afspaces_user_avatar_url` | `string $url`, `int $user_id`, `int $size` | string; WordPress-Avatar-URL | externe Avatar-URL für AFSpaces liefern |
 | `afspaces_user_profile_url` | `string $url`, `int $user_id`, `WP_User $user` | string; Default leer, nach `esc_url_raw()` | kanonische Profil-URL eines externen Mitglieder-/Community-Systems liefern |
 | `afspaces_user_search_results` | `array{user_ids:int[],total:int} $result`, `string $search`, `int $page`, `int $per_page`, `int $candidate_limit` | gleicher Shape; WP-Suche als Default | externe Suchanbieter liefern zusätzliche User-IDs für das gemeinsame Kandidatenfenster |
+| `afspaces_additional_upload_mimes` | `array<string, string> $mimes` | Array; Dateiendung => MIME-Typ; Default: 10 MS Office + LibreOffice Dateitypen | zusätzliche Dateiendungen für Uploads erlauben (wird von WordPress `upload_mimes` kombiniert und an Asgaros `allowed_filetypes` angehängt) |
 
 Tab-Definitionen für die beiden Hub-Filter verwenden die vom Renderer gelesenen Schlüssel `view`, `label`, `url` und `active`. Zusätzliche Schlüssel dürfen transportiert werden, werden aber vom AFSpaces-Renderer nicht automatisch ausgegeben.
 

@@ -15,6 +15,10 @@ Nachschlagewerk für Entwickler. Jede Seite ist auf schnelles Finden ausgelegt: 
 - [DATENBANK.md](DATENBANK.md) — Kernfelder je Tabelle, Personenbezug, Schema-Änderungspfad.
 - [DESIGN-UND-LAYOUT.md](DESIGN-UND-LAYOUT.md) — Gestaltungs-, Farb-, Icon- und Barrierefreiheitsentscheidungen.
 
+## Infrastruktur
+
+- [FileUploadSettings](FileUploadSettings.md) — Erlaubte Dateiendungen beim Upload, Filter-Erweiterungspunkt.
+
 ## Nach Hauptteilen
 
 - [BEREICH-mitglieder-einladungen.md](BEREICH-mitglieder-einladungen.md) — Mitgliederverwaltung, Einladungen, Invite-Links, Beitrittsanfragen.

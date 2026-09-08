@@ -29,6 +29,7 @@ use AFSpaces\Application\SpaceModerationService;
 use AFSpaces\Application\ModerationActionVisibility;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
+use AFSpaces\Core\FileUploadSettings;
 use AFSpaces\Core\Requirements;
 use AFSpaces\Domain\SpacePolicy;
 use AFSpaces\Interface\AFSpacesSettingsPage;
@@ -160,6 +161,10 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 				$installation
 			);
 			$settings_page->init();
+
+			// Datei-Upload-Einstellungen (MIME-Typen).
+			$file_uploads = new FileUploadSettings();
+			$file_uploads->init();
 
 			$activation_notice = get_option( 'afspaces_activation_notice', array() );
 			if ( is_array( $activation_notice ) && ! empty( $activation_notice ) ) {
