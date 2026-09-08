@@ -3544,9 +3544,7 @@ margin: 1.25rem 0 0.5rem;
 padding-bottom: 0.25rem;
 border-bottom: 2px solid #e2e8ee;
 }
-.afspaces-documents-edit,
-.afspaces-post-document-add,
-.afspaces-post-document-edit {
+.afspaces-documents-edit {
 display: inline-block;
 }
 .afspaces-documents-visibility-field {
@@ -3569,29 +3567,98 @@ color: #55636e;
 font-size: 0.85em;
 }
 
-/* Dokumentaktionen unter der Asgaros-Uploadliste */
+/* Dokumentaktionen unter der Asgaros-Uploadliste (kompakt, ruhig) */
 .afspaces-post-documents {
-margin: 0.5rem 0 0;
-padding: 0.5rem 0 0;
+margin: 0.35rem 0 0;
+padding: 0.35rem 0 0;
 border-top: 1px dashed #d5dde4;
 display: flex;
 flex-direction: column;
-gap: 0.4rem;
+gap: 0.2rem;
 }
 .afspaces-post-document-row {
-display: flex;
-flex-wrap: wrap;
-gap: 0.5rem;
-align-items: center;
-font-size: 0.9em;
+font-size: 0.85em;
+line-height: 1.45;
 }
 .afspaces-post-document-file {
+display: block;
 font-weight: 600;
 word-break: break-word;
+color: var(--afspaces-color-secondary-background, #364149);
+}
+.afspaces-post-document-file .fas {
+margin-right: 0.25rem;
+opacity: 0.7;
+}
+.afspaces-post-document-status {
+display: flex;
+flex-wrap: wrap;
+align-items: baseline;
+gap: 0.1rem 0.4rem;
+color: #55636e;
 }
 .afspaces-post-document-flag {
 color: #2f7a34;
 font-weight: 600;
+white-space: nowrap;
+}
+.afspaces-post-document-sep {
+color: #9aa6b0;
+}
+.afspaces-post-document-add,
+.afspaces-post-document-edit {
+display: inline;
+}
+.afspaces-post-document-add > summary,
+.afspaces-post-document-edit > summary {
+list-style: none;
+}
+.afspaces-post-document-add > summary::-webkit-details-marker,
+.afspaces-post-document-edit > summary::-webkit-details-marker {
+display: none;
+}
+.afspaces-post-document-status .afspaces-inline-form {
+display: inline;
+margin: 0;
+}
+/* Verwaltungsaktionen als dezente Inline-Textlinks (keine großen Buttons) */
+.afspaces-post-document-action {
+display: inline;
+background: transparent;
+border: none;
+padding: 0;
+margin: 0;
+font: inherit;
+color: var(--afspaces-link-color, #2d5d7f);
+text-decoration: underline;
+cursor: pointer;
+white-space: nowrap;
+}
+.afspaces-post-document-action:hover,
+.afspaces-post-document-action:focus-visible {
+text-decoration: none;
+}
+.afspaces-post-document-action--danger {
+color: #d63638;
+}
+/* Button-Overrides für Post-Dokument-Aktionen (höhere Spezifität) */
+.afspaces-inline-form .afspaces-post-document-action,
+.afspaces-inline-form .afspaces-post-document-action:hover,
+.afspaces-inline-form .afspaces-post-document-action:focus,
+.afspaces-inline-form .afspaces-post-document-action:active {
+background: transparent !important;
+border: none !important;
+color: var(--afspaces-link-color, #2d5d7f) !important;
+text-decoration: underline !important;
+padding: 0 !important;
+font-weight: normal !important;
+box-shadow: none !important;
+}
+.afspaces-inline-form .afspaces-post-document-action--danger,
+.afspaces-inline-form .afspaces-post-document-action--danger:hover,
+.afspaces-inline-form .afspaces-post-document-action--danger:focus,
+.afspaces-inline-form .afspaces-post-document-action--danger:active {
+color: #d63638 !important;
 }
 .afspaces-post-document-form {
 margin-top: 0.5rem;
@@ -3600,6 +3667,7 @@ border: 1px solid #dce3ea;
 border-radius: 6px;
 background: #f7f9fb;
 max-width: 32rem;
+font-size: 1rem;
 }
 
 /* Toolbox-Dokumentvorschau */

@@ -90,19 +90,23 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumDocumentControls' ) ) {
 
 				$has_rows = true;
 				echo '<div class="afspaces-post-document-row">';
-				echo '<span class="afspaces-post-document-file">' . esc_html( $filename ) . '</span>';
+				echo '<span class="afspaces-post-document-file"><span class="fas fa-file" aria-hidden="true"></span> ' . esc_html( $filename ) . '</span>';
+				echo '<span class="afspaces-post-document-status">';
 
 				if ( null !== $document ) {
 					echo '<span class="afspaces-post-document-flag"><span class="fas fa-check" aria-hidden="true"></span> ' . esc_html__( 'Gruppendokument', 'afspaces' ) . '</span>';
 
 					if ( $can_use ) {
+						echo '<span class="afspaces-post-document-sep" aria-hidden="true">&middot;</span>';
 						echo $this->render_edit_disclosure( $space, $document, $redirect );
+						echo '<span class="afspaces-post-document-sep" aria-hidden="true">&middot;</span>';
 						echo $this->render_remove_form( $space->id, $document->id, $redirect );
 					}
 				} elseif ( $can_use ) {
 					echo $this->render_add_disclosure( $space, $post_id, $filename, $redirect );
 				}
 
+				echo '</span>';
 				echo '</div>';
 			}
 			echo '</div>';
@@ -197,7 +201,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumDocumentControls' ) ) {
 			ob_start();
 			?>
 			<details class="afspaces-post-document-add">
-				<summary class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Als Gruppendokument aufnehmen', 'afspaces' ); ?></summary>
+				<summary class="afspaces-post-document-action afspaces-post-document-action--add"><span class="fas fa-plus" aria-hidden="true"></span> <?php echo esc_html__( 'Als Gruppendokument aufnehmen', 'afspaces' ); ?></summary>
 				<form method="post" class="afspaces-post-document-form">
 					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 					<input type="hidden" name="afspaces_action" value="add_document" />
@@ -231,7 +235,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumDocumentControls' ) ) {
 			ob_start();
 			?>
 			<details class="afspaces-post-document-edit">
-				<summary class="afspaces-button afspaces-button-secondary"><?php echo esc_html__( 'Bearbeiten', 'afspaces' ); ?></summary>
+				<summary class="afspaces-post-document-action"><?php echo esc_html__( 'Bearbeiten', 'afspaces' ); ?></summary>
 				<form method="post" class="afspaces-post-document-form">
 					<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 					<input type="hidden" name="afspaces_action" value="update_document" />
@@ -261,7 +265,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumDocumentControls' ) ) {
 		private function render_remove_form( int $space_id, int $document_id, string $redirect ): string {
 			ob_start();
 			?>
-			<form method="post" class="afspaces-inline-form" data-afspaces-confirm="<?php echo esc_attr__( 'Dieses Dokument aus der Bibliothek entfernen? Die Datei bleibt im Forum erhalten.', 'afspaces' ); ?>">
+			<form method="post" class="afspaces-inline-form afspaces-post-document-remove" data-afspaces-confirm="<?php echo esc_attr__( 'Dieses Dokument aus der Bibliothek entfernen? Die Datei bleibt im Forum erhalten.', 'afspaces' ); ?>">
 				<?php echo wp_nonce_field( 'afspaces_member_action', '_wpnonce', true, false ); ?>
 				<input type="hidden" name="afspaces_action" value="remove_document" />
 				<input type="hidden" name="space_id" value="<?php echo esc_attr( (string) $space_id ); ?>" />
@@ -269,7 +273,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumDocumentControls' ) ) {
 				<?php if ( '' !== $redirect ) : ?>
 					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $redirect ); ?>" />
 				<?php endif; ?>
-				<button type="submit" class="afspaces-button afspaces-button-danger"><?php echo esc_html__( 'Aus Dokumenten entfernen', 'afspaces' ); ?></button>
+				<button type="submit" class="afspaces-post-document-action afspaces-post-document-action--danger"><?php echo esc_html__( 'Aus Dokumenten entfernen', 'afspaces' ); ?></button>
 			</form>
 			<?php
 			return (string) ob_get_clean();

@@ -1658,6 +1658,8 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 			$topic_name = (string) $forum->db->get_var(
 				$forum->db->prepare( "SELECT name FROM {$forum->tables->topics} WHERE id = %d;", $topic_id )
 			);
+			// Asgaros speichert Themennamen ggf. mit maskierten Anführungszeichen.
+			$topic_name = function_exists( 'wp_unslash' ) ? (string) wp_unslash( $topic_name ) : stripslashes( $topic_name );
 
 			return array(
 				'topic_id'   => $topic_id,

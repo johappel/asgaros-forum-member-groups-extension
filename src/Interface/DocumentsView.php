@@ -102,7 +102,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\DocumentsView' ) ) {
 
 				<?php
 				if ( empty( $documents ) ) {
-					echo '<p class="afspaces-documents-empty">' . esc_html__( 'Es sind keine für Sie sichtbaren Dokumente vorhanden.', 'afspaces' ) . '</p>';
+					if ( '' !== $topic || '' !== $search ) {
+						echo '<p class="afspaces-documents-empty">' . esc_html__( 'Zu Ihrer Suche bzw. Filterung passen keine Dokumente. Setzen Sie die Filter zurück, um alle sichtbaren Dokumente anzuzeigen.', 'afspaces' ) . '</p>';
+					} else {
+						echo '<p class="afspaces-documents-empty">' . esc_html__( 'Es sind keine für Sie sichtbaren Dokumente vorhanden.', 'afspaces' ) . '</p>';
+					}
 				} elseif ( self::VIEW_TOPICS === $view ) {
 					echo $this->render_grouped( $documents, $actor, $space_id );
 				} else {
