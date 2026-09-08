@@ -48,6 +48,13 @@ Issue #15 (Topic pinnen/lösen) ist durch `SpaceModerationServiceTest` abgedeckt
 | Mitglieder hinzufügen/entfernen, Manager zuweisen | `Application/MemberService.php` | `tests/Integration/MemberManagementTest.php` |
 | Arbeitsgruppen-Metadaten speichern/validieren | `Application/WorkingGroupService.php` | `tests/Integration/WorkingGroupMetaFlowTest.php` |
 
+## 5a. Werkzeugkasten (Toolbox)
+
+| Feature | Quellklasse | Test |
+| --- | --- | --- |
+| Link-Validierung (URL-Schema, Titel, Icon) | `Domain/SpaceLink.php` | `tests/SpaceLinkDomainTest.php` |
+| Linkverwaltung, Rechteprüfung, Sortierung, Forum→Space-Auflösung | `Application/ToolboxService.php` | `tests/ToolboxServiceTest.php` |
+
 ## 6. Suchschicht (Search)
 
 | Feature | Quellklasse | Test |

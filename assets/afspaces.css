@@ -3274,3 +3274,185 @@ right: auto;
 		width: 100%;
 	}
 }
+
+/* ==========================================================================
+   Toolbox (Werkzeugkasten): Forum-Menüpunkt + Dialog
+   ========================================================================== */
+
+#forum-navigation a.afspaces-toolbox-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+}
+
+#forum-navigation a.afspaces-toolbox-link .fa-toolbox,
+#forum-navigation a.afspaces-toolbox-link .fas {
+	font-size: 0.95em;
+}
+
+.afspaces-toolbox-overlay[hidden] {
+	display: none;
+}
+
+.afspaces-toolbox-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100010;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding: 5vh 1rem 1rem;
+}
+
+/* No-JS-Fallback: Anker-Ziel öffnet den Dialog auch ohne JavaScript. */
+.afspaces-toolbox-overlay:target {
+	display: flex;
+}
+
+.afspaces-toolbox-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(20, 30, 40, 0.55);
+	border: 0;
+}
+
+.afspaces-toolbox-panel {
+	position: relative;
+	background: #fff;
+	color: #222;
+	width: min(680px, 100%);
+	max-height: 90vh;
+	overflow: auto;
+	border-radius: 14px;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+	padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.afspaces-toolbox-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1rem;
+}
+
+.afspaces-toolbox-title {
+	margin: 0;
+	font-size: 1.25rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--afspaces-heading-color, #2d5d7f);
+}
+
+.afspaces-toolbox-close {
+	flex: 0 0 auto;
+	font-size: 1.4rem;
+	line-height: 1;
+	color: #444;
+	text-decoration: none;
+	padding: 0.25rem 0.4rem;
+	border-radius: 6px;
+}
+
+.afspaces-toolbox-close:hover,
+.afspaces-toolbox-close:focus {
+	color: #000;
+	background: #f0f2f4;
+}
+
+.afspaces-toolbox-body {
+	display: grid;
+	gap: 1.5rem;
+}
+
+.afspaces-toolbox-section-title {
+	margin: 0 0 0.6rem;
+	font-size: 1.05rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.afspaces-toolbox-empty {
+	margin: 0 0 0.6rem;
+	color: #555;
+}
+
+.afspaces-toolbox-links {
+	list-style: none;
+	margin: 0 0 0.75rem;
+	padding: 0;
+	display: grid;
+	gap: 0.5rem;
+}
+
+.afspaces-toolbox-link-anchor {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.6rem 0.75rem;
+	border: 1px solid #d9e0e5;
+	border-radius: 10px;
+	text-decoration: none;
+	color: inherit;
+	transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.afspaces-toolbox-link-anchor:hover,
+.afspaces-toolbox-link-anchor:focus {
+	background: #f4f7f9;
+	border-color: var(--afspaces-color-blue, #2d5d7f);
+}
+
+.afspaces-toolbox-link-icon {
+	flex: 0 0 auto;
+	font-size: 1.1rem;
+	color: var(--afspaces-color-blue, #2d5d7f);
+}
+
+.afspaces-toolbox-link-text {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.afspaces-toolbox-link-title {
+	font-weight: 600;
+}
+
+.afspaces-toolbox-link-desc {
+	font-size: 0.9rem;
+	color: #555;
+}
+
+.afspaces-toolbox-manage {
+	margin: 0.5rem 0 0;
+}
+
+@media (max-width: 640px) {
+	.afspaces-toolbox-overlay {
+		padding: 0;
+	}
+
+	.afspaces-toolbox-panel {
+		width: 100%;
+		max-height: 100vh;
+		border-radius: 0;
+	}
+}
+
+/* Verwaltung: Bearbeiten-Aufklappbereich */
+.afspaces-toolbox-edit {
+	margin-bottom: 0.4rem;
+}
+
+.afspaces-toolbox-edit > summary {
+	cursor: pointer;
+	display: inline-block;
+	list-style: none;
+}
+
+.afspaces-toolbox-edit > summary::-webkit-details-marker {
+	display: none;
+}
+

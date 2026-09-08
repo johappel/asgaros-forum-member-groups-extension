@@ -19,6 +19,7 @@ use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Application\SpaceModerationService;
 use AFSpaces\Application\SpaceRegistrationService;
+use AFSpaces\Application\ToolboxService;
 use AFSpaces\Application\WorkingGroupService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Core\DomainException;
@@ -82,6 +83,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private SpaceModerationService $space_moderation;
 
 		/**
+		 * @var ToolboxService
+		 */
+		private ToolboxService $toolbox;
+
+		/**
 		 * @var string
 		 */
 		private string $nonce_action = 'afspaces_member_action';
@@ -105,7 +111,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			SpaceRegistrationService $space_registration,
 			SpaceCreationService $space_creation,
 			SpaceLifecycleService $space_lifecycle,
-			SpaceModerationService $space_moderation
+			SpaceModerationService $space_moderation,
+			ToolboxService $toolbox
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -118,6 +125,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$this->space_creation = $space_creation;
 			$this->space_lifecycle = $space_lifecycle;
 			$this->space_moderation = $space_moderation;
+			$this->toolbox = $toolbox;
 		}
 
 		/**
@@ -455,6 +463,22 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$target_topic_id = isset( $_POST['target_topic_id'] ) ? (int) $_POST['target_topic_id'] : 0;
 					$this->space_moderation->move_post( $space_id, $actor, $post_id, $target_topic_id );
 					$this->set_message( 'success', __( 'Der Beitrag wurde in ein anderes Thema verschoben.', 'afspaces' ) );
+				} elseif ( 'add_toolbox_link' === $action ) {
+					$this->toolbox->add_link( $space_id, $actor, $this->collect_toolbox_input() );
+					$this->set_message( 'success', __( 'Der Link wurde hinzugefügt.', 'afspaces' ) );
+				} elseif ( 'update_toolbox_link' === $action ) {
+					$link_id = isset( $_POST['toolbox_link_id'] ) ? (int) $_POST['toolbox_link_id'] : 0;
+					$this->toolbox->update_link( $space_id, $actor, $link_id, $this->collect_toolbox_input() );
+					$this->set_message( 'success', __( 'Der Link wurde aktualisiert.', 'afspaces' ) );
+				} elseif ( 'delete_toolbox_link' === $action ) {
+					$link_id = isset( $_POST['toolbox_link_id'] ) ? (int) $_POST['toolbox_link_id'] : 0;
+					$this->toolbox->delete_link( $space_id, $actor, $link_id );
+					$this->set_message( 'success', __( 'Der Link wurde gelöscht.', 'afspaces' ) );
+				} elseif ( 'move_toolbox_link' === $action ) {
+					$link_id   = isset( $_POST['toolbox_link_id'] ) ? (int) $_POST['toolbox_link_id'] : 0;
+					$direction = isset( $_POST['direction'] ) && 'up' === $_POST['direction'] ? 'up' : 'down';
+					$this->toolbox->move_link( $space_id, $actor, $link_id, $direction );
+					$this->set_message( 'success', __( 'Die Reihenfolge wurde angepasst.', 'afspaces' ) );
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
@@ -496,6 +520,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			if ( in_array( $action, array( 'rename_space', 'change_space_visibility', 'transfer_space_owner', 'archive_space', 'reactivate_space' ), true ) ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_SETTINGS, array( 'space_id' => $space_id ) ) );
+				exit;
+			}
+
+			if ( in_array( $action, array( 'add_toolbox_link', 'update_toolbox_link', 'delete_toolbox_link', 'move_toolbox_link' ), true ) ) {
+				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_TOOLBOX, array( 'space_id' => $space_id ) ) );
 				exit;
 			}
 
@@ -549,6 +578,24 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			return array(
 				'type'    => $type,
 				'message' => $message,
+			);
+		}
+
+		/**
+		 * Sammelt die Roh-Eingaben eines Toolbox-Link-Formulars.
+		 *
+		 * Die eigentliche Validierung und Bereinigung erfolgt im
+		 * {@see ToolboxService}, damit die Regeln zentral und testbar bleiben.
+		 *
+		 * @return array<string,mixed>
+		 */
+		private function collect_toolbox_input(): array {
+			return array(
+				'title'        => isset( $_POST['title'] ) ? wp_unslash( $_POST['title'] ) : '',
+				'url'          => isset( $_POST['url'] ) ? wp_unslash( $_POST['url'] ) : '',
+				'description'  => isset( $_POST['description'] ) ? wp_unslash( $_POST['description'] ) : '',
+				'icon'         => isset( $_POST['icon'] ) ? sanitize_key( wp_unslash( $_POST['icon'] ) ) : '',
+				'open_new_tab' => ! empty( $_POST['open_new_tab'] ),
 			);
 		}
 

@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Neuer Werkzeugkasten „Toolbox“: In allen Foren einer Arbeitsgruppe erscheint
+  über den Asgaros-Hook `asgarosforum_custom_header_menu` ein Menüpunkt
+  „Toolbox“, der einen Dialog mit den konfigurierten Links der Arbeitsgruppe und
+  einem Einstieg für die spätere Dokumentenansicht öffnet. Der Dialog ist auch
+  in Topic-, Antwort- und Bearbeiten-Ansichten verfügbar und funktioniert per
+  serverseitig gerendertem Anker auch ohne JavaScript.
+- Arbeitsgruppenverantwortliche verwalten die Links unter dem neuen
+  Verwaltungstab „Toolbox“ (Hinzufügen, Bearbeiten, Löschen, Sortieren). URLs
+  werden serverseitig validiert (nur http/https bzw. site-relative Pfade) und
+  bei Ausgabe konsequent escaped.
+- Neue Tabelle `{prefix}afspaces_space_links` (Repository
+  `SpaceLinkRepository`); Anlage bei Aktivierung und Upgrade, Entfernung bei
+  vollständiger Deinstallation.
+- Erweiterungsstelle für die geplante Dokumentenansicht:
+  Filter `afspaces_toolbox_documents_content`. Die eigentliche Dateisuche wird
+  in einem Folgeauftrag umgesetzt.
+- Plugin-Version auf 0.5.0 angehoben; DB-Version auf 3.
+
 - Beitrittsanfragen-Tabelle verbessert: Nachrichten und Aktionen bleiben ohne
   Umbruch lesbar und die Aktionsformulare werden kompakt untereinander angeordnet.
   Technische Statuswerte werden in allen betroffenen Frontend-Ansichten zentral

@@ -117,6 +117,21 @@ Spaces geschützt; seine Löschung erfolgt ausschließlich über den separaten
 Arbeitsgruppen-Lifecycle. Die Aktion löscht das Asgaros-Forum inklusive seiner
 Inhalte und entfernt danach die Space-Forum-Zuordnung.
 
+Toolbox-Aktionen (Werkzeugkasten/Links), verarbeitet über `ToolboxService`:
+
+| `afspaces_action` | Felder | Effekt | Redirect |
+| --- | --- | --- | --- |
+| `add_toolbox_link` | `title`, `url`, optional `description`, `icon`, `open_new_tab` | Link anlegen | `toolbox-links` |
+| `update_toolbox_link` | `toolbox_link_id`, `title`, `url`, optional `description`, `icon`, `open_new_tab` | Link ändern | `toolbox-links` |
+| `delete_toolbox_link` | `toolbox_link_id` | Link löschen | `toolbox-links` |
+| `move_toolbox_link` | `toolbox_link_id`, `direction` (`up`/`down`) | Reihenfolge um eine Position ändern | `toolbox-links` |
+
+Alle Toolbox-Aktionen prüfen `SpacePolicy::can_manage`. Titel und URL werden im
+`ToolboxService` über `SpaceLink::sanitize_title()` bzw.
+`SpaceLink::sanitize_url()` validiert (nur `http`/`https` oder site-relative
+Pfade; gefährliche Schemata werden verworfen). Ein Link kann nur bearbeitet oder
+gelöscht werden, wenn er zur angegebenen `space_id` gehört.
+
 ## Neue Aktion hinzufügen
 
 1. Zweig in `handle_actions()` ergänzen und Parameter sanitisieren (`sanitize_text_field` / `absint` / `sanitize_textarea_field`).

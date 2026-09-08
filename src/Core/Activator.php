@@ -46,6 +46,8 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 			// Eigene Tabellen anlegen.
 			$spaces = new SpaceRepository();
 			$spaces->install();
+			$space_links = new \AFSpaces\Adapters\Database\SpaceLinkRepository();
+			$space_links->install();
 			$audit = new AuditRepository();
 			$audit->install();
 			$invitations = new InvitationRepository();

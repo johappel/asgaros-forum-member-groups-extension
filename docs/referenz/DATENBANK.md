@@ -61,6 +61,23 @@ inklusive seiner Inhalte und danach diese Zuordnung. Die Primärzuordnung kann
 | `topic_ids` | `longtext` | NOT NULL | serialisierte Topic-ID-Liste |
 | `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
+## `afspaces_space_links` — `SpaceLinkRepository::install()`
+
+Toolbox-Links (Werkzeugkasten) einer Arbeitsgruppe.
+
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `id` | `int unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `space_id` | `int unsigned` | NOT NULL | `KEY space_id`; `KEY space_sort` (`space_id`, `sort_order`) |
+| `title` | `varchar(200)` | NOT NULL, Default leer | — |
+| `url` | `text` | NOT NULL | serverseitig auf `http`/`https` bzw. site-relative Pfade validiert |
+| `description` | `text` | NOT NULL | optional |
+| `icon` | `varchar(40)` | NOT NULL, Default leer | Icon-Schlüssel aus `SpaceLink::icon_options()` |
+| `sort_order` | `int unsigned` | NOT NULL, Default `0` | Anzeigereihenfolge |
+| `open_new_tab` | `tinyint(1) unsigned` | NOT NULL, Default `0` | — |
+| `created_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
+| `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
+
 ## `afspaces_invitations` — `InvitationRepository::install()`
 
 | Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
@@ -148,8 +165,8 @@ Audit-Einträge enthalten keine Tokens oder Nachrichtentexte.
 
 ## Installation, Upgrade und Löschung
 
-- `Activator::activate()` installiert alle neun Tabellen und registriert die Capabilities.
-- `Plugin::maybe_upgrade()` stellt die Hub-Seite wieder her, ruft `SpaceRepository::install()` und `SearchIndexRepository::install()` erneut auf und plant den Reindex. `dbDelta()` ist dabei der vorhandene Upgrade-Mechanismus.
+- `Activator::activate()` installiert alle Plugin-Tabellen (inklusive `afspaces_space_links`) und registriert die Capabilities.
+- `Plugin::maybe_upgrade()` stellt die Hub-Seite wieder her, ruft `SpaceRepository::install()`, `SpaceLinkRepository::install()` und `SearchIndexRepository::install()` erneut auf und plant den Reindex. `dbDelta()` ist dabei der vorhandene Upgrade-Mechanismus.
 - `SpaceRepository::install()` ergänzt den eindeutigen `forum_id`-Index nach der Dublettenbereinigung.
 - `Uninstaller::uninstall()` löscht Tabellen nur bei ausdrücklichem Opt-in über `afspaces_cleanup_on_uninstall`; ohne Opt-in bleiben sie bestehen.
 - Es gibt keine Fremdschlüssel und keine automatische Löschung zugehöriger Asgaros-Foren, Gruppen, Kategorien oder Beiträge.

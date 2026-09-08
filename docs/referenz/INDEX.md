@@ -19,6 +19,7 @@ Nachschlagewerk für Entwickler. Jede Seite ist auf schnelles Finden ausgelegt: 
 
 - [BEREICH-mitglieder-einladungen.md](BEREICH-mitglieder-einladungen.md) — Mitgliederverwaltung, Einladungen, Invite-Links, Beitrittsanfragen.
 - [BEREICH-private-arbeitsgruppen.md](BEREICH-private-arbeitsgruppen.md) — Gründung, Lifecycle, Moderation, Metadaten.
+- [BEREICH-toolbox.md](BEREICH-toolbox.md) — Werkzeugkasten (Toolbox): Forum-Menüpunkt, Dialog, Linkverwaltung, geplante Dokumente.
 - [BEREICH-suche.md](BEREICH-suche.md) — Keyword-, Hybrid- und semantische Suche, Overlay, Indexer.
 
 ## Konstanten-Schnellübersicht
@@ -65,6 +66,7 @@ Nur die WordPress-Rolle `administrator` erhält diese Caps bei Aktivierung (`Cap
 | `afspaces_space_managers` | `SpaceRepository` | dito |
 | `afspaces_space_forums` | `SpaceRepository` | dito |
 | `afspaces_space_meta` | `SpaceMetaRepository` | `Activator::activate` |
+| `afspaces_space_links` | `SpaceLinkRepository` | `Activator::activate`, `Plugin::maybe_upgrade` |
 | `afspaces_invitations` | `InvitationRepository` | `Activator::activate` |
 | `afspaces_invite_links` | `InviteLinkRepository` | `Activator::activate` |
 | `afspaces_join_requests` | `JoinRequestRepository` | `Activator::activate` |
@@ -104,6 +106,7 @@ Deinstallation bewahrt Tabellen und Optionen standardmäßig. Vollständiges Cle
 | `VIEW_CREATE` | `create` | nein |
 | `VIEW_APPROVALS` | `approvals` | nein |
 | `VIEW_MODERATION` | `moderation` | ja |
+| `VIEW_TOOLBOX` | `toolbox-links` | ja |
 | `VIEW_SEARCH` | `search` | nein |
 
 Links immer über `SpacesUrls::hub_url( $view, $args )` bauen. Alte Einzelseiten werden per `SpacesUrls::legacy_slug_map` und `SpacesHubController::redirect_legacy_pages` umgeleitet.

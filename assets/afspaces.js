@@ -281,6 +281,98 @@
 		}
 	});
 
+	// Toolbox-Dialog (Werkzeugkasten). Ohne JavaScript bleibt der Dialog über
+	// den Anker im Footer erreichbar; JavaScript ergänzt Modal-Verhalten,
+	// Fokusfalle und das Schließen per Escape/Backdrop.
+	(function () {
+		var lastTrigger = null;
+
+		function getDialog() {
+			return document.getElementById('afspaces-toolbox-dialog');
+		}
+
+		function focusables(dialog) {
+			return Array.prototype.slice.call(
+				dialog.querySelectorAll('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])')
+			).filter(function (el) {
+				return el.offsetParent !== null || el === document.activeElement;
+			});
+		}
+
+		function openDialog(trigger) {
+			var dialog = getDialog();
+			if (!dialog) {
+				return;
+			}
+			lastTrigger = trigger || null;
+			dialog.hidden = false;
+			dialog.classList.add('is-open');
+			document.body.classList.add('afspaces-toolbox-open');
+			var closeBtn = dialog.querySelector('.afspaces-toolbox-close');
+			if (closeBtn) {
+				closeBtn.focus();
+			}
+		}
+
+		function closeDialog() {
+			var dialog = getDialog();
+			if (!dialog || dialog.hidden) {
+				return;
+			}
+			dialog.classList.remove('is-open');
+			dialog.hidden = true;
+			document.body.classList.remove('afspaces-toolbox-open');
+			if (lastTrigger && typeof lastTrigger.focus === 'function') {
+				lastTrigger.focus();
+			}
+			lastTrigger = null;
+		}
+
+		document.addEventListener('click', function (event) {
+			var opener = event.target.closest('[data-afspaces-toolbox-open]');
+			if (opener) {
+				event.preventDefault();
+				openDialog(opener);
+				return;
+			}
+
+			var closer = event.target.closest('[data-afspaces-toolbox-close]');
+			if (closer) {
+				event.preventDefault();
+				closeDialog();
+			}
+		});
+
+		document.addEventListener('keydown', function (event) {
+			var dialog = getDialog();
+			if (!dialog || dialog.hidden) {
+				return;
+			}
+
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				closeDialog();
+				return;
+			}
+
+			if (event.key === 'Tab') {
+				var items = focusables(dialog);
+				if (!items.length) {
+					return;
+				}
+				var first = items[0];
+				var last = items[items.length - 1];
+				if (event.shiftKey && document.activeElement === first) {
+					event.preventDefault();
+					last.focus();
+				} else if (!event.shiftKey && document.activeElement === last) {
+					event.preventDefault();
+					first.focus();
+				}
+			}
+		});
+	})();
+
 	// Optionaler mehrstufiger Raumassistent (Progressive Enhancement).
 	// Ohne JavaScript bleibt das Formular ein zugängliches Ein-Seiten-Formular.
 	function enhanceWizard(form) {

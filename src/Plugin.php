@@ -117,6 +117,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$join_repo = new JoinRequestRepository();
 			$link_repo = new \AFSpaces\Adapters\Database\InviteLinkRepository();
 			$space_meta = new SpaceMetaRepository();
+			$link_repo_toolbox = new \AFSpaces\Adapters\Database\SpaceLinkRepository();
 			$members = new MemberService( $spaces, $asgaros, $policy, $audit, $identity );
 			$invites = new InvitationService( $spaces, $inv_repo, $asgaros, $policy, $audit, $identity );
 			$join_requests = new JoinRequestService( $spaces, $join_repo, $asgaros, $policy, $audit, $identity );
@@ -126,6 +127,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$space_creation = new SpaceCreationService( $spaces, $asgaros, $space_meta, $audit );
 			$space_lifecycle = new SpaceLifecycleService( $spaces, $asgaros, $space_meta, $audit );
 			$space_moderation = new SpaceModerationService( $spaces, $asgaros, $policy, $audit );
+			$toolbox = new \AFSpaces\Application\ToolboxService( $spaces, $link_repo_toolbox, $policy, $audit );
 			$forum_search = new ForumSearchService( $asgaros, $identity );
 			$search_index = new SearchIndexRepository();
 			$wp_search = new \AFSpaces\Search\WpPostSearch( \AFSpaces\Search\SearchSettings::wp_post_types(), $identity );
@@ -134,7 +136,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_indexer = new SearchIndexer( $asgaros, $search_index, $identity );
 			$search_indexer->init();
 
-			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle, $space_moderation );
+			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle, $space_moderation, $toolbox );
 			$frontend->init();
 
 			$appearance = new AppearanceSettingsPage();
@@ -192,8 +194,12 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_modal->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
-			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle, $space_moderation, $identity );
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle, $space_moderation, $toolbox, $identity );
 			$hub->init();
+
+			// Werkzeugkasten (Toolbox) im Forum-Menü der Arbeitsgruppen.
+			$forum_toolbox = new \AFSpaces\Interface\ForumToolbox( $spaces, $asgaros, $toolbox );
+			$forum_toolbox->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
 			$navigation = new ForumNavigation( $spaces, $inv_repo, $join_repo, $asgaros, $space_meta, $space_creation, $space_lifecycle );
@@ -406,6 +412,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			// Neue Strukturen für bestehende Installationen nachziehen.
 			$spaces = new SpaceRepository();
 			$spaces->install();
+			$link_repo = new \AFSpaces\Adapters\Database\SpaceLinkRepository();
+			$link_repo->install();
 			$search_index = new SearchIndexRepository();
 			$search_index->install();
 			SearchIndexer::schedule();

@@ -9,8 +9,8 @@ Diese Referenz ist aus den `add_action()`, `add_filter()`, `do_action()` und `ap
 | `init` | `FrontendController::init`; keine Argumente | — | serverseitige Frontend-Actions verarbeiten |
 | `wp_ajax_afspaces_action` | `FrontendController::init`; keine Argumente | — | AJAX-Variante derselben Frontend-Actions |
 | `rest_api_init` | `Plugin::init`; keine Argumente | — | REST-Routen registrieren |
-| `wp_enqueue_scripts` | `FrontendController`, `ForumNavigation`, `ForumStyleLayer` (Priorität 999), `SearchModal`; keine Argumente | — | Frontend-Assets laden; ForumStyleLayer lädt den Asgaros-Override nur auf `[forum]`-Seiten |
-| `wp_footer` | `SearchModal::init`; keine Argumente | — | Such-Overlay ausgeben |
+| `wp_enqueue_scripts` | `FrontendController`, `ForumNavigation`, `ForumStyleLayer` (Priorität 999), `SearchModal`, `ForumToolbox`; keine Argumente | — | Frontend-Assets laden; ForumStyleLayer lädt den Asgaros-Override nur auf `[forum]`-Seiten; `ForumToolbox` lädt Assets nur auf Forumseiten einer Arbeitsgruppe |
+| `wp_footer` | `SearchModal::init`, `ForumToolbox::init`; keine Argumente | — | Such-Overlay bzw. Toolbox-Dialog ausgeben |
 | `template_redirect` | `SpacesHubController::init`; keine Argumente | — | Legacy-Seiten und die Asgaros-Suche umleiten |
 | `admin_menu` / `admin_init` | Settings-Pages; keine Argumente | — | Admin-Seiten und Settings registrieren |
 | `admin_post_afspaces_search_reindex` | `SearchSettingsPage::init`; keine Argumente | — | manuellen Reindex ausführen |
@@ -34,6 +34,7 @@ Navigationsbereich entfernt wurde.
 | `asgarosforum_filter_forum_menu` | `AsgarosAdapter::add_forum_subscription_menu_entry`; Asgaros-Forum-Menü-Markup | Menü-Markup | Forum-Abo-Aktion im `.forum-menu` |
 | `asgarosforum_filter_topic_menu` | `AsgarosAdapter::add_topic_subscription_menu_entry`; Asgaros-Themenmenü-Markup | Menü-Markup | Themen-Abo-Aktion im `.forum-menu` |
 | `asgarosforum_content_header` | `ForumNavigation::init`; keine Argumente | — | Einstiegs-Panel rendern |
+| `asgarosforum_custom_header_menu` | `ForumToolbox::init`; keine Argumente | — | Menüpunkt „Toolbox“ direkt in `#forum-navigation` ausgeben (in allen Forum-, Topic- und Editieransichten aktiv), sobald `get_current_forum_id()` einem aktiven Space zugeordnet ist |
 | `asgarosforum_content_top` | `ForumNavigation::init`; keine Argumente | — | Kategorie-Farbmarkierungen rendern |
 | `asgarosforum_after_post_message` | `ForumModerationControls::init`, Priorität 20, 2 Argumente: `int $author_id`, `int $post_id` | — | raumbezogene Moderationskontrollen rendern |
 | `asgarosforum_filter_user_groups_taxonomy_name` | `AsgarosAdapter`; aktueller Taxonomiename | Taxonomiename, Default `asgarosforum-usergroup` | interne Adapter-Auflösung; nicht als AFSpaces-Fach-API verwenden |
@@ -58,6 +59,7 @@ Alle folgenden Filter sind im aktuellen Code öffentliche Erweiterungspunkte. Fi
 | `afspaces_working_group_topics_taxonomy` | `string $taxonomy` | string; Default `themen` | Topic-Taxonomie für Arbeitsgruppen |
 | `afspaces_space_forum_url` | `string $url`, `Space $space`, `array<string,mixed>|null $forum`, `int $user_id` | string; zuvor ermittelter Forum-Link | Arbeitsgruppen-Forum-Link in Views/Moderation |
 | `afspaces_forum_home_url` | `string $url` | string; Default `home_url('/forum/')` | Forum-Startseite in Breadcrumbs/Navi |
+| `afspaces_toolbox_documents_content` | `string $content`, `Space $space`, `int $actor_user_id` | string; Default leer | Erweiterungsstelle für die geplante Dokumentenansicht im Toolbox-Dialog; nicht-leere, bereits escapte Rückgabe ersetzt den Platzhalter |
 | `afspaces_hub_navigation_tabs` | `array<int,array<string,mixed>> $tabs`, `string $view`, `int $space_id`, `int $actor` | Tab-Array; AFSpaces-Standardtabs | globale Hub-Navigation erweitern |
 | `afspaces_hub_space_navigation_tabs` | `array<int,array<string,mixed>> $tabs`, `string $view`, `int $space_id`, `int $actor` | Tab-Array; AFSpaces-Standardtabs | Space-Kontextnavigation erweitern |
 | `afspaces_panel_cache_ttl` | `int $ttl` | int Sekunden; Default `30`; Werte `<= 0` deaktivieren Cache | Forum-Einstiegs-Panel |

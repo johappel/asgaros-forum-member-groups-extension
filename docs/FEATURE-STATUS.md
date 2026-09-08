@@ -1,5 +1,32 @@
 # Feature-Status
 
+## Werkzeugkasten „Toolbox“ (Links umgesetzt, Dokumente geplant)
+
+Status: Toolbox mit Linkverwaltung umgesetzt und live abgenommen; die
+Dokumentenansicht ist ausdrücklich als Folgeauftrag markiert und noch **nicht**
+implementiert.
+
+- In allen Foren einer aktiven Arbeitsgruppe erscheint über den Asgaros-Hook
+  `asgarosforum_custom_header_menu` der Menüpunkt „Toolbox“. Er ist in Forum-,
+  Topic-, Neues-Thema-, Antwort- und Bearbeiten-Ansichten verfügbar.
+- Ein Klick öffnet einen Dialog mit den konfigurierten Links der Arbeitsgruppe
+  und einem Einstieg „Dokumente“. Der Dialog ist server-seitig gerendert und
+  auch ohne JavaScript über den Anker `#afspaces-toolbox-dialog` nutzbar;
+  JavaScript ergänzt Modal-Verhalten, Fokusfalle und Schließen per Escape.
+- Verantwortliche verwalten die Links im Hub-Tab „Toolbox“
+  (`toolbox-links`): hinzufügen, bearbeiten, löschen, sortieren. Die
+  Rechteprüfung nutzt ausschließlich `SpacePolicy::can_manage`.
+- URLs werden serverseitig validiert (`http`/`https` oder site-relative Pfade);
+  gefährliche Schemata werden verworfen. Ausgaben sind konsequent escaped.
+- Persistenz in der eigenen Tabelle `afspaces_space_links`
+  (`SpaceLinkRepository`); Anlage bei Aktivierung und Upgrade.
+- **Dokumente (Folgeauftrag):** Der Einstieg ist als klar gekennzeichnete,
+  noch nicht aktive Erweiterungsstelle umgesetzt. Der spätere Turn soll alle in
+  den zugehörigen Foren (Primär- und Zusatzforen) hochgeladenen Dateien
+  erfassen und mindestens nach Dateiname sowie Upload-Datum sortierbar
+  darstellen. Anbindung über den Filter `afspaces_toolbox_documents_content`.
+- Referenz: [referenz/BEREICH-toolbox.md](referenz/BEREICH-toolbox.md).
+
 ## Asgaros-Forum-Style-Layer (Issues #8, #11, #12, #16)
 
 Status: technische Grundlage umgesetzt; weitergehende Gestaltung offen.
