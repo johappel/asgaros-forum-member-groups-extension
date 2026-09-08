@@ -75,22 +75,38 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumDocumentControls' ) ) {
 			/** @var Space $space */
 			$space     = $context['space'];
 			$redirect  = (string) ( $context['post_link'] ?? '' );
-			$has_rows  = false;
+
+			// Nur die tatsächlich darstellbaren Zeilen sammeln, um die Dopplung
+			// des Dateinamens bei einer einzelnen Datei zu vermeiden.
+			$rows = array();
+			foreach ( $context['uploads'] as $row ) {
+				$document = $row['document'] instanceof SpaceDocument ? $row['document'] : null;
+				$can_use  = ! empty( $row['can_use'] );
+				if ( null === $document && ! $can_use ) {
+					continue;
+				}
+				$rows[] = $row;
+			}
+
+			if ( empty( $rows ) ) {
+				return;
+			}
+
+			// Asgaros zeigt den Dateinamen bereits in „Hochgeladene Dateien“.
+			// Bei genau einer Datei wird er hier nicht wiederholt.
+			$show_filename = count( $rows ) > 1;
 
 			ob_start();
 			echo '<div class="afspaces-post-documents" data-afspaces-post-documents>';
-			foreach ( $context['uploads'] as $row ) {
+			foreach ( $rows as $row ) {
 				$filename = (string) $row['filename'];
 				$document = $row['document'] instanceof SpaceDocument ? $row['document'] : null;
 				$can_use  = ! empty( $row['can_use'] );
 
-				if ( null === $document && ! $can_use ) {
-					continue;
-				}
-
-				$has_rows = true;
 				echo '<div class="afspaces-post-document-row">';
-				echo '<span class="afspaces-post-document-file"><span class="fas fa-file" aria-hidden="true"></span> ' . esc_html( $filename ) . '</span>';
+				if ( $show_filename ) {
+					echo '<span class="afspaces-post-document-file"><span class="fas fa-file" aria-hidden="true"></span> ' . esc_html( $filename ) . '</span>';
+				}
 				echo '<span class="afspaces-post-document-status">';
 
 				if ( null !== $document ) {
@@ -110,11 +126,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\ForumDocumentControls' ) ) {
 				echo '</div>';
 			}
 			echo '</div>';
-			$html = (string) ob_get_clean();
-
-			if ( $has_rows ) {
-				echo $html; // Bereits mit esc_* aufgebaut.
-			}
+			echo (string) ob_get_clean(); // Bereits mit esc_* aufgebaut.
 		}
 
 		/**

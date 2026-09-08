@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.0.0] - 2026-09-08
 
 - Neue Dokumentbibliothek pro Arbeitsgruppe: Bestehende Asgaros-Anhänge können
   zusätzlich als „Gruppendokument“ gekennzeichnet werden – ohne zweite

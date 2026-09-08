@@ -112,7 +112,10 @@ Space aktiv, Beitrag existiert, Beitrag gehört zu Primär- **oder** Zusatzforum
 Konsumiert (Asgaros):
 
 - `asgarosforum_after_post_message` (`author_id`, `post_id`) – rendert die
-  Dokumentaktionen unter der Uploadliste jedes Beitrags.
+  Dokumentaktionen unter der Uploadliste jedes Beitrags. Der Dateiname wird
+  nur wiederholt (`afspaces-post-document-file`), wenn ein Beitrag **mehrere**
+  aufnehmbare Dateien enthält; bei genau einer Datei zeigt bereits die
+  Asgaros-Liste „Hochgeladene Dateien“ den Namen, sodass er hier entfällt.
 - `asgarosforum_after_delete_post` (`post_id`) – entfernt verwaiste
   Dokument-Metadaten. Beim Löschen eines Themas feuert Asgaros diesen Hook je
   Beitrag; zusätzlich filtert `DocumentService::list_documents()` defensiv.
