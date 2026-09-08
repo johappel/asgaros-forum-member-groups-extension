@@ -154,7 +154,10 @@
 			moderate_delete_topic: true,
 			moderate_delete_post: true,
 			moderate_move_topic: true,
-			moderate_move_post: true
+			moderate_move_post: true,
+			add_document: true,
+			update_document: true,
+			remove_document: true
 		};
 
 		if (nonAjaxActions[actionInput.value]) {

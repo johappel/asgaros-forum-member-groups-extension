@@ -19,7 +19,8 @@ Nachschlagewerk für Entwickler. Jede Seite ist auf schnelles Finden ausgelegt: 
 
 - [BEREICH-mitglieder-einladungen.md](BEREICH-mitglieder-einladungen.md) — Mitgliederverwaltung, Einladungen, Invite-Links, Beitrittsanfragen.
 - [BEREICH-private-arbeitsgruppen.md](BEREICH-private-arbeitsgruppen.md) — Gründung, Lifecycle, Moderation, Metadaten.
-- [BEREICH-toolbox.md](BEREICH-toolbox.md) — Werkzeugkasten (Toolbox): Forum-Menüpunkt, Dialog, Linkverwaltung, geplante Dokumente.
+- [BEREICH-toolbox.md](BEREICH-toolbox.md) — Werkzeugkasten (Toolbox): Forum-Menüpunkt, Dialog, Linkverwaltung, Dokumentvorschau.
+- [BEREICH-dokumente.md](BEREICH-dokumente.md) — Dokumentbibliothek: Anhang vs. Dokument, Datenmodell, Sichtbarkeit, Rechte, Asgaros-Integration, Ansichten.
 - [BEREICH-suche.md](BEREICH-suche.md) — Keyword-, Hybrid- und semantische Suche, Overlay, Indexer.
 
 ## Konstanten-Schnellübersicht

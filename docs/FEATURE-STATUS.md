@@ -1,17 +1,16 @@
 # Feature-Status
 
-## Werkzeugkasten „Toolbox“ (Links umgesetzt, Dokumente geplant)
+## Werkzeugkasten „Toolbox“ (Links und Dokumente umgesetzt)
 
-Status: Toolbox mit Linkverwaltung umgesetzt und live abgenommen; die
-Dokumentenansicht ist ausdrücklich als Folgeauftrag markiert und noch **nicht**
-implementiert.
+Status: Toolbox mit Linkverwaltung und Dokumentbibliothek umgesetzt und live
+abgenommen.
 
 - In allen Foren einer aktiven Arbeitsgruppe erscheint über den Asgaros-Hook
   `asgarosforum_custom_header_menu` der Menüpunkt „Toolbox“. Er ist in Forum-,
   Topic-, Neues-Thema-, Antwort- und Bearbeiten-Ansichten verfügbar.
 - Ein Klick öffnet einen Dialog mit den konfigurierten Links der Arbeitsgruppe
-  und einem Einstieg „Dokumente“. Der Dialog ist server-seitig gerendert und
-  auch ohne JavaScript über den Anker `#afspaces-toolbox-dialog` nutzbar;
+  und einer kompakten Dokumentvorschau. Der Dialog ist server-seitig gerendert
+  und auch ohne JavaScript über den Anker `#afspaces-toolbox-dialog` nutzbar;
   JavaScript ergänzt Modal-Verhalten, Fokusfalle und Schließen per Escape.
 - Verantwortliche verwalten die Links im Hub-Tab „Toolbox“
   (`toolbox-links`): hinzufügen, bearbeiten, löschen, sortieren. Die
@@ -20,12 +19,32 @@ implementiert.
   gefährliche Schemata werden verworfen. Ausgaben sind konsequent escaped.
 - Persistenz in der eigenen Tabelle `afspaces_space_links`
   (`SpaceLinkRepository`); Anlage bei Aktivierung und Upgrade.
-- **Dokumente (Folgeauftrag):** Der Einstieg ist als klar gekennzeichnete,
-  noch nicht aktive Erweiterungsstelle umgesetzt. Der spätere Turn soll alle in
-  den zugehörigen Foren (Primär- und Zusatzforen) hochgeladenen Dateien
-  erfassen und mindestens nach Dateiname sowie Upload-Datum sortierbar
-  darstellen. Anbindung über den Filter `afspaces_toolbox_documents_content`.
 - Referenz: [referenz/BEREICH-toolbox.md](referenz/BEREICH-toolbox.md).
+
+## Dokumentbibliothek (Gruppendokumente)
+
+Status: umgesetzt, unit- und live-verifiziert. Reale Browser-/axe-Abnahme bleibt
+offen.
+
+- Ein Dokument ist kein neuer Upload: bestehende Asgaros-Anhänge
+  (`forum_posts.uploads`) werden zusätzlich als „Gruppendokument“ gekennzeichnet.
+  Keine zweite Upload-Logik, keine Dateikopie.
+- Aufnahme über den Asgaros-Hook `asgarosforum_after_post_message`: unter der
+  Uploadliste jedes Beitrags erscheint „Als Gruppendokument aufnehmen“ bzw. bei
+  erfassten Dateien „✓ Gruppendokument · Bearbeiten · Aus Dokumenten entfernen“.
+- Metadaten (Titel, Dokumentthema, Sichtbarkeit) in der eigenen Tabelle
+  `afspaces_space_documents` (`SpaceDocumentRepository`); natürlicher Schlüssel
+  `space_id + asgaros_post_id + filename`.
+- Sichtbarkeit `members` (Standard) / `authenticated`; `public` vorbereitet, aber
+  nur über den Filter `afspaces_documents_public_enabled` freischaltbar. Dokument-
+  und Forumsberechtigung sind getrennt: Nicht-Mitglieder sehen bei Freigabe die
+  Datei, aber keinen internen Forumkontext.
+- Vollständige Dokumentansicht (`SpacesUrls::VIEW_DOCUMENTS`) mit Ansichten
+  „Alle/Nach Themen/Neueste“, Sortierung (Dateiname/Upload-Datum), Themenfilter
+  und Suche; erreichbar aus Forum-Toolbox und Gruppen-Detailansicht.
+- Verwaiste Datensätze werden per `asgarosforum_after_delete_post` bereinigt und
+  in `DocumentService::list_documents()` defensiv gefiltert.
+- Referenz: [referenz/BEREICH-dokumente.md](referenz/BEREICH-dokumente.md).
 
 ## Asgaros-Forum-Style-Layer (Issues #8, #11, #12, #16)
 

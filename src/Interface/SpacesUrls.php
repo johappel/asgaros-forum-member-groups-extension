@@ -54,6 +54,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 		public const VIEW_APPROVALS      = 'approvals';
 		public const VIEW_MODERATION     = 'moderation';
 		public const VIEW_TOOLBOX        = 'toolbox-links';
+		public const VIEW_DOCUMENTS      = 'documents';
 		public const VIEW_SEARCH         = 'search';
 
 		/**
@@ -91,6 +92,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesUrls' ) ) {
 				self::VIEW_APPROVALS,
 				self::VIEW_MODERATION,
 				self::VIEW_TOOLBOX,
+				self::VIEW_DOCUMENTS,
 				self::VIEW_SEARCH,
 			);
 		}

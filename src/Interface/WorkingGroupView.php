@@ -14,6 +14,7 @@ use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InvitationService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\WorkingGroupService;
+use AFSpaces\Application\DocumentService;
 use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\Capabilities;
 use AFSpaces\Domain\WorkingGroupMeta;
@@ -31,14 +32,16 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 		private JoinRequestService $join_requests;
 		private WorkingGroupService $working_groups;
 		private UserIdentityService $identity;
+		private ?DocumentService $documents;
 
-		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, JoinRequestService $join_requests, WorkingGroupService $working_groups, ?UserIdentityService $identity = null ) {
+		public function __construct( SpaceRepository $spaces, AsgarosAdapterInterface $asgaros, InvitationService $invitations, JoinRequestService $join_requests, WorkingGroupService $working_groups, ?UserIdentityService $identity = null, ?DocumentService $documents = null ) {
 			$this->spaces = $spaces;
 			$this->asgaros = $asgaros;
 			$this->invitations = $invitations;
 			$this->join_requests = $join_requests;
 			$this->working_groups = $working_groups;
 			$this->identity = $identity ?: new UserIdentityService();
+			$this->documents = $documents;
 		}
 
 		public function render( int $space_id ): string {
@@ -140,6 +143,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 						<?php endif; ?>
 					</div>
 
+					<?php echo $this->render_documents_section( $space_id, $actor ); ?>
+
 					<?php if ( $can_request ) : ?>
 						<div class="afspaces-join-panel">
 							<h3 class="afspaces-join-heading"><?php echo esc_html__( 'Dieser Arbeitsgruppe beitreten', 'afspaces' ); ?></h3>
@@ -173,6 +178,66 @@ if ( ! class_exists( 'AFSpaces\\Interface\\WorkingGroupView' ) ) {
 			</section>
 			<?php
 
+			return (string) ob_get_clean();
+		}
+
+		/**
+		 * Kompakter Dokumentbereich in der Gruppen-Detailansicht.
+		 *
+		 * Zeigt nur die für den Betrachter sichtbaren Dokumente.
+		 *
+		 * @param int $space_id Space-ID.
+		 * @param int $actor    Betrachter.
+		 * @return string
+		 */
+		private function render_documents_section( int $space_id, int $actor ): string {
+			if ( null === $this->documents ) {
+				return '';
+			}
+
+			$documents = $this->documents->list_documents(
+				$space_id,
+				$actor,
+				array( 'sort' => DocumentService::SORT_DATE_DESC )
+			);
+			$all_url = SpacesUrls::hub_url( SpacesUrls::VIEW_DOCUMENTS, array( 'space_id' => $space_id ) );
+
+			ob_start();
+			?>
+			<div class="afspaces-working-group-documents">
+				<strong><?php echo esc_html__( 'Dokumente', 'afspaces' ); ?></strong>
+				<?php if ( empty( $documents ) ) : ?>
+					<p><?php echo esc_html__( 'Für diese Arbeitsgruppe sind derzeit keine sichtbaren Dokumente vorhanden.', 'afspaces' ); ?></p>
+				<?php else : ?>
+					<p class="afspaces-working-group-documents-count">
+						<?php
+						echo esc_html(
+							sprintf(
+								/* translators: %d: Anzahl der Dokumente */
+								_n( '%d Dokument', '%d Dokumente', count( $documents ), 'afspaces' ),
+								count( $documents )
+							)
+						);
+						?>
+					</p>
+					<ul class="afspaces-working-group-documents-list">
+						<?php foreach ( array_slice( $documents, 0, 5 ) as $document ) : ?>
+							<?php $model = $this->documents->document_view_model( $document, $actor ); ?>
+							<li>
+								<?php if ( '' !== $model['url'] ) : ?>
+									<a href="<?php echo esc_url( $model['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $model['title'] ); ?></a>
+								<?php else : ?>
+									<?php echo esc_html( $model['title'] ); ?>
+								<?php endif; ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+				<p>
+					<a class="afspaces-button afspaces-button-secondary" href="<?php echo esc_url( $all_url ); ?>"><?php echo esc_html__( 'Alle Dokumente', 'afspaces' ); ?></a>
+				</p>
+			</div>
+			<?php
 			return (string) ob_get_clean();
 		}
 

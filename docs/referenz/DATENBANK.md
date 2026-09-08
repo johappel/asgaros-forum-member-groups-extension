@@ -78,6 +78,23 @@ Toolbox-Links (Werkzeugkasten) einer Arbeitsgruppe.
 | `created_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 | `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
 
+## `afspaces_space_documents` — `SpaceDocumentRepository::install()`
+
+AFSpaces-Metadaten zu einem bestehenden Asgaros-Anhang (kein neuer Uploadspeicher).
+
+| Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
+| --- | --- | --- | --- |
+| `id` | `int unsigned` | NOT NULL, AUTO_INCREMENT | PRIMARY KEY |
+| `space_id` | `int unsigned` | NOT NULL | `KEY space_id`; `KEY space_topic` (`space_id`, `document_topic`); `KEY space_created` (`space_id`, `created_at`) |
+| `asgaros_post_id` | `int unsigned` | NOT NULL | `KEY asgaros_post_id` |
+| `filename` | `varchar(255)` | NOT NULL, Default leer | Teil von `UNIQUE KEY space_post_file` (`space_id`, `asgaros_post_id`, `filename`) |
+| `title` | `varchar(200)` | NOT NULL, Default leer | Standard = Dateiname ohne Endung |
+| `document_topic` | `varchar(120)` | NOT NULL, Default leer | Ordnungssystem der Bibliothek (Freitext) |
+| `visibility` | `varchar(20)` | NOT NULL, Default `members` | `members` / `authenticated` / (`public`, nur bei Freischaltung) |
+| `created_by` | `bigint(20) unsigned` | NOT NULL, Default `0` | Ersteller des Dokuments |
+| `created_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
+| `updated_at` | `datetime` | NOT NULL, Default `0000-00-00 00:00:00` | — |
+
 ## `afspaces_invitations` — `InvitationRepository::install()`
 
 | Feld | SQL-Typ | NULL/Default | Schlüssel/Index |
@@ -165,8 +182,8 @@ Audit-Einträge enthalten keine Tokens oder Nachrichtentexte.
 
 ## Installation, Upgrade und Löschung
 
-- `Activator::activate()` installiert alle Plugin-Tabellen (inklusive `afspaces_space_links`) und registriert die Capabilities.
-- `Plugin::maybe_upgrade()` stellt die Hub-Seite wieder her, ruft `SpaceRepository::install()`, `SpaceLinkRepository::install()` und `SearchIndexRepository::install()` erneut auf und plant den Reindex. `dbDelta()` ist dabei der vorhandene Upgrade-Mechanismus.
+- `Activator::activate()` installiert alle Plugin-Tabellen (inklusive `afspaces_space_links` und `afspaces_space_documents`) und registriert die Capabilities.
+- `Plugin::maybe_upgrade()` stellt die Hub-Seite wieder her, ruft `SpaceRepository::install()`, `SpaceLinkRepository::install()`, `SpaceDocumentRepository::install()` und `SearchIndexRepository::install()` erneut auf und plant den Reindex. `dbDelta()` ist dabei der vorhandene Upgrade-Mechanismus.
 - `SpaceRepository::install()` ergänzt den eindeutigen `forum_id`-Index nach der Dublettenbereinigung.
 - `Uninstaller::uninstall()` löscht Tabellen nur bei ausdrücklichem Opt-in über `afspaces_cleanup_on_uninstall`; ohne Opt-in bleiben sie bestehen.
 - Es gibt keine Fremdschlüssel und keine automatische Löschung zugehöriger Asgaros-Foren, Gruppen, Kategorien oder Beiträge.

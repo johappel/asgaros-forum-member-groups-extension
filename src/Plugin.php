@@ -128,6 +128,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$space_lifecycle = new SpaceLifecycleService( $spaces, $asgaros, $space_meta, $audit );
 			$space_moderation = new SpaceModerationService( $spaces, $asgaros, $policy, $audit );
 			$toolbox = new \AFSpaces\Application\ToolboxService( $spaces, $link_repo_toolbox, $policy, $audit );
+			$document_repo = new \AFSpaces\Adapters\Database\SpaceDocumentRepository();
+			$documents = new \AFSpaces\Application\DocumentService( $spaces, $document_repo, $policy, $asgaros, $audit );
 			$forum_search = new ForumSearchService( $asgaros, $identity );
 			$search_index = new SearchIndexRepository();
 			$wp_search = new \AFSpaces\Search\WpPostSearch( \AFSpaces\Search\SearchSettings::wp_post_types(), $identity );
@@ -136,7 +138,7 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_indexer = new SearchIndexer( $asgaros, $search_index, $identity );
 			$search_indexer->init();
 
-			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle, $space_moderation, $toolbox );
+			$frontend = new FrontendController( $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $space_registration, $space_creation, $space_lifecycle, $space_moderation, $toolbox, $documents );
 			$frontend->init();
 
 			$appearance = new AppearanceSettingsPage();
@@ -194,12 +196,16 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$search_modal->init();
 
 			// Zentrale Hub-Seite mit Router-Shortcode `[afspaces]`.
-			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle, $space_moderation, $toolbox, $identity );
+			$hub = new SpacesHubController( $frontend, $spaces, $asgaros, $members, $invites, $join_requests, $invite_links, $working_groups, $hybrid_search, $space_creation, $space_lifecycle, $space_moderation, $toolbox, $documents, $identity );
 			$hub->init();
 
 			// Werkzeugkasten (Toolbox) im Forum-Menü der Arbeitsgruppen.
 			$forum_toolbox = new \AFSpaces\Interface\ForumToolbox( $spaces, $asgaros, $toolbox );
 			$forum_toolbox->init();
+
+			// Dokumentbibliothek: Aktionen im Forum, Toolbox-Vorschau und Cleanup.
+			$forum_documents = new \AFSpaces\Interface\ForumDocumentControls( $documents, $document_repo );
+			$forum_documents->init();
 
 			// Integration in die Asgaros-Forum-Navigation.
 			$navigation = new ForumNavigation( $spaces, $inv_repo, $join_repo, $asgaros, $space_meta, $space_creation, $space_lifecycle );
@@ -414,6 +420,8 @@ if ( ! class_exists( 'AFSpaces\\Plugin' ) ) {
 			$spaces->install();
 			$link_repo = new \AFSpaces\Adapters\Database\SpaceLinkRepository();
 			$link_repo->install();
+			$document_repo = new \AFSpaces\Adapters\Database\SpaceDocumentRepository();
+			$document_repo->install();
 			$search_index = new SearchIndexRepository();
 			$search_index->install();
 			SearchIndexer::schedule();

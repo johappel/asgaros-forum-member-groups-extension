@@ -55,6 +55,13 @@ Issue #15 (Topic pinnen/lösen) ist durch `SpaceModerationServiceTest` abgedeckt
 | Link-Validierung (URL-Schema, Titel, Icon) | `Domain/SpaceLink.php` | `tests/SpaceLinkDomainTest.php` |
 | Linkverwaltung, Rechteprüfung, Sortierung, Forum→Space-Auflösung | `Application/ToolboxService.php` | `tests/ToolboxServiceTest.php` |
 
+## 5b. Dokumentbibliothek (Gruppendokumente)
+
+| Feature | Quellklasse | Test |
+| --- | --- | --- |
+| Sichtbarkeits-/Titel-/Themen-/Dateinamens-Normalisierung, öffentliche Sichtbarkeit hinter Filter | `Domain/SpaceDocument.php` | `tests/SpaceDocumentDomainTest.php` |
+| Aufnahme/Idempotenz, Primär-/Zusatzforum, Rechte, Sichtbarkeit, interner Kontextschutz, Sortierung/Filter, Lifecycle | `Application/DocumentService.php` | `tests/DocumentServiceTest.php` |
+
 ## 6. Suchschicht (Search)
 
 | Feature | Quellklasse | Test |

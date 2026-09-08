@@ -42,7 +42,7 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 	 * Gruppenmitgliedschaften werden in Asgaros als WP-Term-Zuordnung
 	 * (Taxonomie `asgarosforum-usergroup`) an Benutzer gespeichert.
 	 */
-	class AsgarosAdapter implements AsgarosAdapterInterface {
+	class AsgarosAdapter implements AsgarosAdapterInterface, DocumentSourceInterface {
 
 		/**
 		 * Anforderungsprüfer.
@@ -1527,6 +1527,143 @@ if ( ! class_exists( 'AFSpaces\\Adapters\\Asgaros\\AsgarosAdapter' ) ) {
 				'topic_id' => $topic_id,
 				'forum_id' => (int) ( $row['forum_id'] ?? 0 ),
 				'is_first' => $post_id === $first_id,
+			);
+		}
+
+		/**
+		 * Gibt das gefilterte Asgaros-Upload-Verzeichnis (relativer Ordnername) zurück.
+		 *
+		 * @return string
+		 */
+		private function upload_folder(): string {
+			$folder = apply_filters( 'asgarosforum_filter_upload_folder', 'asgarosforum' );
+			return trim( (string) $folder, '/' );
+		}
+
+		/**
+		 * Liest die rohe Upload-Liste eines Beitrags aus `forum_posts.uploads`.
+		 *
+		 * @param int $post_id Beitrags-ID.
+		 * @return string[] Registrierte Dateinamen (ungefiltert nach Existenz).
+		 */
+		private function raw_post_uploads( int $post_id ): array {
+			$forum = $this->forum();
+			if ( null === $forum || $post_id < 1 ) {
+				return array();
+			}
+
+			$raw = $forum->db->get_var(
+				$forum->db->prepare( "SELECT uploads FROM {$forum->tables->posts} WHERE id = %d;", $post_id )
+			);
+			if ( empty( $raw ) ) {
+				return array();
+			}
+
+			$uploads = maybe_unserialize( $raw );
+			if ( ! is_array( $uploads ) ) {
+				return array();
+			}
+
+			$names = array();
+			foreach ( $uploads as $upload ) {
+				$name = wp_basename( (string) $upload );
+				if ( '' !== $name ) {
+					$names[] = $name;
+				}
+			}
+
+			return $names;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get_post_uploads( int $post_id ): array {
+			$names = $this->raw_post_uploads( $post_id );
+			if ( empty( $names ) ) {
+				return array();
+			}
+
+			$upload_dir = wp_upload_dir();
+			$base       = trailingslashit( (string) ( $upload_dir['basedir'] ?? '' ) ) . $this->upload_folder() . '/' . $post_id . '/';
+
+			$existing = array();
+			foreach ( $names as $name ) {
+				if ( is_file( $base . wp_basename( $name ) ) ) {
+					$existing[] = $name;
+				}
+			}
+
+			return $existing;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function post_upload_exists( int $post_id, string $filename ): bool {
+			$filename = wp_basename( $filename );
+			if ( '' === $filename ) {
+				return false;
+			}
+
+			$names = $this->raw_post_uploads( $post_id );
+			if ( ! in_array( $filename, array_map( 'wp_basename', $names ), true ) ) {
+				return false;
+			}
+
+			$upload_dir = wp_upload_dir();
+			$path       = trailingslashit( (string) ( $upload_dir['basedir'] ?? '' ) ) . $this->upload_folder() . '/' . $post_id . '/' . $filename;
+
+			return is_file( $path );
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get_upload_file_url( int $post_id, string $filename ): string {
+			if ( ! $this->post_upload_exists( $post_id, $filename ) ) {
+				return '';
+			}
+
+			$filename   = wp_basename( $filename );
+			$upload_dir = wp_upload_dir();
+			$base       = trailingslashit( (string) ( $upload_dir['baseurl'] ?? '' ) ) . $this->upload_folder() . '/' . $post_id . '/';
+
+			$encoded = function_exists( 'utf8_uri_encode' ) ? utf8_uri_encode( $filename ) : rawurlencode( $filename );
+
+			return $base . $encoded;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function resolve_post_context( int $post_id ): ?array {
+			$forum = $this->forum();
+			if ( null === $forum || $post_id < 1 ) {
+				return null;
+			}
+
+			$row = $forum->db->get_row(
+				$forum->db->prepare(
+					"SELECT id, parent_id AS topic_id, forum_id, author_id FROM {$forum->tables->posts} WHERE id = %d;",
+					$post_id
+				),
+				ARRAY_A
+			);
+			if ( empty( $row ) ) {
+				return null;
+			}
+
+			$topic_id   = (int) ( $row['topic_id'] ?? 0 );
+			$topic_name = (string) $forum->db->get_var(
+				$forum->db->prepare( "SELECT name FROM {$forum->tables->topics} WHERE id = %d;", $topic_id )
+			);
+
+			return array(
+				'topic_id'   => $topic_id,
+				'forum_id'   => (int) ( $row['forum_id'] ?? 0 ),
+				'topic_name' => $topic_name,
+				'author_id'  => (int) ( $row['author_id'] ?? 0 ),
 			);
 		}
 

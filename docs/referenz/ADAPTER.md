@@ -156,6 +156,20 @@ Sie prüft globale Asgaros-Moderatorrechte und verweigert Topics in privaten For
 oder `0` (nicht angepinnt), niemals `2` (global). Die raumbezogene Autorisierung
 erfolgt vorher in `SpaceModerationService`.
 
+## Dokument-Zugriff (DocumentSourceInterface)
+
+Der lesende Zugriff auf bestehende Asgaros-Uploads ist über das schmale,
+segregierte Interface
+[src/Adapters/Asgaros/DocumentSourceInterface.php](../../src/Adapters/Asgaros/DocumentSourceInterface.php)
+gekapselt, das vom `AsgarosAdapter` mitimplementiert wird. So bleiben die
+umfangreichen Test-Stubs des Haupt-Interfaces unberührt. Methoden:
+`get_post_uploads()`, `post_upload_exists()`, `get_upload_file_url()`
+(`.../uploads/asgarosforum/<post_id>/<filename>`, Ordner filterbar über
+`asgarosforum_filter_upload_folder`), `resolve_post_context()`
+(`topic_id`, `forum_id`, `topic_name`, `author_id`), `get_post_link()` und
+`is_user_in_group()`. `DocumentService` hängt ausschließlich an diesem Interface,
+nicht am vollen `AsgarosAdapterInterface`.
+
 ## Neue Adaptermethode
 
 1. Asgaros-Quellcode und die getestete Version prüfen.

@@ -13,6 +13,7 @@ use AFSpaces\Adapters\Asgaros\AsgarosAdapterInterface;
 use AFSpaces\Adapters\Database\SpaceRepository;
 use AFSpaces\Application\InviteLinkService;
 use AFSpaces\Application\InvitationService;
+use AFSpaces\Application\DocumentService;
 use AFSpaces\Application\JoinRequestService;
 use AFSpaces\Application\MemberService;
 use AFSpaces\Application\SpaceCreationService;
@@ -88,6 +89,11 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 		private ToolboxService $toolbox;
 
 		/**
+		 * @var DocumentService
+		 */
+		private DocumentService $documents;
+
+		/**
 		 * @var string
 		 */
 		private string $nonce_action = 'afspaces_member_action';
@@ -112,7 +118,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			SpaceCreationService $space_creation,
 			SpaceLifecycleService $space_lifecycle,
 			SpaceModerationService $space_moderation,
-			ToolboxService $toolbox
+			ToolboxService $toolbox,
+			DocumentService $documents
 		) {
 			$this->spaces  = $spaces;
 			$this->asgaros = $asgaros;
@@ -126,6 +133,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 			$this->space_lifecycle = $space_lifecycle;
 			$this->space_moderation = $space_moderation;
 			$this->toolbox = $toolbox;
+			$this->documents = $documents;
 		}
 
 		/**
@@ -479,6 +487,19 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 					$direction = isset( $_POST['direction'] ) && 'up' === $_POST['direction'] ? 'up' : 'down';
 					$this->toolbox->move_link( $space_id, $actor, $link_id, $direction );
 					$this->set_message( 'success', __( 'Die Reihenfolge wurde angepasst.', 'afspaces' ) );
+				} elseif ( 'add_document' === $action ) {
+					$post_id  = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
+					$filename = isset( $_POST['filename'] ) ? sanitize_file_name( wp_unslash( $_POST['filename'] ) ) : '';
+					$this->documents->create_document( $space_id, $post_id, $filename, $actor, $this->collect_document_input() );
+					$this->set_message( 'success', __( 'Die Datei wurde als Gruppendokument aufgenommen.', 'afspaces' ) );
+				} elseif ( 'update_document' === $action ) {
+					$document_id = isset( $_POST['document_id'] ) ? (int) $_POST['document_id'] : 0;
+					$this->documents->update_document( $document_id, $actor, $this->collect_document_input() );
+					$this->set_message( 'success', __( 'Das Gruppendokument wurde aktualisiert.', 'afspaces' ) );
+				} elseif ( 'remove_document' === $action ) {
+					$document_id = isset( $_POST['document_id'] ) ? (int) $_POST['document_id'] : 0;
+					$this->documents->remove_document( $document_id, $actor );
+					$this->set_message( 'success', __( 'Das Gruppendokument wurde entfernt. Die Datei bleibt erhalten.', 'afspaces' ) );
 				}
 			} catch ( DomainException $e ) {
 				$this->set_message( 'error', $e->getMessage() );
@@ -525,6 +546,15 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 
 			if ( in_array( $action, array( 'add_toolbox_link', 'update_toolbox_link', 'delete_toolbox_link', 'move_toolbox_link' ), true ) ) {
 				wp_safe_redirect( SpacesUrls::hub_url( SpacesUrls::VIEW_TOOLBOX, array( 'space_id' => $space_id ) ) );
+				exit;
+			}
+
+			if ( in_array( $action, array( 'add_document', 'update_document', 'remove_document' ), true ) ) {
+				// Aus dem Forum ausgelöste Aktionen kehren ins Forum zurück.
+				$default = SpacesUrls::hub_url( SpacesUrls::VIEW_DOCUMENTS, array( 'space_id' => $space_id ) );
+				$return  = isset( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : '';
+				$target  = '' !== $return ? wp_validate_redirect( $return, $default ) : $default;
+				wp_safe_redirect( $target );
 				exit;
 			}
 
@@ -596,6 +626,21 @@ if ( ! class_exists( 'AFSpaces\\Interface\\FrontendController' ) ) {
 				'description'  => isset( $_POST['description'] ) ? wp_unslash( $_POST['description'] ) : '',
 				'icon'         => isset( $_POST['icon'] ) ? sanitize_key( wp_unslash( $_POST['icon'] ) ) : '',
 				'open_new_tab' => ! empty( $_POST['open_new_tab'] ),
+			);
+		}
+
+		/**
+		 * Sammelt die Roh-Eingaben eines Dokument-Formulars.
+		 *
+		 * Validierung und Bereinigung erfolgen im {@see DocumentService}.
+		 *
+		 * @return array<string,mixed>
+		 */
+		private function collect_document_input(): array {
+			return array(
+				'title'          => isset( $_POST['title'] ) ? wp_unslash( $_POST['title'] ) : '',
+				'document_topic' => isset( $_POST['document_topic'] ) ? wp_unslash( $_POST['document_topic'] ) : '',
+				'visibility'     => isset( $_POST['visibility'] ) ? sanitize_key( wp_unslash( $_POST['visibility'] ) ) : '',
 			);
 		}
 

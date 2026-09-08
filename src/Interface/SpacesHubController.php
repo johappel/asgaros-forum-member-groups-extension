@@ -21,6 +21,7 @@ use AFSpaces\Application\SpaceCreationService;
 use AFSpaces\Application\SpaceLifecycleService;
 use AFSpaces\Application\SpaceModerationService;
 use AFSpaces\Application\ToolboxService;
+use AFSpaces\Application\DocumentService;
 use AFSpaces\Application\UserIdentityService;
 use AFSpaces\Core\Capabilities;
 
@@ -45,6 +46,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 		private SpaceLifecycleService $space_lifecycle;
 		private SpaceModerationService $space_moderation;
 		private ToolboxService $toolbox;
+		private DocumentService $documents;
 		private UserIdentityService $identity;
 
 		/**
@@ -64,6 +66,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			SpaceLifecycleService $space_lifecycle,
 			SpaceModerationService $space_moderation,
 			ToolboxService $toolbox,
+			DocumentService $documents,
 			?UserIdentityService $identity = null
 		) {
 			$this->frontend     = $frontend;
@@ -79,6 +82,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 			$this->space_lifecycle = $space_lifecycle;
 			$this->space_moderation = $space_moderation;
 			$this->toolbox = $toolbox;
+			$this->documents = $documents;
 			$this->identity = $identity ?: new UserIdentityService();
 		}
 
@@ -214,7 +218,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return $requests_view->render( $space_id );
 
 				case SpacesUrls::VIEW_GROUP:
-					$group_view = new WorkingGroupView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->working_groups, $this->identity );
+					$group_view = new WorkingGroupView( $this->spaces, $this->asgaros, $this->invitations, $this->join_requests, $this->working_groups, $this->identity, $this->documents );
 					return $group_view->render( $space_id );
 
 				case SpacesUrls::VIEW_PROFILE:
@@ -233,6 +237,10 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 				case SpacesUrls::VIEW_TOOLBOX:
 					$toolbox_view = new ToolboxLinksView( $this->spaces, $this->asgaros, $this->toolbox );
 					return $toolbox_view->render( $space_id );
+
+				case SpacesUrls::VIEW_DOCUMENTS:
+					$documents_view = new DocumentsView( $this->spaces, $this->asgaros, $this->documents );
+					return $documents_view->render( $space_id );
 
 				case SpacesUrls::VIEW_MY_INVITATIONS:
 					$mine_view = new MyInvitationsView( $this->invitations, $this->join_requests, $this->invite_links, $this->spaces, $this->asgaros, $this->identity );
@@ -310,7 +318,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 
 			$room_context_active = $space_id > 0
 				&& $this->can_manage_space( $space_id, $actor )
-				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS, SpacesUrls::VIEW_SETTINGS, SpacesUrls::VIEW_MODERATION, SpacesUrls::VIEW_TOOLBOX ), true );
+				&& in_array( $view, array( SpacesUrls::VIEW_MEMBERS, SpacesUrls::VIEW_INVITATIONS, SpacesUrls::VIEW_JOIN_REQUESTS, SpacesUrls::VIEW_SETTINGS, SpacesUrls::VIEW_MODERATION, SpacesUrls::VIEW_TOOLBOX, SpacesUrls::VIEW_DOCUMENTS ), true );
 
 			$tabs = array();
 
@@ -456,6 +464,12 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					'label'  => __( 'Toolbox', 'afspaces' ),
 					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_TOOLBOX, array( 'space_id' => $space_id ) ),
 					'active' => SpacesUrls::VIEW_TOOLBOX === $view,
+				),
+				array(
+					'view'   => SpacesUrls::VIEW_DOCUMENTS,
+					'label'  => __( 'Dokumente', 'afspaces' ),
+					'url'    => SpacesUrls::hub_url( SpacesUrls::VIEW_DOCUMENTS, array( 'space_id' => $space_id ) ),
+					'active' => SpacesUrls::VIEW_DOCUMENTS === $view,
 				),
 			);
 
@@ -614,6 +628,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SpacesHubController' ) ) {
 					return __( 'Moderation', 'afspaces' );
 				case SpacesUrls::VIEW_TOOLBOX:
 					return __( 'Toolbox', 'afspaces' );
+				case SpacesUrls::VIEW_DOCUMENTS:
+					return __( 'Dokumente', 'afspaces' );
 				default:
 					return WorkingGroupTerminology::label( WorkingGroupTerminology::MY_PLURAL );
 			}

@@ -40,11 +40,13 @@ Folgeauftrag umzusetzende – Dokumentenansicht.
   Beschreibung, optionales Icon). URLs mit `esc_url()`, Texte mit `esc_html()`
   ausgegeben. Leerzustand: „Für diese Arbeitsgruppe wurden noch keine Links
   eingerichtet.“
-- Bereich **Dokumente**: aktuell ein klar gekennzeichneter, noch nicht aktiver
-  Einstieg. Der Filter `afspaces_toolbox_documents_content`
-  (`string $content`, `Space $space`, `int $actor_user_id`) ist die
-  Erweiterungsstelle für die spätere Dokumentenansicht; gibt er nicht-leeres,
-  bereits escaptes HTML zurück, ersetzt dieses den Platzhalter.
+- Bereich **Dokumente**: kompakte Vorschau der zuletzt hinzugefügten
+  Gruppendokumente. Der Filter `afspaces_toolbox_documents_content`
+  (`string $content`, `Space $space`, `int $actor_user_id`) wird von
+  `ForumDocumentControls::render_toolbox_preview()` bedient und ersetzt den
+  Platzhalter durch bis zu fünf aktuelle, für den Nutzer sichtbare Dokumente
+  samt Button „Alle Dokumente öffnen“ (Ziel: `SpacesUrls::VIEW_DOCUMENTS`).
+  Siehe [BEREICH-dokumente.md](BEREICH-dokumente.md).
 
 ## Linkverwaltung
 
@@ -70,18 +72,16 @@ Folgeauftrag umzusetzende – Dokumentenansicht.
   (nur `http`/`https` bzw. site-relative Pfade; `javascript:`, `data:` und
   schemalose `//host`-URLs werden verworfen), `SpaceLink::sanitize_icon()`.
 
-## Geplante Dokumentenfunktion (Folgeauftrag)
+## Dokumentenfunktion (umgesetzt)
 
-Noch **nicht** umgesetzt. Der Folgeauftrag soll:
+Die Dokumentbibliothek nutzt die vorgesehene Erweiterungsstelle
+`afspaces_toolbox_documents_content` und den bestehenden
+`data-afspaces-toolbox-documents`-Bereich. Der Werkzeugkasten zeigt nur eine
+kompakte Vorschau; die vollständige Verwaltung liegt in der eigenen
+Dokumentansicht (`SpacesUrls::VIEW_DOCUMENTS`).
 
-- alle in den Foren dieser Arbeitsgruppe (Primär- und Zusatzforen) hochgeladenen
-  Dateien erfassen,
-- sie in einer gemeinsamen Liste darstellen,
-- mindestens nach Dateiname (alphabetisch) und Upload-Datum sortierbar machen,
-- später die Navigation vom Dokument zum zugehörigen Forumbeitrag ermöglichen.
-
-Anbindung erfolgt über den bestehenden Filter
-`afspaces_toolbox_documents_content` bzw. den vorhandenen `data-afspaces-toolbox-documents`-Button, ohne den bestehenden Dialog neu zu bauen.
+Details, Datenmodell, Sichtbarkeit und Asgaros-Integration:
+[BEREICH-dokumente.md](BEREICH-dokumente.md).
 
 ## Tests
 

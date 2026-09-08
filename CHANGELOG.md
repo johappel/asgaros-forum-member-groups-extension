@@ -2,10 +2,35 @@
 
 ## Unreleased
 
+- Neue Dokumentbibliothek pro Arbeitsgruppe: Bestehende Asgaros-Anhänge können
+  zusätzlich als „Gruppendokument“ gekennzeichnet werden – ohne zweite
+  Upload-Logik und ohne Dateikopie. Die Aufnahme erfolgt über den Asgaros-Hook
+  `asgarosforum_after_post_message` direkt unter der Uploadliste eines Beitrags
+  („Als Gruppendokument aufnehmen“ bzw. „✓ Gruppendokument · Bearbeiten · Aus
+  Dokumenten entfernen“). Das Entfernen löscht nur die Metadaten; die Datei
+  bleibt erhalten.
+- Vollständige Dokumentansicht (`documents`) mit Ansichten „Alle/Nach
+  Themen/Neueste“, Sortierung nach Dateiname und Upload-Datum, Themenfilter und
+  einfacher Suche; erreichbar aus der Forum-Toolbox (kompakte Vorschau über den
+  Filter `afspaces_toolbox_documents_content`) und der Gruppen-Detailansicht.
+- Dokument- und Forumsberechtigung sind getrennt: Sichtbarkeit `members`
+  (Standard) oder `authenticated`; `public` ist vorbereitet und nur über den
+  Filter `afspaces_documents_public_enabled` freischaltbar. Berechtigte ohne
+  Forumszugriff sehen die Datei, aber keinen internen Forumkontext.
+- Neue Tabelle `{prefix}afspaces_space_documents` (Repository
+  `SpaceDocumentRepository`) mit Unique-Schlüssel
+  `space_id + asgaros_post_id + filename`; Anlage bei Aktivierung und Upgrade,
+  Entfernung bei vollständiger Deinstallation. Verwaiste Metadaten werden per
+  `asgarosforum_after_delete_post` bereinigt und defensiv gefiltert.
+- Neue Frontend-Actions `add_document`, `update_document`, `remove_document`
+  sowie Policy-Methoden `SpacePolicy::can_manage_documents()` und
+  `can_publish_document()`.
+- Plugin-Version auf 0.6.0 angehoben; DB-Version auf 4.
+
 - Neuer Werkzeugkasten „Toolbox“: In allen Foren einer Arbeitsgruppe erscheint
   über den Asgaros-Hook `asgarosforum_custom_header_menu` ein Menüpunkt
   „Toolbox“, der einen Dialog mit den konfigurierten Links der Arbeitsgruppe und
-  einem Einstieg für die spätere Dokumentenansicht öffnet. Der Dialog ist auch
+  einer Dokumentvorschau öffnet. Der Dialog ist auch
   in Topic-, Antwort- und Bearbeiten-Ansichten verfügbar und funktioniert per
   serverseitig gerendertem Anker auch ohne JavaScript.
 - Arbeitsgruppenverantwortliche verwalten die Links unter dem neuen
@@ -15,10 +40,6 @@
 - Neue Tabelle `{prefix}afspaces_space_links` (Repository
   `SpaceLinkRepository`); Anlage bei Aktivierung und Upgrade, Entfernung bei
   vollständiger Deinstallation.
-- Erweiterungsstelle für die geplante Dokumentenansicht:
-  Filter `afspaces_toolbox_documents_content`. Die eigentliche Dateisuche wird
-  in einem Folgeauftrag umgesetzt.
-- Plugin-Version auf 0.5.0 angehoben; DB-Version auf 3.
 
 - Beitrittsanfragen-Tabelle verbessert: Nachrichten und Aktionen bleiben ohne
   Umbruch lesbar und die Aktionsformulare werden kompakt untereinander angeordnet.

@@ -74,6 +74,34 @@ if ( ! class_exists( 'AFSpaces\\Domain\\SpacePolicy' ) ) {
 		}
 
 		/**
+		 * Darf der Akteur die Dokumente einer Arbeitsgruppe verwalten
+		 * (fremde Dokumente bearbeiten oder entfernen)?
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Benutzer-ID des Akteurs.
+		 * @return bool
+		 */
+		public function can_manage_documents( int $space_id, int $actor_user_id ): bool {
+			return $this->can_manage( $space_id, $actor_user_id );
+		}
+
+		/**
+		 * Darf der Akteur ein Dokument mit erweiterter Sichtbarkeit (über die
+		 * Arbeitsgruppe hinaus) veröffentlichen?
+		 *
+		 * Mitglieder dürfen eigene Anhänge nur intern („nur Arbeitsgruppe“)
+		 * kennzeichnen; das Freigeben für alle angemeldeten Nutzer bleibt den
+		 * Verantwortlichen vorbehalten.
+		 *
+		 * @param int $space_id      Space-ID.
+		 * @param int $actor_user_id Benutzer-ID des Akteurs.
+		 * @return bool
+		 */
+		public function can_publish_document( int $space_id, int $actor_user_id ): bool {
+			return $this->can_manage( $space_id, $actor_user_id );
+		}
+
+		/**
 		 * Darf der Akteur eine persönliche Einladung erstellen?
 		 *
 		 * @param int $space_id Space-ID.

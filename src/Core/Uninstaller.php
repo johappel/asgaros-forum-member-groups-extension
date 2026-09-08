@@ -69,6 +69,7 @@ if ( ! class_exists( 'AFSpaces\\Core\\Uninstaller' ) ) {
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_join_requests" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_space_meta" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_space_links" );
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_space_documents" );
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}afspaces_search_index" );
 		}
 

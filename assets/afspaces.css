@@ -3456,3 +3456,177 @@ right: auto;
 	display: none;
 }
 
+
+/* ============================================================
+   Dokumentbibliothek (Gruppendokumente)
+   ============================================================ */
+.afspaces-documents-controls {
+display: flex;
+flex-wrap: wrap;
+gap: 0.75rem 1rem;
+align-items: flex-end;
+margin: 1rem 0;
+}
+.afspaces-documents-controls .afspaces-field {
+margin: 0;
+min-width: 12rem;
+flex: 1 1 12rem;
+}
+.afspaces-documents-controls-submit {
+flex: 0 0 auto;
+min-width: 0;
+}
+.afspaces-documents-count {
+font-weight: 600;
+margin: 0.5rem 0;
+}
+.afspaces-documents-list {
+list-style: none;
+margin: 0;
+padding: 0;
+display: flex;
+flex-direction: column;
+gap: 0.5rem;
+}
+.afspaces-documents-item {
+display: flex;
+flex-wrap: wrap;
+gap: 0.75rem;
+justify-content: space-between;
+align-items: flex-start;
+padding: 0.75rem 1rem;
+border: 1px solid #dce3ea;
+border-radius: 8px;
+background: #fff;
+}
+.afspaces-documents-item-main {
+display: flex;
+gap: 0.75rem;
+align-items: flex-start;
+flex: 1 1 18rem;
+min-width: 0;
+}
+.afspaces-documents-icon {
+color: #2d5d7f;
+font-size: 1.4em;
+margin-top: 0.15rem;
+}
+.afspaces-documents-title {
+margin: 0 0 0.25rem;
+font-weight: 600;
+word-break: break-word;
+}
+.afspaces-documents-meta {
+margin: 0;
+display: flex;
+flex-wrap: wrap;
+gap: 0.35rem 0.75rem;
+font-size: 0.85em;
+color: #55636e;
+}
+.afspaces-documents-meta .afspaces-documents-type {
+font-weight: 600;
+color: #2d5d7f;
+}
+.afspaces-documents-origin {
+margin: 0.3rem 0 0;
+font-size: 0.85em;
+color: #55636e;
+}
+.afspaces-documents-item-actions {
+display: flex;
+flex-wrap: wrap;
+gap: 0.4rem;
+align-items: flex-start;
+}
+.afspaces-documents-group-title {
+margin: 1.25rem 0 0.5rem;
+padding-bottom: 0.25rem;
+border-bottom: 2px solid #e2e8ee;
+}
+.afspaces-documents-edit,
+.afspaces-post-document-add,
+.afspaces-post-document-edit {
+display: inline-block;
+}
+.afspaces-documents-visibility-field {
+border: 1px solid #dce3ea;
+border-radius: 6px;
+padding: 0.5rem 0.75rem;
+}
+.afspaces-documents-visibility-field legend {
+font-weight: 600;
+padding: 0 0.35rem;
+}
+.afspaces-field-radio {
+display: flex;
+align-items: center;
+gap: 0.4rem;
+margin: 0.2rem 0;
+}
+.afspaces-field-radio .description {
+color: #55636e;
+font-size: 0.85em;
+}
+
+/* Dokumentaktionen unter der Asgaros-Uploadliste */
+.afspaces-post-documents {
+margin: 0.5rem 0 0;
+padding: 0.5rem 0 0;
+border-top: 1px dashed #d5dde4;
+display: flex;
+flex-direction: column;
+gap: 0.4rem;
+}
+.afspaces-post-document-row {
+display: flex;
+flex-wrap: wrap;
+gap: 0.5rem;
+align-items: center;
+font-size: 0.9em;
+}
+.afspaces-post-document-file {
+font-weight: 600;
+word-break: break-word;
+}
+.afspaces-post-document-flag {
+color: #2f7a34;
+font-weight: 600;
+}
+.afspaces-post-document-form {
+margin-top: 0.5rem;
+padding: 0.75rem;
+border: 1px solid #dce3ea;
+border-radius: 6px;
+background: #f7f9fb;
+max-width: 32rem;
+}
+
+/* Toolbox-Dokumentvorschau */
+.afspaces-toolbox-documents-list {
+list-style: none;
+margin: 0.25rem 0 0.75rem;
+padding: 0;
+display: flex;
+flex-direction: column;
+gap: 0.35rem;
+}
+.afspaces-toolbox-document-meta {
+color: #55636e;
+font-size: 0.85em;
+}
+
+/* Dokumentbereich in der Gruppen-Detailansicht */
+.afspaces-working-group-documents {
+margin: 1rem 0 0;
+padding-top: 0.75rem;
+border-top: 1px solid #e2e8ee;
+}
+.afspaces-working-group-documents-list {
+list-style: none;
+margin: 0.35rem 0 0.5rem;
+padding: 0;
+display: flex;
+flex-direction: column;
+gap: 0.25rem;
+}

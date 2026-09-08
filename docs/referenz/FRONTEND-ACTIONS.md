@@ -125,6 +125,9 @@ Toolbox-Aktionen (Werkzeugkasten/Links), verarbeitet über `ToolboxService`:
 | `update_toolbox_link` | `toolbox_link_id`, `title`, `url`, optional `description`, `icon`, `open_new_tab` | Link ändern | `toolbox-links` |
 | `delete_toolbox_link` | `toolbox_link_id` | Link löschen | `toolbox-links` |
 | `move_toolbox_link` | `toolbox_link_id`, `direction` (`up`/`down`) | Reihenfolge um eine Position ändern | `toolbox-links` |
+| `add_document` | `post_id`, `filename`, optional `title`, `document_topic`, `visibility`, `redirect_to` | Asgaros-Anhang als Gruppendokument aufnehmen | Forum bzw. `documents` |
+| `update_document` | `document_id`, optional `title`, `document_topic`, `visibility`, `redirect_to` | Dokument-Metadaten ändern | Forum bzw. `documents` |
+| `remove_document` | `document_id`, optional `redirect_to` | Dokument-Metadaten entfernen (Datei bleibt) | Forum bzw. `documents` |
 
 Alle Toolbox-Aktionen prüfen `SpacePolicy::can_manage`. Titel und URL werden im
 `ToolboxService` über `SpaceLink::sanitize_title()` bzw.

@@ -36,7 +36,8 @@ Navigationsbereich entfernt wurde.
 | `asgarosforum_content_header` | `ForumNavigation::init`; keine Argumente | — | Einstiegs-Panel rendern |
 | `asgarosforum_custom_header_menu` | `ForumToolbox::init`; keine Argumente | — | Menüpunkt „Toolbox“ direkt in `#forum-navigation` ausgeben (in allen Forum-, Topic- und Editieransichten aktiv), sobald `get_current_forum_id()` einem aktiven Space zugeordnet ist |
 | `asgarosforum_content_top` | `ForumNavigation::init`; keine Argumente | — | Kategorie-Farbmarkierungen rendern |
-| `asgarosforum_after_post_message` | `ForumModerationControls::init`, Priorität 20, 2 Argumente: `int $author_id`, `int $post_id` | — | raumbezogene Moderationskontrollen rendern |
+| `asgarosforum_after_post_message` | `ForumModerationControls::init`, Priorität 20, 2 Argumente: `int $author_id`, `int $post_id`; `ForumDocumentControls::init`, Priorität 20, 2 Argumente | — | raumbezogene Moderationskontrollen sowie Dokumentaktionen unter der Uploadliste rendern |
+| `asgarosforum_after_delete_post` | `ForumDocumentControls::init`, 1 Argument: `int $post_id` | — | verwaiste Dokument-Metadaten des Beitrags entfernen (Datei bleibt) |
 | `asgarosforum_filter_user_groups_taxonomy_name` | `AsgarosAdapter`; aktueller Taxonomiename | Taxonomiename, Default `asgarosforum-usergroup` | interne Adapter-Auflösung; nicht als AFSpaces-Fach-API verwenden |
 | `asgarosforum_filter_username` | `UserIdentityService::get_display_name`; `string $name`, `WP_User $user` | string; unveränderter WordPress-Anzeigename | primärer externer Anzeigenamen-Filter |
 | `asgarosforum_filter_check_access` | `ForumContentWritePolicy::validate_editor_access`; `bool $allowed`, `int $category_id` | bool; Themenansicht bleibt lesbar, direkte Add-Topic/Add-Post-Editoren für geschützte Nichtmitglieder werden gesperrt | Schreibrecht nicht aus dem Leserecht ableiten |
@@ -59,7 +60,8 @@ Alle folgenden Filter sind im aktuellen Code öffentliche Erweiterungspunkte. Fi
 | `afspaces_working_group_topics_taxonomy` | `string $taxonomy` | string; Default `themen` | Topic-Taxonomie für Arbeitsgruppen |
 | `afspaces_space_forum_url` | `string $url`, `Space $space`, `array<string,mixed>|null $forum`, `int $user_id` | string; zuvor ermittelter Forum-Link | Arbeitsgruppen-Forum-Link in Views/Moderation |
 | `afspaces_forum_home_url` | `string $url` | string; Default `home_url('/forum/')` | Forum-Startseite in Breadcrumbs/Navi |
-| `afspaces_toolbox_documents_content` | `string $content`, `Space $space`, `int $actor_user_id` | string; Default leer | Erweiterungsstelle für die geplante Dokumentenansicht im Toolbox-Dialog; nicht-leere, bereits escapte Rückgabe ersetzt den Platzhalter |
+| `afspaces_toolbox_documents_content` | `string $content`, `Space $space`, `int $actor_user_id` | string; Default leer | wird von `ForumDocumentControls::render_toolbox_preview()` bedient und rendert die kompakte Dokumentvorschau im Toolbox-Dialog; nicht-leere, bereits escapte Rückgabe ersetzt den Platzhalter |
+| `afspaces_documents_public_enabled` | `bool $enabled` | bool; Default `false` | schaltet die öffentliche Sichtbarkeit (`public`) für Dokumente frei; sonst wird `public` auf `authenticated` zurückgestuft |
 | `afspaces_hub_navigation_tabs` | `array<int,array<string,mixed>> $tabs`, `string $view`, `int $space_id`, `int $actor` | Tab-Array; AFSpaces-Standardtabs | globale Hub-Navigation erweitern |
 | `afspaces_hub_space_navigation_tabs` | `array<int,array<string,mixed>> $tabs`, `string $view`, `int $space_id`, `int $actor` | Tab-Array; AFSpaces-Standardtabs | Space-Kontextnavigation erweitern |
 | `afspaces_panel_cache_ttl` | `int $ttl` | int Sekunden; Default `30`; Werte `<= 0` deaktivieren Cache | Forum-Einstiegs-Panel |

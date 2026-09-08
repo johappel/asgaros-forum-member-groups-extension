@@ -48,6 +48,8 @@ if ( ! class_exists( 'AFSpaces\\Core\\Activator' ) ) {
 			$spaces->install();
 			$space_links = new \AFSpaces\Adapters\Database\SpaceLinkRepository();
 			$space_links->install();
+			$space_documents = new \AFSpaces\Adapters\Database\SpaceDocumentRepository();
+			$space_documents->install();
 			$audit = new AuditRepository();
 			$audit->install();
 			$invitations = new InvitationRepository();
