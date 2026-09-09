@@ -122,7 +122,8 @@ if ( ! class_exists( 'AFSpaces\\Interface\\SearchView' ) ) {
 			$scope = in_array( $scope, array( HybridSearchService::SCOPE_ALL, HybridSearchService::SCOPE_FORUM, HybridSearchService::SCOPE_WP ), true ) ? $scope : HybridSearchService::SCOPE_ALL;
 
 			$semantic_available = SearchSettings::is_semantic_enabled();
-			$semantic           = $semantic_available && ! empty( $_GET[ self::PARAM_SEMANTIC ] );
+			$form_submitted     = isset( $_GET[ self::PARAM_QUERY ] );
+			$semantic           = $semantic_available && ( $form_submitted ? ! empty( $_GET[ self::PARAM_SEMANTIC ] ) : true );
 
 			$ag_id  = isset( $_GET[ self::PARAM_GROUP ] ) ? max( 0, (int) $_GET[ self::PARAM_GROUP ] ) : 0;
 			$author = isset( $_GET[ self::PARAM_AUTHOR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::PARAM_AUTHOR ] ) ) : '';

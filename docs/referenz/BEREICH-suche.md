@@ -38,9 +38,16 @@ Eigene Suchplattform über Asgaros- und WordPress-Inhalte. Fachlicher Überblick
 - Kurze Tokens (< FULLTEXT-Mindestlänge): LIKE-Fallback (`FulltextQuery::needs_like_fallback`).
 - Aktive Filter (Autor/Zeitraum/Forum) erzwingen Keyword-Modus und deaktivieren Semantik.
 
+## Titel-Bereinigung
+
+- Foren-Thementitel (`topic_name`) und WP-Post-Titel werden in `ForumSearchService::to_hit()` bzw. `WpPostSearch::to_hit()` mit `wp_strip_all_tags()` gesäubert, bevor sie im `SearchHit` landen.
+- Gewährleistet: keine HTML-Tags (z. B. `<br>`) in der Trefferanzeige, auch wenn die Quelle Markup enthält.
+
 ## Semantische Suche
 
-- Standardmäßig aus; ohne API-Key sauberer No-op.
+- Wenn in der Einstellungsseite aktiviert (`SearchSettings::is_semantic_enabled()`), ist die Checkbox „Semantische Suche einbeziehen" auf der Hub-Suchseite beim ersten Aufruf standardmäßig angekreuzt (Bedingung: Formular noch nicht abgesendet, d. h. kein `afspaces_q`-Parameter vorhanden).
+- Im Suchoverlay (Modal) wird die Checkbox ebenfalls standardmäßig angekreuzt, wenn `cfg.semanticAvailable` gesetzt ist (`semInput.checked = true` in `afspaces-search.js`).
+- Standardmäßig aus (kein API-Key); ohne API-Key sauberer No-op.
 - Index-Tabelle `wp_afspaces_search_index` (Embedding als LONGBLOB via `VectorMath::pack/unpack`, `content_hash`-Skip).
 - Live-Zugriffsfilter bei jeder Abfrage über `list_accessible_category_ids`.
 - Cron-Hook `afspaces_reindex_search` (`SearchIndexer::CRON_HOOK`), täglich; plus `save_post`/`trashed_post`/`deleted_post`.

@@ -164,7 +164,7 @@ if ( ! class_exists( 'AFSpaces\\Search\\WpPostSearch' ) ) {
 		 * @return SearchHit
 		 */
 		private function to_hit( \WP_Post $post, string $keywords ): SearchHit {
-			$title = (string) get_the_title( $post );
+			$title = wp_strip_all_tags( (string) get_the_title( $post ) );
 			if ( '' === $title ) {
 				$title = __( '(ohne Titel)', 'afspaces' );
 			}

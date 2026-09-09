@@ -119,7 +119,7 @@ if ( ! class_exists( 'AFSpaces\\Application\\ForumSearchService' ) ) {
 		 * @return SearchHit
 		 */
 		private function to_hit( array $row, string $keywords ): SearchHit {
-			$title = (string) ( $row['topic_name'] ?? '' );
+			$title = wp_strip_all_tags( (string) ( $row['topic_name'] ?? '' ) );
 			if ( '' === $title ) {
 				$title = __( 'Beitrag', 'afspaces' );
 			}

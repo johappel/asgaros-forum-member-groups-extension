@@ -88,6 +88,7 @@
 			var semP = el('p', { 'class': 'afspaces-field afspaces-field-checkbox' });
 			var semLabel = el('label', { 'for': 'afspaces-modal-semantic' });
 			var semInput = el('input', { type: 'checkbox', id: 'afspaces-modal-semantic', name: 'semantic', value: '1' });
+			semInput.checked = true;
 			semInput.addEventListener('change', function () { scheduleSearch(0); });
 			semLabel.appendChild(semInput);
 			semLabel.appendChild(document.createTextNode(' ' + t('semantic', 'Semantisch')));
