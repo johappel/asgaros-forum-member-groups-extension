@@ -1326,14 +1326,14 @@ a.afspaces-link.is-active {
 	border-radius: 0;
 }
 
-#af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab.is-active {
+/* #af-wrapper.afspaces-wrapper #forum-navigation .afspaces-hub-tab.is-active {
 	background: #fff;
 	color: #1d2327;
 	font-weight: 700;
 	margin: 0;
 	border: 0;
 	border-radius: 0;
-}
+} */
 
 #af-wrapper.afspaces-wrapper #forum-search.afspaces-forum-search {
 	display: flex;
