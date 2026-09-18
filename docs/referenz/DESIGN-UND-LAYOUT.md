@@ -81,6 +81,11 @@ AFSpaces-Oberfläche. Das Einladungslink-Formular wird als einspaltiges Grid
 gerendert; der abschließende Erstellungsbutton steht dadurch immer unter den
 Eingabefeldern und erhält zusätzlich einen vertikalen Abstand.
 
+Nach dem Erstellen eines Einladungslinks erklärt die Oberfläche ausdrücklich,
+dass die Annahme erst nach Login möglich ist. Zusätzlich zeigt
+`InvitationsView::render_created_invite_link()` den Link und einen kurzen
+Einladungstext in readonly-Feldern; beide Inhalte können separat kopiert werden.
+
 ## Arbeitsgruppen-Akzentfarbe und Icon
 
 Pro Arbeitsgruppe in `afspaces_space_meta`:

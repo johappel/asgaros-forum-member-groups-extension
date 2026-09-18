@@ -82,7 +82,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 			<section class="afspaces-invitations" id="afspaces-invitations-view" aria-labelledby="afspaces-invitations-heading">
 				<!-- <h2 id="afspaces-invitations-heading"><?php echo esc_html__( 'Einladungen zur Arbeitsgruppe', 'afspaces' ); ?></h2> -->
 				<?php echo $this->render_message(); ?>
-				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich in diese Arbeitsgruppe einladen und Einladungslinks verwalten. Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', 'afspaces' ); ?></p>
+				<p><?php echo esc_html__( 'Hier kannst du Personen suchen, persönlich in diese Arbeitsgruppe einladen und Einladungslinks verwalten.', 'afspaces' ); ?></p>
 				<?php echo $this->render_created_invite_link(); ?>
 
 				<section class="afspaces-invite-links afspaces-section-card content-container" aria-labelledby="afspaces-invite-links-heading">
@@ -334,16 +334,39 @@ if ( ! class_exists( 'AFSpaces\\Interface\\InvitationsView' ) ) {
 
 			$field_id = 'afspaces-created-link';
 			$status_id = 'afspaces-created-link-status';
-
-			return sprintf(
-				'<div class="afspaces-created-invite-link" role="status" aria-live="polite"><p>%1$s</p><div class="afspaces-inline-form"><input type="text" readonly value="%2$s" id="%3$s" /><button type="button" class="afspaces-button" onclick="var field=document.getElementById(\'%3$s\'); if(field){ field.focus(); field.select(); try { navigator.clipboard.writeText(field.value); } catch(e) {} var status=document.getElementById(\'%4$s\'); if(status){ status.textContent=\'%5$s\'; } }">%6$s</button></div><p id="%4$s" class="afspaces-copy-feedback" role="status" aria-live="polite"></p></div>',
-				esc_html__( 'Neuer Einladungslink:', 'afspaces' ),
-				esc_attr( $url ),
-				esc_attr( $field_id ),
-				esc_attr( $status_id ),
-				esc_js( __( 'Link kopiert.', 'afspaces' ) ),
-				esc_html__( 'Link kopieren', 'afspaces' )
+			$message_id = 'afspaces-created-invite-message';
+			$message_status_id = 'afspaces-created-invite-message-status';
+			$registration_url = function_exists( 'wp_registration_url' ) ? (string) wp_registration_url() : '';
+			$invite_message = sprintf(
+				/* translators: 1: registration URL, 2: generated invitation link */
+				__( "Du bist herzlich zu unserer Arbeitsgruppe eingeladen!\n\nBitte beachte: Um der Gruppe beizutreten, musst du bereits eingeloggt sein.\n\n- Noch kein Konto? Registriere dich zuerst hier: %1\$s\n- Bereits registriert? Logge dich ein und klicke anschließend auf diesen Einladungslink: %2\$s", 'afspaces' ),
+				$registration_url,
+				$url
 			);
+
+			ob_start();
+			?>
+			<div class="afspaces-created-invite-link" role="status" aria-live="polite">
+				<p><strong><?php echo esc_html__( 'Neuer Einladungslink:', 'afspaces' ); ?></strong></p>
+				<p class="description"><?php echo esc_html__( 'Hinweis: Der Einladungslink funktioniert erst nach erfolgreichem Login. Wer noch kein Benutzerkonto hat, muss sich zuerst registrieren und anschließend anmelden.', 'afspaces' ); ?></p>
+				<div class="afspaces-copyable-field">
+					<label for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html__( 'Einladungslink', 'afspaces' ); ?></label>
+					<div class="afspaces-inline-form">
+						<input type="text" readonly value="<?php echo esc_attr( $url ); ?>" id="<?php echo esc_attr( $field_id ); ?>" />
+						<button type="button" class="afspaces-button" onclick="var field=document.getElementById('<?php echo esc_attr( $field_id ); ?>'); if(field){ field.focus(); field.select(); try { navigator.clipboard.writeText(field.value); } catch(e) {} var status=document.getElementById('<?php echo esc_attr( $status_id ); ?>'); if(status){ status.textContent='<?php echo esc_js( __( 'Link kopiert.', 'afspaces' ) ); ?>'; } }"><?php echo esc_html__( 'Link kopieren', 'afspaces' ); ?></button>
+					</div>
+					<p id="<?php echo esc_attr( $status_id ); ?>" class="afspaces-copy-feedback" role="status" aria-live="polite"></p>
+				</div>
+				<div class="afspaces-copyable-field">
+					<label for="<?php echo esc_attr( $message_id ); ?>"><?php echo esc_html__( 'Kurzer Einladungstext', 'afspaces' ); ?></label>
+					<textarea readonly rows="5" id="<?php echo esc_attr( $message_id ); ?>"><?php echo esc_textarea( $invite_message ); ?></textarea>
+					<button type="button" class="afspaces-button" onclick="var field=document.getElementById('<?php echo esc_attr( $message_id ); ?>'); if(field){ field.focus(); field.select(); try { navigator.clipboard.writeText(field.value); } catch(e) {} var status=document.getElementById('<?php echo esc_attr( $message_status_id ); ?>'); if(status){ status.textContent='<?php echo esc_js( __( 'Einladungstext kopiert.', 'afspaces' ) ); ?>'; } }"><?php echo esc_html__( 'Einladungstext kopieren', 'afspaces' ); ?></button>
+					<p id="<?php echo esc_attr( $message_status_id ); ?>" class="afspaces-copy-feedback" role="status" aria-live="polite"></p>
+				</div>
+			</div>
+			<?php
+
+			return (string) ob_get_clean();
 		}
 	}
 }

@@ -1583,6 +1583,43 @@ a.afspaces-link.is-active {
 	margin-bottom: 0;
 }
 
+#af-wrapper.afspaces-wrapper .afspaces-created-invite-link {
+	display: grid;
+	gap: 0.65rem;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-created-invite-link > p {
+	margin: 0;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-copyable-field {
+	display: grid;
+	gap: 0.4rem;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-copyable-field > label {
+	font-weight: 700;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-copyable-field textarea {
+	width: 100%;
+	min-height: 8rem;
+	padding: 8px 10px;
+	border: 1px solid #d5dce3;
+	border-radius: 6px;
+	background: #fff;
+	font-family: Quicksand, sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	color: #444;
+	box-sizing: border-box;
+	resize: vertical;
+}
+
+#af-wrapper.afspaces-wrapper .afspaces-copyable-field > .afspaces-button {
+	justify-self: start;
+}
+
 #af-wrapper.afspaces-wrapper .afspaces-message,
 #af-wrapper.afspaces-wrapper .afspaces-notice {
 	padding: 12px 16px;

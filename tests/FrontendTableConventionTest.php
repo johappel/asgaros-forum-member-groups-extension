@@ -61,6 +61,21 @@ final class FrontendTableConventionTest extends TestCase {
 		self::assertStringContainsString( 'flex-direction: column;', $styles );
 	}
 
+	public function test_created_invite_link_explains_login_and_offers_copyable_message(): void {
+		$source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Interface/InvitationsView.php' );
+		$styles = (string) file_get_contents( dirname( __DIR__ ) . '/assets/afspaces.css' );
+
+		self::assertStringNotContainsString( 'Einladungslinks funktionieren unabhängig davon, ob neue Benutzer sich anmelden oder registrieren müssen.', $source );
+		self::assertStringContainsString( 'Der Einladungslink funktioniert erst nach erfolgreichem Login.', $source );
+		self::assertStringContainsString( 'id="<?php echo esc_attr( $message_id ); ?>"', $source );
+		self::assertStringContainsString( 'esc_textarea( $invite_message )', $source );
+		self::assertStringContainsString( 'wp_registration_url()', $source );
+		self::assertStringContainsString( 'Noch kein Konto? Registriere dich zuerst hier:', $source );
+		self::assertStringContainsString( 'Bereits registriert? Logge dich ein und klicke anschließend auf diesen Einladungslink:', $source );
+		self::assertStringContainsString( 'Einladungstext kopieren', $source );
+		self::assertStringContainsString( '.afspaces-copyable-field textarea', $styles );
+	}
+
 	public function test_join_request_table_avoids_wrapping_and_uses_translated_statuses(): void {
 		$root   = dirname( __DIR__ );
 		$source = (string) file_get_contents( $root . '/src/Interface/JoinRequestsView.php' );
