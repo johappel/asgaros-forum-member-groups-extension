@@ -173,6 +173,7 @@ if ( ! class_exists( 'AFSpaces\\Interface\\MyInvitationsView' ) ) {
 				<p><?php echo esc_html( $preview['status_message'] ); ?></p>
 
 				<?php if ( 'login_required' === $preview['state'] ) : ?>
+					<p class="description"><?php echo esc_html__( 'Hinweis: Dieser Einladungslink funktioniert erst nach erfolgreichem Login.', 'afspaces' ); ?></p>
 					<p><a class="afspaces-button" href="<?php echo esc_url( $preview['login_url'] ); ?>"><?php echo esc_html__( 'Anmelden und fortfahren', 'afspaces' ); ?></a></p>
 						<p class="description"><?php echo esc_html__( 'Der Einladungslink selbst ist davon unabhängig, ob du dich nur anmelden oder auf dieser Website zusätzlich registrieren musst.', 'afspaces' ); ?></p>
 					<?php if ( $preview['can_register'] && '' !== $preview['registration_url'] ) : ?>
