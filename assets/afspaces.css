@@ -3698,3 +3698,12 @@ display: flex;
 flex-direction: column;
 gap: 0.25rem;
 }
+
+.afspaces-space-registration::before {
+  content: "Nur für Administroren sichtbar:";
+}
+.afspaces-space-registration {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #F8B521;
+}
